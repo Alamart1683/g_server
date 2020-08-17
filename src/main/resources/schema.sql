@@ -1,6 +1,6 @@
-create database graduates_site character set 'utf8mb4_0900_ai_ci';
-
-set global time_zone = '-3:00'; /* Если при коннекте ругается на неверное время */
+/* create database graduates_site character set 'utf8mb4_0900_ai_ci'; */
+/* Если при коннекте ругается на неверное время */
+set global time_zone = '-3:00';
 
 create table users (
     id int primary key auto_increment,
@@ -22,7 +22,7 @@ create table user_role (
 
 create table cathedras (
     id int primary key auto_increment,
-    cathedra_name varchar(100) not null
+    cathedra_name varchar (100) not null
 );
 
 create table scientific_advisor_data (
@@ -37,24 +37,30 @@ create table student_type (
     type varchar(100) not null
 );
 
+create table student_group (
+    id int primary key auto_increment,
+    student_group varchar (100) not null
+);
+
 create table student_data (
     id int primary key auto_increment,
-    study_group varchar(100) not null,
+    student_group int not null,
     cathedra int not null,
     type int not null,
     foreign key (cathedra) references cathedras (id),
-    foreign key (type) references student_type (id)
+    foreign key (type) references student_type (id),
+    foreign key (student_group) references student_group (id)
 );
 
 create table project_type (
     id int primary key auto_increment,
-    type varchar(100)
+    type varchar (100)
 );
 
 create table project (
     id int primary key auto_increment,
     type int not null,
-    name varchar(100),
+    name varchar (100),
     scientific_advisor_id int not null,
     foreign key (type) references project_type (id),
     foreign key (scientific_advisor_id) references scientific_advisor_data (id)
@@ -70,7 +76,7 @@ create table occupied_students (
 
 create table document_type (
     id int primary key auto_increment,
-    type varchar(100) not null
+    type varchar (100) not null
 );
 
 create table view_rights (
@@ -85,8 +91,8 @@ create table view_rights (
 create table document (
     id int primary key auto_increment,
     creator_id int not null,
-    name varchar(100) not null,
-    document_path varchar(256) not null,
+    name varchar (100) not null,
+    document_path varchar (256) not null,
     creation_date date not null,
     type int not null,
     description varchar (512) default 'Описание отсутствует',
@@ -100,8 +106,8 @@ create table document_version (
     editor int not null,
     document int not null,
     edition_date date not null,
-    edition_description varchar(512) default 'Описание изменения отсутствует',
-    this_version_document_path varchar(256) not null,
+    edition_description varchar (512) default 'Описание изменения отсутствует',
+    this_version_document_path varchar (256) not null,
     foreign key (editor) references users (id),
     foreign key (document) references document (id)
 );
@@ -110,6 +116,6 @@ create table common_chat (
     id int primary key auto_increment,
     sender int not null,
     send_date date not null,
-    message varchar(512) not null,
+    message varchar (512) not null,
     foreign key (sender) references users(id)
 );
