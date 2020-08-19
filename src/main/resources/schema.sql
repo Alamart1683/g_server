@@ -17,6 +17,7 @@ create table user_role (
     is_student bool not null,
     is_scientific_advisor bool not null,
     is_admin bool not null,
+    is_head_of_cathedra bool not null,
     foreign key (id) references users (id)
 );
 
@@ -62,6 +63,7 @@ create table project (
     type int not null,
     name varchar (100),
     scientific_advisor_id int not null,
+    description varchar(512) default 'Описание отсутствует',
     foreign key (type) references project_type (id),
     foreign key (scientific_advisor_id) references scientific_advisor_data (id)
 );
