@@ -18,7 +18,7 @@ create table user_role (
     is_scientific_advisor bool not null,
     is_admin bool not null,
     is_head_of_cathedra bool not null,
-    foreign key (id) references users (id)
+    foreign key (id) references users (id) on delete cascade on update cascade
 );
 
 create table cathedras (
@@ -27,9 +27,9 @@ create table cathedras (
 );
 
 create table scientific_advisor_data (
-    id int primary key auto_increment,
+    id int primary key not null,
     cathedra int not null,
-    foreign key (id) references user_role (id),
+    foreign key (id) references user_role (id) on delete cascade on update cascade,
     foreign key (cathedra) references cathedras (id)
 );
 
@@ -44,10 +44,11 @@ create table student_group (
 );
 
 create table student_data (
-    id int primary key auto_increment,
+    id int primary key not null,
     student_group int not null,
     cathedra int not null,
     type int not null,
+    foreign key (id) references user_role (id) on delete cascade on update cascade,
     foreign key (cathedra) references cathedras (id),
     foreign key (type) references student_type (id),
     foreign key (student_group) references student_group (id)
@@ -65,15 +66,23 @@ create table project (
     scientific_advisor_id int not null,
     description varchar(512) default 'Описание отсутствует',
     foreign key (type) references project_type (id),
-    foreign key (scientific_advisor_id) references scientific_advisor_data (id)
+    foreign key (scientific_advisor_id) references scientific_advisor_data (id) on delete cascade on update cascade
 );
 
 create table occupied_students (
     id int primary key auto_increment,
     student_id int not null,
     project_id int not null,
-    foreign key (student_id) references student_data (id),
-    foreign key (project_id) references project (id)
+    foreign key (student_id) references student_data (id) on delete cascade on update cascade,
+    foreign key (project_id) references project (id) on delete cascade on update cascade
+);
+
+create table associated_students (
+    id int primary key auto_increment,
+    scientific_advisor int not null,
+    student int not null,
+    foreign key (scientific_advisor) references scientific_advisor_data (id) on delete cascade on update cascade,
+    foreign key (student) references student_data (id) on delete cascade on update cascade
 );
 
 create table document_type (
@@ -98,9 +107,9 @@ create table document (
     creation_date date not null,
     type int not null,
     description varchar (512) default 'Описание отсутствует',
-    foreign key (id) references view_rights (id),
+    foreign key (id) references view_rights (id) on delete cascade on update cascade,
     foreign key (type) references document_type (id),
-    foreign key (creator_id) references users(id)
+    foreign key (creator_id) references users(id) on delete cascade on update cascade
 );
 
 create table document_version (
@@ -110,8 +119,8 @@ create table document_version (
     edition_date date not null,
     edition_description varchar (512) default 'Описание изменения отсутствует',
     this_version_document_path varchar (256) not null,
-    foreign key (editor) references users (id),
-    foreign key (document) references document (id)
+    foreign key (editor) references users (id) on delete cascade on update cascade,
+    foreign key (document) references document (id) on delete cascade on update cascade
 );
 
 create table common_chat (
