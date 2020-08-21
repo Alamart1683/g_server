@@ -1,9 +1,11 @@
 package g_server.g_server.application.entity;
+import org.springframework.security.core.GrantedAuthority;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "user_role")
-public class UserRole {
+public class UserRole implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -34,6 +36,20 @@ public class UserRole {
         this.is_scientific_advisor = is_scientific_advisor;
         this.is_admin = is_admin;
         this.is_head_of_cathedra = is_head_of_cathedra;
+    }
+
+    @Override
+    public String getAuthority() {
+        if (is_student)
+            return "ROLE_STUDENT";
+        else if (is_scientific_advisor)
+            return "ROLE_SCIENTIFIC_ADVISOR";
+        else if (is_head_of_cathedra)
+            return "ROLE_HEAD_OF_CATHEDRA";
+        else if (is_admin)
+            return "ROLE_ADMIN";
+        else
+            return null;
     }
 
     public int getId() {
