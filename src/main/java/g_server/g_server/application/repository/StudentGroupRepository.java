@@ -19,7 +19,4 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
 
     @Override
     <S extends StudentGroup> S save(S s);
-
-    @Override
-    <S extends StudentGroup> List<S> saveAll(Iterable<S> iterable);
 }
