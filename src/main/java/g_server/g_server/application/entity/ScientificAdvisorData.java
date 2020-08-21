@@ -17,7 +17,7 @@ public class ScientificAdvisorData {
     private UserRole userRole;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "cathedra", referencedColumnName = "id")
+    @JoinColumn(name = "cathedra", referencedColumnName = "id", insertable = false, updatable = false)
     private Cathedras cathedras;
 
     public ScientificAdvisorData() { }

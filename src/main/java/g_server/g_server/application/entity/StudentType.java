@@ -15,8 +15,7 @@ public class StudentType {
 
     public StudentType() { }
 
-    public StudentType(int id, String type) {
-        this.id = id;
+    public StudentType(String type) {
         this.type = type;
     }
 

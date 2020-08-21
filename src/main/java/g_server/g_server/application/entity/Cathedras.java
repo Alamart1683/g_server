@@ -15,8 +15,7 @@ public class Cathedras {
 
     public Cathedras() { }
 
-    public Cathedras(int id, String cathedra_name) {
-        this.id = id;
+    public Cathedras(String cathedra_name) {
         this.cathedra_name = cathedra_name;
     }
 

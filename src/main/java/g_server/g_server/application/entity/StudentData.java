@@ -23,15 +23,15 @@ public class StudentData {
     private UserRole userRole;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "student_group", referencedColumnName = "id")
+    @JoinColumn(name = "student_group", referencedColumnName = "id", insertable = false, updatable = false)
     private StudentGroup studentGroup;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "cathedra", referencedColumnName = "id")
+    @JoinColumn(name = "cathedra", referencedColumnName = "id", insertable = false, updatable = false)
     private Cathedras cathedras;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "type", referencedColumnName = "id")
+    @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false)
     private StudentType studentType;
 
     public StudentData() { }

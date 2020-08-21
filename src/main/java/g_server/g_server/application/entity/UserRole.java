@@ -29,9 +29,8 @@ public class UserRole implements GrantedAuthority {
 
     public UserRole() { }
 
-    public UserRole(int id, boolean is_student, boolean is_scientific_advisor,
+    public UserRole(boolean is_student, boolean is_scientific_advisor,
                     boolean is_admin, boolean is_head_of_cathedra) {
-        this.id = id;
         this.is_student = is_student;
         this.is_scientific_advisor = is_scientific_advisor;
         this.is_admin = is_admin;

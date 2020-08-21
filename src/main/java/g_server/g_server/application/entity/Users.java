@@ -30,8 +30,8 @@ public class Users {
 
     public Users() { }
 
-    public Users(int id, String email, String name, String surname, String second_name, String password, String phone) {
-        this.id = id;
+    public Users(String email, String name, String surname,
+                 String second_name, String password, String phone) {
         this.email = email;
         this.name = name;
         this.surname = surname;
