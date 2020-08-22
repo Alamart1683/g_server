@@ -33,7 +33,7 @@ public class CathedrasController {
             @RequestParam String cathedra_name
     ) {
         Cathedras cathedras = cathedrasService.findByID(id).get();
-        cathedras.setCathedra_name(cathedra_name);
+        cathedras.setCathedraName(cathedra_name);
         cathedrasService.save(cathedras);
     }
 

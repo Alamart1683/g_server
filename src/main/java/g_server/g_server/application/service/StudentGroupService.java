@@ -27,4 +27,8 @@ public class StudentGroupService {
     public Optional<StudentGroup> findById(int id) {
         return studentGroupRepository.findById(id);
     }
+
+    public StudentGroup findByStudentGroup(String student_group) {
+        return studentGroupRepository.findByStudentGroup(student_group);
+    }
 }

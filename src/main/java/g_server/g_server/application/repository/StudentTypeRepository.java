@@ -3,7 +3,6 @@ package g_server.g_server.application.repository;
 import g_server.g_server.application.entity.StudentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +19,6 @@ public interface StudentTypeRepository extends JpaRepository<StudentType, Intege
 
     @Override
     <S extends StudentType> S save(S s);
+
+    StudentType findByType(String type);
 }

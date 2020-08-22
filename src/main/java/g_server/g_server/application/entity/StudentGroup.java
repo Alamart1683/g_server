@@ -11,12 +11,12 @@ public class StudentGroup {
     private int id;
 
     @Column(name = "student_group")
-    private String student_group;
+    private String studentGroup;
 
     public StudentGroup() { }
 
     public StudentGroup(String student_group) {
-        this.student_group = student_group;
+        this.studentGroup = student_group;
     }
 
     public int getId() {
@@ -27,11 +27,11 @@ public class StudentGroup {
         this.id = id;
     }
 
-    public String getStudent_group() {
-        return student_group;
+    public String getStudentGroup() {
+        return studentGroup;
     }
 
-    public void setStudent_group(String student_group) {
-        this.student_group = student_group;
+    public void setStudentGroup(String student_group) {
+        this.studentGroup = student_group;
     }
 }

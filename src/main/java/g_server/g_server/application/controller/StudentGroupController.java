@@ -33,7 +33,7 @@ public class StudentGroupController {
             @RequestParam String student_group
     ) {
         StudentGroup studentGroup = studentGroupService.findById(id).get();
-        studentGroup.setStudent_group(student_group);
+        studentGroup.setStudentGroup(student_group);
         studentGroupService.save(studentGroup);
     }
 

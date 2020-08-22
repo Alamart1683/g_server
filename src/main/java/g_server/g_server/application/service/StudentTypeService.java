@@ -27,4 +27,8 @@ public class StudentTypeService {
     public Optional<StudentType> findById(int id) {
         return studentTypeRepository.findById(id);
     }
+
+    public StudentType findByType(String type) {
+        return studentTypeRepository.findByType(type);
+    }
 }

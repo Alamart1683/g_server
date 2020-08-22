@@ -1,6 +1,6 @@
 package g_server.g_server.application.entity;
-import org.springframework.security.core.GrantedAuthority;
 
+import org.springframework.security.core.GrantedAuthority;
 import javax.persistence.*;
 
 @Entity
@@ -39,13 +39,13 @@ public class UserRole implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        if (is_student)
+        if (Is_student())
             return "ROLE_STUDENT";
-        else if (is_scientific_advisor)
+        else if (Is_scientific_advisor())
             return "ROLE_SCIENTIFIC_ADVISOR";
-        else if (is_head_of_cathedra)
+        else if (Is_head_of_cathedra())
             return "ROLE_HEAD_OF_CATHEDRA";
-        else if (is_admin)
+        else if (Is_admin())
             return "ROLE_ADMIN";
         else
             return null;

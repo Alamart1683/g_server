@@ -11,12 +11,12 @@ public class Cathedras {
     private int id;
 
     @Column(name = "cathedra_name")
-    private String cathedra_name;
+    private String cathedraName;
 
     public Cathedras() { }
 
     public Cathedras(String cathedra_name) {
-        this.cathedra_name = cathedra_name;
+        this.cathedraName = cathedra_name;
     }
 
     public int getId() {
@@ -27,11 +27,11 @@ public class Cathedras {
         this.id = id;
     }
 
-    public String getCathedra_name() {
-        return cathedra_name;
+    public String getCathedraName() {
+        return cathedraName;
     }
 
-    public void setCathedra_name(String cathedra_name) {
-        this.cathedra_name = cathedra_name;
+    public void setCathedraName(String cathedra_name) {
+        this.cathedraName = cathedra_name;
     }
 }
