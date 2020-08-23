@@ -30,8 +30,8 @@ public class StudentForm extends Users {
     }
 
     public Users StudentFormToUsers() {
-        Users user = new Users( this.getEmail(), this.getName(), this.getSecond_name(),
-                this.getSurname(), this.getPassword(), this.getPhone()
+        Users user = new Users( this.getEmail(), this.getName(), this.getSurname(),
+                this.getSecond_name(), this.getPassword(), this.getPhone()
         );
         return user;
     }
