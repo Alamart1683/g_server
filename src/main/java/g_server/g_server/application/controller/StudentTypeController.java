@@ -33,7 +33,7 @@ public class StudentTypeController {
             @RequestParam String student_type
     ) {
         StudentType studentType = studentTypeService.findById(id).get();
-        studentType.setType(student_type);
+        studentType.setStudentType(student_type);
         studentTypeService.save(studentType);
     }
 

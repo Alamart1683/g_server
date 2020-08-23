@@ -33,8 +33,7 @@ public class Users implements UserDetails {
 
     public Users() { }
 
-    public Users(String email, String name, String surname,
-                 String second_name, String password, String phone) {
+    public Users(String email, String name, String surname, String second_name, String password, String phone) {
         this.email = email;
         this.name = name;
         this.surname = surname;

@@ -20,5 +20,5 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
     @Override
     <S extends StudentGroup> S save(S s);
 
-    StudentGroup findByStudentGroup(String s);
+    StudentGroup getByStudentGroup(String s);
 }

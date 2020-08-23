@@ -20,5 +20,5 @@ public interface StudentTypeRepository extends JpaRepository<StudentType, Intege
     @Override
     <S extends StudentType> S save(S s);
 
-    StudentType findByType(String type);
+    StudentType getByStudentType(String s);
 }

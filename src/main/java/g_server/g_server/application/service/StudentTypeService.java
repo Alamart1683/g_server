@@ -12,8 +12,8 @@ public class StudentTypeService {
     @Autowired
     StudentTypeRepository studentTypeRepository;
 
-    public void save(StudentType studentGroup) {
-        studentTypeRepository.save(studentGroup);
+    public void save(StudentType studentType) {
+        studentTypeRepository.save(studentType);
     }
 
     public List<StudentType> findAll() {
@@ -26,9 +26,5 @@ public class StudentTypeService {
 
     public Optional<StudentType> findById(int id) {
         return studentTypeRepository.findById(id);
-    }
-
-    public StudentType findByType(String type) {
-        return studentTypeRepository.findByType(type);
     }
 }

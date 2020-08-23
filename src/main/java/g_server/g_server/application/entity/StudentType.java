@@ -11,12 +11,12 @@ public class StudentType {
     private int id;
 
     @Column(name = "type")
-    private String type;
+    private String studentType;
 
     public StudentType() { }
 
     public StudentType(String type) {
-        this.type = type;
+        this.studentType = type;
     }
 
     public int getId() {
@@ -27,11 +27,11 @@ public class StudentType {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
+    public String getStudentType() {
+        return studentType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setStudentType(String type) {
+        this.studentType = type;
     }
 }

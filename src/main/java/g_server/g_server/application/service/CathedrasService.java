@@ -27,8 +27,4 @@ public class CathedrasService {
     public void delete(int id) {
         cathedrasRepository.deleteById(id);
     }
-
-    public Cathedras findByCathedraName(String cathedra_name) {
-        return cathedrasRepository.findByCathedraName(cathedra_name);
-    }
 }

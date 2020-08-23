@@ -13,7 +13,7 @@ create table users (
 );
 
 create table user_role (
-    id int primary key auto_increment,
+    id int primary key not null,
     is_student bool not null,
     is_scientific_advisor bool not null,
     is_admin bool not null,

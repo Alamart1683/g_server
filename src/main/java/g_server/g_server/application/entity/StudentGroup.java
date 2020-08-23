@@ -2,6 +2,12 @@ package g_server.g_server.application.entity;
 
 import javax.persistence.*;
 
+@NamedNativeQuery(
+        name = "getStudentGroupByStudentGroup",
+        query = "select student_group from student_group where student_group = ?",
+        resultClass = StudentGroup.class
+)
+
 @Entity
 @Table(name = "student_group")
 public class StudentGroup {

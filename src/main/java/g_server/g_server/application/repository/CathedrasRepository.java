@@ -20,5 +20,5 @@ public interface CathedrasRepository extends JpaRepository<Cathedras, Integer> {
     @Override
     <S extends Cathedras> S save(S s);
 
-    Cathedras findByCathedraName(String s);
+    Cathedras getCathedrasByCathedraName(String s);
 }

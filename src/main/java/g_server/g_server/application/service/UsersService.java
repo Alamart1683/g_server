@@ -1,9 +1,6 @@
 package g_server.g_server.application.service;
 
-import g_server.g_server.application.entity.ScientificAdvisorData;
-import g_server.g_server.application.entity.StudentData;
-import g_server.g_server.application.entity.UserRole;
-import g_server.g_server.application.entity.Users;
+import g_server.g_server.application.entity.*;
 import g_server.g_server.application.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,17 +45,23 @@ public class UsersService implements UserDetailsService {
         return user;
     }
 
-    public boolean saveStudent(Users user, String student_group, String student_type, String cathedra_name) {
+    public boolean saveStudent(Users user, String student_type, String student_group, String cathedra_name) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
-        if (isUserNotExists(userFromDB)) {
+        if (isUserExists(userFromDB)) {
             return false;
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            UserRole userRole = new UserRole(true, false, false, false);
+            usersRepository.save(user);
+            UserRole userRole = new UserRole(user.getId(), true,
+                    false, false, false);
             userRoleRepository.save(userRole);
-            StudentData studentData = new StudentData(userRole.getId(), studentTypeRepository.findByType(student_type).getId(),
-                    studentGroupRepository.findByStudentGroup(student_group).getId(), cathedrasRepository.findByCathedraName(cathedra_name).getId());
+            StudentData studentData = new StudentData(
+                    userRole.getId(),
+                    studentGroupRepository.getByStudentGroup(student_group).getId(),
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(),
+                    studentTypeRepository.getByStudentType(student_type).getId()
+            );
             studentDataRepository.save(studentData);
             return true;
         }
@@ -66,15 +69,17 @@ public class UsersService implements UserDetailsService {
 
     public boolean saveScientificAdvisor(Users user, String cathedra_name) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
-        if (isUserNotExists(userFromDB)) {
+        if (isUserExists(userFromDB)) {
             return false;
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            UserRole userRole = new UserRole(false, true, false, false);
+            usersRepository.save(user);
+            UserRole userRole = new UserRole(user.getId(), false,
+                    true, false, false);
             userRoleRepository.save(userRole);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(userRole.getId(),
-                    cathedrasRepository.findByCathedraName(cathedra_name).getId());
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
         }
@@ -82,12 +87,14 @@ public class UsersService implements UserDetailsService {
 
     public boolean saveAdmin(Users user) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
-        if (isUserNotExists(userFromDB)) {
+        if (isUserExists(userFromDB)) {
             return false;
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            UserRole userRole = new UserRole(false, false, true, false);
+            usersRepository.save(user);
+            UserRole userRole = new UserRole(user.getId(), false,
+                    false, true, false);
             userRoleRepository.save(userRole);
             return true;
         }
@@ -95,25 +102,27 @@ public class UsersService implements UserDetailsService {
 
     public boolean saveHeadOfCathedra(Users user, String cathedra_name) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
-        if (isUserNotExists(userFromDB)) {
+        if (isUserExists(userFromDB)) {
             return false;
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            UserRole userRole = new UserRole(false, false, false, true);
+            usersRepository.save(user);
+            UserRole userRole = new UserRole(user.getId(), false,
+                    false, false, true);
             userRoleRepository.save(userRole);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(userRole.getId(),
-                    cathedrasRepository.findByCathedraName(cathedra_name).getId());
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
         }
     }
 
-    public boolean isUserNotExists(Users user) {
+    public boolean isUserExists(Users user) {
         if (user == null)
-            return true;
-        else
             return false;
+        else
+            return true;
     }
 
     public Optional<Users> findById(int id) {

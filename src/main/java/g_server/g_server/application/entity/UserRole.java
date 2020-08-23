@@ -7,7 +7,6 @@ import javax.persistence.*;
 @Table(name = "user_role")
 public class UserRole implements GrantedAuthority {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -29,8 +28,9 @@ public class UserRole implements GrantedAuthority {
 
     public UserRole() { }
 
-    public UserRole(boolean is_student, boolean is_scientific_advisor,
+    public UserRole(int id, boolean is_student, boolean is_scientific_advisor,
                     boolean is_admin, boolean is_head_of_cathedra) {
+        this.id = id;
         this.is_student = is_student;
         this.is_scientific_advisor = is_scientific_advisor;
         this.is_admin = is_admin;
