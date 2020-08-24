@@ -19,9 +19,6 @@ public class UsersService implements UserDetailsService {
     private UsersRepository usersRepository;
 
     @Autowired
-    private RolesRepository rolesRepository;
-
-    @Autowired
     private StudentDataRepository studentDataRepository;
 
     @Autowired
@@ -45,6 +42,14 @@ public class UsersService implements UserDetailsService {
         if (user == null)
             throw new UsernameNotFoundException("Пользователь не найден");
         return user;
+    }
+
+    public Users loadUserByEmailAndPassword(String email, String password) {
+        Users user = usersRepository.findByEmail(email);
+        if (user != null)
+            if (bCryptPasswordEncoder.matches(password, user.getPassword()))
+                return user;
+        return null;
     }
 
     public boolean saveStudent(Users user, String student_type, String student_group, String cathedra_name) {
@@ -74,7 +79,23 @@ public class UsersService implements UserDetailsService {
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            user.setRoles(Collections.singleton(new Roles(1, "ROLE_SCIENTIFIC_ADVISOR")));
+            user.setRoles(Collections.singleton(new Roles(2, "ROLE_SCIENTIFIC_ADVISOR")));
+            usersRepository.save(user);
+            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
+            scientificAdvisorDataRepository.save(scientificAdvisorData);
+            return true;
+        }
+    }
+
+    public boolean saveHeadOfCathedra(Users user, String cathedra_name) {
+        Users userFromDB = usersRepository.findByEmail(user.getEmail());
+        if (isUserExists(userFromDB)) {
+            return false;
+        }
+        else {
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            user.setRoles(Collections.singleton(new Roles(3, "ROLE_HEAD_OF_CATHEDRA")));
             usersRepository.save(user);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
@@ -90,24 +111,8 @@ public class UsersService implements UserDetailsService {
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            user.setRoles(Collections.singleton(new Roles(1, "ROLE_ADMIN")));
+            user.setRoles(Collections.singleton(new Roles(4, "ROLE_ADMIN")));
             usersRepository.save(user);
-            return true;
-        }
-    }
-
-    public boolean saveHeadOfCathedra(Users user, String cathedra_name) {
-        Users userFromDB = usersRepository.findByEmail(user.getEmail());
-        if (isUserExists(userFromDB)) {
-            return false;
-        }
-        else {
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            user.setRoles(Collections.singleton(new Roles(1, "ROLE_HEAD_OF_CATHEDRA")));
-            usersRepository.save(user);
-            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
-                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
-            scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
         }
     }

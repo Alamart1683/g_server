@@ -50,13 +50,13 @@ public class RegistrationController {
         return "success!";
     }
 
-    @GetMapping("/registration/scientific_advisor")
+    @GetMapping("/admin/registration/scientific_advisor")
     public String ScientificAdvisorRegistrationPreparing (Model model) {
         model.addAttribute("scientificAdvisorForm", new ScientificAdvisorForm());
         return "registration";
     }
 
-    @PostMapping("/registration/scientific_advisor")
+    @PostMapping("/admin/registration/scientific_advisor")
     public String RegisterScientificAdvisor(
             @ModelAttribute("scientificAdvisorForm") @Validated ScientificAdvisorForm scientificAdvisorForm,
             BindingResult bindingResult, Model model
@@ -76,13 +76,13 @@ public class RegistrationController {
         return "success!";
     }
 
-    @GetMapping("/registration/head_of_cathedra")
+    @GetMapping("/admin/registration/head_of_cathedra")
     public String HeadOfCathedraRegistrationPreparing(Model model) {
         model.addAttribute("scientificAdvisorForm", new ScientificAdvisorForm());
         return "registration";
     }
 
-    @PostMapping("/registration/head_of_cathedra")
+    @PostMapping("/admin/registration/head_of_cathedra")
     public String RegisterHeadOfCathedra(
             @ModelAttribute("scientificAdvisorForm") @Validated ScientificAdvisorForm scientificAdvisorForm,
             BindingResult bindingResult, Model model
@@ -96,19 +96,19 @@ public class RegistrationController {
         }
         if (!usersService.saveHeadOfCathedra(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
                 scientificAdvisorForm.getCathedra())) {
-            model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
+            model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
         return "success!";
     }
 
-    @GetMapping("/registration/admin")
+    @GetMapping("/admin/registration/admin")
     public String AdminRegistrationPreparing(Model model) {
         model.addAttribute("adminForm", new AdminForm());
         return "registration";
     }
 
-    @PostMapping("/registration/admin")
+    @PostMapping("/admin/registration/admin")
     public String RegisterAdmin(
           @ModelAttribute("adminForm") @Validated AdminForm adminForm,
           BindingResult bindingResult, Model model
