@@ -26,11 +26,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/student/**").hasRole("STUDENT")
+                .antMatchers("/student/**", "/student_group/{id}").hasRole("STUDENT")
                 .antMatchers("/scientific_advisor/**").hasRole("SCIENTIFIC_ADVISOR")
                 .antMatchers("/head_of_cathedra/**").hasRole("HEAD_OF_CATHEDRA")
                 .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/registration/student", "/authorization").permitAll()
+                .antMatchers(
+                        "/registration/student",
+                        "/authorization",
+                        "/student_group/all",
+                        "/student_type/all",
+                        "/cathedras/all").permitAll()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }

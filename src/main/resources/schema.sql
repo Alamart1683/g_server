@@ -19,7 +19,7 @@ create table roles (
 
 create table users_roles (
     id int primary key auto_increment,
-    user_id int not null,
+    user_id int not null unique,
     role_id int not null,
     foreign key (user_id) references users (id) on delete cascade on update cascade,
     foreign key (role_id) references roles (id) on delete cascade on update cascade
