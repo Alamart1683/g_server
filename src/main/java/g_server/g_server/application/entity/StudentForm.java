@@ -11,9 +11,9 @@ public class StudentForm extends Users {
     public StudentForm() { }
 
     public StudentForm(String student_group, String cathedra, String student_type,
-                String email, String name, String surname, String second_name,
-                String password, String confirm_password, String phone,
-                int registrationCode, int registrationCodeConfirm) {
+                       String email, String name, String surname, String second_name,
+                       String password, String confirm_password, String phone,
+                       int registrationCode, int registrationCodeConfirm) {
         this.cathedra = cathedra;
         this.student_group = student_group;
         this.student_type = student_type;

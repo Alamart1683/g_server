@@ -12,13 +12,17 @@ create table users (
     phone varchar(50) not null
 );
 
-create table user_role (
-    id int primary key not null,
-    is_student bool not null,
-    is_scientific_advisor bool not null,
-    is_admin bool not null,
-    is_head_of_cathedra bool not null,
-    foreign key (id) references users (id) on delete cascade on update cascade
+create table roles (
+    id int primary key auto_increment,
+    role varchar(100) not null
+);
+
+create table users_roles (
+    id int primary key auto_increment,
+    user_id int not null,
+    role_id int not null,
+    foreign key (user_id) references users (id) on delete cascade on update cascade,
+    foreign key (role_id) references roles (id) on delete cascade on update cascade
 );
 
 create table cathedras (
@@ -29,7 +33,7 @@ create table cathedras (
 create table scientific_advisor_data (
     id int primary key not null,
     cathedra int not null,
-    foreign key (id) references user_role (id) on delete cascade on update cascade,
+    foreign key (id) references users (id) on delete cascade on update cascade,
     foreign key (cathedra) references cathedras (id)
 );
 
@@ -48,7 +52,7 @@ create table student_data (
     student_group int not null,
     cathedra int not null,
     type int not null,
-    foreign key (id) references user_role (id) on delete cascade on update cascade,
+    foreign key (id) references users (id) on delete cascade on update cascade,
     foreign key (cathedra) references cathedras (id),
     foreign key (type) references student_type (id),
     foreign key (student_group) references student_group (id)

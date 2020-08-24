@@ -32,7 +32,7 @@ public class RegistrationController {
         // studentForm.setRegistrationCode(registrationCode);
         // Сделать отправку кода подтверждения по почте
         if (bindingResult.hasErrors()) {
-            return "registration";
+            return "Непредвиденная ошибка";
         }
         if (studentForm.getRegistrationCode() != studentForm.getRegistrationCodeConfirm()) {
             model.addAttribute("codeConfirmationError", "Код подтверждения указан неверно");
@@ -47,7 +47,7 @@ public class RegistrationController {
             model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
-        return "redirect:/success!";
+        return "success!";
     }
 
     @GetMapping("/registration/scientific_advisor")
@@ -62,7 +62,7 @@ public class RegistrationController {
             BindingResult bindingResult, Model model
     ) {
         if (bindingResult.hasErrors()) {
-            return "registration";
+            return "Непредвиденная ошибка";
         }
         if (!scientificAdvisorForm.getPassword().equals(scientificAdvisorForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
@@ -73,7 +73,7 @@ public class RegistrationController {
             model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
-        return "redirect:/success!";
+        return "success!";
     }
 
     @GetMapping("/registration/head_of_cathedra")
@@ -88,7 +88,7 @@ public class RegistrationController {
             BindingResult bindingResult, Model model
     ) {
         if (bindingResult.hasErrors()) {
-            return "registration";
+            return "Непредвиденная ошибка";
         }
         if (!scientificAdvisorForm.getPassword().equals(scientificAdvisorForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
@@ -99,7 +99,7 @@ public class RegistrationController {
             model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
-        return "redirect:/success!";
+        return "success!";
     }
 
     @GetMapping("/registration/admin")
@@ -124,6 +124,6 @@ public class RegistrationController {
             model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
-        return "redirect:/success!";
+        return "success!";
     }
 }

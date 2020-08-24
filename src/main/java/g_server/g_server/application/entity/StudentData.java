@@ -20,7 +20,7 @@ public class StudentData {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "id")
-    private UserRole userRole;
+    private Roles roles;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "student_group", referencedColumnName = "id", insertable = false, updatable = false)
@@ -75,12 +75,12 @@ public class StudentData {
         this.type = type;
     }
 
-    public UserRole getUserRole() {
-        return userRole;
+    public Roles getRoles() {
+        return roles;
     }
 
-    public void setUserRole(UserRole userRole) {
-        this.userRole = userRole;
+    public void setRoles(Roles roles) {
+        this.roles = roles;
     }
 
     public StudentGroup getStudentGroup() {

@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +19,7 @@ public class UsersService implements UserDetailsService {
     private UsersRepository usersRepository;
 
     @Autowired
-    private UserRoleRepository userRoleRepository;
+    private RolesRepository rolesRepository;
 
     @Autowired
     private StudentDataRepository studentDataRepository;
@@ -52,12 +54,10 @@ public class UsersService implements UserDetailsService {
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            user.setRoles(Collections.singleton(new Roles(1, "ROLE_STUDENT")));
             usersRepository.save(user);
-            UserRole userRole = new UserRole(user.getId(), true,
-                    false, false, false);
-            userRoleRepository.save(userRole);
             StudentData studentData = new StudentData(
-                    userRole.getId(),
+                    user.getId(),
                     studentGroupRepository.getByStudentGroup(student_group).getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(),
                     studentTypeRepository.getByStudentType(student_type).getId()
@@ -74,11 +74,9 @@ public class UsersService implements UserDetailsService {
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            user.setRoles(Collections.singleton(new Roles(1, "ROLE_SCIENTIFIC_ADVISOR")));
             usersRepository.save(user);
-            UserRole userRole = new UserRole(user.getId(), false,
-                    true, false, false);
-            userRoleRepository.save(userRole);
-            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(userRole.getId(),
+            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
@@ -92,10 +90,8 @@ public class UsersService implements UserDetailsService {
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            user.setRoles(Collections.singleton(new Roles(1, "ROLE_ADMIN")));
             usersRepository.save(user);
-            UserRole userRole = new UserRole(user.getId(), false,
-                    false, true, false);
-            userRoleRepository.save(userRole);
             return true;
         }
     }
@@ -107,11 +103,9 @@ public class UsersService implements UserDetailsService {
         }
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            user.setRoles(Collections.singleton(new Roles(1, "ROLE_HEAD_OF_CATHEDRA")));
             usersRepository.save(user);
-            UserRole userRole = new UserRole(user.getId(), false,
-                    false, false, true);
-            userRoleRepository.save(userRole);
-            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(userRole.getId(),
+            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;

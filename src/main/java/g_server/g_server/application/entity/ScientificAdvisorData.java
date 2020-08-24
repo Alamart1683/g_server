@@ -14,7 +14,7 @@ public class ScientificAdvisorData {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "id")
-    private UserRole userRole;
+    private Roles roles;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cathedra", referencedColumnName = "id", insertable = false, updatable = false)
@@ -43,12 +43,12 @@ public class ScientificAdvisorData {
         this.cathedra = cathedra;
     }
 
-    public UserRole getUserRole() {
-        return userRole;
+    public Roles getRoles() {
+        return roles;
     }
 
-    public void setUserRole(UserRole userRole) {
-        this.userRole = userRole;
+    public void setRoles(Roles roles) {
+        this.roles = roles;
     }
 
     public Cathedras getCathedras() {
