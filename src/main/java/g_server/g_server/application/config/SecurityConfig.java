@@ -27,7 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/student/**", "/student_group/{id}").hasRole("STUDENT")
-                .antMatchers("/scientific_advisor/**").hasRole("SCIENTIFIC_ADVISOR")
+                .antMatchers("/scientific_advisor/**", "/student_group/save/").hasRole("SCIENTIFIC_ADVISOR")
                 .antMatchers("/head_of_cathedra/**").hasRole("HEAD_OF_CATHEDRA")
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers(
