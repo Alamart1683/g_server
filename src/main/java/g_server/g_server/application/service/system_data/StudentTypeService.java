@@ -1,4 +1,4 @@
-package g_server.g_server.application.service.crud;
+package g_server.g_server.application.service.system_data;
 
 import g_server.g_server.application.entity.system_data.StudentType;
 import g_server.g_server.application.repository.system_data.StudentTypeRepository;
