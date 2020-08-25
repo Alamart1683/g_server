@@ -20,17 +20,17 @@ public class RegistrationController {
 
     @GetMapping("/registration/student")
     public String StudentRegistrationPreparing(Model model) {
-        model.addAttribute("studentForm", new StudentForm());
-        return "registration";
+        int registrationCode = (int)((Math.random() * (1000000 - 100000)) + 100000);
+        StudentForm studentForm = new StudentForm();
+        studentForm.setRegistrationCode(registrationCode);
+        model.addAttribute("studentForm", studentForm);
+        return "studentForm";
     }
 
     @PostMapping("/registration/student")
     public String RegisterStudent(
             @ModelAttribute("studentForm") @Validated StudentForm studentForm,
             BindingResult bindingResult, Model model) {
-        // int registrationCode = (int)((Math.random() * (1000000 - 100000)) + 100000);
-        // studentForm.setRegistrationCode(registrationCode);
-        // Сделать отправку кода подтверждения по почте
         if (bindingResult.hasErrors()) {
             return "Непредвиденная ошибка";
         }
@@ -52,8 +52,9 @@ public class RegistrationController {
 
     @GetMapping("/admin/registration/scientific_advisor")
     public String ScientificAdvisorRegistrationPreparing (Model model) {
-        model.addAttribute("scientificAdvisorForm", new ScientificAdvisorForm());
-        return "registration";
+        ScientificAdvisorForm scientificAdvisorForm = new ScientificAdvisorForm();
+        model.addAttribute("scientificAdvisorForm", scientificAdvisorForm);
+        return "scientificAdvisorForm";
     }
 
     @PostMapping("/admin/registration/scientific_advisor")
@@ -79,7 +80,7 @@ public class RegistrationController {
     @GetMapping("/admin/registration/head_of_cathedra")
     public String HeadOfCathedraRegistrationPreparing(Model model) {
         model.addAttribute("scientificAdvisorForm", new ScientificAdvisorForm());
-        return "registration";
+        return "scientificAdvisorForm";
     }
 
     @PostMapping("/admin/registration/head_of_cathedra")
@@ -105,7 +106,7 @@ public class RegistrationController {
     @GetMapping("/admin/registration/admin")
     public String AdminRegistrationPreparing(Model model) {
         model.addAttribute("adminForm", new AdminForm());
-        return "registration";
+        return "adminForm";
     }
 
     @PostMapping("/admin/registration/admin")
