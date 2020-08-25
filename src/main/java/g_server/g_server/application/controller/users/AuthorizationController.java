@@ -1,4 +1,4 @@
-package g_server.g_server.application.controller;
+package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.forms.AuthorizationForm;

@@ -1,4 +1,4 @@
-package g_server.g_server.application.controller;
+package g_server.g_server.application.controller.system_data;
 
 import g_server.g_server.application.entity.system_data.Cathedras;
 import g_server.g_server.application.service.system_data.CathedrasService;

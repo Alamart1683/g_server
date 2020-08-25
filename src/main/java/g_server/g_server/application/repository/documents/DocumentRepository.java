@@ -19,4 +19,6 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     @Override
     void deleteById(Integer integer);
-}
+
+    List<Document> findByCreator(Integer creator_id);
+ }

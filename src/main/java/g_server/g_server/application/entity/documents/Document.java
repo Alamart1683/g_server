@@ -11,8 +11,8 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column
-    private int creator_id;
+    @Column(name = "creator_id") // Костыль ибо генератор методов JPA не воспринимает подчеркивания в названиях полей
+    private int creator;
 
     @Column
     private String name;
@@ -48,7 +48,7 @@ public class Document {
 
     public Document(int creator_id, String name, String document_path,
            String creation_date, int type, String description, int view_rights) {
-        this.creator_id = creator_id;
+        this.creator = creator_id;
         this.name = name;
         this.document_path = document_path;
         this.creation_date = creation_date;
@@ -58,11 +58,11 @@ public class Document {
     }
 
     public int getCreator_id() {
-        return creator_id;
+        return creator;
     }
 
     public void setCreator_id(int creator_id) {
-        this.creator_id = creator_id;
+        this.creator = creator_id;
     }
 
     public String getName() {
