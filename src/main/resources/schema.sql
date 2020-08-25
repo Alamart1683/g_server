@@ -111,7 +111,8 @@ create table document (
     creation_date date not null,
     type int not null,
     description varchar (512) default 'Описание отсутствует',
-    foreign key (id) references view_rights (id) on delete cascade on update cascade,
+    view_rights int not null,
+    foreign key (view_rights) references view_rights (id) on delete cascade on update cascade,
     foreign key (type) references document_type (id),
     foreign key (creator_id) references users(id) on delete cascade on update cascade
 );

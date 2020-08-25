@@ -81,7 +81,7 @@ public class UsersService implements UserDetailsService {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setRoles(Collections.singleton(new Roles(2, "ROLE_SCIENTIFIC_ADVISOR")));
             usersRepository.save(user);
-            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
+            StudentData.ScientificAdvisorData scientificAdvisorData = new StudentData.ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
@@ -97,7 +97,7 @@ public class UsersService implements UserDetailsService {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setRoles(Collections.singleton(new Roles(3, "ROLE_HEAD_OF_CATHEDRA")));
             usersRepository.save(user);
-            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
+            StudentData.ScientificAdvisorData scientificAdvisorData = new StudentData.ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;

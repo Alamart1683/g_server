@@ -41,6 +41,14 @@ public class Users implements UserDetails {
                     name = "role_id", referencedColumnName = "id"))
     private Set<Roles> roles;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
+    private StudentData studentData;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
+    private StudentData.ScientificAdvisorData scientificAdvisorData;
+
     public Users() { }
 
     public Users(String email, String name, String surname, String second_name, String password, String phone) {
@@ -114,6 +122,22 @@ public class Users implements UserDetails {
 
     public void setRoles(Set<Roles> roles) {
         this.roles = roles;
+    }
+
+    public StudentData getStudentData() {
+        return studentData;
+    }
+
+    public void setStudentData(StudentData studentData) {
+        this.studentData = studentData;
+    }
+
+    public StudentData.ScientificAdvisorData getScientificAdvisorData() {
+        return scientificAdvisorData;
+    }
+
+    public void setScientificAdvisorData(StudentData.ScientificAdvisorData scientificAdvisorData) {
+        this.scientificAdvisorData = scientificAdvisorData;
     }
 
     @Override

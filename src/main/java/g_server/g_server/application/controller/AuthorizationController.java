@@ -1,7 +1,7 @@
 package g_server.g_server.application.controller;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.AuthorizationForm;
+import g_server.g_server.application.entity.forms.AuthorizationForm;
 import g_server.g_server.application.entity.Users;
 import g_server.g_server.application.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;

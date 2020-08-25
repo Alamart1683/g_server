@@ -1,4 +1,6 @@
-package g_server.g_server.application.entity;
+package g_server.g_server.application.entity.forms;
+
+import g_server.g_server.application.entity.Users;
 
 public class StudentForm extends Users {
     private String student_group;

@@ -1,4 +1,4 @@
-package g_server.g_server.application.entity;
+package g_server.g_server.application.entity.forms;
 
 public class AuthorizationForm {
     private String email;
