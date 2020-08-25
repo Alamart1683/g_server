@@ -44,4 +44,96 @@ public class Document {
     @JoinColumn(name = "creator_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Users user;
 
+    public Document() { }
+
+    public Document(int creator_id, String name, String document_path,
+           String creation_date, int type, String description, int view_rights) {
+        this.creator_id = creator_id;
+        this.name = name;
+        this.document_path = document_path;
+        this.creation_date = creation_date;
+        this.type = type;
+        this.description = description;
+        this.view_rights = view_rights;
+    }
+
+    public int getCreator_id() {
+        return creator_id;
+    }
+
+    public void setCreator_id(int creator_id) {
+        this.creator_id = creator_id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDocument_path() {
+        return document_path;
+    }
+
+    public void setDocument_path(String document_path) {
+        this.document_path = document_path;
+    }
+
+    public String getCreation_date() {
+        return creation_date;
+    }
+
+    public void setCreation_date(String creation_date) {
+        this.creation_date = creation_date;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getView_rights() {
+        return view_rights;
+    }
+
+    public void setView_rights(int view_rights) {
+        this.view_rights = view_rights;
+    }
+
+    public ViewRights getViewRights() {
+        return viewRights;
+    }
+
+    public void setViewRights(ViewRights viewRights) {
+        this.viewRights = viewRights;
+    }
+
+    public DocumentType getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(DocumentType documentType) {
+        this.documentType = documentType;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
+    }
 }
