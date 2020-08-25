@@ -42,6 +42,15 @@ public class RegistrationController {
             model.addAttribute("passwordError", "Пароли не совпадают");
             return "Пароли не совпадают";
         }
+        if (!usersService.isCathedraExist(studentForm)) {
+            return "Указана несуществующая кафедра";
+        }
+        if (!usersService.isGroupExist(studentForm)) {
+            return "Указана несуществующая группа";
+        }
+        if (!usersService.isStudentTypeExist(studentForm)) {
+            return "Указан несуществуюший тип";
+        }
         if (!usersService.saveStudent(studentForm.StudentFormToUsers(), studentForm.getStudent_type(),
                 studentForm.getStudent_group(), studentForm.getCathedra())) {
             model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
@@ -69,6 +78,9 @@ public class RegistrationController {
             model.addAttribute("passwordError", "Пароли не совпадают");
             return "Пароли не совпадают";
         }
+        if (!usersService.isCathedraExist(scientificAdvisorForm)) {
+            return "Указана несуществующая кафедра";
+        }
         if (!usersService.saveScientificAdvisor(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
                 scientificAdvisorForm.getCathedra())) {
             model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
@@ -94,6 +106,9 @@ public class RegistrationController {
         if (!scientificAdvisorForm.getPassword().equals(scientificAdvisorForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
             return "Пароли не совпадают";
+        }
+        if (!usersService.isCathedraExist(scientificAdvisorForm)) {
+            return "Указана несуществующая кафедра";
         }
         if (!usersService.saveHeadOfCathedra(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
                 scientificAdvisorForm.getCathedra())) {

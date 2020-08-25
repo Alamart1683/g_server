@@ -1,6 +1,8 @@
 package g_server.g_server.application.service;
 
 import g_server.g_server.application.entity.*;
+import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
+import g_server.g_server.application.entity.forms.StudentForm;
 import g_server.g_server.application.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -122,6 +124,30 @@ public class UsersService implements UserDetailsService {
             return false;
         else
             return true;
+    }
+
+    public boolean isCathedraExist(StudentForm studentForm) {
+        try { Integer cathedraTest = cathedrasRepository.getCathedrasByCathedraName(studentForm.getCathedra()).getId(); }
+        catch (NullPointerException exception) { return false; }
+        return true;
+    }
+
+    public boolean isCathedraExist(ScientificAdvisorForm scientificAdvisorForm) {
+        try { Integer cathedraTest = cathedrasRepository.getCathedrasByCathedraName(scientificAdvisorForm.getCathedra()).getId(); }
+        catch (NullPointerException exception) { return false; }
+        return true;
+    }
+
+    public boolean isGroupExist(StudentForm studentForm) {
+        try { Integer groupTest = studentGroupRepository.getByStudentGroup(studentForm.getStudent_group()).getId(); }
+        catch (NullPointerException exception) { return false; }
+        return true;
+    }
+
+    public boolean isStudentTypeExist(StudentForm studentForm) {
+        try { Integer typeTest = studentTypeRepository.getByStudentType(studentForm.getStudent_type()).getId(); }
+        catch (NullPointerException exception) { return false; }
+        return true;
     }
 
     public Optional<Users> findById(int id) {
