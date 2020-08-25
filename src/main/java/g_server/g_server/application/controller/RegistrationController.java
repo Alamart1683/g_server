@@ -3,7 +3,7 @@ package g_server.g_server.application.controller;
 import g_server.g_server.application.entity.forms.AdminForm;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
-import g_server.g_server.application.service.UsersService;
+import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;

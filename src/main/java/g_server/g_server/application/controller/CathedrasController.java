@@ -1,7 +1,7 @@
 package g_server.g_server.application.controller;
 
-import g_server.g_server.application.entity.Cathedras;
-import g_server.g_server.application.service.CathedrasService;
+import g_server.g_server.application.entity.system_data.Cathedras;
+import g_server.g_server.application.service.crud.CathedrasService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

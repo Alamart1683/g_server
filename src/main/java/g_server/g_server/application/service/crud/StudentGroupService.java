@@ -1,7 +1,7 @@
-package g_server.g_server.application.service;
+package g_server.g_server.application.service.crud;
 
-import g_server.g_server.application.entity.StudentGroup;
-import g_server.g_server.application.repository.StudentGroupRepository;
+import g_server.g_server.application.entity.system_data.StudentGroup;
+import g_server.g_server.application.repository.system_data.StudentGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

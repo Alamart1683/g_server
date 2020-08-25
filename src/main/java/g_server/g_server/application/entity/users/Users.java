@@ -1,4 +1,4 @@
-package g_server.g_server.application.entity;
+package g_server.g_server.application.entity.users;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -47,7 +47,7 @@ public class Users implements UserDetails {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
-    private StudentData.ScientificAdvisorData scientificAdvisorData;
+    private ScientificAdvisorData scientificAdvisorData;
 
     public Users() { }
 
@@ -132,11 +132,11 @@ public class Users implements UserDetails {
         this.studentData = studentData;
     }
 
-    public StudentData.ScientificAdvisorData getScientificAdvisorData() {
+    public ScientificAdvisorData getScientificAdvisorData() {
         return scientificAdvisorData;
     }
 
-    public void setScientificAdvisorData(StudentData.ScientificAdvisorData scientificAdvisorData) {
+    public void setScientificAdvisorData(ScientificAdvisorData scientificAdvisorData) {
         this.scientificAdvisorData = scientificAdvisorData;
     }
 

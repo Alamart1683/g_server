@@ -1,6 +1,6 @@
 package g_server.g_server.application.entity.documents;
 
-import g_server.g_server.application.entity.Users;
+import g_server.g_server.application.entity.users.Users;
 
 import javax.persistence.*;
 

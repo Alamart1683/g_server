@@ -1,6 +1,6 @@
 package g_server.g_server.application.entity.forms;
 
-import g_server.g_server.application.entity.Users;
+import g_server.g_server.application.entity.users.Users;
 
 public class ScientificAdvisorForm extends Users {
     private String cathedra;

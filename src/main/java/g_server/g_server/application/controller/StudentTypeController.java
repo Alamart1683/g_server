@@ -1,7 +1,7 @@
 package g_server.g_server.application.controller;
 
-import g_server.g_server.application.entity.StudentType;
-import g_server.g_server.application.service.StudentTypeService;
+import g_server.g_server.application.entity.system_data.StudentType;
+import g_server.g_server.application.service.crud.StudentTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

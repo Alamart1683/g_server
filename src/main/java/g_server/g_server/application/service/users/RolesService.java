@@ -1,7 +1,7 @@
-package g_server.g_server.application.service;
+package g_server.g_server.application.service.users;
 
-import g_server.g_server.application.entity.Roles;
-import g_server.g_server.application.repository.RolesRepository;
+import g_server.g_server.application.entity.users.Roles;
+import g_server.g_server.application.repository.users.RolesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

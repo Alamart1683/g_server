@@ -1,4 +1,4 @@
-package g_server.g_server.application.entity;
+package g_server.g_server.application.entity.users;
 
 import org.springframework.security.core.GrantedAuthority;
 import javax.persistence.*;

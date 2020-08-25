@@ -1,6 +1,6 @@
 package g_server.g_server.application.config.jwt;
 
-import g_server.g_server.application.service.UsersService;
+import g_server.g_server.application.service.users.UsersService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

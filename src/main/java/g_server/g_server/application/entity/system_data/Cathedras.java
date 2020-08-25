@@ -1,4 +1,4 @@
-package g_server.g_server.application.entity;
+package g_server.g_server.application.entity.system_data;
 
 import javax.persistence.*;
 

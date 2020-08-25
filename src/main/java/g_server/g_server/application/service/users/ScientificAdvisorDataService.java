@@ -1,7 +1,7 @@
-package g_server.g_server.application.service;
+package g_server.g_server.application.service.users;
 
-import g_server.g_server.application.entity.StudentData;
-import g_server.g_server.application.repository.ScientificAdvisorDataRepository;
+import g_server.g_server.application.entity.users.ScientificAdvisorData;
+import g_server.g_server.application.repository.users.ScientificAdvisorDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,15 +13,15 @@ public class ScientificAdvisorDataService {
     @Autowired
     private ScientificAdvisorDataRepository scientificAdvisorDataRepository;
 
-    public List<StudentData.ScientificAdvisorData> findAll() {
+    public List<ScientificAdvisorData> findAll() {
         return scientificAdvisorDataRepository.findAll();
     }
 
-    public Optional<StudentData.ScientificAdvisorData> findById(int id) {
+    public Optional<ScientificAdvisorData> findById(int id) {
         return scientificAdvisorDataRepository.findById(id);
     }
 
-    public void save(StudentData.ScientificAdvisorData scientificAdvisorData) {
+    public void save(ScientificAdvisorData scientificAdvisorData) {
         scientificAdvisorDataRepository.save(scientificAdvisorData);
     }
 

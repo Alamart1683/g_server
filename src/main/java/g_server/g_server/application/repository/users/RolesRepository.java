@@ -1,6 +1,6 @@
-package g_server.g_server.application.repository;
+package g_server.g_server.application.repository.users;
 
-import g_server.g_server.application.entity.Roles;
+import g_server.g_server.application.entity.users.Roles;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

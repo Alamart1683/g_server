@@ -1,16 +1,23 @@
-package g_server.g_server.application.service;
+package g_server.g_server.application.service.users;
 
-import g_server.g_server.application.entity.*;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
-import g_server.g_server.application.repository.*;
+import g_server.g_server.application.entity.users.Roles;
+import g_server.g_server.application.entity.users.ScientificAdvisorData;
+import g_server.g_server.application.entity.users.StudentData;
+import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.repository.system_data.CathedrasRepository;
+import g_server.g_server.application.repository.system_data.StudentGroupRepository;
+import g_server.g_server.application.repository.system_data.StudentTypeRepository;
+import g_server.g_server.application.repository.users.ScientificAdvisorDataRepository;
+import g_server.g_server.application.repository.users.StudentDataRepository;
+import g_server.g_server.application.repository.users.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +90,7 @@ public class UsersService implements UserDetailsService {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setRoles(Collections.singleton(new Roles(2, "ROLE_SCIENTIFIC_ADVISOR")));
             usersRepository.save(user);
-            StudentData.ScientificAdvisorData scientificAdvisorData = new StudentData.ScientificAdvisorData(user.getId(),
+            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
@@ -99,7 +106,7 @@ public class UsersService implements UserDetailsService {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setRoles(Collections.singleton(new Roles(3, "ROLE_HEAD_OF_CATHEDRA")));
             usersRepository.save(user);
-            StudentData.ScientificAdvisorData scientificAdvisorData = new StudentData.ScientificAdvisorData(user.getId(),
+            ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
