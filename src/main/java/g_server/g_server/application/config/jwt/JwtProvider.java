@@ -1,9 +1,13 @@
 package g_server.g_server.application.config.jwt;
 
+import g_server.g_server.application.entity.Roles;
+import g_server.g_server.application.entity.Users;
+import g_server.g_server.application.repository.UsersRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
@@ -13,6 +17,9 @@ import java.util.Date;
 @Log
 @Component
 public class JwtProvider {
+    @Autowired
+    UsersRepository usersRepository;
+
     @Value("$(jwt.secret)")
     private String jwtSecret;
     public String generateToken(String email) {
