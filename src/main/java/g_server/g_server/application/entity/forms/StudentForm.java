@@ -8,14 +8,13 @@ public class StudentForm extends Users {
     private String student_type;
     private String passwordConfirm;
     private int registrationCode;
-    private int registrationCodeConfirm;
 
     public StudentForm() { }
 
     public StudentForm(String student_group, String cathedra, String student_type,
                        String email, String name, String surname, String second_name,
                        String password, String confirm_password, String phone,
-                       int registrationCode, int registrationCodeConfirm) {
+                       int registrationCode) {
         this.cathedra = cathedra;
         this.student_group = student_group;
         this.student_type = student_type;
@@ -28,7 +27,6 @@ public class StudentForm extends Users {
         this.setSecond_name(second_name);
         this.setPhone(phone);
         this.registrationCode = registrationCode;
-        this.registrationCodeConfirm = registrationCodeConfirm;
     }
 
     public Users StudentFormToUsers() {
@@ -76,13 +74,5 @@ public class StudentForm extends Users {
 
     public void setRegistrationCode(int registrationCode) {
         this.registrationCode = registrationCode;
-    }
-
-    public int getRegistrationCodeConfirm() {
-        return registrationCodeConfirm;
-    }
-
-    public void setRegistrationCodeConfirm(int registrationCodeConfirm) {
-        this.registrationCodeConfirm = registrationCodeConfirm;
     }
 }

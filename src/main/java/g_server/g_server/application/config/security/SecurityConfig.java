@@ -1,4 +1,4 @@
-package g_server.g_server.application.config;
+package g_server.g_server.application.config.security;
 
 import g_server.g_server.application.config.jwt.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/authorization",
                         "/student_group/all",
                         "/student_type/all",
-                        "/cathedras/all").permitAll()
+                        "/cathedras/all",
+                        "/registration/student/mail").permitAll()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }

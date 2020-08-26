@@ -19,18 +19,29 @@ public class RegistrationController {
     @Autowired
     private UsersService usersService;
 
+    private Integer registrationCode;
+
     @Autowired
     private MailService mailService;
 
     @GetMapping("/registration/student")
-    public String StudentRegistrationPreparing(@ModelAttribute("email") String email, Model model) {
-        int registrationCode = (int)((Math.random() * (1000000 - 100000)) + 100000);
+    public String StudentRegistrationPreparing(Model model)  {
+        registrationCode = (int)((Math.random() * (1000000 - 100000)) + 100000);
         StudentForm studentForm = new StudentForm();
         studentForm.setRegistrationCode(registrationCode);
         model.addAttribute("studentForm", studentForm);
-        // Отправка письма студенту
-        mailService.sendStudentEmail(email, Integer.toString(registrationCode));
         return "studentForm";
+    }
+
+    @PostMapping("/registration/student/mail/check")
+    public String CheckEmail(@ModelAttribute("email") String email) {
+        return "";
+    }
+
+    @PostMapping("/registration/student/mail")
+    public String StudentSentConfirmationCode(@ModelAttribute("email") String email) {
+        mailService.sendStudentEmail(email, Integer.toString(registrationCode));
+        return "Письмо с кодом подтверждения успешно отправлено";
     }
 
     @PostMapping("/registration/student")
@@ -40,7 +51,7 @@ public class RegistrationController {
         if (bindingResult.hasErrors()) {
             return "Непредвиденная ошибка";
         }
-        if (studentForm.getRegistrationCode() != studentForm.getRegistrationCodeConfirm()) {
+        if (studentForm.getRegistrationCode() != registrationCode) {
             model.addAttribute("codeConfirmationError", "Код подтверждения указан неверно");
             return "Код подтверждения указан неверно";
         }
@@ -62,6 +73,7 @@ public class RegistrationController {
             model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
+        registrationCode = 0;
         return "success!";
     }
 
@@ -93,7 +105,7 @@ public class RegistrationController {
             return "Пользователь с таким email уже есть";
         }
         // Отправка письма науч. рководителю
-        mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword());
+        mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "научного руководителя");
         return "success!";
     }
 
@@ -124,7 +136,7 @@ public class RegistrationController {
             return "Пользователь с таким email уже есть";
         }
         // Отправка письма зав. кафедры
-        mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword());
+        mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "заведующего кафедрой");
         return "success!";
     }
 
@@ -151,7 +163,7 @@ public class RegistrationController {
             return "Пользователь с таким email уже есть";
         }
         // Отправка письма администратору
-        mailService.sendLoginEmail(adminForm.getEmail(), adminForm.getPassword());
+        mailService.sendLoginEmail(adminForm.getEmail(), adminForm.getPassword(), "администратора");
         return "success!";
     }
 }

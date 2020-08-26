@@ -1,4 +1,4 @@
-package g_server.g_server.application.service.mail;
+package g_server.g_server.application.config.mail;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

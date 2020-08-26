@@ -31,8 +31,7 @@ public class AuthorizationController {
             return token;
         }
         else {
-            return "Неверная комбинация логина и пароя";
+            return "Неверная комбинация логина и пароля";
         }
     }
-
 }

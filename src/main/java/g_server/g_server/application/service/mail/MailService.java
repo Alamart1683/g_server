@@ -14,19 +14,19 @@ public class MailService {
     public String sendStudentEmail(String recipient, String registrationCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(recipient);
-        message.setSubject("Код регистрации для graduates_server");
-        message.setText("Код подтверждения регистрации:\n" + registrationCode);
+        message.setSubject("Код регистрации для сайта выпускников кафедры МОСИТ");
+        message.setText("Здравствуйте, для завершения регистрации вам необходимо указать код подтверждения. \nКод подтверждения регистрации: " + registrationCode);
         this.mailSender.send(message);
         return "Email sent!";
     }
 
-    public String sendLoginEmail(String recipient, String password) {
+    public String sendLoginEmail(String recipient, String password, String status) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(recipient);
-        message.setSubject("Учетная запись graduates_server");
-        message.setText("Логин учетной записи: " + recipient + "\nПароль учётной записи: " + password);
+        message.setSubject("Учетная запись сайта выпускников кафедры МОСИТ");
+        message.setText("Здравствуйте, вы были зарегистрированы в статусе " + status + " на сайте выпускников кафдеры МОСИТ." +
+                "\nЛогин учетной записи: " + recipient + "\nПароль учётной записи: " + password);
         this.mailSender.send(message);
         return "Email sent!";
     }
-
 }
