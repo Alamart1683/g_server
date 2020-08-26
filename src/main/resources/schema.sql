@@ -142,3 +142,24 @@ create table common_chat (
     message varchar (512) not null,
     foreign key (sender) references users(id)
 );
+
+insert into roles (role) values
+    ('ROLE_STUDENT'),
+    ('ROLE_SCIENTIFIC_ADVISOR'),
+    ('ROLE_HEAD_OF_CATHEDRA'),
+    ('ROLE_ADMIN');
+
+insert into cathedras (cathedra_name) values
+    ('МОСИТ'),
+    ('ИППО'),
+    ('КИС');
+
+insert into student_type (type) values
+    ('Бакалавр'),
+    ('Магистр'),
+    ('Аспирант');
+
+insert into student_group (student_group) values
+    ('ИКБО-12-17'),
+    ('ИКБО-07-17'),
+    ('ИНБО-15-16');
