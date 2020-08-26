@@ -94,6 +94,11 @@ create table document_type (
     type varchar (100) not null
 );
 
+create table document_kind (
+    id int primary key auto_increment,
+    kind varchar (100) not null
+);
+
 create table view_rights (
     id int primary key auto_increment,
     is_only_for_me bool not null,
@@ -110,10 +115,12 @@ create table document (
     document_path varchar (256) not null,
     creation_date date not null,
     type int not null,
+    kind int not null,
     description varchar (512) default 'Описание отсутствует',
     view_rights int not null,
     foreign key (view_rights) references view_rights (id) on delete cascade on update cascade,
     foreign key (type) references document_type (id),
+    foreign key (kind) references document_kind (id),
     foreign key (creator_id) references users(id) on delete cascade on update cascade
 );
 

@@ -10,7 +10,7 @@ import java.util.Optional;
 @Service
 public class ViewRightsService {
     @Autowired
-    private static ViewRightsRepository viewRightsRepository;
+    private ViewRightsRepository viewRightsRepository;
 
     public List<ViewRights> findAll() {
         return viewRightsRepository.findAll();

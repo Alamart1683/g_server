@@ -13,7 +13,7 @@ import java.util.Optional;
 @RestController
 public class ViewRightsController {
     @Autowired
-    private static ViewRightsService viewRightsService;
+    private ViewRightsService viewRightsService;
 
     @GetMapping("/document/view_rights/all")
     public List<ViewRights> findAll() {

@@ -26,8 +26,7 @@ public class DocumentTypeController {
 
     @PostMapping("/admin/document/type/save/")
     public void save(@RequestParam String type) {
-        DocumentType documentType = new DocumentType(type);
-        documentTypeService.save(documentType);
+        documentTypeService.save(new DocumentType(type));
     }
 
     @PutMapping("/admin/document/type/update/")
@@ -36,6 +35,7 @@ public class DocumentTypeController {
             @RequestParam String type
     ) {
         DocumentType documentType = documentTypeService.findByID(id).get();
+        documentType.setType(type);
         documentTypeService.save(documentType);
     }
 

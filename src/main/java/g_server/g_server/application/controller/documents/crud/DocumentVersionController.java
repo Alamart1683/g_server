@@ -18,10 +18,10 @@ import java.util.Optional;
 @RestController
 public class DocumentVersionController {
     @Autowired
-    private static DocumentVersionService documentVersionService;
+    private DocumentVersionService documentVersionService;
 
     @Autowired
-    private static DocumentVersionRepository documentVersionRepository;
+    private DocumentVersionRepository documentVersionRepository;
 
     @GetMapping("/admin/document/version/all")
     public List<DocumentVersion> findAll() {

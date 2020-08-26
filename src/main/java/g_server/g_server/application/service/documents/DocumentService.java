@@ -10,7 +10,7 @@ import java.util.Optional;
 @Service
 public class DocumentService {
     @Autowired
-    private static DocumentRepository documentRepository;
+    private DocumentRepository documentRepository;
 
     public List<Document> findAll() {
         return documentRepository.findAll();

@@ -18,6 +18,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +47,9 @@ public class UsersService implements UserDetailsService {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -157,6 +163,14 @@ public class UsersService implements UserDetailsService {
         return true;
     }
 
+    @Transactional
+    public void nativeDelete(int id) {
+        Query query = entityManager.createNamedQuery("deleteUser");
+        entityManager.joinTransaction();
+        query.setParameter(1, id);
+        query.executeUpdate();
+    }
+
     public Optional<Users> findById(int id) {
         return usersRepository.findById(id);
     }
@@ -171,9 +185,5 @@ public class UsersService implements UserDetailsService {
 
     public void delete(int id) {
         usersRepository.deleteById(id);
-    }
-
-    public Users findByEmail(String email) {
-        return usersRepository.findByEmail(email);
     }
 }

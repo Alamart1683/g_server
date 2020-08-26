@@ -27,6 +27,9 @@ public class Document {
     private int type;
 
     @Column
+    private int kind;
+
+    @Column
     private String description;
 
     @Column
@@ -41,28 +44,33 @@ public class Document {
     private DocumentType documentType;
 
     @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "kind", referencedColumnName = "id", insertable = false, updatable = false)
+    private DocumentKind documentKind;
+
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "creator_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Users user;
 
     public Document() { }
 
     public Document(int creator_id, String name, String document_path,
-           String creation_date, int type, String description, int view_rights) {
+                    String creation_date, int type, int kind, String description, int view_rights) {
         this.creator = creator_id;
         this.name = name;
         this.document_path = document_path;
         this.creation_date = creation_date;
         this.type = type;
+        this.kind = kind;
         this.description = description;
         this.view_rights = view_rights;
     }
 
-    public int getCreator_id() {
+    public int getCreator() {
         return creator;
     }
 
-    public void setCreator_id(int creator_id) {
-        this.creator = creator_id;
+    public void setCreator(int creator) {
+        this.creator = creator;
     }
 
     public String getName() {
@@ -135,5 +143,13 @@ public class Document {
 
     public void setUser(Users user) {
         this.user = user;
+    }
+
+    public int getKind() {
+        return kind;
+    }
+
+    public void setKind(int kind) {
+        this.kind = kind;
     }
 }

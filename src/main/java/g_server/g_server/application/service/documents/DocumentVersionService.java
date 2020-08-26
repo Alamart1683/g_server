@@ -10,7 +10,7 @@ import java.util.Optional;
 @Service
 public class DocumentVersionService {
     @Autowired
-    private static DocumentVersionRepository documentVersionRepository;
+    private DocumentVersionRepository documentVersionRepository;
 
     public List<DocumentVersion> findAll() {
         return documentVersionRepository.findAll();

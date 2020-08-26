@@ -1,7 +1,6 @@
 package g_server.g_server.application.controller.users.crud;
 
 import g_server.g_server.application.entity.users.Users;
-import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +16,6 @@ public class UsersController {
     @Autowired
     private UsersService usersService;
 
-    @Autowired
-    private UsersRepository usersRepository;
-
     @GetMapping("/admin/users/all")
     public List<Users> findAll() {
         return usersService.findAll();
@@ -31,10 +27,11 @@ public class UsersController {
     }
 
     @DeleteMapping("/admin/users/delete/{id}")
-    public void delete(@PathVariable int id) {
+    public String delete(@PathVariable int id) {
         // Доделать чтобы админ не мог удалять себя и других админов
         // Например ввести надуровень root-admin
-        usersService.delete(id);
+        usersService.nativeDelete(id);
+        return "Пользователь удален успешно";
     }
 
     @PutMapping("/admin/users/change_email/")

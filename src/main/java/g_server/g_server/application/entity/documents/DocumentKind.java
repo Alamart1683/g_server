@@ -3,19 +3,19 @@ package g_server.g_server.application.entity.documents;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "document_type")
-public class DocumentType {
+@Table(name = "document_kind")
+public class DocumentKind {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column
-    private String type;
+    private String kind;
 
-    public DocumentType() {}
+    public DocumentKind() {}
 
-    public DocumentType(String type) {
-        this.type = type;
+    public DocumentKind(String kind) {
+        this.kind = kind;
     }
 
     public int getId() {
@@ -26,11 +26,11 @@ public class DocumentType {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
+    public String getKind() {
+        return kind;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setKind(String kind) {
+        this.kind = kind;
     }
 }

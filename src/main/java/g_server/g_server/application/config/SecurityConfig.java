@@ -35,23 +35,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // То, что можно научному руководителю
                 .antMatchers(
                         "/scientific_advisor/**",
-                        "/student_group/save/",
-                        "/document/**").hasRole("SCIENTIFIC_ADVISOR")
+                        "/student_group/save/").hasRole("SCIENTIFIC_ADVISOR")
 
                 // То, что можно зав. кафедрой
                 .antMatchers(
-                        "/head_of_cathedra/**",
-                        "/document/**").hasRole("HEAD_OF_CATHEDRA")
+                        "/head_of_cathedra/**").hasRole("HEAD_OF_CATHEDRA")
 
                 // То, что можно админу
                 .antMatchers(
-                        "/admin/**",
-                        "/document/**").hasRole("ADMIN")
+                        "/admin/**").hasRole("ADMIN")
 
                 // То, что можно всем авторизованным
-                .antMatchers(
-                        "/document/type/all",
-                        "/document/type/{id}").fullyAuthenticated()
+                .antMatchers("/document/**").hasAnyRole("STUDENT", "SCIENTIFIC_ADVISOR", "HEAD_OF_CATHEDRA", "ADMIN")
 
                 // То, что можно всем
                 .antMatchers(

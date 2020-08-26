@@ -8,6 +8,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
+@NamedNativeQuery(name = "deleteUser", query = "delete from users where users.id = ?")
 public class Users implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
