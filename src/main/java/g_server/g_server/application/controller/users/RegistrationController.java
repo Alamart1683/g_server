@@ -84,8 +84,8 @@ public class RegistrationController {
             model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
-        registrationCode = 0;
-        return "success!";
+        registrationCode = null;
+        return "Студент успешно зарегистрирован!";
     }
 
     @GetMapping("/admin/registration/scientific_advisor")
@@ -115,9 +115,9 @@ public class RegistrationController {
             model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
             return "Пользователь с таким email уже есть";
         }
-        // Отправка письма науч. рководителю
+        // Отправка письма науч. руководителю
         mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "научного руководителя");
-        return "success!";
+        return "Научный руководитель зарегистрирован!";
     }
 
     @GetMapping("/admin/registration/head_of_cathedra")
@@ -148,7 +148,7 @@ public class RegistrationController {
         }
         // Отправка письма зав. кафедры
         mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "заведующего кафедрой");
-        return "success!";
+        return "Заведующий кафедрой успшено зарегистрирован!";
     }
 
     @GetMapping("/admin/registration/admin")
@@ -175,6 +175,6 @@ public class RegistrationController {
         }
         // Отправка письма администратору
         mailService.sendLoginEmail(adminForm.getEmail(), adminForm.getPassword(), "администратора");
-        return "success!";
+        return "Администратор успешно зарегистрирован!";
     }
 }
