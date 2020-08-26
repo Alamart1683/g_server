@@ -33,9 +33,20 @@ public class RegistrationController {
         return "studentForm";
     }
 
-    @PostMapping("/registration/student/mail/check")
+    @PostMapping("/registration/mail/check/valid")
     public String CheckEmail(@ModelAttribute("email") String email) {
-        return "";
+        if (mailService.checkMail(email))
+            return "email is valid";
+        else
+            return "email is not valid";
+    }
+
+    @PostMapping("/registration/mail/check/free")
+    public String isFree(@ModelAttribute("email") String email) {
+        if (!usersService.isEmailExist(email))
+            return "email is free";
+        else
+            return "email is not free";
     }
 
     @PostMapping("/registration/student/mail")

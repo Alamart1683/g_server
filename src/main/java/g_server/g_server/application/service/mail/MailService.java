@@ -5,9 +5,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Service
 public class MailService {
-
     @Autowired
     public JavaMailSender mailSender;
 
@@ -28,5 +30,14 @@ public class MailService {
                 "\nЛогин учетной записи: " + recipient + "\nПароль учётной записи: " + password);
         this.mailSender.send(message);
         return "Email sent!";
+    }
+
+    public boolean checkMail(String email) {
+        Pattern pattern = Pattern.compile("^([A-Za-z0-9_-]+\\.)*[a-zA-Z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$");
+        Matcher matcher = pattern.matcher(email);
+        if (!matcher.matches())
+            return false;
+        else
+            return true;
     }
 }

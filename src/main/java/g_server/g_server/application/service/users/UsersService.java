@@ -163,6 +163,14 @@ public class UsersService implements UserDetailsService {
         return true;
     }
 
+    public boolean isEmailExist(String email) {
+        Users userFromDB = usersRepository.findByEmail(email);
+        if (userFromDB == null)
+            return false;
+        else
+            return true;
+    }
+
     @Transactional
     public void nativeDelete(int id) {
         Query query = entityManager.createNamedQuery("deleteUser");
