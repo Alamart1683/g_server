@@ -62,9 +62,14 @@ public class RegistrationController {
         if (bindingResult.hasErrors()) {
             return "Непредвиденная ошибка";
         }
-        if (studentForm.getRegistrationCode() != registrationCode) {
-            model.addAttribute("codeConfirmationError", "Код подтверждения указан неверно");
-            return "Код подтверждения указан неверно";
+        if (registrationCode != null) {
+            if (studentForm.getRegistrationCode() != registrationCode) {
+                model.addAttribute("codeConfirmationError", "Код подтверждения указан неверно");
+                return "Код подтверждения указан неверно";
+            }
+        }
+        else {
+            return "Код подверждения больше не существует";
         }
         if (!studentForm.getPassword().equals(studentForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
