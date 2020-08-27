@@ -8,7 +8,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@NamedNativeQuery(name = "deleteUser", query = "delete from users where users.id = ?")
 public class Users implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,11 +41,11 @@ public class Users implements UserDetails {
                     name = "role_id", referencedColumnName = "id"))
     private Set<Roles> roles;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
     private StudentData studentData;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
     private ScientificAdvisorData scientificAdvisorData;
 

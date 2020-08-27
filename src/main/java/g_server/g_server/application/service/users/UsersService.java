@@ -52,10 +52,10 @@ public class UsersService implements UserDetailsService {
     private EntityManager entityManager;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
         Users user = usersRepository.findByEmail(email);
         if (user == null)
-            throw new UsernameNotFoundException("Пользователь не найден");
+            return null;
         return user;
     }
 
@@ -169,14 +169,6 @@ public class UsersService implements UserDetailsService {
             return false;
         else
             return true;
-    }
-
-    @Transactional
-    public void nativeUserDelete(int id) {
-        Query query = entityManager.createNamedQuery("deleteUser");
-        entityManager.joinTransaction();
-        query.setParameter(1, id);
-        query.executeUpdate();
     }
 
     public Optional<Users> findById(int id) {

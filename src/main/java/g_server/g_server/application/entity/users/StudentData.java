@@ -22,19 +22,19 @@ public class StudentData {
     @Column(name = "type")
     private int type;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Roles roles;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "student_group", referencedColumnName = "id", insertable = false, updatable = false)
     private StudentGroup studentGroup;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "cathedra", referencedColumnName = "id", insertable = false, updatable = false)
     private Cathedras cathedras;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false)
     private StudentType studentType;
 

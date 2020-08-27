@@ -18,7 +18,13 @@ public class DocumentManagementService {
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
-        Integer creator_id = documentUploadService.getCreatorId(token);
+        if (token == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (token.equals("Ошибка аутентификации: токен пуст"))
+            messagesList.add("");
+        Integer creator_id = null;
+        if (messagesList.size() == 0)
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - удаление документа невозможно");
         if (messagesList.size() == 0) {

@@ -13,11 +13,11 @@ public class ScientificAdvisorData {
     @Column(name = "cathedra")
     private int cathedra;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Roles roles;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "cathedra", referencedColumnName = "id", insertable = false, updatable = false)
     private Cathedras cathedras;
 

@@ -34,19 +34,19 @@ public class Document {
     @Column
     private int view_rights;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "view_rights", referencedColumnName = "id", insertable = false, updatable = false)
     private ViewRights viewRights;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false)
     private DocumentType documentType;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "kind", referencedColumnName = "id", insertable = false, updatable = false)
     private DocumentKind documentKind;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "creator_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Users user;
 

@@ -52,7 +52,14 @@ public class DocumentUploadService {
     public List<String> UploadDocument(DocumentForm documentForm) {
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
-        Integer creator_id = getCreatorId(documentForm.getToken());
+        Integer creator_id = null;
+        if (documentForm.getToken() == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (messagesList.size() == 0)
+            if (documentForm.getToken().equals(""))
+                messagesList.add("Ошибка аутентификации: токен пуст");
+            else
+                creator_id = getCreatorId(documentForm.getToken());
         if (creator_id == null)
             messagesList.add("Пользователь не найден, загрузить файл невозможно");
         // Определим айди типа документа

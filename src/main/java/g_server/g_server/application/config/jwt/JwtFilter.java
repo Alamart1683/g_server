@@ -34,7 +34,10 @@ public class JwtFilter extends GenericFilterBean {
         String token = getTokenFromRequest((HttpServletRequest) servletRequest);
         if (token != null && jwtProvider.validateToken(token)) {
             String email = jwtProvider.getEmailFromToken(token);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(usersService.loadUserByUsername(email), null, usersService.loadUserByUsername(email).getAuthorities());
+            UsernamePasswordAuthenticationToken auth = null;
+            if (usersService.loadUserByUsername(email) != null) {
+                auth = new UsernamePasswordAuthenticationToken(usersService.loadUserByUsername(email), null, usersService.loadUserByUsername(email).getAuthorities());
+            }
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(servletRequest, servletResponse);

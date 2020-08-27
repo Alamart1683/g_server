@@ -26,7 +26,7 @@ public class DocumentVersion {
     @Column
     private String this_version_document_path;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "document", referencedColumnName = "id", insertable = false, updatable = false)
     private Document parentDocument;
 
@@ -34,7 +34,7 @@ public class DocumentVersion {
     // реализации возможности выдачи прав на чтение и запись для созданных пользователем документов,
     // тогда как если привязать его к айди создателя документа, это поставит крест на этой возможости, ибо
     // редактировать документ сможет только его создатель
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "editor", referencedColumnName = "id", insertable = false, updatable = false)
     private Users user;
 
