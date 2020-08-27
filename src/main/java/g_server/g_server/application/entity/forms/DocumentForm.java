@@ -4,27 +4,29 @@ import g_server.g_server.application.entity.documents.Document;
 import org.springframework.web.multipart.MultipartFile;
 
 public class DocumentForm {
-    private String name;
-    private String type;
-    private String kind;
-    private String description;
+    private String documentFormName;
+    private String documentFormType;
+    private String documentFormKind;
+    private String documentFormDescription;
+    private String documentFormViewRights;
     private String token;
     private MultipartFile file;
 
     public DocumentForm() { }
 
     public DocumentForm(String name, String type, String kind, String description,
-                        String token, MultipartFile file) {
-        this.name = name;
-        this.type = type;
-        this.kind = kind;
-        this.description = description;
+                        String viewRights, String token, MultipartFile file) {
+        this.documentFormName = name;
+        this.documentFormType = type;
+        this.documentFormKind = kind;
+        this.documentFormDescription = description;
+        this.documentFormViewRights = viewRights;
         this.token = token;
         this.file = file;
     }
 
     public Document DocumentFormToDocument(int creator, String document_path, String creation_date,
-                                          int type, int kind, int view_rights ) {
+                                          int type, int kind, int view_rights) {
         Document document = new Document(
                 creator, getDocumentFormName(), document_path, creation_date, type,
                 kind, getDocumentFormDescription(), view_rights
@@ -33,35 +35,35 @@ public class DocumentForm {
     }
 
     public String getDocumentFormName() {
-        return name;
+        return documentFormName;
     }
 
     public void setDocumentFormName(String name) {
-        this.name = name;
+        this.documentFormName = name;
     }
 
     public String getDocumentFormType() {
-        return type;
+        return documentFormType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setDocumentFormType(String documentFormType) {
+        this.documentFormType = documentFormType;
     }
 
     public String getDocumentFormKind() {
-        return kind;
+        return documentFormKind;
     }
 
     public void setDocumentFormKind(String kind) {
-        this.kind = kind;
+        this.documentFormKind = kind;
     }
 
     public String getDocumentFormDescription() {
-        return description;
+        return documentFormDescription;
     }
 
     public void setDocumentFormDescription(String description) {
-        this.description = description;
+        this.documentFormDescription = description;
     }
 
     public String getToken() {
@@ -78,5 +80,13 @@ public class DocumentForm {
 
     public void setFile(MultipartFile file) {
         this.file = file;
+    }
+
+    public String getDocumentFormViewRights() {
+        return documentFormViewRights;
+    }
+
+    public void setDocumentFormViewRights(String documentFormViewRights) {
+        this.documentFormViewRights = documentFormViewRights;
     }
 }

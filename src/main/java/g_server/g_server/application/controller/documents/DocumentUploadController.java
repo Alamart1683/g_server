@@ -4,6 +4,7 @@ import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.service.documents.DocumentUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -25,7 +26,8 @@ public class DocumentUploadController {
     }
 
     @PostMapping("/scientific_advisor/document/upload")
-    public List<String> UploadDocument(@ModelAttribute("documentForm") @Validated DocumentForm documentForm) {
+    public List<String> UploadDocument(@ModelAttribute("documentForm") @Validated DocumentForm documentForm,
+        BindingResult bindingResult, Model model) {
         return documentUploadService.UploadDocument(documentForm);
     }
 }
