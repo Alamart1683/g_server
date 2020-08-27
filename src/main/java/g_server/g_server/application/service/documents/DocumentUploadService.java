@@ -178,7 +178,10 @@ public class DocumentUploadService {
         if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) {
             String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
             if (extension.equals("docx") || extension.equals("pdf") || extension.equals("doc") ||
-                extension.equals("txt") || extension.equals("rtf")) {
+                extension.equals("txt") || extension.equals("rtf") || extension.equals("ppt") ||
+                extension.equals("pptx") || extension.equals("csv") || extension.equals("jpg") ||
+                extension.equals("jpeg") || extension.equals("png") || extension.equals("webp") ||
+                extension.equals("xls") || extension.equals("xlsx") || extension.equals("xlsm")) {
                 return extension;
             }
             else {
