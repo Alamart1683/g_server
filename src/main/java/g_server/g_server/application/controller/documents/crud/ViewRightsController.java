@@ -27,13 +27,9 @@ public class ViewRightsController {
 
     @PostMapping("/admin/document/view_rights/save/")
     public void save(
-            @RequestParam boolean iofm,
-            @RequestParam boolean iofsa,
-            @RequestParam boolean iofms,
-            @RequestParam boolean ifas,
-            @RequestParam boolean ifa
+            @RequestParam String viewRight
     ) {
-        ViewRights viewRights = new ViewRights(iofm, iofsa, iofms, ifas, ifa);
+        ViewRights viewRights = new ViewRights(viewRight);
         viewRightsService.save(viewRights);
     }
 

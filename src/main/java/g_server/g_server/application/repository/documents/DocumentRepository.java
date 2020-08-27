@@ -2,6 +2,7 @@ package g_server.g_server.application.repository.documents;
 
 import g_server.g_server.application.entity.documents.Document;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -21,4 +22,6 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     void deleteById(Integer integer);
 
     List<Document> findByCreator(Integer creator_id);
+
+    Document findByCreatorAndName(Integer creator_id, String name);
  }

@@ -101,11 +101,7 @@ create table document_kind (
 
 create table view_rights (
     id int primary key auto_increment,
-    is_only_for_me bool not null,
-    is_only_for_scientific_advisors bool not null,
-    is_only_for_my_students bool not null,
-    is_for_all_students bool not null,
-    is_for_all bool not null
+    view_right varchar(100) not null
 );
 
 create table document (
@@ -163,3 +159,22 @@ insert into student_group (student_group) values
     ('ИКБО-12-17'),
     ('ИКБО-07-17'),
     ('ИНБО-15-16');
+
+insert into view_rights (view_right) values
+    ('is_only_for_me'),
+    ('is_only_for_scientific_advisors'),
+    ('is_only_for_my_students'),
+    ('is_for_all_students'),
+    ('is_for_all');
+
+insert into document_type (type) values
+    ('Научно-исследовательская работа'),
+    ('Практика по получению знаний и умений'),
+    ('Преддипломная практика'),
+    ('ВКР');
+
+insert into document_kind (kind) values
+    ('Отчёт'),
+    ('Приказ'),
+    ('Титульный лист'),
+    ('Методическое пособие');

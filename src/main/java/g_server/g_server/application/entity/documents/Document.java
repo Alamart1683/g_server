@@ -65,6 +65,14 @@ public class Document {
         this.view_rights = view_rights;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getCreator() {
         return creator;
     }
@@ -151,5 +159,13 @@ public class Document {
 
     public void setKind(int kind) {
         this.kind = kind;
+    }
+
+    public DocumentKind getDocumentKind() {
+        return documentKind;
+    }
+
+    public void setDocumentKind(DocumentKind documentKind) {
+        this.documentKind = documentKind;
     }
 }

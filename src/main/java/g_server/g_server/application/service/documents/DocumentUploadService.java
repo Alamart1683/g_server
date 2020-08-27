@@ -1,17 +1,20 @@
 package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentKind;
 import g_server.g_server.application.entity.documents.DocumentType;
+import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.DocumentKindRepository;
+import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentTypeRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
+import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.crud.DocumentVersionService;
 import g_server.g_server.application.service.documents.crud.ViewRightsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
@@ -21,10 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class DocumentUploadService {
@@ -44,7 +45,10 @@ public class DocumentUploadService {
     private DocumentVersionService documentVersionService;
 
     @Autowired
-    private ViewRightsService viewRightsService;
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private DocumentService documentService;
 
     public List<String> UploadDocument(DocumentForm documentForm) {
         List<String> messagesList = new ArrayList<String>();
@@ -75,8 +79,9 @@ public class DocumentUploadService {
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             // Создание директории версий файла
-            File documentDirectory = new File( "src" + File.separator + "main" + File.separator + "resources" + File.separator +
-                    "users_documents" + File.separator + creator_id + " " + documentForm.getFile().getOriginalFilename());
+            String documentPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator +
+                    "users_documents" + File.separator + creator_id + " " + documentForm.getFile().getOriginalFilename();
+            File documentDirectory = new File(documentPath);
             // Проверим что одноименный файл не был загружен пользователем
             if (!documentDirectory.exists()) {
                 documentDirectory.mkdir();
@@ -84,13 +89,26 @@ public class DocumentUploadService {
             else {
                 messagesList.add("Файл с таким именем уже существует");
             }
+            // Сохраним файл на сервере, создав необходимую директорию
             if (messagesList.size() == 0) {
                 String currentDate = getCurrentDate();
-                Path uploadingFilePath = Paths.get(documentDirectory.getPath() + File.separator +
-                        "version_" + currentDate + "." + fileExtension);
+                String versionPath = documentDirectory.getPath() + File.separator +
+                        "version_" + currentDate + "." + fileExtension;
+                Path uploadingFilePath = Paths.get(versionPath);
                 try {
                     if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
-
+                        // После этого занесем загруженный файл в таблицу документов
+                        currentDate =  currentDate.substring(0, 10);
+                        Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, currentDate,
+                                type_id, kind_id, viewRights
+                        );
+                        documentService.save(document);
+                        // Далее создадим запись о первой версии документа в таблице версий
+                        int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id,
+                                documentForm.getFile().getOriginalFilename()).getId();
+                        DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId, currentDate,
+                                "Загрузка документа на сайт", versionPath);
+                        documentVersionService.save(documentVersion);
                     }
                     else {
                         messagesList.add("Непредвиденная ошибка загрузки файла");
