@@ -101,25 +101,30 @@ public class DocumentUploadService {
                         "version_" + currentDate + "." + fileExtension;
                 Path uploadingFilePath = Paths.get(versionPath);
                 try {
-                    if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
-                        // После этого занесем загруженный файл в таблицу документов
-                        currentDate =  currentDate.substring(0, 10);
-                        Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, currentDate,
-                                type_id, kind_id, viewRights
-                        );
-                        documentService.save(document);
-                        // Далее создадим запись о первой версии документа в таблице версий
-                        int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id,
-                                documentForm.getFile().getOriginalFilename()).getId();
-                        DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId, currentDate,
-                                "Загрузка документа на сайт", versionPath);
-                        documentVersionService.save(documentVersion);
+                    if (documentRepository.findByCreatorAndName(creator_id, documentForm.getFile().getOriginalFilename()) != null) {
+                        if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                            // После этого занесем загруженный файл в таблицу документов
+                            currentDate =  currentDate.substring(0, 10);
+                            Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, currentDate,
+                                    type_id, kind_id, viewRights
+                            );
+                            documentService.save(document);
+                            // Далее создадим запись о первой версии документа в таблице версий
+                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id,
+                                    documentForm.getFile().getOriginalFilename()).getId();
+                            DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId, currentDate,
+                                    "Загрузка документа на сайт", versionPath);
+                            documentVersionService.save(documentVersion);
+                        }
+                        else {
+                            messagesList.add("Непредвиденная ошибка загрузки файла");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
                     }
                     else {
-                        messagesList.add("Непредвиденная ошибка загрузки файла");
-                        if (documentDirectory.listFiles().length == 0) {
-                            documentDirectory.delete();
-                        }
+                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
                     }
                 }
                 catch (IOException ioException) {
