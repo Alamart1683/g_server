@@ -19,4 +19,6 @@ public interface DocumentTypeRepository extends JpaRepository<DocumentType, Inte
 
     @Override
     void deleteById(Integer integer);
+
+    DocumentType getDocumentTypeByType(String type);
 }

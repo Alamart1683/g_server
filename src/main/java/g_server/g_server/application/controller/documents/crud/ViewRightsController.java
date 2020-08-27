@@ -1,7 +1,7 @@
 package g_server.g_server.application.controller.documents.crud;
 
 import g_server.g_server.application.entity.documents.ViewRights;
-import g_server.g_server.application.service.documents.ViewRightsService;
+import g_server.g_server.application.service.documents.crud.ViewRightsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

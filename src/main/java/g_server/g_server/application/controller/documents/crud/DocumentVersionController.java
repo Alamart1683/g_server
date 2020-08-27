@@ -2,7 +2,7 @@ package g_server.g_server.application.controller.documents.crud;
 
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
-import g_server.g_server.application.service.documents.DocumentVersionService;
+import g_server.g_server.application.service.documents.crud.DocumentVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

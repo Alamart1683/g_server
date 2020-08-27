@@ -20,4 +20,6 @@ public interface DocumentKindRepository extends JpaRepository<DocumentKind, Inte
 
     @Override
     void deleteById(Integer integer);
+
+    DocumentKind getDocumentKindByKind(String kind);
 }

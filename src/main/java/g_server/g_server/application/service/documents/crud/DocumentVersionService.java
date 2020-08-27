@@ -1,4 +1,4 @@
-package g_server.g_server.application.service.documents;
+package g_server.g_server.application.service.documents.crud;
 
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;

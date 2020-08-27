@@ -2,7 +2,7 @@ package g_server.g_server.application.controller.documents.crud;
 
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.repository.documents.DocumentRepository;
-import g_server.g_server.application.service.documents.DocumentService;
+import g_server.g_server.application.service.documents.crud.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
