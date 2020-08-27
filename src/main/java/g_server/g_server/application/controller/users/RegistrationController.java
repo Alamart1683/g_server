@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class RegistrationController {
@@ -56,41 +58,47 @@ public class RegistrationController {
     }
 
     @PostMapping("/registration/student")
-    public String RegisterStudent(
+    public List<String> RegisterStudent(
             @ModelAttribute("studentForm") @Validated StudentForm studentForm,
             BindingResult bindingResult, Model model) {
+        List<String> messageList = new ArrayList<>();
         if (bindingResult.hasErrors()) {
-            return "Непредвиденная ошибка";
+            messageList.add("Непредвиденная ошибка");
         }
         if (registrationCode != null) {
             if (studentForm.getRegistrationCode() != registrationCode) {
                 model.addAttribute("codeConfirmationError", "Код подтверждения указан неверно");
-                return "Код подтверждения указан неверно";
+                messageList.add("Код подтверждения указан неверно");
             }
         }
         else {
-            return "Код подверждения больше не существует";
+            messageList.add("Код подверждения больше не существует");
         }
         if (!studentForm.getPassword().equals(studentForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
-            return "Пароли не совпадают";
+            messageList.add("Пароли не совпадают");
         }
         if (!usersService.isCathedraExist(studentForm)) {
-            return "Указана несуществующая кафедра";
+            messageList.add("Указана несуществующая кафедра");
         }
         if (!usersService.isGroupExist(studentForm)) {
-            return "Указана несуществующая группа";
+            messageList.add("Указана несуществующая группа");
         }
         if (!usersService.isStudentTypeExist(studentForm)) {
-            return "Указан несуществуюший тип";
+            messageList.add("Указан несуществуюший тип");
         }
-        if (!usersService.saveStudent(studentForm.StudentFormToUsers(), studentForm.getStudent_type(),
-                studentForm.getStudent_group(), studentForm.getCathedra())) {
-            model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
-            return "Пользователь с таким email уже есть";
+        if (messageList.size() == 0) {
+            if (!usersService.saveStudent(studentForm.StudentFormToUsers(), studentForm.getStudent_type(),
+                    studentForm.getStudent_group(), studentForm.getCathedra())) {
+                model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
+                messageList.add("Пользователь с таким email уже есть");
+            }
+            else {
+                messageList.add("Студент успешно зарегистрирован!");
+                registrationCode = null;
+            }
         }
-        registrationCode = null;
-        return "Студент успешно зарегистрирован!";
+        return messageList;
     }
 
     @GetMapping("/admin/registration/scientific_advisor")
@@ -101,28 +109,34 @@ public class RegistrationController {
     }
 
     @PostMapping("/admin/registration/scientific_advisor")
-    public String RegisterScientificAdvisor(
+    public List<String> RegisterScientificAdvisor(
             @ModelAttribute("scientificAdvisorForm") @Validated ScientificAdvisorForm scientificAdvisorForm,
             BindingResult bindingResult, Model model
     ) {
+        List<String> messageList = new ArrayList<>();
         if (bindingResult.hasErrors()) {
-            return "Непредвиденная ошибка";
+            messageList.add("Непредвиденная ошибка");
         }
         if (!scientificAdvisorForm.getPassword().equals(scientificAdvisorForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
-            return "Пароли не совпадают";
+            messageList.add("Пароли не совпадают");
         }
         if (!usersService.isCathedraExist(scientificAdvisorForm)) {
-            return "Указана несуществующая кафедра";
+            messageList.add("Указана несуществующая кафедра");
         }
-        if (!usersService.saveScientificAdvisor(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
-                scientificAdvisorForm.getCathedra())) {
-            model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
-            return "Пользователь с таким email уже есть";
+        if (messageList.size() == 0) {
+            if (!usersService.saveScientificAdvisor(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
+                    scientificAdvisorForm.getCathedra())) {
+                model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
+                messageList.add("Пользователь с таким email уже есть");
+            }
+            else {
+                // Отправка письма науч. руководителю
+                mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "научного руководителя");
+                messageList.add("Научный руководитель зарегистрирован!");
+            }
         }
-        // Отправка письма науч. руководителю
-        mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "научного руководителя");
-        return "Научный руководитель зарегистрирован!";
+        return messageList;
     }
 
     @GetMapping("/admin/registration/head_of_cathedra")
@@ -132,28 +146,34 @@ public class RegistrationController {
     }
 
     @PostMapping("/admin/registration/head_of_cathedra")
-    public String RegisterHeadOfCathedra(
+    public List<String> RegisterHeadOfCathedra(
             @ModelAttribute("scientificAdvisorForm") @Validated ScientificAdvisorForm scientificAdvisorForm,
             BindingResult bindingResult, Model model
     ) {
+        List<String> messageList = new ArrayList<>();
         if (bindingResult.hasErrors()) {
-            return "Непредвиденная ошибка";
+            messageList.add("Непредвиденная ошибка");
         }
         if (!scientificAdvisorForm.getPassword().equals(scientificAdvisorForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
-            return "Пароли не совпадают";
+            messageList.add("Пароли не совпадают");
         }
         if (!usersService.isCathedraExist(scientificAdvisorForm)) {
-            return "Указана несуществующая кафедра";
+            messageList.add("Указана несуществующая кафедра");
         }
-        if (!usersService.saveHeadOfCathedra(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
-                scientificAdvisorForm.getCathedra())) {
-            model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
-            return "Пользователь с таким email уже есть";
+        if (messageList.size() == 0) {
+            if (!usersService.saveHeadOfCathedra(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
+                    scientificAdvisorForm.getCathedra())) {
+                model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
+                messageList.add("Пользователь с таким email уже есть");
+            }
+            else {
+                // Отправка письма зав. кафедры
+                mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "заведующего кафедрой");
+                messageList.add("Заведующий кафедрой успшено зарегистрирован!");
+            }
         }
-        // Отправка письма зав. кафедры
-        mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "заведующего кафедрой");
-        return "Заведующий кафедрой успшено зарегистрирован!";
+        return messageList;
     }
 
     @GetMapping("/admin/registration/admin")
@@ -163,23 +183,29 @@ public class RegistrationController {
     }
 
     @PostMapping("/admin/registration/admin")
-    public String RegisterAdmin(
+    public List<String> RegisterAdmin(
           @ModelAttribute("adminForm") @Validated AdminForm adminForm,
           BindingResult bindingResult, Model model
     ) {
+        List<String> messageList = new ArrayList<>();
         if (bindingResult.hasErrors()) {
-            return "registration";
+            messageList.add("registration");
         }
         if (!adminForm.getPassword().equals(adminForm.getPasswordConfirm())) {
             model.addAttribute("passwordError", "Пароли не совпадают");
-            return "Пароли не совпадают";
+            messageList.add("Пароли не совпадают");
         }
-        if (!usersService.saveAdmin(adminForm.AdminFormToUsers())) {
-            model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
-            return "Пользователь с таким email уже есть";
+        if (messageList.size() == 0) {
+            if (!usersService.saveAdmin(adminForm.AdminFormToUsers())) {
+                model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
+                messageList.add("Пользователь с таким email уже есть");
+            }
+            else {
+                // Отправка письма администратору
+                mailService.sendLoginEmail(adminForm.getEmail(), adminForm.getPassword(), "администратора");
+                messageList.add("Администратор успешно зарегистрирован!");
+            }
         }
-        // Отправка письма администратору
-        mailService.sendLoginEmail(adminForm.getEmail(), adminForm.getPassword(), "администратора");
-        return "Администратор успешно зарегистрирован!";
+        return messageList;
     }
 }
