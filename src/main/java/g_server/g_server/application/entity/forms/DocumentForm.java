@@ -2,7 +2,6 @@ package g_server.g_server.application.entity.forms;
 
 import g_server.g_server.application.entity.documents.Document;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
 
 public class DocumentForm {
     private String name;

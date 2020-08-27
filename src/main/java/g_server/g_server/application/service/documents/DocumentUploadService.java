@@ -50,7 +50,7 @@ public class DocumentUploadService {
             messagesList.add("Указан несуществующий тип документа");
         // Определим айди вида документа
         Integer kind_id = getKindId(documentForm.getDocumentFormKind());
-        if (type_id == null)
+        if (kind_id == null)
             messagesList.add("Указан несуществующий вид докумета");
         // Проверим корректное разрешение файла
         if (!checkFileExtension(documentForm.getFile()))
@@ -58,10 +58,10 @@ public class DocumentUploadService {
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             // Создание директории версий файла
-            File file = new File("main" + File.separator + "resources" + File.separator + "users_documents" + File.separator
-                    + creator_id + " document " + documentForm.getFile().getOriginalFilename() + "versions");
-            if (!file.exists()) {
-                file.mkdir();
+            File documentDirectory = new File( "src" + File.separator + "main" + File.separator + "resources" + File.separator +
+                    "users_documents" + File.separator + creator_id + " document " + documentForm.getFile().getOriginalFilename() + "versions");
+            if (!documentDirectory.exists()) {
+                documentDirectory.mkdir();
             }
             else {
                 messagesList.add("Файл с таким именем уже существует");
