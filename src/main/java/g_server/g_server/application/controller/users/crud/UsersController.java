@@ -30,7 +30,7 @@ public class UsersController {
     public String delete(@PathVariable int id) {
         // Доделать чтобы админ не мог удалять себя и других админов
         // Например ввести надуровень root-admin
-        usersService.nativeDelete(id);
+        usersService.nativeUserDelete(id);
         return "Пользователь удален успешно";
     }
 

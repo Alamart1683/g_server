@@ -172,7 +172,7 @@ public class UsersService implements UserDetailsService {
     }
 
     @Transactional
-    public void nativeDelete(int id) {
+    public void nativeUserDelete(int id) {
         Query query = entityManager.createNamedQuery("deleteUser");
         entityManager.joinTransaction();
         query.setParameter(1, id);

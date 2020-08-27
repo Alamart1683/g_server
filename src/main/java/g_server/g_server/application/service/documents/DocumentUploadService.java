@@ -104,7 +104,6 @@ public class DocumentUploadService {
                     if (documentRepository.findByCreatorAndName(creator_id, documentForm.getFile().getOriginalFilename()) == null) {
                         if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                             // После этого занесем загруженный файл в таблицу документов
-                            currentDate =  currentDate.substring(0, 10);
                             Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, currentDate,
                                     type_id, kind_id, viewRights
                             );
@@ -207,6 +206,7 @@ public class DocumentUploadService {
         String completeDateTime = dateTime.getDayOfMonth() + "." + monthWordToMonthNumber(dateTime.getMonth().toString()) +
                 "." + dateTime.getYear() + "." + dateTime.getHour() + "." + dateTime.getMinute() + "." + dateTime.getSecond() +
                 "." + dateTime.getNano();
+        completeDateTime = completeDateTime.substring(0, completeDateTime.lastIndexOf('.'));
         return completeDateTime;
     }
 

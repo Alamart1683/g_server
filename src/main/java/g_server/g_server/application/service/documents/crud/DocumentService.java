@@ -24,7 +24,5 @@ public class DocumentService {
         documentRepository.save(document);
     }
 
-    public void delete(int id) {
-        documentRepository.deleteById(id);
-    }
+    public void delete(int id) { documentRepository.deleteById(id); }
 }

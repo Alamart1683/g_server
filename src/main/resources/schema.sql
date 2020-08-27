@@ -124,7 +124,7 @@ create table document_version (
     id int primary key auto_increment,
     editor int not null,
     document int not null,
-    edition_date date not null,
+    edition_date datetime not null,
     edition_description varchar (512) default 'Описание изменения отсутствует',
     this_version_document_path varchar (256) not null,
     foreign key (editor) references users (id) on delete cascade on update cascade,
