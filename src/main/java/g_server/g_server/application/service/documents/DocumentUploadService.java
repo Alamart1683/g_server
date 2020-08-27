@@ -101,7 +101,7 @@ public class DocumentUploadService {
                         "version_" + currentDate + "." + fileExtension;
                 Path uploadingFilePath = Paths.get(versionPath);
                 try {
-                    if (documentRepository.findByCreatorAndName(creator_id, documentForm.getFile().getOriginalFilename()) != null) {
+                    if (documentRepository.findByCreatorAndName(creator_id, documentForm.getFile().getOriginalFilename()) == null) {
                         if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                             // После этого занесем загруженный файл в таблицу документов
                             currentDate =  currentDate.substring(0, 10);
@@ -115,6 +115,7 @@ public class DocumentUploadService {
                             DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId, currentDate,
                                     "Загрузка документа на сайт", versionPath);
                             documentVersionService.save(documentVersion);
+                            messagesList.add("Документ был успешно загружен");
                         }
                         else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
@@ -125,6 +126,9 @@ public class DocumentUploadService {
                     }
                     else {
                         messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                        if (documentDirectory.listFiles().length == 0) {
+                            documentDirectory.delete();
+                        }
                     }
                 }
                 catch (IOException ioException) {
@@ -135,7 +139,6 @@ public class DocumentUploadService {
             else {
                 return messagesList;
             }
-            messagesList.add("Документ был успешно загружен");
         }
         else {
             return messagesList;
