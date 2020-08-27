@@ -33,9 +33,8 @@ public class DocumentManagementService {
             if (document != null) {
                 File fileDirectory = new File(document.getDocument_path());
                 if (fileDirectory.exists()) {
-                    for (int i = 0; i < fileDirectory.listFiles().length; i++) {
-                        File deletingFile = fileDirectory.listFiles()[i];
-                        deletingFile.delete();
+                    for (File file: fileDirectory.listFiles()) {
+                        file.delete();
                     }
                     fileDirectory.delete();
                     documentRepository.deleteById(document.getId());
