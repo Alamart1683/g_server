@@ -77,9 +77,15 @@ public class DocumentUploadService {
             messagesList.add("Попытка загрузить документ с некорректным разрешением");
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
+            // Создание директории документов научного руководителя
+            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator +
+                    "users_documents" + File.separator + creator_id;
+            File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
+            if (!scientificAdvisorDirectory.exists()) {
+                scientificAdvisorDirectory.mkdir();
+            }
             // Создание директории версий файла
-            String documentPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator +
-                    "users_documents" + File.separator + creator_id + " " + documentForm.getFile().getOriginalFilename();
+            String documentPath = scientificAdvisorDocumentsPath + File.separator + documentForm.getFile().getOriginalFilename();
             File documentDirectory = new File(documentPath);
             // Проверим что одноименный файл не был загружен пользователем
             if (!documentDirectory.exists()) {
@@ -111,7 +117,9 @@ public class DocumentUploadService {
                     }
                     else {
                         messagesList.add("Непредвиденная ошибка загрузки файла");
-                        documentDirectory.delete();
+                        if (documentDirectory.listFiles().length == 0) {
+                            documentDirectory.delete();
+                        }
                     }
                 }
                 catch (IOException ioException) {
