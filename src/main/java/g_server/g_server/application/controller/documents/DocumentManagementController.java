@@ -3,6 +3,7 @@ package g_server.g_server.application.controller.documents;
 import g_server.g_server.application.service.documents.DocumentManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
@@ -27,5 +28,14 @@ public class DocumentManagementController {
             @RequestParam String token
     ) {
         return documentManagementService.deleteDocumentVersion(documentName, documentEditionDate, token);
+    }
+
+    @PutMapping("/scientific_advisor/document/rename")
+    public List<String> RenameDocument(
+        @RequestParam String oldDocumentName,
+        @RequestParam String newDocumentName,
+        @RequestParam String token
+    ) {
+        return documentManagementService.renameDocument(oldDocumentName, newDocumentName, token);
     }
 }

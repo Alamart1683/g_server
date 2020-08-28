@@ -4,6 +4,7 @@ import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
+import g_server.g_server.application.service.documents.crud.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.File;
@@ -20,6 +21,9 @@ public class DocumentManagementService {
 
     @Autowired
     private DocumentVersionRepository documentVersionRepository;
+
+    @Autowired
+    private DocumentService documentService;
 
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
@@ -120,6 +124,51 @@ public class DocumentManagementService {
             }
             else {
                 messagesList.add("Удаляемый документ не найден - удаление версии документа невозможно");
+            }
+        }
+        return messagesList;
+    }
+
+    // Переименовать документ
+    public List<String> renameDocument(String oldDocumentName, String newDocumentName, String token) {
+        List<String> messagesList = new ArrayList<String>();
+        if (token == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (token.equals("Ошибка аутентификации: токен пуст"))
+            messagesList.add("");
+        Integer creator_id = null;
+        if (messagesList.size() == 0)
+            creator_id = documentUploadService.getCreatorId(token);
+        if (creator_id == null)
+            messagesList.add("Пользователь, загрузивший документ, не найден - переименование документа невозможно");
+        if (messagesList.size() == 0) {
+            Document document = documentRepository.findByCreatorAndName(creator_id, oldDocumentName);
+            // Если переименовываемый документ существует в базе данных, то переименуем его
+            if (document != null) {
+                File documentDirectory = new File(document.getDocument_path());
+                String newDocumentPath = document.getDocument_path().substring(0,
+                        document.getDocument_path().lastIndexOf(File.separator) + 1) + newDocumentName;
+                File newDocumentDirectoryName = new File(newDocumentPath);
+                if (!newDocumentDirectoryName.exists()) {
+                    documentDirectory.renameTo(newDocumentDirectoryName);
+                    document.setDocument_path(newDocumentPath);
+                    document.setName(newDocumentName);
+                    documentService.save(document);
+                    // Подкорректируем пути к версиям документа
+                    List<DocumentVersion> versions = documentVersionRepository.findByDocument(document.getId());
+                    for (DocumentVersion version : versions) {
+                        version.setThis_version_document_path(version.getThis_version_document_path().replace(
+                                oldDocumentName, newDocumentName));
+                    }
+                    documentVersionRepository.saveAll(versions);
+                    messagesList.add("Документ переименован успешно");
+                }
+                else {
+                    messagesList.add("Документ с таким именем уже существует");
+                }
+            }
+            else {
+                messagesList.add("Переименовываемый документ не существует");
             }
         }
         return messagesList;
