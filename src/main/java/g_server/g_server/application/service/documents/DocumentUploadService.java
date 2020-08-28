@@ -6,10 +6,12 @@ import g_server.g_server.application.entity.documents.DocumentKind;
 import g_server.g_server.application.entity.documents.DocumentType;
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.entity.forms.DocumentForm;
+import g_server.g_server.application.entity.forms.DocumentVersionForm;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.DocumentKindRepository;
 import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentTypeRepository;
+import g_server.g_server.application.repository.documents.DocumentVersionRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.crud.DocumentVersionService;
@@ -49,7 +51,10 @@ public class DocumentUploadService {
     @Autowired
     private DocumentService documentService;
 
-    public List<String> UploadDocument(DocumentForm documentForm) {
+    @Autowired
+    private DocumentVersionRepository documentVersionRepository;
+
+    public List<String> uploadDocument(DocumentForm documentForm) {
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
         Integer creator_id = null;
@@ -72,9 +77,8 @@ public class DocumentUploadService {
             messagesList.add("Указан несуществующий вид докумета");
         // Проверим права доступа
         Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
-        if (viewRights == null) {
+        if (viewRights == null)
             messagesList.add("Указаны некорректные права доступа");
-        }
         // Проверим что файл был загружен
         if (documentForm.getFile() == null)
             messagesList.add("Ошибка загрузки файла. Такого файла не существует");
@@ -85,41 +89,41 @@ public class DocumentUploadService {
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             // Создание директории документов научного руководителя
-            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator +
-                    "users_documents" + File.separator + creator_id;
+            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" + File.separator + "resources"
+                    + File.separator + "users_documents" + File.separator + creator_id;
             File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
-            if (!scientificAdvisorDirectory.exists()) {
+            if (!scientificAdvisorDirectory.exists())
                 scientificAdvisorDirectory.mkdir();
-            }
+            // Получим имя файла без разрешения
+            String withoutExtension = documentForm.getFile().getOriginalFilename().substring(0,
+                    documentForm.getFile().getOriginalFilename().lastIndexOf('.'));
             // Создание директории версий файла
-            String documentPath = scientificAdvisorDocumentsPath + File.separator + documentForm.getFile().getOriginalFilename();
+            String documentPath = scientificAdvisorDocumentsPath + File.separator + withoutExtension;
             File documentDirectory = new File(documentPath);
             // Проверим что одноименный файл не был загружен пользователем
-            if (!documentDirectory.exists()) {
+            if (!documentDirectory.exists())
                 documentDirectory.mkdir();
-            }
-            else {
+            else
                 messagesList.add("Файл с таким именем уже существует");
-            }
             // Сохраним файл на сервере, создав необходимую директорию
             if (messagesList.size() == 0) {
                 String currentDate = getCurrentDate();
+                String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
                 String versionPath = documentDirectory.getPath() + File.separator +
                         "version_" + currentDate + "." + fileExtension;
                 Path uploadingFilePath = Paths.get(versionPath);
                 try {
-                    if (documentRepository.findByCreatorAndName(creator_id, documentForm.getFile().getOriginalFilename()) == null) {
+                    if (documentRepository.findByCreatorAndName(creator_id, withoutExtension) == null) {
                         if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                             // После этого занесем загруженный файл в таблицу документов
-                            Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, currentDate,
+                            Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
                                     type_id, kind_id, viewRights
                             );
                             documentService.save(document);
                             // Далее создадим запись о первой версии документа в таблице версий
-                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id,
-                                    documentForm.getFile().getOriginalFilename()).getId();
-                            DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId, currentDate,
-                                    "Загрузка документа на сайт", versionPath);
+                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, withoutExtension).getId();
+                            DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
+                                    sqlDateTime, "Загрузка документа на сайт", versionPath);
                             documentVersionService.save(documentVersion);
                             messagesList.add("Документ был успешно загружен");
                         }
@@ -148,6 +152,58 @@ public class DocumentUploadService {
         }
         else {
             return messagesList;
+        }
+        return messagesList;
+    }
+
+    // Метод загрузки версии документа
+    public List<String> uploadDocumentVersion(DocumentVersionForm documentVersionForm) {
+        List<String> messagesList = new ArrayList<String>();
+        // Определим айди научного руководителя
+        Integer editor_id = null;
+        if (documentVersionForm.getToken() == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (messagesList.size() == 0)
+            if (documentVersionForm.getToken().equals(""))
+                messagesList.add("Ошибка аутентификации: токен пуст");
+            else
+                editor_id = getCreatorId(documentVersionForm.getToken());
+        if (editor_id == null)
+            messagesList.add("Пользователь не найден, загрузить версию файла невозможно");
+        String fileExtension = getFileExtension(documentVersionForm.getVersionFile());
+        if (fileExtension.equals(""))
+            messagesList.add("Вы загружаете версию файла с недопустимым расширением");
+        if (messagesList.size() == 0) {
+            Document document = documentRepository.findByCreatorAndName(editor_id, documentVersionForm.getDocumentName());
+            String currentDate = getCurrentDate();
+            String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
+            // На случай, если пользователь умудрился секунда в секунду загрузить две версии
+            DocumentVersion integrityController =
+                    documentVersionRepository.findByEditorAndDocumentAndEditionDate(editor_id, document.getId(), sqlDateTime);
+            if (integrityController != null) {
+                currentDate = getCurrentDate(true);
+                sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
+            }
+            if (document != null) {
+                String versionUploadPath = document.getDocument_path() + File.separator +
+                        "version_" + currentDate + "." + fileExtension;
+                try {
+                    if (multipartFileToFileWrite(documentVersionForm.getVersionFile(),Paths.get(versionUploadPath))) {
+                        DocumentVersion documentVersion = new DocumentVersion(editor_id, document.getId(), sqlDateTime,
+                                documentVersionForm.getEditionDescription(), versionUploadPath
+                        );
+                        documentVersionService.save(documentVersion);
+                        messagesList.add("Версия файла " + documentVersionForm.getDocumentName() + " была успешно загружена");
+                    }
+                    else
+                        messagesList.add("Произошла непредвиденная ошибка загрузки версии фалйа");
+                } catch (IOException ioException) {
+                    messagesList.add("IOException");
+                }
+            }
+            else {
+                messagesList.add("Загрузить новую версию документа невозможно, так как документ не был найден");
+            }
         }
         return messagesList;
     }
@@ -217,6 +273,37 @@ public class DocumentUploadService {
         return completeDateTime;
     }
 
+    // Защита целостности таблицы версий для одного документа
+    public String getCurrentDate(boolean integrityFlag) {
+        ZonedDateTime dateTime = ZonedDateTime.now().plusSeconds(1);
+        String completeDateTime = dateTime.getDayOfMonth() + "." + monthWordToMonthNumber(dateTime.getMonth().toString()) +
+                "." + dateTime.getYear() + "." + dateTime.getHour() + "." + dateTime.getMinute() + "." + dateTime.getSecond() +
+                "." + dateTime.getNano();
+        completeDateTime = completeDateTime.substring(0, completeDateTime.lastIndexOf('.'));
+        return completeDateTime;
+    }
+
+    public String convertRussianDateToSqlDateTime(String russianDate) {
+        String year = russianDate.substring(6, 10);
+        String month = russianDate.substring(3, 5);
+        String day = russianDate.substring(0, 2);
+        List<Integer> dotIndexesList = new ArrayList<>();
+        for (int i = 11; i < russianDate.length(); i++) {
+            if (russianDate.charAt(i) == '.')
+                dotIndexesList.add(i);
+        }
+        String hour = russianDate.substring(11, dotIndexesList.get(0));
+        String minute = russianDate.substring(dotIndexesList.get(0) + 1, dotIndexesList.get(1));
+        String second = russianDate.substring(dotIndexesList.get(1) + 1);
+        if (hour.length() == 1)
+            hour = '0' + hour;
+        if (minute.length() == 1)
+            minute = '0' + minute;
+        if (second.length() == 1)
+            second = '0' + second;
+        return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
+    }
+
     // Необходимо конвертировать месяца в номера
     public String monthWordToMonthNumber(String monthWord) {
         switch (monthWord) {
@@ -258,7 +345,7 @@ public class DocumentUploadService {
     }
 
     // Необходимо конвертировать multipart file в file после чего записать его
-    public boolean multipartFileToFileWrite(MultipartFile multipartFile, Path path) throws IOException {
+    private boolean multipartFileToFileWrite(MultipartFile multipartFile, Path path) throws IOException {
         try (OutputStream os = Files.newOutputStream(path)) {
             os.write(multipartFile.getBytes());
             return true;

@@ -21,7 +21,12 @@ public interface DocumentVersionRepository extends JpaRepository<DocumentVersion
     @Override
     void deleteById(Integer integer);
 
+    @Override
+    void delete(DocumentVersion documentVersion);
+
     List<DocumentVersion> findByDocument(int document);
 
     List<DocumentVersion> findByEditor(int editor);
+
+    DocumentVersion findByEditorAndDocumentAndEditionDate(int editor, int document, String date);
 }

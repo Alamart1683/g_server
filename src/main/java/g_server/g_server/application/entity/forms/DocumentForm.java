@@ -26,8 +26,8 @@ public class DocumentForm {
     public Document DocumentFormToDocument(int creator, String document_path, String creation_date,
                                           int type, int kind, int view_rights) {
         Document document = new Document(
-                creator, getFile().getOriginalFilename(), document_path, creation_date, type,
-                kind, getDocumentFormDescription(), view_rights
+                creator, getFile().getOriginalFilename().substring(0, getFile().getOriginalFilename().lastIndexOf('.')),
+                document_path, creation_date, type, kind, getDocumentFormDescription(), view_rights
         );
         return document;
     }

@@ -17,8 +17,8 @@ public class DocumentVersion {
     @Column
     private int document;
 
-    @Column
-    private String edition_date;
+    @Column(name = "edition_date")
+    private String editionDate;
 
     @Column
     private String edition_description;
@@ -44,7 +44,7 @@ public class DocumentVersion {
            String edition_description, String this_version_document_path) {
         this.editor = editor;
         this.document = document;
-        this.edition_date = edition_date;
+        this.editionDate = edition_date;
         this.edition_description = edition_description;
         this.this_version_document_path = this_version_document_path;
     }
@@ -65,12 +65,12 @@ public class DocumentVersion {
         this.document = document;
     }
 
-    public String getEdition_date() {
-        return edition_date;
+    public String getEditionDate() {
+        return editionDate;
     }
 
-    public void setEdition_date(String edition_date) {
-        this.edition_date = edition_date;
+    public void setEditionDate(String edition_date) {
+        this.editionDate = edition_date;
     }
 
     public String getEdition_description() {

@@ -19,4 +19,13 @@ public class DocumentManagementController {
     ) {
         return documentManagementService.deleteDocument(documentName, token);
     }
+
+    @DeleteMapping("/scientific_advisor/document/delete/version/")
+    public List<String> deleteDocumentVersion(
+            @RequestParam String documentName,
+            @RequestParam String documentEditionDate,
+            @RequestParam String token
+    ) {
+        return documentManagementService.deleteDocumentVersion(documentName, documentEditionDate, token);
+    }
 }
