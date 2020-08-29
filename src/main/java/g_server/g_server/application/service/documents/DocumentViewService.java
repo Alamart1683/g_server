@@ -6,5 +6,8 @@ import org.springframework.stereotype.Service;
 // Сервис ответственный за представление
 // и разграничение документов пользователям
 public class DocumentViewService {
-    // TODO
+    // Метод проверки может ли пользователь увидеть либо скачать файл
+    public boolean checkView(String documentName, String token) {
+        return true;
+    }
 }
