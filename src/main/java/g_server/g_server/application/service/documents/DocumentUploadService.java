@@ -251,7 +251,8 @@ public class DocumentUploadService {
                 extension.equals("txt") || extension.equals("rtf") || extension.equals("ppt") ||
                 extension.equals("pptx") || extension.equals("csv") || extension.equals("jpg") ||
                 extension.equals("jpeg") || extension.equals("png") || extension.equals("webp") ||
-                extension.equals("xls") || extension.equals("xlsx") || extension.equals("xlsm")) {
+                extension.equals("xls") || extension.equals("xlsx") || extension.equals("xlsm") ||
+                extension.equals("rar") || extension.equals("zip") || extension.equals("7z")) {
                 return extension;
             }
             else {

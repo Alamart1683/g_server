@@ -46,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/admin/**").hasRole("ADMIN")
 
                 // То, что можно всем авторизованным
-                //.antMatchers("/document/**").hasAnyRole("STUDENT", "SCIENTIFIC_ADVISOR", "HEAD_OF_CATHEDRA", "ADMIN")
+                .antMatchers("/document/**").hasAnyRole("STUDENT", "SCIENTIFIC_ADVISOR", "HEAD_OF_CATHEDRA", "ADMIN")
 
                 // То, что можно всем
                 .antMatchers(
@@ -56,8 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/student_type/all",
                         "/cathedras/all",
                         "/registration/student/mail",
-                        "/registration/mail/check/**",
-                        "/document/**").permitAll()
+                        "/registration/mail/check/**").permitAll()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }

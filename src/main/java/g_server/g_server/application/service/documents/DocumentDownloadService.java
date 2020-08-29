@@ -58,12 +58,46 @@ public class DocumentDownloadService {
     // Метод определения типа контента
     public String getContentType(String path) {
         String extension = getFileExtension(path);
-        // TODO Сделать для всех типов контента аналогичные условия относительно типов их файлов
-        if (extension.equals("docx")) {
-            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        }
-        else {
-            return "";
+        switch(extension) {
+            case "docx":
+                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "doc":
+                return "application/msword";
+            case "pdf":
+                return "application/pdf";
+            case "rtf":
+                return "application/rtf";
+            case "txt":
+                return "text/plain";
+            case "ppt":
+                return "application/mspowerpoint";
+            case "pptx":
+                return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            case "csv":
+                return "text/csv";
+            case "xls":
+                return "application/vnd.ms-excel";
+            case "xlsx":
+                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "xlsm":
+                return "application/vnd.ms-excel.sheet.macroenabled.12";
+            case "jpg":
+                return "image/x-citrix-jpeg";
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "webp":
+                return "image/webp";
+            case "rar":
+                return "application/x-rar-compressed";
+            case "zip":
+                return "application/zip";
+            case "7z":
+                return "application/x-7z-compressed";
+            default:
+                return "";
+
         }
     }
 
