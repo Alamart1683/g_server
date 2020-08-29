@@ -338,10 +338,20 @@ public class DocumentUploadService {
 
     // Необходимо декодировать права просмотра
     public Integer getViewRights(String viewRights) {
-        if (viewRights.equals("Только моим студентам")) {
-            return 3;
+        switch (viewRights) {
+            case "Только я":
+                return 1;
+            case "Только для научных руководителей":
+                return 2;
+            case "Только моим студентам":
+                return 3;
+            case "Для всех студентов":
+                return 4;
+            case "Для всех":
+                return 5;
+            default:
+                return null;
         }
-        return null;
     }
 
     // Необходимо конвертировать multipart file в file после чего записать его

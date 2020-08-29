@@ -38,4 +38,40 @@ public class DocumentManagementController {
     ) {
         return documentManagementService.renameDocument(oldDocumentName, newDocumentName, token);
     }
+
+    @PutMapping("/scientific_advisor/document/change/description/")
+    public List<String> changeDocumentDescription(
+            @RequestParam String documentName,
+            @RequestParam String newDescription,
+            @RequestParam String token
+    ) {
+        return documentManagementService.editDescription(documentName, newDescription, token);
+    }
+
+    @PutMapping("/scientific_advisor/document/change/type/")
+    public List<String> changeDocumentType(
+            @RequestParam String documentName,
+            @RequestParam String newType,
+            @RequestParam String token
+    ) {
+        return documentManagementService.editType(documentName, newType, token);
+    }
+
+    @PutMapping("/scientific_advisor/document/change/kind/")
+    public List<String> changeDocumentKind(
+            @RequestParam String documentName,
+            @RequestParam String newKind,
+            @RequestParam String token
+    ) {
+        return documentManagementService.editKind(documentName, newKind, token);
+    }
+
+    @PutMapping("/scientific_advisor/document/change/view_rights/")
+    public List<String> changeDocumentViewRights(
+            @RequestParam String documentName,
+            @RequestParam String newViewRights,
+            @RequestParam String token
+    ) {
+        return documentManagementService.editViewRights(documentName, newViewRights, token);
+    }
 }

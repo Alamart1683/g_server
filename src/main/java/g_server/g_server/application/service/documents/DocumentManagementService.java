@@ -2,7 +2,9 @@ package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
+import g_server.g_server.application.repository.documents.DocumentKindRepository;
 import g_server.g_server.application.repository.documents.DocumentRepository;
+import g_server.g_server.application.repository.documents.DocumentTypeRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,12 @@ public class DocumentManagementService {
 
     @Autowired
     private DocumentService documentService;
+
+    @Autowired
+    private DocumentTypeRepository documentTypeRepository;
+
+    @Autowired
+    private DocumentKindRepository documentKindRepository;
 
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
@@ -175,10 +183,130 @@ public class DocumentManagementService {
     }
 
     // Необходимо корректно сопоставить дату и время из бд с полученными от пользователя
-    boolean collateDateTimes(String fromDB, String fromRequest) {
+    public boolean collateDateTimes(String fromDB, String fromRequest) {
         fromRequest = documentUploadService.convertRussianDateToSqlDateTime(fromRequest);
         if (fromDB.equals(fromRequest))
             return true;
         else return false;
+    }
+
+    // Метод изменения описания документа
+    public List<String> editDescription(String documentName, String newDescription, String token) {
+        List<String> messagesList = new ArrayList<String>();
+        if (token == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (token.equals("Ошибка аутентификации: токен пуст"))
+            messagesList.add("");
+        Integer creator_id = null;
+        if (messagesList.size() == 0)
+            creator_id = documentUploadService.getCreatorId(token);
+        if (creator_id == null)
+            messagesList.add("Пользователь, загрузивший документ, не найден - изменение описания документа невозможно");
+        if (messagesList.size() == 0) {
+            Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+            if (document != null) {
+                document.setDescription(newDescription);
+                documentService.save(document);
+                messagesList.add("Описание документа успешно изменено");
+            }
+            else {
+                messagesList.add("Редактируемый документ не найден");
+            }
+        }
+        return messagesList;
+    }
+
+    // Метод измнения вида документа
+    public List<String> editType(String documentName, String newType, String token) {
+        List<String> messagesList = new ArrayList<String>();
+        if (token == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (token.equals("Ошибка аутентификации: токен пуст"))
+            messagesList.add("");
+        Integer creator_id = null;
+        if (messagesList.size() == 0)
+            creator_id = documentUploadService.getCreatorId(token);
+        if (creator_id == null)
+            messagesList.add("Пользователь, загрузивший документ, не найден - изменение типа документа невозможно");
+        if (messagesList.size() == 0) {
+            if (documentTypeRepository.getDocumentTypeByType(newType) != null) {
+                Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+                if (document != null) {
+                    document.setType(documentTypeRepository.getDocumentTypeByType(newType).getId());
+                    documentService.save(document);
+                    messagesList.add("Тип документа успешно изменен");
+                }
+                else {
+                    messagesList.add("Редактируемый документ не найден");
+                }
+            }
+            else {
+                messagesList.add("Указан несуществующий тип документа");
+            }
+        }
+        return messagesList;
+    }
+
+    // Метод изменения типа документа
+    public List<String> editKind(String documentName, String newKind, String token) {
+        List<String> messagesList = new ArrayList<String>();
+        if (token == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (token.equals("Ошибка аутентификации: токен пуст"))
+            messagesList.add("");
+        Integer creator_id = null;
+        if (messagesList.size() == 0)
+            creator_id = documentUploadService.getCreatorId(token);
+        if (creator_id == null)
+            messagesList.add("Пользователь, загрузивший документ, не найден - изменение вида документа невозможно");
+        if (messagesList.size() == 0) {
+            if (documentKindRepository.getDocumentKindByKind(newKind) != null) {
+                Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+                if (document != null) {
+                    document.setKind(documentKindRepository.getDocumentKindByKind(newKind).getId());
+                    documentService.save(document);
+                    messagesList.add("Вид документа успешно изменен");
+                }
+                else {
+                    messagesList.add("Редактируемый документ не найден");
+                }
+            }
+            else {
+                messagesList.add("Указан несуществующий вид документа");
+            }
+        }
+        return messagesList;
+    }
+
+    // Метод изменения прав видимости документа
+    public List<String> editViewRights(String documentName, String newViewRights, String token) {
+        List<String> messagesList = new ArrayList<String>();
+        if (token == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (token.equals("Ошибка аутентификации: токен пуст"))
+            messagesList.add("");
+        Integer creator_id = null;
+        if (messagesList.size() == 0)
+            creator_id = documentUploadService.getCreatorId(token);
+        if (creator_id == null)
+            messagesList.add("Пользователь, загрузивший документ, не найден - изменение зоны видимости документа невозможно");
+        if (messagesList.size() == 0) {
+            Integer viewRights = documentUploadService.getViewRights(newViewRights);
+            if (viewRights!= null) {
+                Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+                if (document != null) {
+                    document.setView_rights(viewRights);
+                    documentService.save(document);
+                    messagesList.add("Зона видимости документа успешно изменена");
+                }
+                else {
+                    messagesList.add("Редактируемый документ не найден");
+                }
+            }
+            else {
+                messagesList.add("Указан несуществующий вид прав видимости");
+            }
+        }
+        return messagesList;
     }
 }
