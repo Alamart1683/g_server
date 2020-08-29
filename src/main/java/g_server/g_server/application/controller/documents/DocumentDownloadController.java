@@ -13,18 +13,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @RestController
 public class DocumentDownloadController {
     @Autowired
     private DocumentDownloadService documentDownloadService;
 
+    public static final String AUTHORIZATION = "Authorization";
+
     @GetMapping("/document/download/")
     public void documentDownload(
             @RequestParam String documentName,
-            @RequestParam String token,
             HttpServletResponse httpServletResponse,
             HttpServletRequest httpServletRequest
     ) {
+        String token = getTokenFromRequest(httpServletRequest);
         // TODO Сделать присвоение файлу адекватного имени
         // TODO Разобраться как вытащить тоек из HTTP запроса напрямую
         // TODO Убрать костыли в скачивании документов, сделать её для каждой из версий
@@ -41,5 +45,13 @@ public class DocumentDownloadController {
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
+    }
+
+    public String getTokenFromRequest(HttpServletRequest request) {
+        String bearer = request.getHeader(AUTHORIZATION);
+        if (hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
     }
 }

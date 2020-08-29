@@ -10,12 +10,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class DocumentUploadController {
     @Autowired
     private DocumentUploadService documentUploadService;
+
+    public static final String AUTHORIZATION = "Authorization";
 
     @GetMapping("/scientific_advisor/document/upload")
     public String PreparingUploadDocument(Model model) {
@@ -25,7 +29,10 @@ public class DocumentUploadController {
     }
 
     @PostMapping("/scientific_advisor/document/upload")
-    public List<String> UploadDocument(@ModelAttribute("documentForm") @Validated DocumentForm documentForm) {
+    public List<String> UploadDocument(
+            @ModelAttribute("documentForm") @Validated DocumentForm documentForm,
+            HttpServletRequest httpServletRequest ) {
+        documentForm.setToken(getTokenFromRequest(httpServletRequest));
         return documentUploadService.uploadDocument(documentForm);
     }
 
@@ -37,8 +44,18 @@ public class DocumentUploadController {
     }
 
     @PostMapping("/scientific_advisor/document/upload/version")
-    public List<String> UploadDocumentVersion(@ModelAttribute("documentVersionForm")
-        @Validated DocumentVersionForm documentVersionForm ) {
+    public List<String> UploadDocumentVersion(
+            @ModelAttribute("documentVersionForm") @Validated DocumentVersionForm documentVersionForm,
+            HttpServletRequest httpServletRequest) {
+        documentVersionForm.setToken(getTokenFromRequest(httpServletRequest));
         return documentUploadService.uploadDocumentVersion(documentVersionForm);
+    }
+
+    private String getTokenFromRequest(HttpServletRequest request) {
+        String bearer = request.getHeader(AUTHORIZATION);
+        if (hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
     }
 }
