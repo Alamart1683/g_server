@@ -281,9 +281,23 @@ public class DocumentUploadService {
     public String getCurrentDate() {
         ZonedDateTime dateTime = ZonedDateTime.now();
         String completeDateTime = dateTime.getDayOfMonth() + "." + monthWordToMonthNumber(dateTime.getMonth().toString()) +
-                "." + dateTime.getYear() + "." + dateTime.getHour() + "." + dateTime.getMinute() + "." + dateTime.getSecond() +
-                "." + dateTime.getNano();
-        completeDateTime = completeDateTime.substring(0, completeDateTime.lastIndexOf('.'));
+                "." + dateTime.getYear() + ".";
+        String currentHour;
+        if (dateTime.getHour() < 10)
+            currentHour = "0" + dateTime.getHour();
+        else
+            currentHour = dateTime.getHour() + "";
+        String currentMinute;
+        if (dateTime.getMinute() < 10)
+            currentMinute = "0" + dateTime.getMinute();
+        else
+            currentMinute = dateTime.getMinute() + "";
+        String currentSecond;
+        if (dateTime.getSecond() < 10)
+            currentSecond = "0" + dateTime.getSecond();
+        else
+            currentSecond = dateTime.getSecond() + "";
+        completeDateTime = completeDateTime + currentHour + "." + currentMinute + "." + currentSecond;
         return completeDateTime;
     }
 
