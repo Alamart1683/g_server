@@ -27,7 +27,7 @@ public class ScientificAdvisorForm extends Users {
     public Users ScientificAdvisorFormToUsers() {
         Users user = new Users( this.getEmail(), this.getName(), this.getSurname(),
                 this.getSecond_name(), this.getPassword(), this.getPhone(),
-                determineMaidSendingAccepted(mailSendingAccepted)
+                determineMailSendingAccepted(mailSendingAccepted)
         );
         return user;
     }

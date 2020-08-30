@@ -25,7 +25,7 @@ public class AdminForm extends Users {
     public Users AdminFormToUsers() {
         Users user = new Users(this.getEmail(), this.getName(), this.getSurname(),
                 this.getSecond_name(), this.getPassword(), this.getPhone(),
-                determineMaidSendingAccepted(mailSendingAccepted)
+                determineMailSendingAccepted(mailSendingAccepted)
         );
         return user;
     }

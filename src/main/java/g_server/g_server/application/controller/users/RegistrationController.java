@@ -86,7 +86,7 @@ public class RegistrationController {
         if (!usersService.isStudentTypeExist(studentForm)) {
             messageList.add("Указан несуществуюший тип");
         }
-        if (studentForm.determineMaidSendingAccepted(studentForm.getMailSendingAccepted()) == null) {
+        if (studentForm.determineMailSendingAccepted(studentForm.getMailSendingAccepted()) == null) {
             messageList.add("Ошибка определения согласия на почтовую рассылку");
         }
         if (messageList.size() == 0) {
@@ -163,7 +163,7 @@ public class RegistrationController {
         if (!usersService.isCathedraExist(scientificAdvisorForm)) {
             messageList.add("Указана несуществующая кафедра");
         }
-        if (scientificAdvisorForm.determineMaidSendingAccepted(scientificAdvisorForm.getMailSendingAccepted()) == null) {
+        if (scientificAdvisorForm.determineMailSendingAccepted(scientificAdvisorForm.getMailSendingAccepted()) == null) {
             messageList.add("Ошибка определения согласия на почтовую рассылку");
         }
         if (messageList.size() == 0) {
@@ -200,7 +200,7 @@ public class RegistrationController {
             model.addAttribute("passwordError", "Пароли не совпадают");
             messageList.add("Пароли не совпадают");
         }
-        if (adminForm.determineMaidSendingAccepted(adminForm.getMailSendingAccepted()) == null) {
+        if (adminForm.determineMailSendingAccepted(adminForm.getMailSendingAccepted()) == null) {
             messageList.add("Ошибка определения согласия на почтовую рассылку");
         }
         if (messageList.size() == 0) {
