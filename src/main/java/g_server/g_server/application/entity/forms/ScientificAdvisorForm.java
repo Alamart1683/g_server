@@ -9,7 +9,8 @@ public class ScientificAdvisorForm extends Users {
     public ScientificAdvisorForm() { }
 
     public ScientificAdvisorForm(String cathedra, String email, String name, String surname,
-            String second_name, String password, String confirm_password, String phone) {
+            String second_name, String password, String confirm_password, String phone
+            ,boolean mailSendingAccepted) {
         this.cathedra = cathedra;
         this.setEmail(email);
         this.setPassword(password);
@@ -19,11 +20,12 @@ public class ScientificAdvisorForm extends Users {
         this.setSurname(surname);
         this.setSecond_name(second_name);
         this.setPhone(phone);
+        this.setSendMailAccepted(mailSendingAccepted);
     }
 
     public Users ScientificAdvisorFormToUsers() {
         Users user = new Users( this.getEmail(), this.getName(), this.getSurname(),
-                this.getSecond_name(), this.getPassword(), this.getPhone()
+                this.getSecond_name(), this.getPassword(), this.getPhone(), this.isSendMailAccepted()
         );
         return user;
     }

@@ -30,7 +30,6 @@ public class RegistrationController {
     public String StudentRegistrationPreparing(Model model)  {
         registrationCode = (int)((Math.random() * (1000000 - 100000)) + 100000);
         StudentForm studentForm = new StudentForm();
-        studentForm.setRegistrationCode(registrationCode);
         model.addAttribute("studentForm", studentForm);
         return "studentForm";
     }
