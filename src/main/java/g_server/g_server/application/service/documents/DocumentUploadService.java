@@ -184,18 +184,19 @@ public class DocumentUploadService {
             Document document = documentRepository.findByCreatorAndName(editor_id, documentVersionForm.getDocumentName());
             String currentDate = getCurrentDate();
             String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
-            // На случай, если пользователь умудрился секунда в секунду загрузить две версии
-            DocumentVersion integrityController =
-                    documentVersionRepository.findByEditorAndDocumentAndEditionDate(editor_id, document.getId(), sqlDateTime);
-            if (integrityController != null) {
-                currentDate = getCurrentDate(true);
-                sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
-            }
             if (document != null) {
                 if (!fileExtension.equals(documentDownloadService.getFileExtension(document.getName())))
                     messagesList.add("Запрещено загружать версию документа с иным разрешением," +
                             " для этого следует загрузить новый документ");
                 if (messagesList.size() == 0) {
+                    // На случай, если пользователь умудрился секунда в секунду загрузить две версии
+                    DocumentVersion integrityController = documentVersionRepository.findByEditorAndDocumentAndEditionDate(editor_id,
+                            document.getId(), sqlDateTime);
+                    if (integrityController != null) {
+                        try { Thread.sleep(3000); } catch (InterruptedException interruptedException) { }
+                        currentDate = getCurrentDate(true);
+                        sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
+                    }
                     String versionUploadPath = document.getDocument_path() + File.separator +
                             "version_" + currentDate + "." + fileExtension;
                     try {

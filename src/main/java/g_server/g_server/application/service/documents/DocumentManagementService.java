@@ -33,6 +33,9 @@ public class DocumentManagementService {
     @Autowired
     private DocumentKindRepository documentKindRepository;
 
+    @Autowired
+    private DocumentDownloadService documentDownloadService;
+
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
@@ -149,6 +152,8 @@ public class DocumentManagementService {
             creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - переименование документа невозможно");
+        if (!documentDownloadService.getFileExtension(newDocumentName).equals(documentDownloadService.getFileExtension(oldDocumentName)))
+            messagesList.add("Запрещено изменять расширение переименовываемого документа");
         if (messagesList.size() == 0) {
             Document document = documentRepository.findByCreatorAndName(creator_id, oldDocumentName);
             // Если переименовываемый документ существует в базе данных, то переименуем его
