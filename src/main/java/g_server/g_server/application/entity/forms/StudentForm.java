@@ -14,7 +14,7 @@ public class StudentForm extends Users {
     public StudentForm(String student_group, String cathedra, String student_type,
                        String email, String name, String surname, String second_name,
                        String password, String confirm_password, String phone,
-                       int registrationCode) {
+                       boolean mailSendingAccepted, int registrationCode) {
         this.cathedra = cathedra;
         this.student_group = student_group;
         this.student_type = student_type;
@@ -26,12 +26,13 @@ public class StudentForm extends Users {
         this.setSurname(surname);
         this.setSecond_name(second_name);
         this.setPhone(phone);
+        this.setSendMailAccepted(mailSendingAccepted);
         this.registrationCode = registrationCode;
     }
 
     public Users StudentFormToUsers() {
         Users user = new Users( this.getEmail(), this.getName(), this.getSurname(),
-                this.getSecond_name(), this.getPassword(), this.getPhone()
+                this.getSecond_name(), this.getPassword(), this.getPhone(), this.isSendMailAccepted()
         );
         return user;
     }

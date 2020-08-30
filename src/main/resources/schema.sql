@@ -9,7 +9,8 @@ create table users (
     surname varchar(100) not null,
     second_name varchar(100) not null,
     password varchar(256) not null,
-    phone varchar(50) not null
+    phone varchar(50) not null,
+    is_accepted_mail_sending bool not null
 );
 
 create table roles (

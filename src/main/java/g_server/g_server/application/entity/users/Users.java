@@ -32,6 +32,9 @@ public class Users implements UserDetails {
     @Column(name = "phone")
     private String phone;
 
+    @Column(name = "is_accepted_mail_sending")
+    private boolean sendMailAccepted;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
@@ -51,13 +54,15 @@ public class Users implements UserDetails {
 
     public Users() { }
 
-    public Users(String email, String name, String surname, String second_name, String password, String phone) {
+    public Users(String email, String name, String surname, String second_name,
+                 String password, String phone, boolean sendMailAccepted) {
         this.email = email;
         this.name = name;
         this.surname = surname;
         this.second_name = second_name;
         this.password = password;
         this.phone = phone;
+        this.sendMailAccepted = sendMailAccepted;
     }
 
     public int getId() {
@@ -138,6 +143,14 @@ public class Users implements UserDetails {
 
     public void setScientificAdvisorData(ScientificAdvisorData scientificAdvisorData) {
         this.scientificAdvisorData = scientificAdvisorData;
+    }
+
+    public boolean isSendMailAccepted() {
+        return sendMailAccepted;
+    }
+
+    public void setSendMailAccepted(boolean sendMailAccepted) {
+        this.sendMailAccepted = sendMailAccepted;
     }
 
     @Override
