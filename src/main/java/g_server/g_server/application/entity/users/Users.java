@@ -65,6 +65,17 @@ public class Users implements UserDetails {
         this.sendMailAccepted = sendMailAccepted;
     }
 
+    public Boolean determineMaidSendingAccepted(String mailSendingAccepted) {
+        switch (mailSendingAccepted) {
+            case "true":
+                return true;
+            case "false":
+                return false;
+            default:
+                return null;
+        }
+    }
+
     public int getId() {
         return id;
     }
