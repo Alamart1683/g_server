@@ -85,6 +85,7 @@ create table associated_students (
     id int primary key auto_increment,
     scientific_advisor int not null,
     student int not null,
+    is_accepted bool not null default false,
     foreign key (scientific_advisor) references scientific_advisor_data (id) on delete cascade on update cascade,
     foreign key (student) references student_data (id) on delete cascade on update cascade
 );
