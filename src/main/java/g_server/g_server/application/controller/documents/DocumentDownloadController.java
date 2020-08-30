@@ -29,16 +29,13 @@ public class DocumentDownloadController {
             HttpServletRequest httpServletRequest
     ) {
         String token = getTokenFromRequest(httpServletRequest);
-        // TODO Сделать присвоение файлу адекватного имени
-        // TODO Разобраться как вытащить тоек из HTTP запроса напрямую
-        // TODO Убрать костыли в скачивании документов, сделать её для каждой из версий
+        // TODO Убрать костыли в скачивании документов
         File file = documentDownloadService.findDownloadDocument(documentName, token);
         String contentType = documentDownloadService.getContentType(file.getName());
-        String extension = documentDownloadService.getFileExtension(file.getName());
         String mainName = documentDownloadService.getMainFileName(documentName, token);
         Path path = Paths.get(file.getPath());
         httpServletResponse.setContentType(contentType);
-        httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName + '.' + extension);
+        httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
         try {
             Files.copy(path, httpServletResponse.getOutputStream());
             httpServletResponse.getOutputStream().flush();

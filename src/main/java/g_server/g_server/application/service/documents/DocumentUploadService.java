@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+// TODO Сделать проверку размера загружаемого файла
 public class DocumentUploadService {
     @Autowired
     private JwtProvider jwtProvider;
@@ -53,6 +54,9 @@ public class DocumentUploadService {
 
     @Autowired
     private DocumentVersionRepository documentVersionRepository;
+
+    @Autowired
+    private DocumentDownloadService documentDownloadService;
 
     public List<String> uploadDocument(DocumentForm documentForm) {
         List<String> messagesList = new ArrayList<String>();
@@ -94,11 +98,14 @@ public class DocumentUploadService {
             File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
             if (!scientificAdvisorDirectory.exists())
                 scientificAdvisorDirectory.mkdir();
-            // Получим имя файла без разрешения
-            String withoutExtension = documentForm.getFile().getOriginalFilename().substring(0,
-                    documentForm.getFile().getOriginalFilename().lastIndexOf('.'));
+            // TODO Здесь сокрыт функционал для реализации разрешения версий файлов разных разрешений
+            // TODO Получим имя файла без разрешения
+            //String withoutExtension = documentForm.getFile().getOriginalFilename().substring(0,
+            //        documentForm.getFile().getOriginalFilename().lastIndexOf('.'));
+            // TODO Его можно ввести снова при необходимости, заменив имя файла на его версию без расширения
+            String fileName = documentForm.getFile().getOriginalFilename();
             // Создание директории версий файла
-            String documentPath = scientificAdvisorDocumentsPath + File.separator + withoutExtension;
+            String documentPath = scientificAdvisorDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
             // Проверим что одноименный файл не был загружен пользователем
             if (!documentDirectory.exists())
@@ -113,7 +120,7 @@ public class DocumentUploadService {
                         "version_" + currentDate + "." + fileExtension;
                 Path uploadingFilePath = Paths.get(versionPath);
                 try {
-                    if (documentRepository.findByCreatorAndName(creator_id, withoutExtension) == null) {
+                    if (documentRepository.findByCreatorAndName(creator_id, fileName) == null) {
                         if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                             // После этого занесем загруженный файл в таблицу документов
                             Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
@@ -121,7 +128,7 @@ public class DocumentUploadService {
                             );
                             documentService.save(document);
                             // Далее создадим запись о первой версии документа в таблице версий
-                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, withoutExtension).getId();
+                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                             DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
                                     sqlDateTime, "Загрузка документа на сайт", versionPath);
                             documentVersionService.save(documentVersion);
@@ -185,20 +192,25 @@ public class DocumentUploadService {
                 sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
             }
             if (document != null) {
-                String versionUploadPath = document.getDocument_path() + File.separator +
-                        "version_" + currentDate + "." + fileExtension;
-                try {
-                    if (multipartFileToFileWrite(documentVersionForm.getVersionFile(),Paths.get(versionUploadPath))) {
-                        DocumentVersion documentVersion = new DocumentVersion(editor_id, document.getId(), sqlDateTime,
-                                documentVersionForm.getEditionDescription(), versionUploadPath
-                        );
-                        documentVersionService.save(documentVersion);
-                        messagesList.add("Версия файла " + documentVersionForm.getDocumentName() + " была успешно загружена");
+                if (!fileExtension.equals(documentDownloadService.getFileExtension(document.getName())))
+                    messagesList.add("Запрещено загружать версию документа с иным разрешением," +
+                            " для этого следует загрузить новый документ");
+                if (messagesList.size() == 0) {
+                    String versionUploadPath = document.getDocument_path() + File.separator +
+                            "version_" + currentDate + "." + fileExtension;
+                    try {
+                        if (multipartFileToFileWrite(documentVersionForm.getVersionFile(),Paths.get(versionUploadPath))) {
+                            DocumentVersion documentVersion = new DocumentVersion(editor_id, document.getId(), sqlDateTime,
+                                    documentVersionForm.getEditionDescription(), versionUploadPath
+                            );
+                            documentVersionService.save(documentVersion);
+                            messagesList.add("Версия файла " + documentVersionForm.getDocumentName() + " была успешно загружена");
+                        }
+                        else
+                            messagesList.add("Произошла непредвиденная ошибка загрузки версии фалйа");
+                    } catch (IOException ioException) {
+                        messagesList.add("IOException");
                     }
-                    else
-                        messagesList.add("Произошла непредвиденная ошибка загрузки версии фалйа");
-                } catch (IOException ioException) {
-                    messagesList.add("IOException");
                 }
             }
             else {
