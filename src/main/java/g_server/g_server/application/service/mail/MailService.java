@@ -62,7 +62,7 @@ public class MailService {
         String studentType = student.getStudentData().getStudentType().getStudentType().toLowerCase();
         // TODO Если сделаем темы, сделать здесь также уведомление о выбранной студентом теме
         String theme = "мы придумаем их позже";
-        String scientificAdvisorName = scientificAdvisor.getName() + ' ' + scientificAdvisor.getSurname();
+        String scientificAdvisorName = scientificAdvisor.getName() + ' ' + scientificAdvisor.getSecond_name();
         // Получим время суток
         String time = mailTimeDetector();
         // Получив необходимые данные, отправим само письмо
@@ -71,11 +71,11 @@ public class MailService {
         message.setSubject("Заявка студента на ваше научное руководство");
         message.setText(time + ", " + scientificAdvisorName + ".\n");
         message.setText(message.getText() + "Студент(ка)-" + studentType + ' ' + studentFIO + " из группы " + studentGroup + " подал(а) заявку на то," +
-                " чтобы вы стали его(её) научным руководителем\n");
-        message.setText(message.getText() + "Его(её) интересует тема ВКР " + theme + ".");
-        message.setText(message.getText() + "Вы можете как <u>принять</u>, так и <u>отклонить</u> данную заявку, перейдя по этим ссылкам, " +
+                " чтобы вы стали его(её) научным руководителем.\n");
+        message.setText(message.getText() + "Студент(ка) заинтересован(а) в том, чтобы взять следующую тему ВКР: " + theme + ".\n");
+        message.setText(message.getText() + "Вы можете как принять, так и отклонить данную заявку, перейдя по этим ссылкам, " +
                 "работу которых мы конечно же организуем позже\n");
-        message.setText(message.getText() + "\n Для связи с данным студентом(кой) вы можете использовать:\n");
+        message.setText(message.getText() + "\nДля связи с данным студентом(кой) вы можете использовать:\n");
         message.setText(message.getText() + "email-адрес " + studentEmail + "\n");
         // TODO Возможно сделать автоматический перевод мобильного телефона в адекватный вид
         message.setText(message.getText() + "мобильный телефон " + studentPhone + "\n");
