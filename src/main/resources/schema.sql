@@ -4,13 +4,14 @@ set global time_zone = '-3:00';
 
 create table users (
     id int primary key auto_increment,
-    email varchar(100) not null,
+    email varchar(100) not null unique,
     name varchar(100) not null,
     surname varchar(100) not null,
     second_name varchar(100) not null,
     password varchar(256) not null,
     phone varchar(50) not null,
-    is_accepted_mail_sending bool not null
+    is_accepted_mail_sending bool not null,
+    is_confirmed bool not null
 );
 
 create table roles (

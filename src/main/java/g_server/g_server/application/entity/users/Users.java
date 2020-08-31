@@ -35,6 +35,9 @@ public class Users implements UserDetails {
     @Column(name = "is_accepted_mail_sending")
     private boolean sendMailAccepted;
 
+    @Column(name = "is_confirmed")
+    private boolean isConfirmed;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
@@ -55,7 +58,7 @@ public class Users implements UserDetails {
     public Users() { }
 
     public Users(String email, String name, String surname, String second_name,
-                 String password, String phone, boolean sendMailAccepted) {
+                 String password, String phone, boolean sendMailAccepted, boolean isConfirmed) {
         this.email = email;
         this.name = name;
         this.surname = surname;
@@ -63,6 +66,7 @@ public class Users implements UserDetails {
         this.password = password;
         this.phone = phone;
         this.sendMailAccepted = sendMailAccepted;
+        this.isConfirmed = isConfirmed;
     }
 
     public Boolean determineMailSendingAccepted(String mailSendingAccepted) {
@@ -195,5 +199,13 @@ public class Users implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles();
+    }
+
+    public boolean isConfirmed() {
+        return isConfirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        isConfirmed = confirmed;
     }
 }

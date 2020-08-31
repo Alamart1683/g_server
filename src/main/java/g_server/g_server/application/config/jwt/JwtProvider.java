@@ -20,12 +20,26 @@ public class JwtProvider {
 
     @Value("$(jwt.secret)")
     private String jwtSecret;
+
+    @Value("$(registration.secret)")
+    private String registrationSecret;
+
     public String generateToken(String email) {
         Date date = Date.from(LocalDate.now().plusDays(15).atStartOfDay(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .setSubject(email)
                 .setExpiration(date)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
+
+    public String generateConfirmToken(int registrationCode) {
+        String registrationCodeString = registrationCode + "";
+        Date date = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return Jwts.builder()
+                .setSubject(registrationCodeString)
+                .setExpiration(date)
+                .signWith(SignatureAlgorithm.HS512, registrationSecret)
                 .compact();
     }
 
@@ -41,6 +55,11 @@ public class JwtProvider {
 
     public String getEmailFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+        return claims.getSubject();
+    }
+
+    public String getRegistrationCodeFromToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey(registrationSecret).parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
 }

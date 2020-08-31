@@ -104,4 +104,10 @@ public class AssociatedStudentsService {
         }
         return messageList;
     }
+
+    // TODO Показать список активных заявок
+
+    // TODO Показать список ассоциированных студентов
+
+    // TODO Отклонить заявку
 }

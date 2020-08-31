@@ -62,10 +62,8 @@ public class DocumentUploadService {
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
         Integer creator_id = null;
-
         if (documentForm.getToken() == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
-
         if (messagesList.size() == 0)
             if (documentForm.getToken().equals(""))
                 messagesList.add("Ошибка аутентификации: токен пуст");
@@ -74,41 +72,31 @@ public class DocumentUploadService {
 
         if (creator_id == null)
             messagesList.add("Пользователь не найден, загрузить файл невозможно");
-
         // Определим айди типа документа
         Integer type_id = getTypeId(documentForm.getDocumentFormType());
         if (type_id == null)
             messagesList.add("Указан несуществующий тип документа");
-
         // Определим айди вида документа
         Integer kind_id = getKindId(documentForm.getDocumentFormKind());
-
         if (kind_id == null)
             messagesList.add("Указан несуществующий вид докумета");
-
         // Проверим права доступа
         Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
-
         if (viewRights == null)
             messagesList.add("Указаны некорректные права доступа");
-
         // Проверим что файл был загружен
         if (documentForm.getFile() == null)
             messagesList.add("Ошибка загрузки файла. Такого файла не существует");
-
         // Проверим корректное разрешение файла
         String fileExtension = getFileExtension(documentForm.getFile());
-
         if (fileExtension.length() == 0)
             messagesList.add("Попытка загрузить документ с некорректным разрешением");
-
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             // Создание директории документов научного руководителя
             String scientificAdvisorDocumentsPath = "src" + File.separator + "main" + File.separator + "resources"
                     + File.separator + "users_documents" + File.separator + creator_id;
             File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
-
             if (!scientificAdvisorDirectory.exists())
                 scientificAdvisorDirectory.mkdir();
             // TODO Здесь сокрыт функционал для реализации разрешения версий файлов разных разрешений
@@ -120,13 +108,11 @@ public class DocumentUploadService {
             // Создание директории версий файла
             String documentPath = scientificAdvisorDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
-
             // Проверим что одноименный файл не был загружен пользователем
             if (!documentDirectory.exists())
                 documentDirectory.mkdir();
             else
                 messagesList.add("Файл с таким именем уже существует");
-
             // Сохраним файл на сервере, создав необходимую директорию
             if (messagesList.size() == 0) {
                 String currentDate = getCurrentDate();
@@ -134,11 +120,8 @@ public class DocumentUploadService {
                 String versionPath = documentDirectory.getPath() + File.separator +
                         "version_" + currentDate + "." + fileExtension;
                 Path uploadingFilePath = Paths.get(versionPath);
-
                 try {
-
                     if (documentRepository.findByCreatorAndName(creator_id, fileName) == null) {
-
                         if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                             // После этого занесем загруженный файл в таблицу документов
                             Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
@@ -171,7 +154,6 @@ public class DocumentUploadService {
                 catch (IOException ioException) {
                     messagesList.add("IOException");
                 }
-
             }
             else {
                 return messagesList;
@@ -188,41 +170,30 @@ public class DocumentUploadService {
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
         Integer editor_id = null;
-
         if (documentVersionForm.getToken() == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
-
         if (messagesList.size() == 0)
-
             if (documentVersionForm.getToken().equals(""))
                 messagesList.add("Ошибка аутентификации: токен пуст");
             else
                 editor_id = getCreatorId(documentVersionForm.getToken());
-
         if (editor_id == null)
             messagesList.add("Пользователь не найден, загрузить версию файла невозможно");
-
         String fileExtension = getFileExtension(documentVersionForm.getVersionFile());
-
         if (fileExtension.equals(""))
             messagesList.add("Вы загружаете версию файла с недопустимым расширением");
-
         if (messagesList.size() == 0) {
             Document document = documentRepository.findByCreatorAndName(editor_id, documentVersionForm.getDocumentName());
             String currentDate = getCurrentDate();
             String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
-
             if (document != null) {
-
                 if (!fileExtension.equals(documentDownloadService.getFileExtension(document.getName())))
                     messagesList.add("Запрещено загружать версию документа с иным разрешением," +
                             " для этого следует загрузить новый документ");
-
                 if (messagesList.size() == 0) {
                     // На случай, если пользователь умудрился секунда в секунду загрузить две версии
                     DocumentVersion integrityController = documentVersionRepository.findByEditorAndDocumentAndEditionDate(editor_id,
                             document.getId(), sqlDateTime);
-
                     if (integrityController != null) {
                         try { Thread.sleep(3000); } catch (InterruptedException interruptedException) { }
                         currentDate = getCurrentDate(true);
@@ -230,9 +201,7 @@ public class DocumentUploadService {
                     }
                     String versionUploadPath = document.getDocument_path() + File.separator +
                             "version_" + currentDate + "." + fileExtension;
-
                     try {
-
                         if (multipartFileToFileWrite(documentVersionForm.getVersionFile(),Paths.get(versionUploadPath))) {
                             DocumentVersion documentVersion = new DocumentVersion(editor_id, document.getId(), sqlDateTime,
                                     documentVersionForm.getEditionDescription(), versionUploadPath
@@ -260,7 +229,6 @@ public class DocumentUploadService {
     public Integer getCreatorId(String token) {
         String email = jwtProvider.getEmailFromToken(token);
         Users user = usersRepository.findByEmail(email);
-
         if (user != null) {
             return user.getId();
         }
@@ -272,7 +240,6 @@ public class DocumentUploadService {
     // Необходимо получить id типа документа
     public Integer getTypeId(String type) {
         DocumentType documentType = documentTypeRepository.getDocumentTypeByType(type);
-
         if (documentType != null) {
             return documentType.getId();
         }
@@ -284,7 +251,6 @@ public class DocumentUploadService {
     // Необходимо получить id вида документа
     public Integer getKindId(String kind) {
         DocumentKind documentKind = documentKindRepository.getDocumentKindByKind(kind);
-
         if (documentKind != null) {
             return documentKind.getId();
         }
@@ -296,10 +262,8 @@ public class DocumentUploadService {
     // Необходимо опеределить корректность расширения файла
     public String getFileExtension(MultipartFile file) {
         String fileName = file.getOriginalFilename();
-
         if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) {
             String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-
             if (extension.equals("docx") || extension.equals("pdf") || extension.equals("doc") ||
                 extension.equals("txt") || extension.equals("rtf") || extension.equals("ppt") ||
                 extension.equals("pptx") || extension.equals("csv") || extension.equals("jpg") ||
@@ -323,24 +287,20 @@ public class DocumentUploadService {
         String completeDateTime = dateTime.getDayOfMonth() + "." + monthWordToMonthNumber(dateTime.getMonth().toString()) +
                 "." + dateTime.getYear() + ".";
         String currentHour;
-
         if (dateTime.getHour() < 10)
             currentHour = "0" + dateTime.getHour();
         else
             currentHour = dateTime.getHour() + "";
         String currentMinute;
-
         if (dateTime.getMinute() < 10)
             currentMinute = "0" + dateTime.getMinute();
         else
             currentMinute = dateTime.getMinute() + "";
         String currentSecond;
-
         if (dateTime.getSecond() < 10)
             currentSecond = "0" + dateTime.getSecond();
         else
             currentSecond = dateTime.getSecond() + "";
-
         completeDateTime = completeDateTime + currentHour + "." + currentMinute + "." + currentSecond;
         return completeDateTime;
     }
@@ -367,16 +327,12 @@ public class DocumentUploadService {
         String hour = russianDate.substring(11, dotIndexesList.get(0));
         String minute = russianDate.substring(dotIndexesList.get(0) + 1, dotIndexesList.get(1));
         String second = russianDate.substring(dotIndexesList.get(1) + 1);
-
         if (hour.length() == 1)
             hour = '0' + hour;
-
         if (minute.length() == 1)
             minute = '0' + minute;
-
         if (second.length() == 1)
             second = '0' + second;
-
         return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
     }
 

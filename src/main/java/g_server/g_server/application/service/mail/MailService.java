@@ -1,12 +1,16 @@
 package g_server.g_server.application.service.mail;
 
+import g_server.g_server.application.config.mail.MailConfig;
 import g_server.g_server.application.entity.users.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.time.ZonedDateTime;
 
 @Service
@@ -15,17 +19,40 @@ import java.time.ZonedDateTime;
 // TODO студента, просто перейдя по ссылке
 public class MailService {
     @Autowired
-    public JavaMailSender mailSender;
+    private JavaMailSender mailSender;
 
-    // Отправить по почте код подтверждения для студента
-    public String sendStudentEmail(String recipient, String registrationCode) {
+    // Отправить по почте код подтверждения и ссылки завершения регистрации для студента
+    public String sendStudentEmail(String recipient, String registrationCode, String registrationLink) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "utf-8");
+        try {
+            message.setTo(recipient);
+            message.setSubject("Код регистрации для сайта выпускников кафедры МОСИТ");
+            String htmlMessage = "Здравствуйте, для завершения регистрации вам необходимо указать код подтверждения."
+                    + "<br>Код подтверждения регистрации:<b> " + registrationCode + "</b><p>" +
+                    "<br>Так же вы можете завершить регистрацию, перейдя по <b><a href=\"" +
+                    registrationLink + "\" target=\"_blank \"> ссылке </a></b>"
+                    + "<br>Ссылка действительна 24 часа с момента регистрации.<p>" +
+                    "<br><br><br>Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.";
+            message.setText(htmlMessage, true);
+            this.mailSender.send(mimeMessage);
+        }
+        catch (MessagingException messagingException) {
+            return "MessagingException";
+        }
+        return "Email sent!";
+    }
+
+    // Послать уведомление об окончании регистрации студенту
+    public String sendSuccessRegistrationMailForStudent(Users student) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(recipient);
-        message.setSubject("Код регистрации для сайта выпускников кафедры МОСИТ");
-        message.setText("Здравствуйте, для завершения регистрации вам необходимо указать код подтверждения. " +
-                "\nКод подтверждения регистрации: " + registrationCode + "\n");
-        message.setText(message.getText() + "\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
-        this.mailSender.send(message);
+        message.setTo(student.getEmail());
+        String time = mailTimeDetector();
+        String studentName = student.getName() + ' ' + student.getSecond_name();
+        message.setText(time + ", " + studentName + ".\n");
+        message.setText(message.getText() + "Ваш аккаунт был успешно активирован. С этого момента вы можете " +
+                "пользоваться всеми сервисами сайта.\n");
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
         return "Email sent!";
     }
 
@@ -34,9 +61,9 @@ public class MailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(recipient);
         message.setSubject("Учетная запись сайта выпускников кафедры МОСИТ");
-        message.setText("Здравствуйте, вы были зарегистрированы в статусе " + status + " на сайте выпускников кафдеры МОСИТ." +
+        message.setText("Здравствуйте, вы были зарегистрированы в статусе " + status + " на сайте выпускников кафедры МОСИТ." +
                 "\nЛогин учетной записи: " + recipient + "\nПароль учётной записи: " + password + "\n");
-        message.setText(message.getText() + "\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
         this.mailSender.send(message);
         return "Email sent!";
     }
@@ -79,7 +106,7 @@ public class MailService {
         message.setText(message.getText() + "email-адрес: " + studentEmail + "\n");
         // TODO Возможно сделать автоматический перевод мобильного телефона в адекватный вид
         message.setText(message.getText() + "мобильный телефон: " + studentPhone + "\n");
-        message.setText(message.getText() + "\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
         this.mailSender.send(message);
     }
 
