@@ -73,7 +73,7 @@ public class AssociatedStudentsService {
                 messageList.add("Ошибка определения ролей пользователей");
             }
 
-            if (studentRole != 2 || scientificAdvisorRole != 3) {
+            if (studentRole != 1 || scientificAdvisorRole != 2) {
                 messageList.add("Ошибка соответствия ролей пользователей");
             }
 
