@@ -12,15 +12,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class DocumentDownloadController {
+    public static final String AUTHORIZATION = "Authorization";
+
     @Autowired
     private DocumentDownloadService documentDownloadService;
-
-    public static final String AUTHORIZATION = "Authorization";
 
     @GetMapping("/document/download/")
     public void documentDownload(
