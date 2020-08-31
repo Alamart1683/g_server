@@ -181,13 +181,13 @@ public class RegistrationController {
         return messageList;
     }
 
-    @GetMapping("/admin/registration/admin")
+    @GetMapping("/root/registration/admin")
     public String AdminRegistrationPreparing(Model model) {
         model.addAttribute("adminForm", new AdminForm());
         return "adminForm";
     }
 
-    @PostMapping("/admin/registration/admin")
+    @PostMapping("/root/registration/admin")
     public List<String> RegisterAdmin(
           @ModelAttribute("adminForm") @Validated AdminForm adminForm,
           BindingResult bindingResult, Model model

@@ -145,7 +145,8 @@ insert into roles (role) values
     ('ROLE_STUDENT'),
     ('ROLE_SCIENTIFIC_ADVISOR'),
     ('ROLE_HEAD_OF_CATHEDRA'),
-    ('ROLE_ADMIN');
+    ('ROLE_ADMIN'),
+    ('ROLE_ROOT');
 
 insert into cathedras (cathedra_name) values
     ('МОСИТ'),
