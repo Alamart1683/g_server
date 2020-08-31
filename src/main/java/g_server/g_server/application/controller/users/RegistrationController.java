@@ -149,7 +149,7 @@ public class RegistrationController {
     @GetMapping("/registration/student/confirm/{token}")
     public String StudentConfirmCodeFromUrl(@PathVariable String token) {
         Integer confirmationCode = Integer.parseInt(jwtProvider.getRegistrationCodeFromToken(token));
-        if (confirmationCode == null) {
+        if (confirmationCode == null || registrationCode == null) {
             return "Срок действия ссылки подтверждения истек или она указана неверно";
         }
         if (confirmationCode.equals(registrationCode)) {

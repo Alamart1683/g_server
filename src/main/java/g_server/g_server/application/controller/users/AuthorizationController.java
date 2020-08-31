@@ -19,7 +19,7 @@ public class AuthorizationController {
 
     @Autowired
     private JwtProvider jwtProvider;
-
+    
     @PostMapping("/authorization")
     public String AuthorizationResponse(
             @ModelAttribute("authorizationForm") @Validated AuthorizationForm authorizationForm,
@@ -27,8 +27,13 @@ public class AuthorizationController {
     ) {
         Users user = usersService.loadUserByEmailAndPassword(authorizationForm.getEmail(), authorizationForm.getPassword());
         if (user != null) {
-            String token = jwtProvider.generateToken(user.getEmail());
-            return token;
+            if (user.isConfirmed()) {
+                String token = jwtProvider.generateToken(user.getEmail());
+                return token;
+            }
+            else {
+                return "Для авторизации необходимо подтвердить регистрацию аккаунта";
+            }
         }
         else {
             return "Неверная комбинация логина и пароля";
