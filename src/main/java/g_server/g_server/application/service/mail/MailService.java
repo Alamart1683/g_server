@@ -74,12 +74,11 @@ public class MailService {
                 " чтобы вы стали его(её) научным руководителем.\n");
         message.setText(message.getText() + "Студент(ка) заинтересован(а) в том, чтобы взять следующую тему ВКР: " + theme + ".\n");
         message.setText(message.getText() + "Вы можете как принять, так и отклонить данную заявку, перейдя по этим ссылкам, " +
-                "работу которых мы конечно же организуем позже, либо же совершить аналогичные действия в соответствующем разделе" +
-                " нашего сайта.\n");
-        message.setText(message.getText() + "\nДля связи с данным студентом(кой) вы можете использовать:\n");
-        message.setText(message.getText() + "email-адрес " + studentEmail + "\n");
+                "либо же совершить аналогичные действия в соответствующем разделе нашего сайта.\n");
+        message.setText(message.getText() + "\nДля связи с данным студентом(кой) вы можете использовать\n");
+        message.setText(message.getText() + "email-адрес: " + studentEmail + "\n");
         // TODO Возможно сделать автоматический перевод мобильного телефона в адекватный вид
-        message.setText(message.getText() + "мобильный телефон " + studentPhone + "\n");
+        message.setText(message.getText() + "мобильный телефон: " + studentPhone + "\n");
         message.setText(message.getText() + "\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
         this.mailSender.send(message);
     }
