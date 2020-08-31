@@ -134,7 +134,7 @@ public class RegistrationController {
             }
             else {
                 // Отправка письма науч. руководителю
-                mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "научного руководителя");
+                mailService.sendLoginEmailAndPassword(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "научного руководителя");
                 messageList.add("Научный руководитель зарегистрирован!");
             }
         }
@@ -174,7 +174,7 @@ public class RegistrationController {
             }
             else {
                 // Отправка письма зав. кафедры
-                mailService.sendLoginEmail(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "заведующего кафедрой");
+                mailService.sendLoginEmailAndPassword(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "заведующего кафедрой");
                 messageList.add("Заведующий кафедрой успшено зарегистрирован!");
             }
         }
@@ -210,7 +210,7 @@ public class RegistrationController {
             }
             else {
                 // Отправка письма администратору
-                mailService.sendLoginEmail(adminForm.getEmail(), adminForm.getPassword(), "администратора");
+                mailService.sendLoginEmailAndPassword(adminForm.getEmail(), adminForm.getPassword(), "администратора");
                 messageList.add("Администратор успешно зарегистрирован!");
             }
         }

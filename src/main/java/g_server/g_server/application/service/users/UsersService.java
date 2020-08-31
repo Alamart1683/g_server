@@ -2,23 +2,18 @@ package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
-import g_server.g_server.application.entity.users.Roles;
-import g_server.g_server.application.entity.users.ScientificAdvisorData;
-import g_server.g_server.application.entity.users.StudentData;
-import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.users.*;
 import g_server.g_server.application.repository.system_data.CathedrasRepository;
 import g_server.g_server.application.repository.system_data.StudentGroupRepository;
 import g_server.g_server.application.repository.system_data.StudentTypeRepository;
-import g_server.g_server.application.repository.users.ScientificAdvisorDataRepository;
-import g_server.g_server.application.repository.users.StudentDataRepository;
-import g_server.g_server.application.repository.users.UsersRepository;
-import g_server.g_server.application.repository.users.UsersRolesRepository;
+import g_server.g_server.application.repository.users.*;
+import g_server.g_server.application.service.documents.DocumentUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +44,14 @@ public class UsersService implements UserDetailsService {
     @Autowired
     private UsersRolesRepository usersRolesRepository;
 
+    @Autowired
+    private DocumentUploadService documentUploadService;
+
+    @Autowired
+    private AssociatedStudentsRepository associatedStudentsRepository;
+
     @Override
+    // Загрузить пользователя по email
     public UserDetails loadUserByUsername(String email) {
         Users user = usersRepository.findByEmail(email);
         if (user == null)
@@ -57,6 +59,7 @@ public class UsersService implements UserDetailsService {
         return user;
     }
 
+    // Загрузить пользователя по email и паролю
     public Users loadUserByEmailAndPassword(String email, String password) {
         Users user = usersRepository.findByEmail(email);
         if (user != null)
@@ -65,6 +68,7 @@ public class UsersService implements UserDetailsService {
         return null;
     }
 
+    // Сохарнить студента
     public boolean saveStudent(Users user, String student_type, String student_group, String cathedra_name) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
@@ -85,6 +89,7 @@ public class UsersService implements UserDetailsService {
         }
     }
 
+    // Сохранить НР
     public boolean saveScientificAdvisor(Users user, String cathedra_name) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
@@ -101,6 +106,7 @@ public class UsersService implements UserDetailsService {
         }
     }
 
+    // Сохранить зав. кафедрой
     public boolean saveHeadOfCathedra(Users user, String cathedra_name) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
@@ -117,6 +123,7 @@ public class UsersService implements UserDetailsService {
         }
     }
 
+    // Сохранить админа
     public boolean saveAdmin(Users user) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
@@ -130,6 +137,7 @@ public class UsersService implements UserDetailsService {
         }
     }
 
+    // Существует ли пользователь
     public boolean isUserExists(Users user) {
         if (user == null)
             return false;
@@ -137,67 +145,99 @@ public class UsersService implements UserDetailsService {
             return true;
     }
 
+    // Существует ли кафедра для формы студента
     public boolean isCathedraExist(StudentForm studentForm) {
-        try { Integer cathedraTest = cathedrasRepository.getCathedrasByCathedraName(studentForm.getCathedra()).getId(); }
-        catch (NullPointerException exception) { return false; }
+        try {
+            Integer cathedraTest = cathedrasRepository.getCathedrasByCathedraName(studentForm.getCathedra()).getId();
+        }
+        catch (NullPointerException exception) {
+            return false;
+        }
         return true;
     }
 
+    // Существует ли кафедра для формы НР
     public boolean isCathedraExist(ScientificAdvisorForm scientificAdvisorForm) {
-        try { Integer cathedraTest = cathedrasRepository.getCathedrasByCathedraName(scientificAdvisorForm.getCathedra()).getId(); }
-        catch (NullPointerException exception) { return false; }
+        try {
+            Integer cathedraTest = cathedrasRepository.getCathedrasByCathedraName(scientificAdvisorForm.getCathedra()).getId();
+        }
+        catch (NullPointerException exception) {
+            return false;
+        }
         return true;
     }
 
+    // Существует ли группа
     public boolean isGroupExist(StudentForm studentForm) {
-        try { Integer groupTest = studentGroupRepository.getByStudentGroup(studentForm.getStudent_group()).getId(); }
-        catch (NullPointerException exception) { return false; }
+        try {
+            Integer groupTest = studentGroupRepository.getByStudentGroup(studentForm.getStudent_group()).getId();
+        }
+        catch (NullPointerException exception) {
+            return false;
+        }
         return true;
     }
 
+    // Существует ли тип студента
     public boolean isStudentTypeExist(StudentForm studentForm) {
-        try { Integer typeTest = studentTypeRepository.getByStudentType(studentForm.getStudent_type()).getId(); }
-        catch (NullPointerException exception) { return false; }
+        try {
+            Integer typeTest = studentTypeRepository.getByStudentType(studentForm.getStudent_type()).getId();
+        }
+        catch (NullPointerException exception) {
+            return false;
+        }
         return true;
     }
 
+    // Существует ли email
     public boolean isEmailExist(String email) {
         Users userFromDB = usersRepository.findByEmail(email);
+
         if (userFromDB == null)
             return false;
         else
             return true;
     }
 
+    // Найти пользователя по id
     public Optional<Users> findById(int id) {
         return usersRepository.findById(id);
     }
 
+    // Найти всех пользователей
     public List<Users> findAll() {
         return usersRepository.findAll();
     }
 
+    // Сохранить пользователя
     public void save(Users users) {
         usersRepository.save(users);
     }
 
+    // Удалить пользователя по ID
     public void delete(int id) {
         usersRepository.deleteById(id);
     }
 
     // Метод проверки уполномоченности админа удалять пользователя
     public boolean checkUsersRoles(Integer adminId, Integer userToDeleteId) {
+
         if (adminId != null && userToDeleteId != null) {
             Users admin = usersRepository.findById(adminId).get();
             Users userToDelete = usersRepository.findById(userToDeleteId).get();
+
             if (admin != null && userToDelete != null) {
                 Integer userToDeleteRoleId = usersRolesRepository.findUsersRolesByUserId(userToDeleteId).getRoleId();
                 Integer adminRoleId = usersRolesRepository.findUsersRolesByUserId(adminId).getRoleId();
+
                 if (userToDeleteRoleId != null && adminRoleId != null) {
+
                     if (userToDeleteRoleId == adminRoleId)
                         return false;
+
                     else if (userToDeleteRoleId > adminRoleId)
                         return false;
+
                     else if (userToDeleteRoleId < adminRoleId)
                         return true;
                 }

@@ -35,13 +35,18 @@ public class DocumentDownloadService {
         if (documentViewService.checkView(documentName, token)) {
             if (token == null)
                 return null;
+
             if (token == "")
                 return null;
+
             Integer creator_id = null;
             creator_id = documentUploadService.getCreatorId(token);
+
             if (creator_id == null)
                 return null;
+
             Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
             if (document != null) {
                 List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(document.getId());
                 DocumentVersion lastVersion = documentVersions.get(documentVersions.size() - 1);
@@ -49,8 +54,9 @@ public class DocumentDownloadService {
                 File downloadFile = new File(path);
                 return downloadFile;
             }
-            else
+            else {
                 return null;
+            }
         }
         return null;
     }
@@ -105,6 +111,7 @@ public class DocumentDownloadService {
     public String getFileExtension(String path) {
         if (path.lastIndexOf(".") != -1 && path.lastIndexOf(".") != 0) {
             String extension = path.substring(path.lastIndexOf(".") + 1);
+
             if (extension.equals("docx") || extension.equals("pdf") || extension.equals("doc") ||
                     extension.equals("txt") || extension.equals("rtf") || extension.equals("ppt") ||
                     extension.equals("pptx") || extension.equals("csv") || extension.equals("jpg") ||
@@ -115,6 +122,7 @@ public class DocumentDownloadService {
             else {
                 return "";
             }
+
         }
         else {
             return "";
@@ -125,15 +133,21 @@ public class DocumentDownloadService {
     public String getMainFileName(String documentName, String token) {
         if (token == null)
             return "";
+
         if (token == "")
             return "";
+
         Integer creator_id = null;
         creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             return "";
+
         Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
         if (document == null)
             return "";
+
         return document.getName();
     }
 }

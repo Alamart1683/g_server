@@ -41,18 +41,25 @@ public class DocumentManagementService {
         List<String> messagesList = new ArrayList<String>();
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
+
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
+
         Integer creator_id = null;
+
         if (messagesList.size() == 0)
             creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - удаление документа невозможно");
+
         if (messagesList.size() == 0) {
             Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
             // Если директория удаляемого документа существует, удалим его версии и саму директорию
             if (document != null) {
                 File fileDirectory = new File(document.getDocument_path());
+
                 if (fileDirectory.exists()) {
                     for (File file: fileDirectory.listFiles()) {
                         file.delete();
@@ -77,31 +84,44 @@ public class DocumentManagementService {
     // Формат даты и времени вида ДД.ММ.ГГГГ.ЧЧ.ММ.СС
     public List<String> deleteDocumentVersion(String documentName, String editionDateTime, String token) {
         List<String> messagesList = new ArrayList<String>();
+
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
+
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
+
         Integer creator_id = null;
+
         if (messagesList.size() == 0)
             creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - удаление версии документа невозможно");
+
         if (messagesList.size() == 0) {
             Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
             // Если директория удаляемого документа существует, удалим его версию и саму директорию
             if (document != null) {
                 File fileDirectory = new File(document.getDocument_path());
+
                 if (fileDirectory.exists()) {
                     List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(document.getId());
+
                     if (documentVersions.size() != 0) {
+
                         if (documentVersions.size() == 1) {
+
                             if (collateDateTimes(documentVersions.get(0).getEditionDate(), editionDateTime)) {
                                 String versionPath = documentVersions.get(0).getThis_version_document_path();
                                 File file = new File(versionPath);
                                 file.delete();
+
                                 if (fileDirectory.listFiles().length == 0) {
                                     fileDirectory.delete();
                                 }
+
                                 documentRepository.deleteById(document.getId());
                                 messagesList.add("Документ был успешно удален вместе с последней его версией");
                             }
@@ -119,6 +139,7 @@ public class DocumentManagementService {
                                     break;
                                 }
                             }
+
                             if (messagesList.size() == 0) {
                                 messagesList.add("Удаляемая версия документа не найдена");
                             }
@@ -145,23 +166,31 @@ public class DocumentManagementService {
         List<String> messagesList = new ArrayList<String>();
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
+
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
+
         Integer creator_id = null;
+
         if (messagesList.size() == 0)
             creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - переименование документа невозможно");
+
         if (!documentDownloadService.getFileExtension(newDocumentName).equals(documentDownloadService.getFileExtension(oldDocumentName)))
             messagesList.add("Запрещено изменять расширение переименовываемого документа");
+
         if (messagesList.size() == 0) {
             Document document = documentRepository.findByCreatorAndName(creator_id, oldDocumentName);
+
             // Если переименовываемый документ существует в базе данных, то переименуем его
             if (document != null) {
                 File documentDirectory = new File(document.getDocument_path());
                 String newDocumentPath = document.getDocument_path().substring(0,
                         document.getDocument_path().lastIndexOf(File.separator) + 1) + newDocumentName;
                 File newDocumentDirectoryName = new File(newDocumentPath);
+
                 if (!newDocumentDirectoryName.exists()) {
                     documentDirectory.renameTo(newDocumentDirectoryName);
                     document.setDocument_path(newDocumentPath);
@@ -190,9 +219,11 @@ public class DocumentManagementService {
     // Необходимо корректно сопоставить дату и время из бд с полученными от пользователя
     public boolean collateDateTimes(String fromDB, String fromRequest) {
         fromRequest = documentUploadService.convertRussianDateToSqlDateTime(fromRequest);
+
         if (fromDB.equals(fromRequest))
             return true;
-        else return false;
+        else
+            return false;
     }
 
     // Метод изменения описания документа
@@ -200,15 +231,21 @@ public class DocumentManagementService {
         List<String> messagesList = new ArrayList<String>();
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
+
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
+
         Integer creator_id = null;
+
         if (messagesList.size() == 0)
             creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение описания документа невозможно");
+
         if (messagesList.size() == 0) {
             Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
             if (document != null) {
                 document.setDescription(newDescription);
                 documentService.save(document);
@@ -224,18 +261,26 @@ public class DocumentManagementService {
     // Метод измнения вида документа
     public List<String> editType(String documentName, String newType, String token) {
         List<String> messagesList = new ArrayList<String>();
+
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
+
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
+
         Integer creator_id = null;
+
         if (messagesList.size() == 0)
             creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение типа документа невозможно");
+
         if (messagesList.size() == 0) {
+
             if (documentTypeRepository.getDocumentTypeByType(newType) != null) {
                 Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
                 if (document != null) {
                     document.setType(documentTypeRepository.getDocumentTypeByType(newType).getId());
                     documentService.save(document);
@@ -255,18 +300,26 @@ public class DocumentManagementService {
     // Метод изменения типа документа
     public List<String> editKind(String documentName, String newKind, String token) {
         List<String> messagesList = new ArrayList<String>();
+
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
+
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
+
         Integer creator_id = null;
+
         if (messagesList.size() == 0)
             creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение вида документа невозможно");
+
         if (messagesList.size() == 0) {
+
             if (documentKindRepository.getDocumentKindByKind(newKind) != null) {
                 Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
                 if (document != null) {
                     document.setKind(documentKindRepository.getDocumentKindByKind(newKind).getId());
                     documentService.save(document);
@@ -286,19 +339,27 @@ public class DocumentManagementService {
     // Метод изменения прав видимости документа
     public List<String> editViewRights(String documentName, String newViewRights, String token) {
         List<String> messagesList = new ArrayList<String>();
+
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
+
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
+
         Integer creator_id = null;
+
         if (messagesList.size() == 0)
             creator_id = documentUploadService.getCreatorId(token);
+
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение зоны видимости документа невозможно");
+
         if (messagesList.size() == 0) {
             Integer viewRights = documentUploadService.getViewRights(newViewRights);
+
             if (viewRights!= null) {
                 Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+
                 if (document != null) {
                     document.setView_rights(viewRights);
                     documentService.save(document);
