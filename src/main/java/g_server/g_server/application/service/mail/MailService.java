@@ -59,6 +59,7 @@ public class MailService {
         String studentGroup = student.getStudentData().getStudentGroup().getStudentGroup();
         String studentPhone = student.getPhone();
         String studentEmail = student.getEmail();
+        String studentType = student.getStudentData().getStudentType().getStudentType().toLowerCase();
         // TODO Если сделаем темы, сделать здесь также уведомление о выбранной студентом теме
         String theme = "мы придумаем их позже";
         String scientificAdvisorName = scientificAdvisor.getName() + ' ' + scientificAdvisor.getSurname();
@@ -69,7 +70,7 @@ public class MailService {
         message.setTo(scientificAdvisor.getEmail());
         message.setSubject("Заявка студента на ваше научное руководство");
         message.setText(time + ", " + scientificAdvisorName + ".\n");
-        message.setText("Студент(ка) " + studentFIO + " из группы " + studentGroup + " подал(а) заявку на то," +
+        message.setText("Студент(ка)-" + studentType + ' ' + studentFIO + " из группы " + studentGroup + " подал(а) заявку на то," +
                 " чтобы вы стали его(её) научным руководителем\n");
         message.setText("Его(её) интересует тема ВКР " + theme + ".");
         message.setText("Вы можете как <u>принять</u>, так и <u>отклонить</u> данную заявку, перейдя по этим ссылкам, " +

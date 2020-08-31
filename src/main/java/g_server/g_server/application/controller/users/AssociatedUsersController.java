@@ -18,7 +18,7 @@ public class AssociatedUsersController {
     @Autowired
     private AssociatedStudentsService associatedStudentsService;
 
-    @PostMapping("/student/send/request/for_scientific_advisor")
+    @PostMapping("/student/request/for_scientific_advisor/")
     public List<String> sendRequestForScientificAdvisor(
             @RequestParam int scientificAdvisorId,
             HttpServletRequest httpServletRequest) {
