@@ -27,6 +27,7 @@ public class MailService {
         message.setSubject("Учетная запись сайта выпускников кафедры МОСИТ");
         message.setText("Здравствуйте, вы были зарегистрированы в статусе " + status + " на сайте выпускников кафдеры МОСИТ." +
                 "\nЛогин учетной записи: " + recipient + "\nПароль учётной записи: " + password);
+
         this.mailSender.send(message);
         return "Email sent!";
     }

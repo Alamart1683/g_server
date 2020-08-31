@@ -12,6 +12,7 @@ import g_server.g_server.application.repository.system_data.StudentTypeRepositor
 import g_server.g_server.application.repository.users.ScientificAdvisorDataRepository;
 import g_server.g_server.application.repository.users.StudentDataRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
+import g_server.g_server.application.repository.users.UsersRolesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -46,7 +47,7 @@ public class UsersService implements UserDetailsService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    private EntityManager entityManager;
+    private UsersRolesRepository usersRolesRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) {
@@ -182,5 +183,29 @@ public class UsersService implements UserDetailsService {
 
     public void delete(int id) {
         usersRepository.deleteById(id);
+    }
+
+    // Метод проверки уполномоченности админа удалять пользователя
+    public boolean checkUsersRoles(Integer adminId, Integer userToDeleteId) {
+        if (adminId != null && userToDeleteId != null) {
+            Users admin = usersRepository.findById(adminId).get();
+            Users userToDelete = usersRepository.findById(userToDeleteId).get();
+            if (admin != null && userToDelete != null) {
+                Integer userToDeleteRoleId = usersRolesRepository.findUsersRolesByUserId(userToDeleteId).getRoleId();
+                Integer adminRoleId = usersRolesRepository.findUsersRolesByUserId(adminId).getRoleId();
+                if (userToDeleteRoleId != null && adminRoleId != null) {
+                    if (userToDeleteRoleId == adminRoleId)
+                        return false;
+                    else if (userToDeleteRoleId > adminRoleId)
+                        return false;
+                    else if (userToDeleteRoleId < adminRoleId)
+                        return true;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
     }
 }
