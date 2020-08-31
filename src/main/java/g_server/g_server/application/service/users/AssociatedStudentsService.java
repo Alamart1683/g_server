@@ -56,9 +56,14 @@ public class AssociatedStudentsService {
 
         if (messageList.size() == 0) {
             Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
+            Users student = usersRepository.findById(student_id).get();
 
             if (scientificAdvisor == null) {
                 messageList.add("Не удается найти научного руководителя");
+            }
+
+            if (student == null) {
+                messageList.add("Не удается найти ваш аккаунт");
             }
 
             Integer studentRole = usersRolesRepository.findUsersRolesByUserId(student_id).getRoleId();
@@ -90,7 +95,7 @@ public class AssociatedStudentsService {
                 // Проверим, активна ли у научного руководителя почтовая рассылка
                 if (scientificAdvisor.isSendMailAccepted()) {
                     // Отправим ему письмо с уведомлением
-                    // TODO Сделай это
+                    mailService.sendRequestForScientificAdvisorMail(student, scientificAdvisor);
                     messageList.add("Ваш потенциальный научный руководитель" +
                             " получил уведомление по почте о вашей заявке");
                 }
