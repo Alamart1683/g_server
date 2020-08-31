@@ -2,6 +2,7 @@ package g_server.g_server.application.entity.users;
 
 import g_server.g_server.application.entity.system_data.Cathedras;
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "scientific_advisor_data")

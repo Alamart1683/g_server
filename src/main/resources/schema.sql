@@ -87,8 +87,8 @@ create table associated_students (
     scientific_advisor int not null,
     student int not null,
     is_accepted bool not null default false,
-    foreign key (scientific_advisor) references scientific_advisor_data (id) on delete cascade on update cascade,
-    foreign key (student) references student_data (id) on delete cascade on update cascade
+    foreign key (scientific_advisor) references users (id) on delete cascade on update cascade,
+    foreign key (student) references users (id) on delete cascade on update cascade
 );
 
 create table document_type (

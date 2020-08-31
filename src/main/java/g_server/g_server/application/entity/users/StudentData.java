@@ -5,6 +5,7 @@ import g_server.g_server.application.entity.system_data.StudentGroup;
 import g_server.g_server.application.entity.system_data.StudentType;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "student_data")

@@ -18,6 +18,14 @@ public class AssociatedStudents {
     @Column(name = "is_accepted")
     private boolean isAccepted;
 
+    @ManyToOne
+    @JoinColumn(name = "scientific_advisor", referencedColumnName = "id", insertable = false, updatable = false)
+    private Users advisorUser;
+
+    @ManyToOne
+    @JoinColumn(name = "student", referencedColumnName = "id", insertable = false, updatable = false)
+    private Users studentUser;
+
     public AssociatedStudents() { }
 
     public AssociatedStudents(int scientificAdvisor, int student, boolean isAccepted) {

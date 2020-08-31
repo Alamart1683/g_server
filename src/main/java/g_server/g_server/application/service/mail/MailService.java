@@ -24,7 +24,7 @@ public class MailService {
         message.setSubject("Код регистрации для сайта выпускников кафедры МОСИТ");
         message.setText("Здравствуйте, для завершения регистрации вам необходимо указать код подтверждения. " +
                 "\nКод подтверждения регистрации: " + registrationCode + "\n");
-        message.setText("\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
         this.mailSender.send(message);
         return "Email sent!";
     }
@@ -36,7 +36,7 @@ public class MailService {
         message.setSubject("Учетная запись сайта выпускников кафедры МОСИТ");
         message.setText("Здравствуйте, вы были зарегистрированы в статусе " + status + " на сайте выпускников кафдеры МОСИТ." +
                 "\nЛогин учетной записи: " + recipient + "\nПароль учётной записи: " + password + "\n");
-        message.setText("\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
         this.mailSender.send(message);
         return "Email sent!";
     }
@@ -70,16 +70,17 @@ public class MailService {
         message.setTo(scientificAdvisor.getEmail());
         message.setSubject("Заявка студента на ваше научное руководство");
         message.setText(time + ", " + scientificAdvisorName + ".\n");
-        message.setText("Студент(ка)-" + studentType + ' ' + studentFIO + " из группы " + studentGroup + " подал(а) заявку на то," +
+        message.setText(message.getText() + "Студент(ка)-" + studentType + ' ' + studentFIO + " из группы " + studentGroup + " подал(а) заявку на то," +
                 " чтобы вы стали его(её) научным руководителем\n");
-        message.setText("Его(её) интересует тема ВКР " + theme + ".");
-        message.setText("Вы можете как <u>принять</u>, так и <u>отклонить</u> данную заявку, перейдя по этим ссылкам, " +
+        message.setText(message.getText() + "Его(её) интересует тема ВКР " + theme + ".");
+        message.setText(message.getText() + "Вы можете как <u>принять</u>, так и <u>отклонить</u> данную заявку, перейдя по этим ссылкам, " +
                 "работу которых мы конечно же организуем позже\n");
-        message.setText("\n Для связи с данным студентом(кой) вы можете использовать:\n");
-        message.setText("email-адрес " + studentEmail + "\n");
+        message.setText(message.getText() + "\n Для связи с данным студентом(кой) вы можете использовать:\n");
+        message.setText(message.getText() + "email-адрес " + studentEmail + "\n");
         // TODO Возможно сделать автоматический перевод мобильного телефона в адекватный вид
-        message.setText("мобильный телефон " + studentPhone + "\n");
-        message.setText("\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "мобильный телефон " + studentPhone + "\n");
+        message.setText(message.getText() + "\n\n\n Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        this.mailSender.send(message);
     }
 
     // Определить время письма
