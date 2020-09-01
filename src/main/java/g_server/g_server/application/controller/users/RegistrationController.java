@@ -109,6 +109,9 @@ public class RegistrationController {
     // Запрос на повторную отправку кода
     @PostMapping("/registration/student/confirm/{email}")
     public String repeatConformCodeSending(@PathVariable String email) {
+        registrationCode = (int) ((Math.random() * (1000000 - 100000)) + 100000);
+        String tokenConfirm = jwtProvider.generateConfirmToken(registrationCode);
+        confirmUrl = apiUrl + "registration/student/confirm/" + tokenConfirm;
         mailService.sendStudentEmail(email, Integer.toString(registrationCode), confirmUrl);
         return "Код подтверждения был успешно выслан повторно";
     }
@@ -164,7 +167,7 @@ public class RegistrationController {
             return "Аккаунт был успешно подтвержден";
         }
         else {
-            return "Чексумма не совпадает";
+            return "Чексумма не совпадает, возможно вы выслали код заново и данный код стал недействителен";
         }
     }
 
