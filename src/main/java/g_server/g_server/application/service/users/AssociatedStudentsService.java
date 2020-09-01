@@ -106,6 +106,7 @@ public class AssociatedStudentsService {
     }
 
     // TODO Показать список активных заявок
+    // public List<>
 
     // TODO Показать список ассоциированных студентов
 

@@ -85,7 +85,7 @@ public class RegistrationController {
             messageList.add("Ошибка определения согласия на почтовую рассылку");
         }
         if (registrationCode == null) {
-            messageList.add("Код подтверждения регистрации не был сгенерирован");
+            messageList.add("Код подтверждения регистрации не был сгенерирован (не получена форма регистрации)");
         }
         if (messageList.size() == 0) {
             if (!usersService.saveStudent(studentForm.StudentFormToUsers(), studentForm.getStudent_type(),
@@ -140,6 +140,7 @@ public class RegistrationController {
             registrationCode = null;
             studentRegistrationEmail = null;
             confirmUrl = null;
+            mailService.sendSuccessRegistrationMailForStudent(user);
             messageList.add("Аккаунт был успешно подтвержден");
         }
         return messageList;
@@ -159,6 +160,7 @@ public class RegistrationController {
             registrationCode = null;
             studentRegistrationEmail = null;
             confirmUrl = null;
+            mailService.sendSuccessRegistrationMailForStudent(user);
             return "Аккаунт был успешно подтвержден";
         }
         else {

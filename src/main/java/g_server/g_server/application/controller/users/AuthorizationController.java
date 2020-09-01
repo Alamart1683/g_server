@@ -19,7 +19,7 @@ public class AuthorizationController {
 
     @Autowired
     private JwtProvider jwtProvider;
-    
+
     @PostMapping("/authorization")
     public String AuthorizationResponse(
             @ModelAttribute("authorizationForm") @Validated AuthorizationForm authorizationForm,

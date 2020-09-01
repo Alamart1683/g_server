@@ -1,6 +1,5 @@
 package g_server.g_server.application.service.mail;
 
-import g_server.g_server.application.config.mail.MailConfig;
 import g_server.g_server.application.entity.users.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -47,12 +46,14 @@ public class MailService {
     public String sendSuccessRegistrationMailForStudent(Users student) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(student.getEmail());
+        message.setSubject("Завершение регистрации");
         String time = mailTimeDetector();
         String studentName = student.getName() + ' ' + student.getSecond_name();
         message.setText(time + ", " + studentName + ".\n");
         message.setText(message.getText() + "Ваш аккаунт был успешно активирован. С этого момента вы можете " +
                 "пользоваться всеми сервисами сайта.\n");
         message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        this.mailSender.send(message);
         return "Email sent!";
     }
 
