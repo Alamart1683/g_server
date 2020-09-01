@@ -60,9 +60,9 @@ create table student_data (
     foreign key (student_group) references student_group (id)
 );
 
-create table project_type (
+create table project_theme (
     id int primary key auto_increment,
-    type varchar (100)
+    theme varchar (256)
 );
 
 create table project (
@@ -71,7 +71,7 @@ create table project (
     name varchar (100),
     scientific_advisor_id int not null,
     description varchar(512) default 'Описание отсутствует',
-    foreign key (type) references project_type (id),
+    foreign key (type) references project_theme (id),
     foreign key (scientific_advisor_id) references scientific_advisor_data (id) on delete cascade on update cascade
 );
 
@@ -184,3 +184,9 @@ insert into document_kind (kind) values
     ('Методическое пособие'),
     ('Презентация'),
     ('Пример отчёта');
+
+insert into project_theme (theme) values
+    ('Обучающие программы для портала Госуслуги, на основе технологии опережающего, деятельного, ситуационного обучения'),
+    ('Дизайн и исследование интерфейсов клиентских приложений, на основе ментальных моделей пользователя'),
+    ('Мобильные и WEB приложения, базирующиеся на клиент-серверной архитектуре'),
+    ('Анализ, разработка, внедрение и сопровождение распределенных, гетерогенных  систем');

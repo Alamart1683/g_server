@@ -82,14 +82,12 @@ public class MailService {
     }
 
     // Послать научному руководителю письмо о том, что студент хочет получить его научное руководство
-    public void sendRequestForScientificAdvisorMail(Users student, Users scientificAdvisor) {
+    public void sendRequestForScientificAdvisorMail(Users student, Users scientificAdvisor, String theme) {
         String studentFIO = student.getSurname() + ' ' + student.getName() + ' ' + student.getSecond_name();
         String studentGroup = student.getStudentData().getStudentGroup().getStudentGroup();
         String studentPhone = student.getPhone();
         String studentEmail = student.getEmail();
         String studentType = student.getStudentData().getStudentType().getStudentType().toLowerCase();
-        // TODO Если сделаем темы, сделать здесь также уведомление о выбранной студентом теме
-        String theme = "мы придумаем их позже";
         String scientificAdvisorName = scientificAdvisor.getName() + ' ' + scientificAdvisor.getSecond_name();
         // Получим время суток
         String time = mailTimeDetector();

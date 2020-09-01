@@ -21,9 +21,10 @@ public class AssociatedUsersController {
     @PostMapping("/student/request/for_scientific_advisor/")
     public List<String> sendRequestForScientificAdvisor(
             @RequestParam int scientificAdvisorId,
+            @RequestParam String theme,
             HttpServletRequest httpServletRequest) {
         return associatedStudentsService.sendRequestForScientificAdvisor(getTokenFromRequest(httpServletRequest),
-                scientificAdvisorId);
+                scientificAdvisorId, theme);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
