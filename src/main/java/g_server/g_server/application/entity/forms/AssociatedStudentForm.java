@@ -4,6 +4,7 @@ import g_server.g_server.application.entity.users.Users;
 
 // Форма формирующая пользовательское представление студенческих заявок
 public class AssociatedStudentForm {
+    private int requestID;
     private String FIO;
     private String group;
     private String type;
@@ -12,7 +13,8 @@ public class AssociatedStudentForm {
 
     public AssociatedStudentForm() { }
 
-    public AssociatedStudentForm(Users users, String theme) {
+    public AssociatedStudentForm(Users users, String theme, int requestID) {
+        this.requestID = requestID;
         this.FIO = users.getSurname() + ' ' + users.getName() + ' ' + users.getSecond_name();
         this.group = users.getStudentData().getStudentGroup().getStudentGroup();
         this.type = users.getStudentData().getStudentType().getStudentType();
@@ -58,5 +60,13 @@ public class AssociatedStudentForm {
 
     public void setTheme(String theme) {
         this.theme = theme;
+    }
+
+    public int getRequestID() {
+        return requestID;
+    }
+
+    public void setRequestID(int requestID) {
+        this.requestID = requestID;
     }
 }

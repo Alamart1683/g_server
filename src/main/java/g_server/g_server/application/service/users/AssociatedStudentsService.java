@@ -117,6 +117,7 @@ public class AssociatedStudentsService {
 
     // Показать список активных заявок
     public List<AssociatedStudentForm> getActiveRequests(String token) {
+        List<String> messageList = new ArrayList<>();
         // Проверка токена
         if (token == null) {
             return null;
@@ -141,7 +142,8 @@ public class AssociatedStudentsService {
             for (AssociatedStudents associatedStudent: associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
                 String currentTheme = associatedStudent.getProjectTheme().getTheme();
-                AssociatedStudentForm associatedStudentForm = new AssociatedStudentForm(currentStudent, currentTheme);
+                AssociatedStudentForm associatedStudentForm = new AssociatedStudentForm(currentStudent,
+                        currentTheme, associatedStudent.getId());
                 activeRequests.add(associatedStudentForm);
             }
             return activeRequests;
@@ -149,9 +151,53 @@ public class AssociatedStudentsService {
         return null;
     }
 
-    // TODO Принять заявку
-
-    // TODO Отклонить заявку
+    // Принять заявку или отклонить заявку
+    public List<String> handleRequest(String token, Integer requestId, boolean accept) {
+        List<String> messageList = new ArrayList<>();
+        // Проверка токена
+        if (token == null) {
+            messageList.add("Ошибка аутентификации: токен равен null");
+        }
+        if (token.equals("")) {
+            messageList.add("Ошибка аутентификации: токен пуст");
+        }
+        if (requestId == null) {
+            messageList.add("Передан некорректный айди заявки");
+        }
+        Integer scientificAdvisorId = getUserId(token);
+        Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
+        AssociatedStudents associatedStudent = associatedStudentsRepository.findById(requestId).get();
+        Users student = usersRepository.findById(associatedStudent.getStudent()).get();
+        if (associatedStudent == null) {
+            messageList.add("Не удается найти заявку");
+        }
+        if (scientificAdvisor == null) {
+            messageList.add("Ошибка авторизации");
+        }
+        if (student == null) {
+            messageList.add("Не удается найти студента");
+        }
+        // После проведения всех проверок примем заявку
+        if (messageList.size() == 0) {
+            if (accept) {
+                associatedStudent.setAccepted(accept);
+                associatedStudentsRepository.save(associatedStudent);
+                // Сообщим студенту о том, что его заявка была принята
+                if (student.isSendMailAccepted()) {
+                    mailService.sendMailStudentAboutHandledRequest(student, scientificAdvisor, "принята");
+                }
+            }
+            else {
+                associatedStudentsRepository.deleteById(requestId);
+                // Сообщим студенту о том, что его заявка была отклонена
+                if (student.isSendMailAccepted()) {
+                    mailService.sendMailStudentAboutHandledRequest(student, scientificAdvisor, "отклонена");
+                }
+            }
+            messageList.add("Заявка успешно обработана");
+        }
+        return messageList;
+    }
 
     // TODO Показать список ассоциированных студентов
 

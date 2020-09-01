@@ -32,7 +32,8 @@ public class MailService {
                     "<br>Так же вы можете завершить регистрацию, перейдя по <b><a href=\"" +
                     registrationLink + "\" target=\"_blank \"> ссылке </a></b>"
                     + "<br>Ссылка действительна 24 часа с момента регистрации.<p>" +
-                    "<br><br><br>Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.";
+                    "<br><br><br>Это письмо было сгенерировано автоматически, пожалуйста, " +
+                    "не отвечайте на него.";
             message.setText(htmlMessage, true);
             this.mailSender.send(mimeMessage);
         }
@@ -52,7 +53,8 @@ public class MailService {
         message.setText(time + ", " + studentName + ".\n");
         message.setText(message.getText() + "Ваш аккаунт был успешно активирован. С этого момента вы можете " +
                 "пользоваться всеми сервисами сайта.\n");
-        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, " +
+                "не отвечайте на него.");
         this.mailSender.send(message);
         return "Email sent!";
     }
@@ -64,7 +66,8 @@ public class MailService {
         message.setSubject("Учетная запись сайта выпускников кафедры МОСИТ");
         message.setText("Здравствуйте, вы были зарегистрированы в статусе " + status + " на сайте выпускников кафедры МОСИТ." +
                 "\nЛогин учетной записи: " + recipient + "\nПароль учётной записи: " + password + "\n");
-        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, " +
+                "не отвечайте на него.");
         this.mailSender.send(message);
         return "Email sent!";
     }
@@ -107,7 +110,8 @@ public class MailService {
         message.setText(message.getText() + "email-адрес: " + studentEmail + "\n");
         // TODO Возможно сделать автоматический перевод мобильного телефона в адекватный вид
         message.setText(message.getText() + "мобильный телефон: " + studentPhone + "\n");
-        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, " +
+                "пожалуйста, не отвечайте на него.");
         this.mailSender.send(message);
     }
 
@@ -122,7 +126,29 @@ public class MailService {
         message.setText(message.getText() + "Ваша заявка на научное руководство была успешно отправлена" +
                 " на рассмотрение научному руководителю. \n");
         message.setText(message.getText() + "После рассмотрения заявки вы получите соответствующее уведомление. \n");
-        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.");
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, " +
+                "не отвечайте на него.");
+        this.mailSender.send(message);
+    }
+
+    // Послать студенту письмо о том, что его заявка обработана преподавателем
+    public void sendMailStudentAboutHandledRequest(Users student, Users scientificAdvisor, String handleResult) {
+        String time = mailTimeDetector();
+        String studentName = student.getName() + ' ' + student.getSecond_name();
+        String advisorName = scientificAdvisor.getSurname() + ' ' +
+                scientificAdvisor.getName() + ' ' + scientificAdvisor.getSecond_name();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(student.getEmail());
+        message.setSubject("Заявка " + handleResult);
+        message.setText(time + ", " + studentName + ".\n");
+        if (handleResult.equals("принята")) {
+            message.setText(message.getText() + advisorName + " принял(а) вашу заявку на научное руководство.");
+        }
+        else if (handleResult.equals("отклонена")) {
+            message.setText(message.getText() + advisorName + " отклонил(а) вашу заявку на научное руководство.");
+        }
+        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, " +
+                "не отвечайте на него.");
         this.mailSender.send(message);
     }
 

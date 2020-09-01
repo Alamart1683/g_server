@@ -36,6 +36,19 @@ public class AssociatedUsersController {
         return associatedStudentsService.getActiveRequests(getTokenFromRequest(httpServletRequest));
     }
 
+    // Обработка заявки с помощью интерфейса сайта
+    @PostMapping("/scientific_advisor/request/handle/")
+    public List<String> handleStudentRequest(
+            @RequestParam int requestID,
+            @RequestParam boolean accept,
+            HttpServletRequest httpServletRequest
+    ) {
+        return associatedStudentsService.handleRequest(getTokenFromRequest(httpServletRequest),
+                requestID, accept);
+    }
+
+    // TODO Сделать обработку заявки через генерацию ссылок в письме
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {
