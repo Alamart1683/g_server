@@ -1,5 +1,7 @@
 package g_server.g_server.application.service.users;
 
+import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.forms.AssociatedStudentForm;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.project.ProjectThemeRepository;
@@ -34,6 +36,9 @@ public class AssociatedStudentsService {
     @Autowired
     private ProjectThemeRepository projectThemeRepository;
 
+    @Autowired
+    private JwtProvider jwtProvider;
+
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
         Integer scientificAdvisorId, String theme) {
@@ -47,7 +52,7 @@ public class AssociatedStudentsService {
             messageList.add("Ошибка аутентификации: токен пуст");
         }
         else {
-            student_id = documentUploadService.getCreatorId(token);
+            student_id = getUserId(token);
         }
         // Проверка существования айди студента и научного рукводителя
         if (student_id == null) {
@@ -89,11 +94,10 @@ public class AssociatedStudentsService {
             // Если не возникло ошибок, добавим заявку
             if (messageList.size() == 0) {
                 // Сформируем заявку
-                AssociatedStudents associatedStudent = new AssociatedStudents(student_id,
-                        scientificAdvisorId, false);
+                AssociatedStudents associatedStudent = new AssociatedStudents(scientificAdvisorId, student_id,
+                        projectThemeRepository.findByTheme(theme).getId(), false);
                 // Сохраним заявку
                 associatedStudentsRepository.save(associatedStudent);
-
                 // Проверим, активна ли у научного руководителя почтовая рассылка
                 if (scientificAdvisor.isSendMailAccepted()) {
                     // Отправим ему письмо с уведомлением
@@ -101,18 +105,67 @@ public class AssociatedStudentsService {
                     messageList.add("Ваш потенциальный научный руководитель" +
                             " получил уведомление по почте о вашей заявке");
                 }
+                // Проверим, активна ли у студента почтовая рассылка
+                if (student.isSendMailAccepted()) {
+                    mailService.sendMailStudentAboutHisRequestSending(student);
+                }
                 messageList.add("Заяка успешно оформлена");
             }
         }
         return messageList;
     }
 
-    // TODO Показать список активных заявок
-    // public List<>
+    // Показать список активных заявок
+    public List<AssociatedStudentForm> getActiveRequests(String token) {
+        // Проверка токена
+        if (token == null) {
+            return null;
+        }
+        if (token.equals("")) {
+            return null;
+        }
+        Integer scientificAdvisorId = getUserId(token);
+        List<AssociatedStudentForm> activeRequests = new ArrayList<>();
+        Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
+        if (scientificAdvisor != null) {
+            List<AssociatedStudents> associatedStudents =
+                    associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
+            // TODO Это очевидный костыль из-за того, что я не понимаю, почему Hibernate
+            // TODO не хочет брать как параметр выборки булевское поле. В будущем его надо
+            // TODO пофиксить, ибо это жутко не оптимальное решение
+            for (AssociatedStudents associatedStudentRaw: associatedStudents) {
+                if (associatedStudentRaw.isAccepted()) {
+                    associatedStudents.remove(associatedStudentRaw);
+                }
+            }
+            for (AssociatedStudents associatedStudent: associatedStudents) {
+                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+                String currentTheme = associatedStudent.getProjectTheme().getTheme();
+                AssociatedStudentForm associatedStudentForm = new AssociatedStudentForm(currentStudent, currentTheme);
+                activeRequests.add(associatedStudentForm);
+            }
+            return activeRequests;
+        }
+        return null;
+    }
 
     // TODO Принять заявку
 
     // TODO Отклонить заявку
 
     // TODO Показать список ассоциированных студентов
+
+    // TODO Отозвать заявку от лица студента
+
+    // Получить айди из токена
+    public Integer getUserId(String token) {
+        String email = jwtProvider.getEmailFromToken(token);
+        Users user = usersRepository.findByEmail(email);
+        if (user != null) {
+            return user.getId();
+        }
+        else {
+            return null;
+        }
+    }
 }

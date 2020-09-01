@@ -1,5 +1,7 @@
 package g_server.g_server.application.entity.users;
 
+import g_server.g_server.application.entity.project.ProjectTheme;
+
 import javax.persistence.*;
 
 @Entity
@@ -15,8 +17,11 @@ public class AssociatedStudents {
     @Column(name = "student")
     private int student;
 
+    @Column(name = "theme")
+    private int theme;
+
     @Column(name = "is_accepted")
-    private boolean isAccepted;
+    private boolean Accepted;
 
     @ManyToOne
     @JoinColumn(name = "scientific_advisor", referencedColumnName = "id", insertable = false, updatable = false)
@@ -26,12 +31,17 @@ public class AssociatedStudents {
     @JoinColumn(name = "student", referencedColumnName = "id", insertable = false, updatable = false)
     private Users studentUser;
 
+    @ManyToOne
+    @JoinColumn(name = "theme", referencedColumnName = "id", insertable = false, updatable = false)
+    private ProjectTheme projectTheme;
+
     public AssociatedStudents() { }
 
-    public AssociatedStudents(int scientificAdvisor, int student, boolean isAccepted) {
+    public AssociatedStudents(int scientificAdvisor, int student, int theme, boolean Accepted) {
         this.scientificAdvisor = scientificAdvisor;
         this.student = student;
-        this.isAccepted = isAccepted;
+        this.theme = theme;
+        this.Accepted = Accepted;
     }
 
     public int getId() {
@@ -58,11 +68,27 @@ public class AssociatedStudents {
         this.student = student;
     }
 
+    public int getTheme() {
+        return theme;
+    }
+
+    public void setTheme(int theme) {
+        this.theme = theme;
+    }
+
     public boolean isAccepted() {
-        return isAccepted;
+        return Accepted;
     }
 
     public void setAccepted(boolean accepted) {
-        isAccepted = accepted;
+        Accepted = accepted;
+    }
+
+    public ProjectTheme getProjectTheme() {
+        return projectTheme;
+    }
+
+    public void setProjectTheme(ProjectTheme projectTheme) {
+        this.projectTheme = projectTheme;
     }
 }

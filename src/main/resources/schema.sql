@@ -87,9 +87,11 @@ create table associated_students (
     id int primary key auto_increment,
     scientific_advisor int not null,
     student int not null,
+    theme int not null,
     is_accepted bool not null default false,
     foreign key (scientific_advisor) references users (id) on delete cascade on update cascade,
-    foreign key (student) references users (id) on delete cascade on update cascade
+    foreign key (student) references users (id) on delete cascade on update cascade,
+    foreign key (theme) references project_theme (id) on delete cascade on update cascade
 );
 
 create table document_type (

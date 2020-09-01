@@ -1,7 +1,9 @@
 package g_server.g_server.application.controller.users;
 
+import g_server.g_server.application.entity.forms.AssociatedStudentForm;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,13 @@ public class AssociatedUsersController {
             HttpServletRequest httpServletRequest) {
         return associatedStudentsService.sendRequestForScientificAdvisor(getTokenFromRequest(httpServletRequest),
                 scientificAdvisorId, theme);
+    }
+
+    @GetMapping("/scientific_advisor/request/all/active")
+    public List<AssociatedStudentForm> findAllActiveRequest(
+            HttpServletRequest httpServletRequest
+    ) {
+        return associatedStudentsService.getActiveRequests(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
