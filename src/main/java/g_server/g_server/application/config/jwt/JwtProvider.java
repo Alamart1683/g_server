@@ -24,22 +24,15 @@ public class JwtProvider {
     @Value("$(registration.secret)")
     private String registrationSecret;
 
+    @Value("&(request.handle.secret)")
+    private String requestHandleSecret;
+
     public String generateToken(String email) {
         Date date = Date.from(LocalDate.now().plusDays(15).atStartOfDay(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .setSubject(email)
                 .setExpiration(date)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
-                .compact();
-    }
-
-    public String generateConfirmToken(int registrationCode) {
-        String registrationCodeString = registrationCode + "";
-        Date date = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-        return Jwts.builder()
-                .setSubject(registrationCodeString)
-                .setExpiration(date)
-                .signWith(SignatureAlgorithm.HS512, registrationSecret)
                 .compact();
     }
 
@@ -58,8 +51,33 @@ public class JwtProvider {
         return claims.getSubject();
     }
 
+    public String generateConfirmToken(int registrationCode) {
+        String registrationCodeString = registrationCode + "";
+        Date date = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return Jwts.builder()
+                .setSubject(registrationCodeString)
+                .setExpiration(date)
+                .signWith(SignatureAlgorithm.HS512, registrationSecret)
+                .compact();
+    }
+
     public String getRegistrationCodeFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(registrationSecret).parseClaimsJws(token).getBody();
+        return claims.getSubject();
+    }
+
+    // Токен ссылок обработки заявок студента
+    public String getStudentRequestHandleToken(String studentRequestIdentifier) {
+        Date date = Date.from(LocalDate.now().plusDays(7).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return Jwts.builder()
+                .setSubject(studentRequestIdentifier)
+                .setExpiration(date)
+                .signWith(SignatureAlgorithm.HS512, requestHandleSecret)
+                .compact();
+    }
+
+    public String getRequestIdentifierFromToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey(requestHandleSecret).parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
 }

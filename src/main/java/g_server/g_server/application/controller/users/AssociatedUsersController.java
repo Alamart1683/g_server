@@ -3,11 +3,9 @@ package g_server.g_server.application.controller.users;
 import g_server.g_server.application.entity.forms.AssociatedStudentForm;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -43,11 +41,30 @@ public class AssociatedUsersController {
             @RequestParam boolean accept,
             HttpServletRequest httpServletRequest
     ) {
-        return associatedStudentsService.handleRequest(getTokenFromRequest(httpServletRequest),
-                requestID, accept);
+        List<String> messageList = new ArrayList<>();
+        Integer scientificAdvisorId = associatedStudentsService.getUserId(getTokenFromRequest(httpServletRequest));
+        if (scientificAdvisorId == null) {
+            messageList.add("Ошибка валидации токена");
+            return messageList;
+        }
+        return associatedStudentsService.handleRequest(scientificAdvisorId, requestID, accept);
     }
 
-    // TODO Сделать обработку заявки через генерацию ссылок в письме
+    // Обработка заявки через ссылки в письме
+    @GetMapping("/mail/request/handle/{token}")
+    public String handleStudentRequestByURL(@PathVariable String token) {
+        List<String> params = associatedStudentsService.decodeRequestToken(token);
+        if (params == null) {
+            return "Срок действия ссылки подтверждения истек или она указана неверно";
+        }
+        Integer advisorID = Integer.parseInt(params.get(0));
+        Integer requestID = associatedStudentsService.getRequestId(params.get(0), params.get(1));
+        Boolean accept = associatedStudentsService.getAccept(params.get(2));
+        if (accept == null || requestID == null || advisorID == null) {
+            return "Срок действия ссылки подтверждения истек или она указана неверно";
+        }
+        return associatedStudentsService.handleRequest(advisorID, requestID, accept).get(0);
+    }
 
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);

@@ -61,10 +61,11 @@ public class MailService {
 
     // Отравить по почте уведолмение о регистрации
     public String sendLoginEmailAndPassword(String recipient, String password, String status) {
+        String time = mailTimeDetector();
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(recipient);
         message.setSubject("Учетная запись сайта выпускников кафедры МОСИТ");
-        message.setText("Здравствуйте, вы были зарегистрированы в статусе " + status + " на сайте выпускников кафедры МОСИТ." +
+        message.setText(time + ", вы были зарегистрированы в статусе " + status + " на сайте выпускников кафедры МОСИТ." +
                 "\nЛогин учетной записи: " + recipient + "\nПароль учётной записи: " + password + "\n");
         message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, " +
                 "не отвечайте на него.");
@@ -85,7 +86,8 @@ public class MailService {
     }
 
     // Послать научному руководителю письмо о том, что студент хочет получить его научное руководство
-    public void sendRequestForScientificAdvisorMail(Users student, Users scientificAdvisor, String theme) {
+    public String sendRequestForScientificAdvisorMail(Users student, Users scientificAdvisor,
+                                                    String theme, String acceptURL, String declineURL) {
         String studentFIO = student.getSurname() + ' ' + student.getName() + ' ' + student.getSecond_name();
         String studentGroup = student.getStudentData().getStudentGroup().getStudentGroup();
         String studentPhone = student.getPhone();
@@ -96,27 +98,36 @@ public class MailService {
         // Получим время суток
         String time = mailTimeDetector();
         // Получив необходимые данные, отправим само письмо
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(scientificAdvisor.getEmail());
-        message.setSubject("Заявка студента на ваше научное руководство");
-        message.setText(time + ", " + scientificAdvisorName + ".\n");
-        message.setText(message.getText() + "Студент(ка)-" + studentType + ' ' + studentFIO + " из группы " + studentGroup +
-                " с кафедры " + studentCathedra + " подал(а) заявку на то," +
-                " чтобы вы стали его(её) научным руководителем.\n");
-        message.setText(message.getText() + "Студент(ка) заинтересован(а) в том, чтобы взять следующую тему ВКР: " + theme + ".\n");
-        message.setText(message.getText() + "Вы можете как принять, так и отклонить данную заявку, перейдя по этим ссылкам, " +
-                "либо же совершить аналогичные действия в соответствующем разделе нашего сайта.\n");
-        message.setText(message.getText() + "\nДля связи с данным студентом(кой) вы можете использовать\n");
-        message.setText(message.getText() + "email-адрес: " + studentEmail + "\n");
-        // TODO Возможно сделать автоматический перевод мобильного телефона в адекватный вид
-        message.setText(message.getText() + "мобильный телефон: " + studentPhone + "\n");
-        message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, " +
-                "пожалуйста, не отвечайте на него.");
-        this.mailSender.send(message);
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "utf-8");
+        try {
+            message.setTo(scientificAdvisor.getEmail());
+            message.setSubject("Заявка студента на ваше научное руководство");
+            String htmlMessage = time + ", " + scientificAdvisorName + ".<br>" +
+                "Студент(ка)-" + studentType + ' ' + studentFIO + " из группы " +
+                 studentGroup + " с кафедры " + studentCathedra + " подал(а) " +
+                "заявку на то," + " чтобы вы стали его(её) научным руководителем.<br>" +
+                "Студент(ка) заинтересован(а) в том, чтобы взять следующую тему ВКР: " + theme + ".<br>" +
+                "Вы можете как <a href=\"" + acceptURL + "\" target=\"_blank \">принять</a>, " +
+                "так и <a href=\"" + declineURL + "\" target=\"_blank \">отклонить</a>" + " данную заявку, перейдя по этим ссылкам, " +
+                "либо же совершить аналогичные действия в соответствующем разделе сайта.<br>" +
+                "Ссылки действительны 7 дней с момента отправления письма.<br>" +
+                "<br>Для связи с данным студентом(кой) вы можете использовать<br>" +
+                "email-адрес: " + studentEmail + "<br>" +
+                // TODO Возможно сделать автоматический перевод мобильного телефона в адекватный вид
+                "мобильный телефон: " + studentPhone + "<br>" +
+                "<br><br><br>Это письмо было сгенерировано автоматически, пожалуйста, не отвечайте на него.";
+            message.setText(htmlMessage, true);
+            this.mailSender.send(mimeMessage);
+            return "Email sent!";
+        }
+        catch (MessagingException messagingException) {
+            return "MessagingException";
+        }
     }
 
     // Послать студенту письмо о том, что его заявка доставлена преподавателю
-    public void sendMailStudentAboutHisRequestSending(Users student) {
+    public String sendMailStudentAboutHisRequestSending(Users student) {
         String time = mailTimeDetector();
         String studentName = student.getName() + ' ' + student.getSecond_name();
         SimpleMailMessage message = new SimpleMailMessage();
@@ -129,10 +140,11 @@ public class MailService {
         message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, " +
                 "не отвечайте на него.");
         this.mailSender.send(message);
+        return "Email sent!";
     }
 
     // Послать студенту письмо о том, что его заявка обработана преподавателем
-    public void sendMailStudentAboutHandledRequest(Users student, Users scientificAdvisor, String handleResult) {
+    public String sendMailStudentAboutHandledRequest(Users student, Users scientificAdvisor, String handleResult) {
         String time = mailTimeDetector();
         String studentName = student.getName() + ' ' + student.getSecond_name();
         String advisorName = scientificAdvisor.getSurname() + ' ' +
@@ -150,6 +162,7 @@ public class MailService {
         message.setText(message.getText() + "\n\n\nЭто письмо было сгенерировано автоматически, пожалуйста, " +
                 "не отвечайте на него.");
         this.mailSender.send(message);
+        return "Email sent!";
     }
 
     // Определить время письма

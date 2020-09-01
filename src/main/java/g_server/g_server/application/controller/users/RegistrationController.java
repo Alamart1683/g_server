@@ -21,6 +21,7 @@ public class RegistrationController {
     private Integer registrationCode;
     private String studentRegistrationEmail;
     private String confirmUrl;
+    // TODO Нигде не забыть заменить на итоговый адрес сервера
     private static final String apiUrl = "http://localhost:8080/";
 
     @Autowired

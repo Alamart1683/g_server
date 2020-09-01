@@ -18,6 +18,9 @@ import java.util.List;
 // Сервис взаимодействия студентов и научных руководителей
 @Service
 public class AssociatedStudentsService {
+    // TODO Нигде не забыть заменить на итоговый адрес сервера
+    private static final String apiUrl = "http://localhost:8080/";
+
     @Autowired
     private DocumentUploadService documentUploadService;
 
@@ -87,7 +90,7 @@ public class AssociatedStudentsService {
             }
             // Проверка на то, одну ли заявку отправляет студент
             AssociatedStudents existController =
-                    associatedStudentsRepository.findByScientificAdvisorAndStudent(student_id, scientificAdvisorId);
+                    associatedStudentsRepository.findByScientificAdvisorAndStudent(scientificAdvisorId, student_id);
             if (existController != null) {
                 messageList.add("Одновременно позволено подавать только одну заявку для одного научного руководителя");
             }
@@ -98,10 +101,20 @@ public class AssociatedStudentsService {
                         projectThemeRepository.findByTheme(theme).getId(), false);
                 // Сохраним заявку
                 associatedStudentsRepository.save(associatedStudent);
+                // Сгенерируем её уникальный идентификатор
+                String acceptRequestIdentifier = scientificAdvisorId.toString() + "."
+                        + student_id.toString() + ".true";
+                String declineRequestIdentifier = scientificAdvisorId.toString() + "."
+                        + student_id.toString() + ".false";
+                String acceptToken = jwtProvider.getStudentRequestHandleToken(acceptRequestIdentifier);
+                String declineToken = jwtProvider.getStudentRequestHandleToken(declineRequestIdentifier);
+                String acceptURL = apiUrl + "mail/request/handle/" +  acceptToken;
+                String declineURL = apiUrl + "mail/request/handle/" + declineToken;
                 // Проверим, активна ли у научного руководителя почтовая рассылка
                 if (scientificAdvisor.isSendMailAccepted()) {
                     // Отправим ему письмо с уведомлением
-                    mailService.sendRequestForScientificAdvisorMail(student, scientificAdvisor, theme);
+                    mailService.sendRequestForScientificAdvisorMail(student, scientificAdvisor, theme,
+                            acceptURL, declineURL);
                     messageList.add("Ваш потенциальный научный руководитель" +
                             " получил уведомление по почте о вашей заявке");
                 }
@@ -152,19 +165,8 @@ public class AssociatedStudentsService {
     }
 
     // Принять заявку или отклонить заявку
-    public List<String> handleRequest(String token, Integer requestId, boolean accept) {
+    public List<String> handleRequest(Integer scientificAdvisorId, Integer requestId, boolean accept) {
         List<String> messageList = new ArrayList<>();
-        // Проверка токена
-        if (token == null) {
-            messageList.add("Ошибка аутентификации: токен равен null");
-        }
-        if (token.equals("")) {
-            messageList.add("Ошибка аутентификации: токен пуст");
-        }
-        if (requestId == null) {
-            messageList.add("Передан некорректный айди заявки");
-        }
-        Integer scientificAdvisorId = getUserId(token);
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
         AssociatedStudents associatedStudent = associatedStudentsRepository.findById(requestId).get();
         Users student = usersRepository.findById(associatedStudent.getStudent()).get();
@@ -176,6 +178,12 @@ public class AssociatedStudentsService {
         }
         if (student == null) {
             messageList.add("Не удается найти студента");
+        }
+        if (requestId == null) {
+            messageList.add("Передан некорректный айди заявки");
+        }
+        if (associatedStudent.isAccepted()) {
+            messageList.add("Срок действия ссылки подтверждения истек или она указана неверно");
         }
         // После проведения всех проверок примем заявку
         if (messageList.size() == 0) {
@@ -205,12 +213,61 @@ public class AssociatedStudentsService {
 
     // Получить айди из токена
     public Integer getUserId(String token) {
+        // Проверка токена
+        if (token == null) {
+            return null;
+        }
+        if (token.equals("")) {
+            return null;
+        }
         String email = jwtProvider.getEmailFromToken(token);
         Users user = usersRepository.findByEmail(email);
         if (user != null) {
             return user.getId();
         }
         else {
+            return null;
+        }
+    }
+
+    // Метод декодирования токена идентификатора студентческой заявки
+    public List<String> decodeRequestToken(String token) {
+        List<String> params = new ArrayList<>();
+        String identifier = jwtProvider.getRequestIdentifierFromToken(token);
+        if (identifier != null) {
+            if (!identifier.equals("")) {
+                String[] identifierArray = identifier.split("\\.");
+                for (int i = 0; i < identifierArray.length; i++) {
+                    params.add(identifierArray[i]);
+                }
+                return params;
+            }
+        }
+        return null;
+    }
+
+    // Метод получения айди запроса по айди НР и студента
+    public Integer getRequestId(String scientificAdvisor, String student) {
+        Integer advisor_id = Integer.parseInt(scientificAdvisor);
+        Integer student_id = Integer.parseInt(student);
+        if (advisor_id == null || student_id == null) {
+            return null;
+        }
+        AssociatedStudents associatedStudent =
+                associatedStudentsRepository.findByScientificAdvisorAndStudent(advisor_id, student_id);
+        if (associatedStudent == null) {
+            return null;
+        }
+        return  associatedStudent.getId();
+    }
+
+    // Декодировать вердикт по заявке
+    public Boolean getAccept(String accept) {
+        if (accept.equals("true")) {
+            return true;
+        } else if (accept.equals("false")) {
+            return false;
+        } else {
             return null;
         }
     }
