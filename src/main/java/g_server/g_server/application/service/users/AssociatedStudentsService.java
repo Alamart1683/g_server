@@ -1,7 +1,7 @@
 package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.forms.AssociatedStudentForm;
+import g_server.g_server.application.entity.view.AssociatedStudentView;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.project.ProjectThemeRepository;
@@ -129,7 +129,7 @@ public class AssociatedStudentsService {
     }
 
     // Показать список активных заявок
-    public List<AssociatedStudentForm> getActiveRequests(String token) {
+    public List<AssociatedStudentView> getActiveRequests(String token) {
         List<String> messageList = new ArrayList<>();
         // Проверка токена
         if (token == null) {
@@ -139,7 +139,7 @@ public class AssociatedStudentsService {
             return null;
         }
         Integer scientificAdvisorId = getUserId(token);
-        List<AssociatedStudentForm> activeRequests = new ArrayList<>();
+        List<AssociatedStudentView> activeRequests = new ArrayList<>();
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
         if (scientificAdvisor != null) {
             List<AssociatedStudents> associatedStudents =
@@ -155,7 +155,7 @@ public class AssociatedStudentsService {
             for (AssociatedStudents associatedStudent: associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
                 String currentTheme = associatedStudent.getProjectTheme().getTheme();
-                AssociatedStudentForm associatedStudentForm = new AssociatedStudentForm(currentStudent,
+                AssociatedStudentView associatedStudentForm = new AssociatedStudentView(currentStudent,
                         currentTheme, associatedStudent.getId());
                 activeRequests.add(associatedStudentForm);
             }

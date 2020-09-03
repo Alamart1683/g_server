@@ -5,33 +5,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class DocumentDownloadController {
-    public static final String AUTHORIZATION = "Authorization";
-
     @Autowired
     private DocumentDownloadService documentDownloadService;
 
     @GetMapping("/document/download/")
     public void documentDownload(
+            @RequestParam Integer creator_id,
             @RequestParam String documentName,
-            HttpServletResponse httpServletResponse,
-            HttpServletRequest httpServletRequest
+            HttpServletResponse httpServletResponse
     ) {
-        String token = getTokenFromRequest(httpServletRequest);
-        // TODO Убрать костыли в скачивании документов
-        File file = documentDownloadService.findDownloadDocument(documentName, token);
+        File file = documentDownloadService.findDownloadDocument(creator_id, documentName);
         String contentType = documentDownloadService.getContentType(file.getName());
-        String mainName = documentDownloadService.getMainFileName(documentName, token);
+        String mainName = documentDownloadService.getMainFileName(creator_id, documentName);
         Path path = Paths.get(file.getPath());
         httpServletResponse.setContentType(contentType);
         httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
@@ -41,13 +35,5 @@ public class DocumentDownloadController {
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
-    }
-
-    private String getTokenFromRequest(HttpServletRequest request) {
-        String bearer = request.getHeader(AUTHORIZATION);
-        if (hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
-        }
-        return null;
     }
 }

@@ -14,7 +14,7 @@ public class DocumentVersion {
     @Column
     private int editor;
 
-    @Column
+    @Column(name = "document")
     private int document;
 
     @Column(name = "edition_date")

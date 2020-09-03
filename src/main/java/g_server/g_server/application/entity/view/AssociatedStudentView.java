@@ -1,20 +1,20 @@
-package g_server.g_server.application.entity.forms;
+package g_server.g_server.application.entity.view;
 
 import g_server.g_server.application.entity.users.Users;
 
 // Форма формирующая пользовательское представление студенческих заявок
-public class AssociatedStudentForm {
-    private int requestID;
+public class AssociatedStudentView {
+    private int systemRequestID;
     private String FIO;
     private String group;
     private String type;
     private String cathedra;
     private String theme;
 
-    public AssociatedStudentForm() { }
+    public AssociatedStudentView() { }
 
-    public AssociatedStudentForm(Users users, String theme, int requestID) {
-        this.requestID = requestID;
+    public AssociatedStudentView(Users users, String theme, int requestID) {
+        this.systemRequestID = requestID;
         this.FIO = users.getSurname() + ' ' + users.getName() + ' ' + users.getSecond_name();
         this.group = users.getStudentData().getStudentGroup().getStudentGroup();
         this.type = users.getStudentData().getStudentType().getStudentType();
@@ -62,11 +62,11 @@ public class AssociatedStudentForm {
         this.theme = theme;
     }
 
-    public int getRequestID() {
-        return requestID;
+    public int getSystemRequestID() {
+        return systemRequestID;
     }
 
-    public void setRequestID(int requestID) {
-        this.requestID = requestID;
+    public void setSystemRequestID(int systemRequestID) {
+        this.systemRequestID = systemRequestID;
     }
 }

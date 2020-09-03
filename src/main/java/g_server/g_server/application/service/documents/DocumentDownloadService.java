@@ -16,9 +16,6 @@ public class DocumentDownloadService {
     private DocumentViewService documentViewService;
 
     @Autowired
-    private DocumentDownloadService documentDownloadService;
-
-    @Autowired
     private DocumentUploadService documentUploadService;
 
     @Autowired
@@ -30,35 +27,21 @@ public class DocumentDownloadService {
     @Autowired
     private DocumentVersionRepository documentVersionRepository;
 
-    // Метод поиска скачиваемого документа
-    public File findDownloadDocument(String documentName, String token) {
-        if (documentViewService.checkView(documentName, token)) {
-            if (token == null)
-                return null;
-
-            if (token == "")
-                return null;
-
-            Integer creator_id = null;
-            creator_id = documentUploadService.getCreatorId(token);
-
-            if (creator_id == null)
-                return null;
-
-            Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
-
-            if (document != null) {
-                List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(document.getId());
-                DocumentVersion lastVersion = documentVersions.get(documentVersions.size() - 1);
-                String path = lastVersion.getThis_version_document_path();
-                File downloadFile = new File(path);
-                return downloadFile;
-            }
-            else {
-                return null;
-            }
+    // Метод скачивания документа последней версии
+    public File findDownloadDocument(Integer creator_id, String documentName) {
+        if (creator_id == null)
+            return null;
+        Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+        if (document != null) {
+            List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(document.getId());
+            DocumentVersion lastVersion = documentVersions.get(documentVersions.size() - 1);
+            String path = lastVersion.getThis_version_document_path();
+            File downloadFile = new File(path);
+            return downloadFile;
         }
-        return null;
+        else {
+            return null;
+        }
     }
 
     // Метод определения типа контента
@@ -128,13 +111,7 @@ public class DocumentDownloadService {
     }
 
     // Метод получения основного имени файла
-    public String getMainFileName(String documentName, String token) {
-        if (token == null)
-            return "";
-        if (token == "")
-            return "";
-        Integer creator_id = null;
-        creator_id = documentUploadService.getCreatorId(token);
+    public String getMainFileName(Integer creator_id, String documentName) {
         if (creator_id == null)
             return "";
         Document document = documentRepository.findByCreatorAndName(creator_id, documentName);

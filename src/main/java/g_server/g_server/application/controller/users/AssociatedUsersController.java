@@ -1,6 +1,6 @@
 package g_server.g_server.application.controller.users;
 
-import g_server.g_server.application.entity.forms.AssociatedStudentForm;
+import g_server.g_server.application.entity.view.AssociatedStudentView;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +28,7 @@ public class AssociatedUsersController {
     }
 
     @GetMapping("/scientific_advisor/request/all/active")
-    public List<AssociatedStudentForm> findAllActiveRequest(
+    public List<AssociatedStudentView> findAllActiveRequest(
             HttpServletRequest httpServletRequest
     ) {
         return associatedStudentsService.getActiveRequests(getTokenFromRequest(httpServletRequest));

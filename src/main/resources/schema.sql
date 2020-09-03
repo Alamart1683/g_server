@@ -170,7 +170,7 @@ insert into view_rights (view_right) values
     ('is_only_for_me'),
     ('is_only_for_scientific_advisors'),
     ('is_only_for_my_students'),
-    ('is_for_all_students'),
+    ('is_only_for_my_students_and_only_for_scientific_advisors'),
     ('is_for_all');
 
 insert into document_type (type) values

@@ -51,6 +51,7 @@ public class JwtProvider {
         return claims.getSubject();
     }
 
+    // Токен подтверждения регистрации
     public String generateConfirmToken(int registrationCode) {
         String registrationCodeString = registrationCode + "";
         Date date = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());

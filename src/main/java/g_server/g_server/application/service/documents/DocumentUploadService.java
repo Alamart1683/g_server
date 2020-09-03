@@ -373,13 +373,13 @@ public class DocumentUploadService {
         switch (viewRights) {
             case "Только я":
                 return 1;
-            case "Только для научных руководителей":
+            case "Только научные руководители":
                 return 2;
-            case "Только моим студентам":
+            case "Только мои студенты":
                 return 3;
-            case "Для всех студентов":
+            case "Только мои студенты и научные руководители":
                 return 4;
-            case "Для всех":
+            case "Все пользователи":
                 return 5;
             default:
                 return null;
