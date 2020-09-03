@@ -14,6 +14,7 @@ import g_server.g_server.application.service.documents.crud.DocumentVersionServi
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +59,13 @@ public class DocumentViewService {
                 if (documentView == 3 || documentView == 4) {
                     AssociatedStudents associatedStudent = associatedStudentsRepository.
                             findByScientificAdvisorAndStudent(advisor.getId(), student.getId());
-                    if (associatedStudent.isAccepted()) {
-                        return true;
+                    if (associatedStudent != null) {
+                        if (associatedStudent.isAccepted()) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
                     }
                     else {
                         return false;
@@ -98,7 +104,7 @@ public class DocumentViewService {
             // TODO этот момент надо учесть при загрузке прав видимости документов на клиент
             // TODO то есть в идеале надо сделать отдельную выдачу списка типов документов и прав видимостей
             // TODO для научных руководителей и заведующего кафедрой
-            if (documentView < 3 || documentView == 5) {
+            if (documentView > 0 || documentView < 6) {
                 // Если документ может видеть только его создатель
                 if (documentView == 1) {
                     // Если желающий увидеть документ НР сам его загрузил
@@ -110,11 +116,17 @@ public class DocumentViewService {
                     }
                 }
                 // Если документ могут видеть все НР
-                else if (documentView == 2 || documentView == 4 || documentView == 5) {
-                    return true;
+                else if (documentView == 3) {
+                    // Если желающий увидеть документ НР сам его загрузил
+                    if (lookingAdvisor.getId() == documentCreatorAdvisor.getId()) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
                 }
                 else {
-                    return false;
+                    return true;
                 }
             }
             else {

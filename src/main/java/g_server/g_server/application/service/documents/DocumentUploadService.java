@@ -284,7 +284,12 @@ public class DocumentUploadService {
     // Необходимо определить текущую дату
     public String getCurrentDate() {
         ZonedDateTime dateTime = ZonedDateTime.now();
-        String completeDateTime = dateTime.getDayOfMonth() + "." + monthWordToMonthNumber(dateTime.getMonth().toString()) +
+        String currentDay;
+        if (dateTime.getDayOfMonth() < 10)
+            currentDay = "0" + dateTime.getDayOfMonth();
+        else
+            currentDay = dateTime.getDayOfMonth() + "";
+        String completeDateTime = currentDay + "." + monthWordToMonthNumber(dateTime.getMonth().toString()) +
                 "." + dateTime.getYear() + ".";
         String currentHour;
         if (dateTime.getHour() < 10)
