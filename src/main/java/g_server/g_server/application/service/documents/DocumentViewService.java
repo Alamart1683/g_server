@@ -10,11 +10,9 @@ import g_server.g_server.application.repository.documents.DocumentVersionReposit
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
-import g_server.g_server.application.service.documents.crud.DocumentVersionService;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;

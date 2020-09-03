@@ -20,11 +20,18 @@ public class DocumentView {
         this.documentName = document.getName();
         this.documentDownloader = document.getUser().getSurname() + " " + document.getUser().getName() + " " +
                 document.getUser().getSecond_name();
-        this.documentDownloadDate = document.getCreation_date();
+        this.documentDownloadDate = getRussianDate(document.getCreation_date());
         this.documentType = document.getDocumentType().getType();
         this.documentKind = document.getDocumentKind().getKind();
         this.documentDescription = document.getDescription();
         this.documentVersions = documentVersions;
+    }
+
+    public String getRussianDate(String date) {
+        String year = date.substring(0, 4);
+        String month = date.substring(5, 7);
+        String day = date.substring(8, 10);
+        return day + "." + month + "." + year;
     }
 
     public int getSystemCreatorID() {
