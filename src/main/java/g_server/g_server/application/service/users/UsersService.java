@@ -220,23 +220,18 @@ public class UsersService implements UserDetailsService {
 
     // Метод проверки уполномоченности админа удалять пользователя
     public boolean checkUsersRoles(Integer adminId, Integer userToDeleteId) {
-
         if (adminId != null && userToDeleteId != null) {
             Users admin = usersRepository.findById(adminId).get();
-            Users userToDelete = usersRepository.findById(userToDeleteId).get();
-
+            Users userToDelete = null;
+            try { userToDelete = usersRepository.findById(userToDeleteId).get(); } catch (Exception e) { }
             if (admin != null && userToDelete != null) {
                 Integer userToDeleteRoleId = usersRolesRepository.findUsersRolesByUserId(userToDeleteId).getRoleId();
                 Integer adminRoleId = usersRolesRepository.findUsersRolesByUserId(adminId).getRoleId();
-
                 if (userToDeleteRoleId != null && adminRoleId != null) {
-
                     if (userToDeleteRoleId == adminRoleId)
                         return false;
-
                     else if (userToDeleteRoleId > adminRoleId)
                         return false;
-
                     else if (userToDeleteRoleId < adminRoleId)
                         return true;
                 }

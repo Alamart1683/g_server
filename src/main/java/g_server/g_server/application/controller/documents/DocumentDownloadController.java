@@ -24,16 +24,18 @@ public class DocumentDownloadController {
             HttpServletResponse httpServletResponse
     ) {
         File file = documentDownloadService.findDownloadDocument(creator_id, documentName);
-        String contentType = documentDownloadService.getContentType(file.getName());
-        String mainName = documentDownloadService.getMainFileName(creator_id, documentName);
-        Path path = Paths.get(file.getPath());
-        httpServletResponse.setContentType(contentType);
-        httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
-        try {
-            Files.copy(path, httpServletResponse.getOutputStream());
-            httpServletResponse.getOutputStream().flush();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+        if (file != null) {
+            String contentType = documentDownloadService.getContentType(file.getName());
+            String mainName = documentDownloadService.getMainFileName(creator_id, documentName);
+            Path path = Paths.get(file.getPath());
+            httpServletResponse.setContentType(contentType);
+            httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
+            try {
+                Files.copy(path, httpServletResponse.getOutputStream());
+                httpServletResponse.getOutputStream().flush();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 }

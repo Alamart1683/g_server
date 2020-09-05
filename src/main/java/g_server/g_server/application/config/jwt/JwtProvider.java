@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Log
@@ -27,7 +28,10 @@ public class JwtProvider {
     @Value("&(request.handle.secret)")
     private String requestHandleSecret;
 
+    // Сгенерировать токен по email
     public String generateToken(String email) {
+        ZonedDateTime dateTime = ZonedDateTime.now();
+        email = email + "$" + dateTime;
         Date date = Date.from(LocalDate.now().plusDays(15).atStartOfDay(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .setSubject(email)
@@ -46,14 +50,18 @@ public class JwtProvider {
         return false;
     }
 
+    // Получить токен из email
     public String getEmailFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-        return claims.getSubject();
+        if (claims.getSubject().lastIndexOf("$") == -1)
+            return null;
+        return claims.getSubject().substring(0, claims.getSubject().lastIndexOf("$"));
     }
 
     // Токен подтверждения регистрации
     public String generateConfirmToken(int registrationCode) {
-        String registrationCodeString = registrationCode + "";
+        ZonedDateTime dateTime = ZonedDateTime.now();
+        String registrationCodeString = registrationCode + "$" + dateTime;;
         Date date = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .setSubject(registrationCodeString)
@@ -62,13 +70,18 @@ public class JwtProvider {
                 .compact();
     }
 
+    // Получить код регистрации из токена
     public String getRegistrationCodeFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(registrationSecret).parseClaimsJws(token).getBody();
-        return claims.getSubject();
+        if (claims.getSubject().lastIndexOf("$") == -1)
+            return null;
+        return claims.getSubject().substring(0, claims.getSubject().lastIndexOf("$"));
     }
 
     // Токен ссылок обработки заявок студента
     public String getStudentRequestHandleToken(String studentRequestIdentifier) {
+        ZonedDateTime dateTime = ZonedDateTime.now();
+        studentRequestIdentifier = studentRequestIdentifier + "$" + dateTime;
         Date date = Date.from(LocalDate.now().plusDays(7).atStartOfDay(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .setSubject(studentRequestIdentifier)
@@ -79,6 +92,8 @@ public class JwtProvider {
 
     public String getRequestIdentifierFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(requestHandleSecret).parseClaimsJws(token).getBody();
-        return claims.getSubject();
+        if (claims.getSubject().lastIndexOf("$") == -1)
+            return null;
+        return claims.getSubject().substring(0, claims.getSubject().lastIndexOf("$"));
     }
 }
