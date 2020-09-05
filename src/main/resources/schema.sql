@@ -35,6 +35,7 @@ create table cathedras (
 create table scientific_advisor_data (
     id int primary key not null,
     cathedra int not null,
+    places int not null default 0,
     foreign key (id) references users (id) on delete cascade on update cascade,
     foreign key (cathedra) references cathedras (id)
 );
