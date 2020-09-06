@@ -89,7 +89,7 @@ public class UsersService implements UserDetailsService {
     }
 
     // Сохранить НР
-    public boolean saveScientificAdvisor(Users user, String cathedra_name) {
+    public boolean saveScientificAdvisor(Users user, String cathedra_name, int places) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
             return false;
@@ -99,14 +99,14 @@ public class UsersService implements UserDetailsService {
             user.setRoles(Collections.singleton(new Roles(2, "ROLE_SCIENTIFIC_ADVISOR")));
             usersRepository.save(user);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
-                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places);
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
         }
     }
 
     // Сохранить зав. кафедрой
-    public boolean saveHeadOfCathedra(Users user, String cathedra_name) {
+    public boolean saveHeadOfCathedra(Users user, String cathedra_name, int places) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
             return false;
@@ -116,7 +116,7 @@ public class UsersService implements UserDetailsService {
             user.setRoles(Collections.singleton(new Roles(3, "ROLE_HEAD_OF_CATHEDRA")));
             usersRepository.save(user);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
-                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId());
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places);
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             return true;
         }

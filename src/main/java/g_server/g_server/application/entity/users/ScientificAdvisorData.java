@@ -14,6 +14,9 @@ public class ScientificAdvisorData {
     @Column(name = "cathedra")
     private int cathedra;
 
+    @Column(name = "places")
+    private int places;
+
     @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Roles roles;
@@ -24,9 +27,10 @@ public class ScientificAdvisorData {
 
     public ScientificAdvisorData() { }
 
-    public ScientificAdvisorData(int id, int cathedra) {
+    public ScientificAdvisorData(int id, int cathedra, int places) {
         this.id = id;
         this.cathedra = cathedra;
+        this.places = places;
     }
 
     public int getId() {
@@ -59,5 +63,13 @@ public class ScientificAdvisorData {
 
     public void setCathedras(Cathedras cathedras) {
         this.cathedras = cathedras;
+    }
+
+    public int getPlaces() {
+        return places;
+    }
+
+    public void setPlaces(int places) {
+        this.places = places;
     }
 }

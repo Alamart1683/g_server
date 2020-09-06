@@ -22,9 +22,6 @@ public class AssociatedStudentsService {
     private static final String apiUrl = "http://localhost:8080/";
 
     @Autowired
-    private DocumentUploadService documentUploadService;
-
-    @Autowired
     private UsersRepository usersRepository;
 
     @Autowired
@@ -93,6 +90,11 @@ public class AssociatedStudentsService {
                     associatedStudentsRepository.findByScientificAdvisorAndStudent(scientificAdvisorId, student_id);
             if (existController != null) {
                 messageList.add("Одновременно позволено подавать только одну заявку для одного научного руководителя");
+            }
+            // Проверка на то, что у научного руководтеля еще есть свободные места
+            if (associatedStudentsRepository.findByScientificAdvisor(scientificAdvisor.getId()).size()
+                    >= scientificAdvisor.getScientificAdvisorData().getPlaces()) {
+                messageList.add("У данного научного руководителя не осталось свободных мест");
             }
             // Если не возникло ошибок, добавим заявку
             if (messageList.size() == 0) {
@@ -210,6 +212,8 @@ public class AssociatedStudentsService {
     // TODO Показать список ассоциированных студентов
 
     // TODO Отозвать заявку от лица студента
+
+    // TODO Сформировать представление научных руководителей для подачи студентом заявки
 
     // Получить айди из токена
     public Integer getUserId(String token) {

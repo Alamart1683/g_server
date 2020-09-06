@@ -3,8 +3,10 @@ package g_server.g_server.application.controller.users.crud;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.documents.DocumentUploadService;
+import g_server.g_server.application.service.users.ScientificAdvisorDataService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +31,9 @@ public class UsersController {
 
     @Autowired
     private DocumentUploadService documentUploadService;
+
+    @Autowired
+    private ScientificAdvisorDataService scientificAdvisorDataService;
 
     @GetMapping("/admin/users/all")
     public List<Users> findAll() {
@@ -69,6 +74,11 @@ public class UsersController {
         else {
             return "Такого пользователя не существует";
         }
+    }
+
+    @PutMapping("/scientific_advisor/users/change_places/{places}")
+    public List<String> changePlaces(@PathVariable Integer places, HttpServletRequest httpServletRequest) {
+        return scientificAdvisorDataService.changePlaces(getTokenFromRequest(httpServletRequest), places);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
