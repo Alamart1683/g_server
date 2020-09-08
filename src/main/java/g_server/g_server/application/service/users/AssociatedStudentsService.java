@@ -1,14 +1,16 @@
 package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.project.ProjectTheme;
+import g_server.g_server.application.entity.users.ScientificAdvisorData;
 import g_server.g_server.application.entity.view.AssociatedStudentView;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.view.ScientificAdvisorView;
 import g_server.g_server.application.repository.project.ProjectThemeRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
-import g_server.g_server.application.service.documents.DocumentUploadService;
 import g_server.g_server.application.service.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,9 @@ public class AssociatedStudentsService {
 
     @Autowired
     private JwtProvider jwtProvider;
+
+    @Autowired
+    private ScientificAdvisorDataService scientificAdvisorDataService;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -132,7 +137,6 @@ public class AssociatedStudentsService {
 
     // Показать список активных заявок
     public List<AssociatedStudentView> getActiveRequests(String token) {
-        List<String> messageList = new ArrayList<>();
         // Проверка токена
         if (token == null) {
             return null;
@@ -213,7 +217,52 @@ public class AssociatedStudentsService {
 
     // TODO Отозвать заявку от лица студента
 
-    // TODO Сформировать представление научных руководителей для подачи студентом заявки
+    // TODO Откзаться от научного руководителя от лица студента
+
+    // TODO Проверить, имеет ли студент научного руководителя
+
+    // TODO Возможно стоит сделать триггер при принятии последней заявки НР чтобы те, что не были
+    // TODO им приняты, автоматически отклонились и для этого заюзать письмо
+
+    // TODO Может добавить атрибут должности преподавателя в таблицу данных о научном руководителе
+
+    // Сформировать представление научных руководителей для подачи студентом заявки
+    // TODO Не знаю, стоит ли отображать преподов с уже закончившимися местами
+    // TODO Можно отображать их типа приглушенными, ввел для этого специальный флаг
+    public List<ScientificAdvisorView> getScientificAdvisorViewList() {
+        List<ScientificAdvisorData> advisorList = scientificAdvisorDataService.findAll();
+        List<ScientificAdvisorView> advisorViewList = new ArrayList<>();
+        // TODO Список обших на данный момент тем проектов
+        List<ProjectTheme> projectThemes = projectThemeRepository.findAll();
+        for (ScientificAdvisorData currentAdvisorData: advisorList) {
+            Users currentAdvisor = usersRepository.findById(currentAdvisorData.getId()).get();
+            List<AssociatedStudents> associatedStudents =
+                    associatedStudentsRepository.findByScientificAdvisor(currentAdvisorData.getId());
+            for (AssociatedStudents associatedStudent: associatedStudents) {
+                if (!associatedStudent.isAccepted()) {
+                    associatedStudents.remove(associatedStudent);
+                }
+            }
+            Integer freePlaces = currentAdvisorData.getPlaces() - associatedStudents.size();
+            Integer occupiedPlaces = associatedStudents.size();
+            advisorViewList.add(
+                    new ScientificAdvisorView(
+                            currentAdvisorData.getId(),
+                            currentAdvisor.getSurname(),
+                            currentAdvisor.getName(),
+                            currentAdvisor.getSecond_name(),
+                            currentAdvisorData.getCathedras().getCathedraName(),
+                            currentAdvisor.getEmail(),
+                            currentAdvisor.getPhone(),
+                            currentAdvisorData.getPlaces(),
+                            freePlaces,
+                            occupiedPlaces,
+                            projectThemes
+                    )
+            );
+        }
+        return advisorViewList;
+    }
 
     // Получить айди из токена
     public Integer getUserId(String token) {

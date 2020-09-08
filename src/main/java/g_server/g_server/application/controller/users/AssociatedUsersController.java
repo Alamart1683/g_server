@@ -1,6 +1,7 @@
 package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.entity.view.AssociatedStudentView;
+import g_server.g_server.application.entity.view.ScientificAdvisorView;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +65,12 @@ public class AssociatedUsersController {
             return "Срок действия ссылки подтверждения истек или она указана неверно";
         }
         return associatedStudentsService.handleRequest(advisorID, requestID, accept).get(0);
+    }
+
+    // Получить представление научных руководителей для отправки заявки
+    @GetMapping("/student/scientific_advisor/all")
+    public List<ScientificAdvisorView> getScientificAdvisorView() {
+        return associatedStudentsService.getScientificAdvisorViewList();
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
