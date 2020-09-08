@@ -2,6 +2,10 @@
 /* Если при коннекте ругается на неверное время */
 set global time_zone = '-3:00';
 
+/* Включить планировшик MySQL*/
+SET GLOBAL event_scheduler = ON;
+
+
 create table users (
     id int primary key auto_increment,
     email varchar(100) not null unique,
@@ -11,7 +15,8 @@ create table users (
     password varchar(256) not null,
     phone varchar(50) not null,
     is_accepted_mail_sending bool not null,
-    is_confirmed bool not null
+    is_confirmed bool not null,
+    registration_date timestamp not null default current_timestamp
 );
 
 create table roles (
@@ -193,3 +198,14 @@ insert into project_theme (theme) values
     ('Дизайн и исследование интерфейсов клиентских приложений, на основе ментальных моделей пользователя'),
     ('Мобильные и WEB приложения, базирующиеся на клиент-серверной архитектуре'),
     ('Анализ, разработка, внедрение и сопровождение распределенных, гетерогенных систем');
+
+/*
+Событие для планировщика, которое будет удалять неподтвердившихся
+пользователей через 30 дней после их регистрации
+ */
+create event delete_not_confirmed_users
+on
+    schedule every 1 day starts current_timestamp
+do
+    delete from users
+    where is_confirmed = false and to_days(date(current_timestamp)) - to_days(date(registration_date)) > 30
