@@ -57,7 +57,7 @@ public class ProjectController {
             @RequestParam String newTheme,
             HttpServletRequest httpServletRequest
     ) {
-        projectService.changeProjectTheme(getTokenFromRequest(httpServletRequest), projectID, newTheme);
+        return projectService.changeProjectTheme(getTokenFromRequest(httpServletRequest), projectID, newTheme);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
