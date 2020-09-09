@@ -9,6 +9,7 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.mail.MailService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -21,8 +22,8 @@ public class RegistrationController {
     private Integer registrationCode;
     private String studentRegistrationEmail;
     private String confirmUrl;
-    // TODO Нигде не забыть заменить на итоговый адрес сервера
-    private static final String apiUrl = "http://localhost:8080/";
+    @Value("$(api.url)")
+    private String apiUrl;
 
     @Autowired
     private UsersService usersService;

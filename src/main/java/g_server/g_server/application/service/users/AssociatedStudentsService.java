@@ -20,6 +20,7 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,8 @@ import java.util.NoSuchElementException;
 // Сервис взаимодействия студентов и научных руководителей
 @Service
 public class AssociatedStudentsService {
-    // TODO Нигде не забыть заменить на итоговый адрес сервера
-    private static final String apiUrl = "http://localhost:8080/";
+    @Value("$(api.url)")
+    private String apiUrl;
 
     @Autowired
     private UsersRepository usersRepository;
@@ -255,6 +256,8 @@ public class AssociatedStudentsService {
     // TODO Откзаться от научного руководителя от лица студента
 
     // TODO Проверить, имеет ли студент научного руководителя
+
+    // TODO Удалить студента для научного руководителя
 
     // Добавить студента в проект
     public List<String> addStudentToProject(String token, Integer studentID, Integer projectID) {
