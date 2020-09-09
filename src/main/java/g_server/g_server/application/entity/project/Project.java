@@ -1,7 +1,6 @@
 package g_server.g_server.application.entity.project;
 
 import g_server.g_server.application.entity.users.ScientificAdvisorData;
-
 import javax.persistence.*;
 
 @Entity
@@ -78,5 +77,21 @@ public class Project {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public ProjectTheme getProjectTheme() {
+        return projectTheme;
+    }
+
+    public void setProjectTheme(ProjectTheme projectTheme) {
+        this.projectTheme = projectTheme;
+    }
+
+    public ScientificAdvisorData getScientificAdvisorData() {
+        return scientificAdvisorData;
+    }
+
+    public void setScientificAdvisorData(ScientificAdvisorData scientificAdvisorData) {
+        this.scientificAdvisorData = scientificAdvisorData;
     }
 }

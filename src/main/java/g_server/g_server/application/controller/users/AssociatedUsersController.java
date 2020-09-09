@@ -1,6 +1,7 @@
 package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.entity.view.AssociatedRequestView;
+import g_server.g_server.application.entity.view.AssociatedStudentView;
 import g_server.g_server.application.entity.view.ScientificAdvisorView;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,34 @@ public class AssociatedUsersController {
     @GetMapping("/student/scientific_advisor/all")
     public List<ScientificAdvisorView> getScientificAdvisorView() {
         return associatedStudentsService.getScientificAdvisorViewList();
+    }
+
+    // Добавить студента в проект
+    @PostMapping("/scientific_advisor/project/student/add/")
+    public List<String> AddStudentToProject(
+            @RequestParam Integer studentID,
+            @RequestParam Integer projectID,
+            HttpServletRequest httpServletRequest
+    ) {
+        return associatedStudentsService.addStudentToProject(getTokenFromRequest(httpServletRequest),
+                studentID, projectID);
+    }
+
+    // Удалить студента из проекта
+    @DeleteMapping("/scientific_advisor/project/student/delete/")
+    public List<String> DeleteStudentFromProject(
+            @RequestParam Integer studentID,
+            @RequestParam Integer projectID,
+            HttpServletRequest httpServletRequest
+    ) {
+        return associatedStudentsService.deleteStudentFromProject(getTokenFromRequest(httpServletRequest),
+                studentID, projectID);
+    }
+
+    // Получить список активных студентов
+    @GetMapping("/scientific_advisor/student/active")
+    public List<AssociatedStudentView> getActiveStudents(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.getActiveStudents(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

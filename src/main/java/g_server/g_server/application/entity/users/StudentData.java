@@ -1,5 +1,6 @@
 package g_server.g_server.application.entity.users;
 
+import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.system_data.Cathedras;
 import g_server.g_server.application.entity.system_data.StudentGroup;
 import g_server.g_server.application.entity.system_data.StudentType;
@@ -26,6 +27,10 @@ public class StudentData {
     @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Roles roles;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "student_id")
+    private OccupiedStudents occupiedStudents;
 
     @ManyToOne
     @JoinColumn(name = "student_group", referencedColumnName = "id", insertable = false, updatable = false)
@@ -110,5 +115,13 @@ public class StudentData {
 
     public void setStudentType(StudentType studentType) {
         this.studentType = studentType;
+    }
+
+    public OccupiedStudents getOccupiedStudents() {
+        return occupiedStudents;
+    }
+
+    public void setOccupiedStudents(OccupiedStudents occupiedStudents) {
+        this.occupiedStudents = occupiedStudents;
     }
 }

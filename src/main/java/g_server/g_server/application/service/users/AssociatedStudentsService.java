@@ -1,14 +1,21 @@
 package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.project.OccupiedStudents;
+import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectTheme;
 import g_server.g_server.application.entity.users.ScientificAdvisorData;
+import g_server.g_server.application.entity.users.StudentData;
 import g_server.g_server.application.entity.view.AssociatedRequestView;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.view.AssociatedStudentView;
 import g_server.g_server.application.entity.view.ScientificAdvisorView;
+import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
+import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.project.ProjectThemeRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
+import g_server.g_server.application.repository.users.StudentDataRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.mail.MailService;
@@ -16,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 // Сервис взаимодействия студентов и научных руководителей
 @Service
@@ -43,6 +51,15 @@ public class AssociatedStudentsService {
 
     @Autowired
     private ScientificAdvisorDataService scientificAdvisorDataService;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private StudentDataRepository studentDataRepository;
+
+    @Autowired
+    private OccupiedStudentsRepository occupiedStudentsRepository;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -193,10 +210,10 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
-    // TODO Показать список студентов данного научного руководителя
-    public List<AssociatedRequestView> getActiveStudents(String token) {
+    // Показать список студентов данного научного руководителя
+    public List<AssociatedStudentView> getActiveStudents(String token) {
         Integer scientificAdvisorId = getUserId(token);
-        List<AssociatedRequestView> activeRequests = new ArrayList<>();
+        List<AssociatedStudentView> activeStudents = new ArrayList<>();
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
         if (scientificAdvisor != null) {
             List<AssociatedStudents> associatedStudents =
@@ -208,12 +225,23 @@ public class AssociatedStudentsService {
             }
             for (AssociatedStudents associatedStudent: associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+                Integer studentID = associatedStudent.getStudent();
+                String projectTheme = "Проект не назначен";
+                OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
+                Project project = null;
+                if (occupiedStudent != null) {
+                    try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
+                    catch (NoSuchElementException noSuchElementException) { System.out.println("СУКА");}
+                }
+                if (project != null) {
+                    projectTheme = project.getName();
+                }
                 String currentTheme = associatedStudent.getProjectTheme().getTheme();
-                AssociatedRequestView associatedStudentForm = new AssociatedRequestView(currentStudent,
-                        currentTheme, associatedStudent.getId());
-                activeRequests.add(associatedStudentForm);
+                AssociatedStudentView activeStudentForm = new AssociatedStudentView(currentStudent,
+                        currentTheme, associatedStudent.getId(), projectTheme);
+                activeStudents.add(activeStudentForm);
             }
-            return activeRequests;
+            return activeStudents;
         }
         return null;
     }
@@ -224,7 +252,93 @@ public class AssociatedStudentsService {
 
     // TODO Проверить, имеет ли студент научного руководителя
 
-    // TODO Добавить студента в проект
+    // Добавить студента в проект
+    public List<String> addStudentToProject(String token, Integer studentID, Integer projectID) {
+        List<String> messageList = new ArrayList<>();
+        Integer advisorID = getUserId(token);
+        if (advisorID == null) {
+            messageList.add("ID научного руководителя не найден");
+        }
+        if (studentID == null) {
+            messageList.add("ID студента не найден");
+        }
+        if (projectID == null) {
+            messageList.add("ID проекта не найдено");
+        }
+        Project project = null;
+        try { project = projectRepository.findById(projectID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Проект не найден"); }
+        StudentData student = null;
+        try { student = studentDataRepository.findById(studentID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Студент не найден"); }
+        if (messageList.size() == 0) {
+            AssociatedStudents associatedStudent =
+                    associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
+            if (associatedStudent == null) {
+                messageList.add("Данный студент не ассоциирован с данным научным руководителем");
+            }
+            if (advisorID != project.getScientificAdvisorID()) {
+                messageList.add("Вы не можете добавлять студентов в чужой проект");
+            }
+            if (messageList.size() == 0) {
+                if (associatedStudent.isAccepted()) {
+                    List<OccupiedStudents> integrityController =
+                            occupiedStudentsRepository.findAllByStudentID(studentID);
+                    if (integrityController.size() == 0) {
+                        OccupiedStudents occupiedStudents = new OccupiedStudents(studentID, projectID);
+                        occupiedStudentsRepository.save(occupiedStudents);
+                        messageList.add("Студент был успешно добавлен в проект");
+                        // TODO Сделать почтовое уведомление об этом
+                    }
+                    else {
+                        messageList.add("Данный студент уже стостоит в проекте");
+                    }
+
+                }
+                else {
+                    messageList.add("Вы не можете добавить данного студента в проект," +
+                            " так как вы не приняли его заявку");
+                }
+            }
+        }
+        return messageList;
+    }
+
+    // Удалить студента из проекта
+    public List<String> deleteStudentFromProject(String token, Integer studentID, Integer projectID) {
+        List<String> messageList = new ArrayList<>();
+        Integer advisorID = getUserId(token);
+        if (advisorID == null) {
+            messageList.add("ID научного руководителя не найден");
+        }
+        if (studentID == null) {
+            messageList.add("ID студента не найден");
+        }
+        if (projectID == null) {
+            messageList.add("ID проекта не найдено");
+        }
+        Project project = null;
+        try { project = projectRepository.findById(projectID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Проект не найден"); }
+        StudentData student = null;
+        try { student = studentDataRepository.findById(studentID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Студент не найден"); }
+        if (messageList.size() == 0) {
+            OccupiedStudents occupiedStudent =
+                    occupiedStudentsRepository.findAllByStudentIDAndProjectID(studentID, projectID);
+            if (occupiedStudent == null) {
+                messageList.add("Не удается найти данного студента участником данного проекта");
+            }
+            else if (project.getScientificAdvisorID() != advisorID) {
+                messageList.add("Вы не моежет удалять студента не из своего проекта");
+            }
+            else {
+                occupiedStudentsRepository.deleteById(occupiedStudent.getId());
+                messageList.add("Студент был успешно удален из данного проекта");
+            }
+        }
+        return messageList;
+    }
 
     // TODO Возможно стоит сделать триггер при принятии последней заявки НР чтобы те, что не были
     // TODO им приняты, автоматически отклонились и для этого заюзать письмо

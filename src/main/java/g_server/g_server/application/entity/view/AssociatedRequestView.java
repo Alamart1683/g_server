@@ -4,7 +4,7 @@ import g_server.g_server.application.entity.users.Users;
 
 // Форма формирующая пользовательское представление студенческих заявок
 public class AssociatedRequestView {
-    private int systemRequestID;
+    private int systemID;
     private String FIO;
     private String group;
     private String type;
@@ -13,8 +13,8 @@ public class AssociatedRequestView {
 
     public AssociatedRequestView() { }
 
-    public AssociatedRequestView(Users users, String theme, int requestID) {
-        this.systemRequestID = requestID;
+    public AssociatedRequestView(Users users, String theme, int systemID) {
+        this.systemID = systemID;
         this.FIO = users.getSurname() + ' ' + users.getName() + ' ' + users.getSecond_name();
         this.group = users.getStudentData().getStudentGroup().getStudentGroup();
         this.type = users.getStudentData().getStudentType().getStudentType();
@@ -62,11 +62,11 @@ public class AssociatedRequestView {
         this.theme = theme;
     }
 
-    public int getSystemRequestID() {
-        return systemRequestID;
+    public int getSystemID() {
+        return systemID;
     }
 
-    public void setSystemRequestID(int systemRequestID) {
-        this.systemRequestID = systemRequestID;
+    public void setSystemID(int systemID) {
+        this.systemID = systemID;
     }
 }

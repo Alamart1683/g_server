@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ProjectService {
@@ -64,12 +65,14 @@ public class ProjectService {
             messageList.add("Научный руководитель не найден");
         }
         if (projectID == null) {
-            messageList.add("Проект не найден");
+            messageList.add("ID проекта не найдено");
         }
+        Project project = null;
+        try { project = projectRepository.findById(projectID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Проект не найден"); }
         if (messageList.size() == 0) {
-            Project project = projectRepository.findById(projectID).get();
             if (project.getScientificAdvisorID() != advisorID) {
-                messageList.add("Вы не можете удалить проект другого научного рукводителя");
+                messageList.add("Вы не можете удалить проект другого научного руководителя");
             }
             else {
                 projectRepository.deleteById(projectID);
@@ -87,9 +90,8 @@ public class ProjectService {
             messageList.add("Научный руководитель не найден");
         }
         if (projectID == null) {
-            messageList.add("Проект не найден");
+            messageList.add("ID проекта не найдено");
         }
-        Project renamingProject = projectRepository.findById(projectID).get();
         List<Project> projects = projectRepository.findAllByScientificAdvisorID(advisorID);
         for (Project project: projects) {
             if (project.getName().equals(newName)) {
@@ -97,13 +99,18 @@ public class ProjectService {
                 break;
             }
         }
-        if (renamingProject.getScientificAdvisorID() != advisorID) {
-            messageList.add("Вы не можете переименовать проект другого научного рукводителя");
-        }
+        Project renamingProject = null;
+        try { renamingProject = projectRepository.findById(projectID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Проект не найден"); }
         if (messageList.size() == 0) {
-            renamingProject.setName(newName);
-            projectRepository.save(renamingProject);
-            messageList.add("Проект успешно переименован");
+            if (renamingProject.getScientificAdvisorID() != advisorID) {
+                messageList.add("Вы не можете переименовать проект другого научного руководителя");
+            }
+            else {
+                renamingProject.setName(newName);
+                projectRepository.save(renamingProject);
+                messageList.add("Проект успешно переименован");
+            }
         }
         return messageList;
     }
@@ -116,16 +123,20 @@ public class ProjectService {
             messageList.add("Научный руководитель не найден");
         }
         if (projectID == null) {
-            messageList.add("Проект не найден");
+            messageList.add("ID проекта не найдено");
         }
-        Project project = projectRepository.findById(projectID).get();
-        if (project.getScientificAdvisorID() != advisorID) {
-            messageList.add("Вы не можете изменить описание проекта другого научного руководителя");
-        }
+        Project project = null;
+        try { project = projectRepository.findById(projectID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Проект не найден"); }
         if (messageList.size() == 0) {
-            project.setDescription(newDescription);
-            projectRepository.save(project);
-            messageList.add("Описание проекта успешно изменено");
+            if (project.getScientificAdvisorID() != advisorID) {
+                messageList.add("Вы не можете изменить описание проекта другого научного руководителя");
+            }
+            else {
+                project.setDescription(newDescription);
+                projectRepository.save(project);
+                messageList.add("Описание проекта успешно изменено");
+            }
         }
         return messageList;
     }
@@ -143,14 +154,18 @@ public class ProjectService {
         if (projectThemeRepository.findByTheme(newTheme) == null) {
             messageList.add("Тема не найдена");
         }
-        Project project = projectRepository.findById(projectID).get();
-        if (project.getScientificAdvisorID() != advisorID) {
-            messageList.add("Вы не можете изменить тему проекта другого научного руководителя");
-        }
+        Project project = null;
+        try { project = projectRepository.findById(projectID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Проект не найден"); }
         if (messageList.size() == 0) {
-            project.setType(projectThemeRepository.findByTheme(newTheme).getId());
-            projectRepository.save(project);
-            messageList.add("Тема проекта успешно изменена");
+            if (project.getScientificAdvisorID() != advisorID) {
+                messageList.add("Вы не можете изменить тему проекта другого научного руководителя");
+            }
+            else {
+                project.setType(projectThemeRepository.findByTheme(newTheme).getId());
+                projectRepository.save(project);
+                messageList.add("Тема проекта успешно изменена");
+            }
         }
         return messageList;
     }
