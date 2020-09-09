@@ -362,11 +362,12 @@ public class AssociatedStudentsService {
         List<ProjectTheme> projectThemes = projectThemeRepository.findAll();
         for (ScientificAdvisorData currentAdvisorData: advisorList) {
             Users currentAdvisor = usersRepository.findById(currentAdvisorData.getId()).get();
-            List<AssociatedStudents> associatedStudents =
+            List<AssociatedStudents> associatedStudents = new ArrayList<>();
+            List<AssociatedStudents> associatedStudentsRaw =
                     associatedStudentsRepository.findByScientificAdvisor(currentAdvisorData.getId());
-            for (AssociatedStudents associatedStudent: associatedStudents) {
-                if (!associatedStudent.isAccepted()) {
-                    associatedStudents.remove(associatedStudent);
+            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+                if (associatedStudentRaw.isAccepted()) {
+                    associatedStudents.add(associatedStudentRaw);
                 }
             }
             Integer freePlaces = currentAdvisorData.getPlaces() - associatedStudents.size();
