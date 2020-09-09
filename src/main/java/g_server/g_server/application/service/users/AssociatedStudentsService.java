@@ -3,7 +3,7 @@ package g_server.g_server.application.service.users;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.project.ProjectTheme;
 import g_server.g_server.application.entity.users.ScientificAdvisorData;
-import g_server.g_server.application.entity.view.AssociatedStudentView;
+import g_server.g_server.application.entity.view.AssociatedRequestView;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.view.ScientificAdvisorView;
@@ -48,17 +48,7 @@ public class AssociatedStudentsService {
     public List<String> sendRequestForScientificAdvisor(String token,
         Integer scientificAdvisorId, String theme) {
         List<String> messageList = new ArrayList<>();
-        Integer student_id = null;
-        // Проверка токена
-        if (token == null) {
-            messageList.add("Ошибка аутентификации: токен равен null");
-        }
-        if (token.equals("")) {
-            messageList.add("Ошибка аутентификации: токен пуст");
-        }
-        else {
-            student_id = getUserId(token);
-        }
+        Integer student_id = getUserId(token);
         // Проверка существования айди студента и научного рукводителя
         if (student_id == null) {
             messageList.add("Студент не найден, отправить заявку невозможно");
@@ -135,24 +125,14 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
-    // Показать список активных заявок
-    public List<AssociatedStudentView> getActiveRequests(String token) {
-        // Проверка токена
-        if (token == null) {
-            return null;
-        }
-        if (token.equals("")) {
-            return null;
-        }
+    // Показать список активных заявок данного научного руководителя
+    public List<AssociatedRequestView> getActiveRequests(String token) {
         Integer scientificAdvisorId = getUserId(token);
-        List<AssociatedStudentView> activeRequests = new ArrayList<>();
+        List<AssociatedRequestView> activeRequests = new ArrayList<>();
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
         if (scientificAdvisor != null) {
             List<AssociatedStudents> associatedStudents =
                     associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
-            // TODO Это очевидный костыль из-за того, что я не понимаю, почему Hibernate
-            // TODO не хочет брать как параметр выборки булевское поле. В будущем его надо
-            // TODO пофиксить, ибо это жутко не оптимальное решение
             for (AssociatedStudents associatedStudentRaw: associatedStudents) {
                 if (associatedStudentRaw.isAccepted()) {
                     associatedStudents.remove(associatedStudentRaw);
@@ -161,7 +141,7 @@ public class AssociatedStudentsService {
             for (AssociatedStudents associatedStudent: associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
                 String currentTheme = associatedStudent.getProjectTheme().getTheme();
-                AssociatedStudentView associatedStudentForm = new AssociatedStudentView(currentStudent,
+                AssociatedRequestView associatedStudentForm = new AssociatedRequestView(currentStudent,
                         currentTheme, associatedStudent.getId());
                 activeRequests.add(associatedStudentForm);
             }
@@ -213,13 +193,38 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
-    // TODO Показать список ассоциированных студентов
+    // TODO Показать список студентов данного научного руководителя
+    public List<AssociatedRequestView> getActiveStudents(String token) {
+        Integer scientificAdvisorId = getUserId(token);
+        List<AssociatedRequestView> activeRequests = new ArrayList<>();
+        Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
+        if (scientificAdvisor != null) {
+            List<AssociatedStudents> associatedStudents =
+                    associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
+            for (AssociatedStudents associatedStudentRaw: associatedStudents) {
+                if (!associatedStudentRaw.isAccepted()) {
+                    associatedStudents.remove(associatedStudentRaw);
+                }
+            }
+            for (AssociatedStudents associatedStudent: associatedStudents) {
+                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+                String currentTheme = associatedStudent.getProjectTheme().getTheme();
+                AssociatedRequestView associatedStudentForm = new AssociatedRequestView(currentStudent,
+                        currentTheme, associatedStudent.getId());
+                activeRequests.add(associatedStudentForm);
+            }
+            return activeRequests;
+        }
+        return null;
+    }
 
     // TODO Отозвать заявку от лица студента
 
     // TODO Откзаться от научного руководителя от лица студента
 
     // TODO Проверить, имеет ли студент научного руководителя
+
+    // TODO Добавить студента в проект
 
     // TODO Возможно стоит сделать триггер при принятии последней заявки НР чтобы те, что не были
     // TODO им приняты, автоматически отклонились и для этого заюзать письмо

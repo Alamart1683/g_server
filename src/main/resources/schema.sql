@@ -83,7 +83,7 @@ create table project (
 
 create table occupied_students (
     id int primary key auto_increment,
-    student_id int not null,
+    student_id int not null unique,
     project_id int not null,
     foreign key (student_id) references student_data (id) on delete cascade on update cascade,
     foreign key (project_id) references project (id) on delete cascade on update cascade
