@@ -148,11 +148,12 @@ public class AssociatedStudentsService {
         List<AssociatedRequestView> activeRequests = new ArrayList<>();
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
         if (scientificAdvisor != null) {
-            List<AssociatedStudents> associatedStudents =
+            List<AssociatedStudents> associatedStudentsRaw =
                     associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
-            for (AssociatedStudents associatedStudentRaw: associatedStudents) {
-                if (associatedStudentRaw.isAccepted()) {
-                    associatedStudents.remove(associatedStudentRaw);
+            List<AssociatedStudents> associatedStudents = new ArrayList<>();
+            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+                if (!associatedStudentRaw.isAccepted()) {
+                    associatedStudents.add(associatedStudentRaw);
                 }
             }
             for (AssociatedStudents associatedStudent: associatedStudents) {
@@ -215,12 +216,13 @@ public class AssociatedStudentsService {
         Integer scientificAdvisorId = getUserId(token);
         List<AssociatedStudentView> activeStudents = new ArrayList<>();
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
+        List<AssociatedStudents> associatedStudents = new ArrayList<>();
         if (scientificAdvisor != null) {
-            List<AssociatedStudents> associatedStudents =
+            List<AssociatedStudents> associatedStudentsRaw =
                     associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
-            for (AssociatedStudents associatedStudentRaw: associatedStudents) {
-                if (!associatedStudentRaw.isAccepted()) {
-                    associatedStudents.remove(associatedStudentRaw);
+            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+                if (associatedStudentRaw.isAccepted()) {
+                    associatedStudents.add(associatedStudentRaw);
                 }
             }
             for (AssociatedStudents associatedStudent: associatedStudents) {
@@ -245,6 +247,8 @@ public class AssociatedStudentsService {
         }
         return null;
     }
+
+    // TODO Показать список студентов данного научного рукводителя, которые не участвуют в проектах
 
     // TODO Отозвать заявку от лица студента
 
