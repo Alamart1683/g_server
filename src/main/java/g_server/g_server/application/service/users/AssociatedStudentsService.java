@@ -6,9 +6,12 @@ import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectTheme;
 import g_server.g_server.application.entity.users.ScientificAdvisorData;
 import g_server.g_server.application.entity.users.StudentData;
-import g_server.g_server.application.entity.view.*;
+import g_server.g_server.application.entity.view.AssociatedRequestView;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.view.AssociatedStudentView;
+import g_server.g_server.application.entity.view.AssociatedStudentViewWithoutProject;
+import g_server.g_server.application.entity.view.ScientificAdvisorView;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.project.ProjectThemeRepository;
@@ -59,9 +62,6 @@ public class AssociatedStudentsService {
 
     @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
-
-    @Autowired
-    private UsersService usersService;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -505,74 +505,6 @@ public class AssociatedStudentsService {
             );
         }
         return advisorViewList;
-    }
-
-    // Сформировать представление проектов для научного руководителя
-    public List<ProjectView> getAdvisorProjectView(String token) {
-        List<ProjectView> advisorProjectsViews = new ArrayList<>();
-        Integer advisorID = getUserId(token);
-        if (advisorID == null) {
-            return advisorProjectsViews;
-        }
-        List<Project> advisorProjects = projectRepository.findAllByScientificAdvisorID(advisorID);
-        if (advisorProjects == null) {
-            return advisorProjectsViews;
-        }
-        for (Project advisorProject: advisorProjects) {
-            List<OccupiedStudentsView> involvedStudents = new ArrayList<>();
-            List<OccupiedStudents> occupiedStudents =
-                    occupiedStudentsRepository.findAllByProjectID(advisorProject.getId());
-            Users advisor;
-            try { advisor = usersService.findById(advisorID).get(); }
-            catch (NoSuchElementException noSuchElementException) { break; }
-            for (OccupiedStudents occupiedStudent: occupiedStudents) {
-                Users currentStudent;
-                try { currentStudent = usersService.findById(occupiedStudent.getStudentID()).get(); }
-                catch (NoSuchElementException noSuchElementException) { break; }
-                involvedStudents.add(new OccupiedStudentsView(currentStudent, advisorProject.getProjectTheme().getTheme()));
-            }
-            advisorProjectsViews.add(new ProjectView(advisorProject, advisor, involvedStudents));
-        }
-        return advisorProjectsViews;
-    }
-
-    // Сформировать представление проекта для студента, в котором он задействован
-    public ProjectView getStudentProjectView(String token) {
-        ProjectView studentProjectView;
-        Integer studentID = getUserId(token);
-        if (studentID == null) {
-            return null;
-        }
-        OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
-        if (occupiedStudent == null) {
-            return null;
-        }
-        Project project;
-        Users advisor;
-        try {
-            project = projectRepository.findById(occupiedStudent.getProjectID()).get();
-            advisor = usersService.findById(occupiedStudent.getProject().getScientificAdvisorID()).get();
-        }
-        catch (NoSuchElementException noSuchElementException) {
-            return null;
-        }
-        List<OccupiedStudents> occupiedStudents =
-                occupiedStudentsRepository.findAllByProjectID(occupiedStudent.getProjectID());
-        List<OccupiedStudentsView> involvedStudents = new ArrayList<>();
-        if (occupiedStudent == null) {
-            return null;
-        }
-        for (OccupiedStudents currentOccupiedStudent: occupiedStudents) {
-            Users currentUser;
-            try  {
-                currentUser = usersService.findById(currentOccupiedStudent.getStudentID()).get();
-            } catch (NoSuchElementException noSuchElementException) {
-                return null;
-            }
-            involvedStudents.add(new OccupiedStudentsView(currentUser, project.getProjectTheme().getTheme()));
-        }
-        studentProjectView = new ProjectView(project, advisor, involvedStudents);
-        return studentProjectView;
     }
 
     // Получить айди из токена
