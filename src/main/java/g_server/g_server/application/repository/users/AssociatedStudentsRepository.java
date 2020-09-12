@@ -22,7 +22,7 @@ public interface AssociatedStudentsRepository extends JpaRepository<AssociatedSt
 
     List<AssociatedStudents> findByScientificAdvisor(int scientificAdvisorId);
 
-    List<AssociatedStudents> findByStudent(int studentId);
+    AssociatedStudents findByStudent(int studentId);
 
     AssociatedStudents findByScientificAdvisorAndStudent(int scientificAdvisorId, int studentId);
 }

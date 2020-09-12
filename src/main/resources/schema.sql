@@ -92,7 +92,7 @@ create table occupied_students (
 create table associated_students (
     id int primary key auto_increment,
     scientific_advisor int not null,
-    student int not null,
+    student int not null unique,
     theme int not null,
     is_accepted bool not null default false,
     foreign key (scientific_advisor) references users (id) on delete cascade on update cascade,

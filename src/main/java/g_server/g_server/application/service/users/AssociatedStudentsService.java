@@ -10,6 +10,7 @@ import g_server.g_server.application.entity.view.AssociatedRequestView;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.view.AssociatedStudentView;
+import g_server.g_server.application.entity.view.AssociatedStudentViewWithoutProject;
 import g_server.g_server.application.entity.view.ScientificAdvisorView;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
@@ -190,6 +191,9 @@ public class AssociatedStudentsService {
         if (associatedStudent.isAccepted()) {
             messageList.add("Срок действия ссылки подтверждения истек или она указана неверно");
         }
+        if (associatedStudent.getScientificAdvisor() != scientificAdvisorId) {
+            messageList.add("Вы не можете принять заявку студента другому научному руководителю");
+        }
         // После проведения всех проверок примем заявку
         if (messageList.size() == 0) {
             if (accept) {
@@ -234,7 +238,7 @@ public class AssociatedStudentsService {
                 Project project = null;
                 if (occupiedStudent != null) {
                     try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
-                    catch (NoSuchElementException noSuchElementException) { System.out.println("СУКА");}
+                    catch (NoSuchElementException noSuchElementException) { }
                 }
                 if (project != null) {
                     projectTheme = project.getName();
@@ -249,15 +253,89 @@ public class AssociatedStudentsService {
         return null;
     }
 
-    // TODO Показать список студентов данного научного рукводителя, которые не участвуют в проектах
+    // Показать список студентов данного научного рукводителя, которые не участвуют в проектах
+    public List<AssociatedStudentViewWithoutProject> getStudentsWithoutProject(String token) {
+        Integer scientificAdvisorId = getUserId(token);
+        List<AssociatedStudentView> activeStudents = new ArrayList<>();
+        Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
+        List<AssociatedStudents> associatedStudents = new ArrayList<>();
+        List<AssociatedStudentViewWithoutProject> associatedStudentViewWithoutProjects = new ArrayList<>();
+        if (scientificAdvisor != null) {
+            List<AssociatedStudents> associatedStudentsRaw =
+                    associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
+            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+                if (associatedStudentRaw.isAccepted()) {
+                    associatedStudents.add(associatedStudentRaw);
+                }
+            }
+            for (AssociatedStudents associatedStudent: associatedStudents) {
+                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+                Integer studentID = associatedStudent.getStudent();
+                OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
+                Project project = null;
+                if (occupiedStudent != null) {
+                    try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
+                    catch (NoSuchElementException noSuchElementException) { }
+                }
+                if (project == null) {
+                    String currentTheme = associatedStudent.getProjectTheme().getTheme();
+                    AssociatedStudentViewWithoutProject associatedStudentViewWithoutProject
+                            = new AssociatedStudentViewWithoutProject(currentStudent, currentTheme, associatedStudent.getId());
+                    associatedStudentViewWithoutProjects.add(associatedStudentViewWithoutProject);
+                }
+            }
+            return associatedStudentViewWithoutProjects;
+        }
+        return null;
+    }
 
-    // TODO Отозвать заявку от лица студента
+    // Отозвать заявку от лица студента
+    public List<String> revokeRequestByStudent(String token) {
+        List<String> messageList = new ArrayList<>();
+        Integer studentID = getUserId(token);
+        if (studentID != null) {
+            messageList.add("ID студента не найдено");
+        }
+        AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(studentID);
+        if (associatedStudent == null) {
+            messageList.add("Не удается найти заявку");
+        }
+        if (associatedStudent.isAccepted()) {
+            messageList.add("Вы можете отозвать только не принятую заявку");
+        }
+        if (messageList.size() == 0) {
+            associatedStudentsRepository.deleteById(associatedStudent.getId());
+            // TODO Возможно сделать уведомление по почте
+            messageList.add("Заявка успешно отозвана");
+        }
+        return messageList;
+    }
 
-    // TODO Откзаться от научного руководителя от лица студента
+    // Откзаться от научного руководителя от лица студента
+    public List<String> dismissAdvisorByStudent(String token) {
+        List<String> messageList = new ArrayList<>();
+        Integer studentID = getUserId(token);
+        if (studentID != null) {
+            messageList.add("ID студента не найдено");
+        }
+        AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(studentID);
+        if (associatedStudent == null) {
+            messageList.add("Не удается найти заявку");
+        }
+        if (!associatedStudent.isAccepted()) {
+            messageList.add("Ваша заявка до сих пор не рассмотрена");
+        }
+        if (messageList.size() == 0) {
+            // TODO Послать по почте на подтверждение НР письмо о том, что студент хочет сменить руководителя
+            // TODO Сообщить по почте студенту о том, что это произошло
+            messageList.add("Уведомление о вашем стремлении отправлено научному руководителю");
+        }
+        return messageList;
+    }
 
     // TODO Проверить, имеет ли студент научного руководителя
 
-    // TODO Удалить студента для научного руководителя
+    // TODO Отказаться от студента для научного руководителя
 
     // Добавить студента в проект
     public List<String> addStudentToProject(String token, Integer studentID, Integer projectID) {
@@ -349,8 +427,6 @@ public class AssociatedStudentsService {
 
     // TODO Возможно стоит сделать триггер при принятии последней заявки НР чтобы те, что не были
     // TODO им приняты, автоматически отклонились и для этого заюзать письмо
-
-    // TODO Может добавить атрибут должности преподавателя в таблицу данных о научном руководителе
 
     // Сформировать представление научных руководителей для подачи студентом заявки
     // TODO Не знаю, стоит ли отображать преподов с уже закончившимися местами

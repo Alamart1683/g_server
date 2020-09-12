@@ -2,6 +2,7 @@ package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.entity.view.AssociatedRequestView;
 import g_server.g_server.application.entity.view.AssociatedStudentView;
+import g_server.g_server.application.entity.view.AssociatedStudentViewWithoutProject;
 import g_server.g_server.application.entity.view.ScientificAdvisorView;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,7 @@ public class AssociatedUsersController {
 
     // Добавить студента в проект
     @PostMapping("/scientific_advisor/project/student/add/")
-    public List<String> AddStudentToProject(
+    public List<String> addStudentToProject(
             @RequestParam Integer studentID,
             @RequestParam Integer projectID,
             HttpServletRequest httpServletRequest
@@ -87,7 +88,7 @@ public class AssociatedUsersController {
 
     // Удалить студента из проекта
     @DeleteMapping("/scientific_advisor/project/student/delete/")
-    public List<String> DeleteStudentFromProject(
+    public List<String> deleteStudentFromProject(
             @RequestParam Integer studentID,
             @RequestParam Integer projectID,
             HttpServletRequest httpServletRequest
@@ -100,6 +101,25 @@ public class AssociatedUsersController {
     @GetMapping("/scientific_advisor/student/active")
     public List<AssociatedStudentView> getActiveStudents(HttpServletRequest httpServletRequest) {
         return associatedStudentsService.getActiveStudents(getTokenFromRequest(httpServletRequest));
+    }
+
+    // Получить список активных студентов без проекта
+    @GetMapping("/scientific_advisor/student/active/without_project")
+    public List<AssociatedStudentViewWithoutProject> getActiveStudentsWithoutProject(
+            HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.getStudentsWithoutProject(getTokenFromRequest(httpServletRequest));
+    }
+
+    // Отозвать заявку научному руководителю от лица студента
+    @DeleteMapping("/student/dismiss/request")
+    public List<String> revokeStudentRequest(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.revokeRequestByStudent(getTokenFromRequest(httpServletRequest));
+    }
+
+    // Послать научному руководителю о желании студента сменить его
+    @PostMapping("/student/dismiss/advisor")
+    public List<String> dismissAdvisorByStudent(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.dismissAdvisorByStudent(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
