@@ -116,10 +116,22 @@ public class AssociatedUsersController {
         return associatedStudentsService.revokeRequestByStudent(getTokenFromRequest(httpServletRequest));
     }
 
+    // Отказаться от научного руководства студента от лица научного руководителя
+    @DeleteMapping("/scientific_advisor/dismiss/student")
+    public List<String> dismissStudentByAdvisor(@RequestParam Integer systemID, HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.dismissStudentByAdvisor(getTokenFromRequest(httpServletRequest), systemID);
+    }
+
     // Послать научному руководителю о желании студента сменить его
     @PostMapping("/student/dismiss/advisor")
     public List<String> dismissAdvisorByStudent(HttpServletRequest httpServletRequest) {
         return associatedStudentsService.dismissAdvisorByStudent(getTokenFromRequest(httpServletRequest));
+    }
+
+    // Проверить имеет ли студент научного руководителя
+    @GetMapping("/student/check/advisor")
+    public List<String> isStudentHasAdvisor(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.isStudentHasAdvisor(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

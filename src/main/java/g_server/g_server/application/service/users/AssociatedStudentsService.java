@@ -333,9 +333,49 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
-    // TODO Проверить, имеет ли студент научного руководителя
+    // Проверить, имеет ли студент научного руководителя
+    public List<String> isStudentHasAdvisor(String token) {
+        List<String> messageList = new ArrayList<>();
+        Integer studentID = getUserId(token);
+        if (studentID == null) {
+            messageList.add("ID студента не найден");
+        }
+        if (messageList.size() == 0) {
+            AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(studentID);
+            if (associatedStudent != null) {
+                messageList.add("Данный студент имеет научного руководителя");
+            }
+            else {
+                messageList.add("Данный студент не имеет научного руководителя");
+            }
+        }
+        return messageList;
+    }
 
-    // TODO Отказаться от студента для научного руководителя
+    // Отказаться от научного руководства студента для научного руководителя
+    public List<String> dismissStudentByAdvisor(String token, Integer systemID) {
+        List<String> messageList = new ArrayList<>();
+        Integer advisorID = getUserId(token);
+        if (advisorID == null) {
+            messageList.add("Не удается найти ID научного руководителя");
+        }
+        if (systemID == null) {
+            messageList.add("Некорректный системный ID");
+        }
+        AssociatedStudents associatedStudent = null;
+        try { associatedStudent = associatedStudentsRepository.findById(systemID).get(); }
+        catch (NoSuchElementException noSuchElementException) { messageList.add("Не удается найти запись о руководстве"); }
+        if (advisorID == associatedStudent.getScientificAdvisor()) {
+            messageList.add("Вы не можете отказаться от чужого студента");
+        }
+        if (messageList.size() == 0) {
+            // TODO Возмжно стоит вместо уведомления об отказе от студента
+            // TODO сделать требование подтвердения отказа по почте
+            associatedStudentsRepository.deleteById(systemID);
+            messageList.add("Вы успешно отказались от научного руководства для данного студента");
+        }
+        return messageList;
+    }
 
     // Добавить студента в проект
     public List<String> addStudentToProject(String token, Integer studentID, Integer projectID) {
@@ -415,7 +455,7 @@ public class AssociatedStudentsService {
                 messageList.add("Не удается найти данного студента участником данного проекта");
             }
             else if (project.getScientificAdvisorID() != advisorID) {
-                messageList.add("Вы не моежет удалять студента не из своего проекта");
+                messageList.add("Вы не можете удалять студента не из своего проекта");
             }
             else {
                 occupiedStudentsRepository.deleteById(occupiedStudent.getId());
