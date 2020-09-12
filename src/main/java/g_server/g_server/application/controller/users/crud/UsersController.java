@@ -1,6 +1,7 @@
 package g_server.g_server.application.controller.users.crud;
 
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.view.PersonalStudentView;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.documents.DocumentUploadService;
 import g_server.g_server.application.service.users.ScientificAdvisorDataService;
@@ -79,6 +80,11 @@ public class UsersController {
     @PutMapping("/scientific_advisor/users/change_places/{places}")
     public List<String> changePlaces(@PathVariable Integer places, HttpServletRequest httpServletRequest) {
         return scientificAdvisorDataService.changePlaces(getTokenFromRequest(httpServletRequest), places);
+    }
+
+    @GetMapping("/student/personal")
+    public PersonalStudentView getStudentPersonalView(HttpServletRequest httpServletRequest) {
+        return usersService.getPersonalStudentView(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

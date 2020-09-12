@@ -1,13 +1,17 @@
 package g_server.g_server.application.service.users;
 
+import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
+import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.*;
+import g_server.g_server.application.entity.view.PersonalStudentView;
+import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
+import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.system_data.CathedrasRepository;
 import g_server.g_server.application.repository.system_data.StudentGroupRepository;
 import g_server.g_server.application.repository.system_data.StudentTypeRepository;
 import g_server.g_server.application.repository.users.*;
-import g_server.g_server.application.service.documents.DocumentUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -44,10 +49,16 @@ public class UsersService implements UserDetailsService {
     private UsersRolesRepository usersRolesRepository;
 
     @Autowired
-    private DocumentUploadService documentUploadService;
+    private AssociatedStudentsRepository associatedStudentsRepository;
 
     @Autowired
-    private AssociatedStudentsRepository associatedStudentsRepository;
+    private JwtProvider jwtProvider;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private OccupiedStudentsRepository occupiedStudentsRepository;
 
     @Override
     // Загрузить пользователя по email
@@ -243,7 +254,72 @@ public class UsersService implements UserDetailsService {
         return false;
     }
 
-    // TODO Сформировать личный кабинет студента
+    // Получить айди из токена
+    public Integer getUserId(String token) {
+        // Проверка токена
+        if (token == null) {
+            return null;
+        }
+        if (token.equals("")) {
+            return null;
+        }
+        String email = jwtProvider.getEmailFromToken(token);
+        Users user = usersRepository.findByEmail(email);
+        if (user != null) {
+            return user.getId();
+        }
+        else {
+            return null;
+        }
+    }
+
+    // Сформировать личный кабинет студента
+    public PersonalStudentView getPersonalStudentView(String token) {
+        Integer studentID = getUserId(token);
+        if (studentID == null) {
+            return null;
+        }
+        else {
+            Users student;
+            Users advisor;
+            Project project;
+            String advisorName = "Нет научного руководителя";
+            String projectName = "Проект не назначен";
+            try {
+                student = usersRepository.findById(studentID).get();
+            } catch (NoSuchElementException noSuchElementException) {
+                return null;
+            }
+            Integer advisorID;
+            try {
+                advisorID = associatedStudentsRepository.findByStudent(studentID).getScientificAdvisor();
+            } catch (NullPointerException nullPointerException) {
+                advisorID = null;
+            }
+            if (advisorID != null) {
+                try {
+                    advisor = usersRepository.findById(advisorID).get();
+                } catch (NoSuchElementException noSuchElementException) {
+                    advisor = null;
+                }
+                if (advisor != null) {
+                    advisorName = advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name();
+                }
+            }
+            try {
+                project = projectRepository.findById(
+                        occupiedStudentsRepository.findByStudentID(studentID).getProjectID()
+                ).get();
+            } catch (Exception e) {
+                project = null;
+            }
+            if (project != null) {
+                projectName = project.getName();
+            }
+            PersonalStudentView personalStudentView = new PersonalStudentView(student, advisorName, projectName);
+            return personalStudentView;
+        }
+    }
 
     // TODO Сформировать личный кабинет научного руководителя или заведующего кафедрой
 
