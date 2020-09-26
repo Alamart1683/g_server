@@ -5,7 +5,6 @@ set global time_zone = '-3:00';
 /* Включить планировшик MySQL*/
 SET GLOBAL event_scheduler = ON;
 
-
 create table users (
     id int primary key auto_increment,
     email varchar(100) not null unique,
@@ -68,7 +67,9 @@ create table student_data (
 
 create table project_theme (
     id int primary key auto_increment,
-    theme varchar (256)
+    advisor int not null,
+    theme varchar (256),
+    foreign key (advisor) references scientific_advisor_data (id) on delete cascade on update cascade
 );
 
 create table project (

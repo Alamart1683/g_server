@@ -34,7 +34,12 @@ public class ProjectService {
         if (advisorID == null) {
             messageList.add("Научный руководитель не найден");
         }
-        Integer themeID = projectThemeRepository.findByTheme(projectForm.getProjectTheme()).getId();
+        Integer themeID;
+        try {
+            themeID = projectThemeRepository.findByThemeAndAdvisor(projectForm.getProjectTheme(), advisorID).getId();
+        } catch (Exception e) {
+            themeID = null;
+        }
         if (themeID == null) {
             messageList.add("Тема не найдена");
         }
@@ -151,7 +156,7 @@ public class ProjectService {
         if (projectID == null) {
             messageList.add("Проект не найден");
         }
-        if (projectThemeRepository.findByTheme(newTheme) == null) {
+        if (projectThemeRepository.findByThemeAndAdvisor(newTheme, advisorID) == null) {
             messageList.add("Тема не найдена");
         }
         Project project = null;
@@ -162,7 +167,7 @@ public class ProjectService {
                 messageList.add("Вы не можете изменить тему проекта другого научного руководителя");
             }
             else {
-                project.setType(projectThemeRepository.findByTheme(newTheme).getId());
+                project.setType(projectThemeRepository.findByThemeAndAdvisor(newTheme, advisorID).getId());
                 projectRepository.save(project);
                 messageList.add("Тема проекта успешно изменена");
             }

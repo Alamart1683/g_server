@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 // Сервис взаимодействия студентов и научных руководителей
 @Service
 public class AssociatedStudentsService {
-    @Value("$(api.url)")
+    @Value("${api.url}")
     private String apiUrl;
 
     @Autowired
@@ -76,7 +76,7 @@ public class AssociatedStudentsService {
             messageList.add("Ошибка: получен null вместо int в качестве параметра");
         }
         // Проверка, корректно ли указана тема ВКР
-        if (projectThemeRepository.findByTheme(theme) == null) {
+        if (projectThemeRepository.findByThemeAndAdvisor(theme, scientificAdvisorId) == null) {
             messageList.add("Ошибка: желаемая тема ВКР указана некорректно");
         }
         // Формирование и отправка заявки
@@ -114,7 +114,7 @@ public class AssociatedStudentsService {
             if (messageList.size() == 0) {
                 // Сформируем заявку
                 AssociatedStudents associatedStudent = new AssociatedStudents(scientificAdvisorId, student_id,
-                        projectThemeRepository.findByTheme(theme).getId(), false);
+                        projectThemeRepository.findByThemeAndAdvisor(theme, scientificAdvisorId).getId(), false);
                 // Сохраним заявку
                 associatedStudentsRepository.save(associatedStudent);
                 // Сгенерируем её уникальный идентификатор
@@ -474,13 +474,16 @@ public class AssociatedStudentsService {
     public List<ScientificAdvisorView> getScientificAdvisorViewList() {
         List<ScientificAdvisorData> advisorList = scientificAdvisorDataService.findAll();
         List<ScientificAdvisorView> advisorViewList = new ArrayList<>();
-        // TODO Список обших на данный момент тем проектов
-        List<ProjectTheme> projectThemes = projectThemeRepository.findAll();
         for (ScientificAdvisorData currentAdvisorData: advisorList) {
             Users currentAdvisor = usersRepository.findById(currentAdvisorData.getId()).get();
             List<AssociatedStudents> associatedStudents = new ArrayList<>();
             List<AssociatedStudents> associatedStudentsRaw =
                     associatedStudentsRepository.findByScientificAdvisor(currentAdvisorData.getId());
+            List<ProjectTheme> projectThemesRaw = projectThemeRepository.findByAdvisor(currentAdvisorData.getId());
+            List<String> projectThemes = new ArrayList<>();
+            for (ProjectTheme projectThemeRaw: projectThemesRaw) {
+                projectThemes.add(projectThemeRaw.getTheme());
+            }
             for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
                 if (associatedStudentRaw.isAccepted()) {
                     associatedStudents.add(associatedStudentRaw);
@@ -506,6 +509,8 @@ public class AssociatedStudentsService {
         }
         return advisorViewList;
     }
+
+    // TODO Сделать смену темы студента
 
     // Получить айди из токена
     public Integer getUserId(String token) {

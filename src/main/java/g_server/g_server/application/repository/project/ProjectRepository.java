@@ -21,4 +21,6 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
     void deleteById(Integer integer);
 
     List<Project> findAllByScientificAdvisorID(Integer id);
+
+    boolean existsByType(Integer typeID);
 }

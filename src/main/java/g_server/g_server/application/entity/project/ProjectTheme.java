@@ -9,12 +9,16 @@ public class ProjectTheme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "advisor")
+    private int advisor;
+
     @Column(name = "theme")
     private String theme;
 
     public ProjectTheme() { }
 
-    public ProjectTheme(String theme) {
+    public ProjectTheme(Integer advisor, String theme) {
+        this.advisor = advisor;
         this.theme = theme;
     }
 
@@ -32,5 +36,13 @@ public class ProjectTheme {
 
     public void setTheme(String theme) {
         this.theme = theme;
+    }
+
+    public int getAdvisor() {
+        return advisor;
+    }
+
+    public void setAdvisor(int advisor) {
+        this.advisor = advisor;
     }
 }

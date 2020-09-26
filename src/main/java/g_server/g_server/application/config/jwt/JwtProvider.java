@@ -19,13 +19,13 @@ public class JwtProvider {
     @Autowired
     UsersRepository usersRepository;
 
-    @Value("$(jwt.secret)")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("$(registration.secret)")
+    @Value("${registration.secret}")
     private String registrationSecret;
 
-    @Value("&(request.handle.secret)")
+    @Value("&{request.handle.secret}")
     private String requestHandleSecret;
 
     // Сгенерировать токен по email

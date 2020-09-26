@@ -20,5 +20,7 @@ public interface ProjectThemeRepository extends JpaRepository<ProjectTheme, Inte
     @Override
     void deleteById(Integer integer);
 
-    ProjectTheme findByTheme(String theme);
+    ProjectTheme findByThemeAndAdvisor(String theme, Integer advisor);
+
+    List<ProjectTheme> findByAdvisor(Integer advisor);
 }
