@@ -4,14 +4,8 @@ import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectTheme;
-import g_server.g_server.application.entity.users.ScientificAdvisorData;
-import g_server.g_server.application.entity.users.StudentData;
-import g_server.g_server.application.entity.view.AssociatedRequestView;
-import g_server.g_server.application.entity.users.AssociatedStudents;
-import g_server.g_server.application.entity.users.Users;
-import g_server.g_server.application.entity.view.AssociatedStudentView;
-import g_server.g_server.application.entity.view.AssociatedStudentViewWithoutProject;
-import g_server.g_server.application.entity.view.ScientificAdvisorView;
+import g_server.g_server.application.entity.users.*;
+import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.project.ProjectThemeRepository;
@@ -20,6 +14,7 @@ import g_server.g_server.application.repository.users.StudentDataRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.mail.MailService;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -508,6 +503,87 @@ public class AssociatedStudentsService {
             );
         }
         return advisorViewList;
+    }
+
+    // Получить представление проекта
+    public List<ProjectView> getProjectView(String token) {
+        List<ProjectView> projectViews = new ArrayList<>();
+        Integer userID;
+        try {
+            userID = getUserId(token);
+        } catch (Exception e) {
+            return null;
+        }
+        Users user;
+        try {
+            user = usersRepository.findById(userID).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            return null;
+        }
+        UsersRoles usersRoles = usersRolesRepository.findUsersRolesByUserId(userID);
+        Integer userRole = usersRoles.getRoleId();
+        Project project;
+        List<OccupiedStudents> occupiedStudents;
+        List<AssociatedStudentViewWithoutProject> occupiedStudentViews = new ArrayList<>();
+        switch (userRole) {
+            case 1:
+                try {
+                    Integer projectID = occupiedStudentsRepository.findByStudentID(userID).getProjectID();
+                    project = projectRepository.findById(projectID).get();
+                    occupiedStudents = occupiedStudentsRepository.findAllByProjectID(projectID);
+                    Users advisor = usersRepository.findById(project.getScientificAdvisorID()).get();
+                    for (OccupiedStudents occupiedStudent: occupiedStudents) {
+                        Users student = usersRepository.findById(occupiedStudent.getStudentID()).get();
+                        // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
+                        AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
+                                student, project.getProjectTheme().getTheme(), student.getId()
+                        );
+                        occupiedStudentViews.add(currentStudentView);
+                    }
+                    ProjectView projectView = new ProjectView(
+                            projectID,
+                            advisor.getId(),
+                            project.getName(),
+                            project.getProjectTheme().getTheme(),
+                            advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name(),
+                            occupiedStudentViews
+                    );
+                    projectViews.add(projectView);
+                    return projectViews;
+                } catch (Exception e) {
+                    return null;
+                }
+            case 2:
+                List<Project> advisorProjects;
+                try {
+                    advisorProjects = projectRepository.findAllByScientificAdvisorID(userID);
+                    for (Project advisorProject: advisorProjects) {
+                        occupiedStudents = occupiedStudentsRepository.findAllByProjectID(advisorProject.getId());
+                        for (OccupiedStudents occupiedStudent: occupiedStudents) {
+                            Users student = usersRepository.findById(occupiedStudent.getStudentID()).get();
+                            // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
+                            AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
+                                    student, advisorProject.getProjectTheme().getTheme(), student.getId()
+                            );
+                            occupiedStudentViews.add(currentStudentView);
+                        }
+                        ProjectView projectView = new ProjectView(
+                                advisorProject.getId(),
+                                userID,
+                                advisorProject.getName(),
+                                advisorProject.getProjectTheme().getTheme(),
+                                user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
+                                occupiedStudentViews
+                        );
+                        projectViews.add(projectView);
+                    }
+                    return projectViews;
+                } catch (Exception e) {
+                    return null;
+                }
+            default:
+                return null;
+        }
     }
 
     // TODO Сделать смену темы студента

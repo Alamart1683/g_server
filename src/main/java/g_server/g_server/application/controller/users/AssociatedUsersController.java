@@ -1,9 +1,6 @@
 package g_server.g_server.application.controller.users;
 
-import g_server.g_server.application.entity.view.AssociatedRequestView;
-import g_server.g_server.application.entity.view.AssociatedStudentView;
-import g_server.g_server.application.entity.view.AssociatedStudentViewWithoutProject;
-import g_server.g_server.application.entity.view.ScientificAdvisorView;
+import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -132,6 +129,16 @@ public class AssociatedUsersController {
     @GetMapping("/student/check/advisor")
     public List<String> isStudentHasAdvisor(HttpServletRequest httpServletRequest) {
         return associatedStudentsService.isStudentHasAdvisor(getTokenFromRequest(httpServletRequest));
+    }
+
+    @GetMapping("/student/project")
+    public List<ProjectView> getProject(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.getProjectView(getTokenFromRequest(httpServletRequest));
+    }
+
+    @GetMapping("/scientific_advisor/projects")
+    public List<ProjectView> getProjects(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.getProjectView(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
