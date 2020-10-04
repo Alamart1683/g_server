@@ -1,17 +1,13 @@
 package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.documents.Document;
-import g_server.g_server.application.entity.documents.DocumentKind;
-import g_server.g_server.application.entity.documents.DocumentType;
-import g_server.g_server.application.entity.documents.DocumentVersion;
+import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
+import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.Users;
-import g_server.g_server.application.repository.documents.DocumentKindRepository;
-import g_server.g_server.application.repository.documents.DocumentRepository;
-import g_server.g_server.application.repository.documents.DocumentTypeRepository;
-import g_server.g_server.application.repository.documents.DocumentVersionRepository;
+import g_server.g_server.application.repository.documents.*;
+import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.crud.DocumentVersionService;
@@ -58,6 +54,15 @@ public class DocumentUploadService {
     @Autowired
     private DocumentDownloadService documentDownloadService;
 
+    @Autowired
+    private ViewRightsRepository viewRightsRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private ViewRightsProjectRepository viewRightsProjectRepository;
+
     public List<String> uploadDocument(DocumentForm documentForm) {
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
@@ -82,8 +87,13 @@ public class DocumentUploadService {
             messagesList.add("Указан несуществующий вид докумета");
         // Проверим права доступа
         Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
-        if (viewRights == null)
+        String projectName = documentForm.getProjectName();
+        if (viewRights == null) {
             messagesList.add("Указаны некорректные права доступа");
+        }
+        else if (viewRights == 6 && projectName == null) {
+            messagesList.add("Не указано имя проекта для добавления ему документа");
+        }
         // Проверим что файл был загружен
         if (documentForm.getFile() == null)
             messagesList.add("Ошибка загрузки файла. Такого файла не существует");
@@ -128,6 +138,26 @@ public class DocumentUploadService {
                                     type_id, kind_id, viewRights
                             );
                             documentService.save(document);
+                            // Теперь если документ находится в поле видимости проекта, запишем его в таблицу
+                            // согласования документов с проектом, если что-то пошло не так, изменим поле видимости
+                            // документа на видимость только создателю
+                            if (viewRights == 6) {
+                                Project project;
+                                try {
+                                    project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                                } catch (NullPointerException nullPointerException) {
+                                    project = null;
+                                }
+                                if (project == null) {
+                                    Document changingDocument = documentRepository.findByCreatorAndName(creator_id, document.getName());
+                                    changingDocument.setView_rights(1);
+                                    documentService.save(changingDocument);
+                                }
+                                else {
+                                    ViewRightsProject viewRightsProject = new ViewRightsProject(project.getId(), document.getId());
+                                    viewRightsProjectRepository.save(viewRightsProject);
+                                }
+                            }
                             // Далее создадим запись о первой версии документа в таблице версий
                             int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                             DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
@@ -137,7 +167,6 @@ public class DocumentUploadService {
                         }
                         else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
-
                             if (documentDirectory.listFiles().length == 0) {
                                 documentDirectory.delete();
                             }
@@ -145,7 +174,6 @@ public class DocumentUploadService {
                     }
                     else {
                         messagesList.add("Ошибка синхронизации файловой системы с базой данных");
-
                         if (documentDirectory.listFiles().length == 0) {
                             documentDirectory.delete();
                         }
@@ -375,19 +403,10 @@ public class DocumentUploadService {
 
     // Необходимо декодировать права просмотра
     public Integer getViewRights(String viewRights) {
-        switch (viewRights) {
-            case "Только я":
-                return 1;
-            case "Только научные руководители":
-                return 2;
-            case "Только мои студенты":
-                return 3;
-            case "Только мои студенты и научные руководители":
-                return 4;
-            case "Все пользователи":
-                return 5;
-            default:
-                return null;
+        try {
+            return viewRightsRepository.findByViewRight(viewRights).getId();
+        } catch (NullPointerException nullPointerException) {
+            return null;
         }
     }
 

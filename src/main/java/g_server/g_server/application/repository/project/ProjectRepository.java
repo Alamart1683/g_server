@@ -23,4 +23,6 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
     List<Project> findAllByScientificAdvisorID(Integer id);
 
     boolean existsByType(Integer typeID);
+
+    Project findByScientificAdvisorIDAndName(Integer advisorID, String projectName);
 }

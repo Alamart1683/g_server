@@ -8,17 +8,20 @@ public class DocumentForm {
     private String documentFormKind;
     private String documentFormDescription;
     private String documentFormViewRights;
+    private String projectName;
     private String token;
     private MultipartFile file;
 
     public DocumentForm() { }
 
     public DocumentForm(String type, String kind, String description,
-                        String viewRights, String token, MultipartFile file) {
+                        String viewRights, String projectName, String token,
+                        MultipartFile file) {
         this.documentFormType = type;
         this.documentFormKind = kind;
         this.documentFormDescription = description;
         this.documentFormViewRights = viewRights;
+        this.projectName = projectName;
         this.token = token;
         this.file = file;
     }
@@ -78,5 +81,13 @@ public class DocumentForm {
 
     public void setDocumentFormViewRights(String documentFormViewRights) {
         this.documentFormViewRights = documentFormViewRights;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 }

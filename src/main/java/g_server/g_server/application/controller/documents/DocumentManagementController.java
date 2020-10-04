@@ -1,11 +1,11 @@
 package g_server.g_server.application.controller.documents;
 
+import g_server.g_server.application.entity.forms.NewRightViewForm;
 import g_server.g_server.application.service.documents.DocumentManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import static org.springframework.util.StringUtils.hasText;
@@ -75,11 +75,15 @@ public class DocumentManagementController {
 
     @PutMapping("/scientific_advisor/document/change/view_rights/")
     public List<String> changeDocumentViewRights(
-            @RequestParam String documentName,
-            @RequestParam String newViewRights,
+            @ModelAttribute("newThemeForm") @Validated NewRightViewForm newRightViewForm,
             HttpServletRequest httpServletRequest
     ) {
-        return documentManagementService.editViewRights(documentName, newViewRights, getTokenFromRequest(httpServletRequest));
+        return documentManagementService.editViewRights(
+                newRightViewForm.getDocumentName(),
+                newRightViewForm.getNewViewRights(),
+                newRightViewForm.getProjectName(),
+                getTokenFromRequest(httpServletRequest)
+        );
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

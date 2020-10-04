@@ -2,11 +2,17 @@ package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
+import g_server.g_server.application.entity.documents.ViewRightsProject;
+import g_server.g_server.application.entity.project.OccupiedStudents;
+import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.view.DocumentVersionView;
 import g_server.g_server.application.entity.view.DocumentView;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
+import g_server.g_server.application.repository.documents.ViewRightsProjectRepository;
+import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
+import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
@@ -16,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 // Сервис ответственный за представление
@@ -41,6 +48,15 @@ public class DocumentViewService {
 
     @Autowired
     private DocumentVersionRepository documentVersionRepository;
+
+    @Autowired
+    private ViewRightsProjectRepository viewRightsProjectRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private OccupiedStudentsRepository occupiedStudentsRepository;
 
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users advisor, Document document) {
@@ -72,6 +88,18 @@ public class DocumentViewService {
                 else if (documentView == 5) {
                     return true;
                 }
+                else if (documentView == 6) {
+                    Integer documentID = document.getId();
+                    ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(documentID);
+                    List<OccupiedStudents> occupiedStudents =
+                            occupiedStudentsRepository.findAllByProjectID(viewRightsProject.getProject());
+                    for (OccupiedStudents occupiedStudent: occupiedStudents) {
+                        if (occupiedStudent.getStudentID() == student.getId()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
                 else {
                     return false;
                 }
@@ -102,9 +130,10 @@ public class DocumentViewService {
             // TODO этот момент надо учесть при загрузке прав видимости документов на клиент
             // TODO то есть в идеале надо сделать отдельную выдачу списка типов документов и прав видимостей
             // TODO для научных руководителей и заведующего кафедрой
-            if (documentView > 0 || documentView < 6) {
-                // Если документ может видеть только его создатель
-                if (documentView == 1) {
+            if (documentView > 0 || documentView < 7) {
+                // Если документ может видеть только его создатель или документ привязан к проекту и
+                // его может видеть созадтель проекта
+                if (documentView == 1 || documentView == 6) {
                     // Если желающий увидеть документ НР сам его загрузил
                     if (lookingAdvisor.getId() == documentCreatorAdvisor.getId()) {
                         return true;

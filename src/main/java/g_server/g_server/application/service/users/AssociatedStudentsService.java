@@ -588,6 +588,22 @@ public class AssociatedStudentsService {
 
     // TODO Сделать смену темы студента
 
+    // Получение списка имен проектов конкретного НР
+    public List<String> getAdvisorProjectNames(String token) {
+        Integer advisorID;
+        List<String> projectNames = new ArrayList<>();
+        try {
+            advisorID = getUserId(token);
+        } catch (Exception e) {
+            return null;
+        }
+        List<Project> projectList = projectRepository.findAllByScientificAdvisorID(advisorID);
+        for (Project project: projectList) {
+            projectNames.add(project.getName());
+        }
+        return projectNames;
+    }
+
     // Получить айди из токена
     public Integer getUserId(String token) {
         // Проверка токена

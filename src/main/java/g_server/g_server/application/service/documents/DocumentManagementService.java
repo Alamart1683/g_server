@@ -2,10 +2,10 @@ package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
-import g_server.g_server.application.repository.documents.DocumentKindRepository;
-import g_server.g_server.application.repository.documents.DocumentRepository;
-import g_server.g_server.application.repository.documents.DocumentTypeRepository;
-import g_server.g_server.application.repository.documents.DocumentVersionRepository;
+import g_server.g_server.application.entity.documents.ViewRightsProject;
+import g_server.g_server.application.entity.project.Project;
+import g_server.g_server.application.repository.documents.*;
+import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +35,12 @@ public class DocumentManagementService {
 
     @Autowired
     private DocumentDownloadService documentDownloadService;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private ViewRightsProjectRepository viewRightsProjectRepository;
 
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
@@ -286,7 +292,7 @@ public class DocumentManagementService {
     }
 
     // Метод изменения прав видимости документа
-    public List<String> editViewRights(String documentName, String newViewRights, String token) {
+    public List<String> editViewRights(String documentName, String newViewRightsString, String projectName, String token) {
         List<String> messagesList = new ArrayList<String>();
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
@@ -298,13 +304,81 @@ public class DocumentManagementService {
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение зоны видимости документа невозможно");
         if (messagesList.size() == 0) {
-            Integer viewRights = documentUploadService.getViewRights(newViewRights);
-            if (viewRights!= null) {
+            Integer newViewRights = documentUploadService.getViewRights(newViewRightsString);
+            if (newViewRights!= null) {
                 Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
                 if (document != null) {
-                    document.setView_rights(viewRights);
-                    documentService.save(document);
-                    messagesList.add("Зона видимости документа успешно изменена");
+                    // Если зона видимости не затрагивала проект и стала затрагивать
+                    if (document.getView_rights() != 6 && newViewRights == 6) {
+                        Project project;
+                        try {
+                            project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                        } catch (NullPointerException nullPointerException) {
+                            project = null;
+                        }
+                        if (project == null) {
+                            messagesList.add("Ошибка изменения зоны видимости: проект не найден");
+                        } else {
+                            document.setView_rights(newViewRights);
+                            documentService.save(document);
+                            ViewRightsProject viewRightsProject = new ViewRightsProject(project.getId(), document.getId());
+                            viewRightsProjectRepository.save(viewRightsProject);
+                            messagesList.add("Зона видимости документа успешно изменена");
+                        }
+                    }
+                    // Если зона видимости затрагивала проект и стала затрагивать другой
+                    else if (document.getView_rights() == 6 && newViewRights == 6) {
+                        Project project;
+                        try {
+                            project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                        } catch (NullPointerException nullPointerException) {
+                            project = null;
+                        }
+                        if (project == null) {
+                            messagesList.add("Ошибка изменения зоны видимости: проект не найден");
+                        } else {
+                            ViewRightsProject old;
+                            try {
+                                old = viewRightsProjectRepository.findByDocument(document.getId());
+                            } catch (NullPointerException nullPointerException) {
+                                old = null;
+                            }
+                            if (old == null) {
+                                messagesList.add("Предыдущая проектная принадлежность документа не обнаружена");
+                            }
+                            else {
+                                document.setView_rights(newViewRights);
+                                documentService.save(document);
+                                ViewRightsProject viewRightsProject = new ViewRightsProject(project.getId(), document.getId());
+                                viewRightsProjectRepository.save(viewRightsProject);
+                                messagesList.add("Зона видимости документа успешно изменена");
+                            }
+                        }
+                    }
+                    // Если зона видимости затрагивала проект и перестала его затрагивать
+                    else if (document.getView_rights() == 6 && newViewRights != 6) {
+                        ViewRightsProject old;
+                        try {
+                            old = viewRightsProjectRepository.findByDocument(document.getId());
+                        } catch (NullPointerException nullPointerException) {
+                            old = null;
+                        }
+                        if (old == null) {
+                            messagesList.add("Предыдущая проектная принадлежность документа не обнаружена");
+                        }
+                        else {
+                            viewRightsProjectRepository.deleteById(old.getId());
+                            document.setView_rights(newViewRights);
+                            documentService.save(document);
+                            messagesList.add("Зона видимости документа успешно изменена");
+                        }
+                    }
+                    // Изменение зоны видимости без затрагивания проекта
+                    else {
+                        document.setView_rights(newViewRights);
+                        documentService.save(document);
+                        messagesList.add("Зона видимости документа успешно изменена");
+                    }
                 }
                 else {
                     messagesList.add("Редактируемый документ не найден");

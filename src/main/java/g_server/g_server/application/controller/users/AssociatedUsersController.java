@@ -141,6 +141,11 @@ public class AssociatedUsersController {
         return associatedStudentsService.getProjectView(getTokenFromRequest(httpServletRequest));
     }
 
+    @GetMapping("/scientific_advisor/projects/names")
+    public List<String> getProjectNames(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.getAdvisorProjectNames(getTokenFromRequest(httpServletRequest));
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

@@ -19,4 +19,6 @@ public interface ViewRightsRepository extends JpaRepository<ViewRights, Integer>
 
     @Override
     void deleteById(Integer integer);
+
+    ViewRights findByViewRight(String viewRight);
 }

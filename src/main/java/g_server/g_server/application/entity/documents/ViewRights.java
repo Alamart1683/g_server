@@ -9,20 +9,28 @@ public class ViewRights {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column
-    private String view_right;
+    @Column(name = "view_right")
+    private String viewRight;
 
     public ViewRights() { }
 
-    public ViewRights(String view_right) {
-        this.view_right = view_right;
+    public ViewRights(String viewRight) {
+        this.viewRight = viewRight;
     }
 
-    public String getView_right() {
-        return view_right;
+    public String getViewRight() {
+        return viewRight;
     }
 
-    public void setView_right(String view_right) {
-        this.view_right = view_right;
+    public void setViewRight(String view_right) {
+        this.viewRight = view_right;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

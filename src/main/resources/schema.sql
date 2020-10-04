@@ -152,6 +152,14 @@ create table common_chat (
     foreign key (sender) references users(id)
 );
 
+create table project_document (
+    id int primary key key auto_increment,
+    project int not null,
+    document int not null unique,
+    foreign key (project) references project (id) on delete cascade on update cascade,
+    foreign key (document) references document (id) on delete cascade on update cascade
+);
+
 insert into roles (role) values
     ('ROLE_STUDENT'),
     ('ROLE_SCIENTIFIC_ADVISOR'),
@@ -175,11 +183,12 @@ insert into student_group (student_group) values
     ('ИНБО-15-16');
 
 insert into view_rights (view_right) values
-    ('is_only_for_me'),
-    ('is_only_for_scientific_advisors'),
-    ('is_only_for_my_students'),
-    ('is_only_for_my_students_and_only_for_scientific_advisors'),
-    ('is_for_all');
+    ('Только я'),
+    ('Только научные руководители'),
+    ('Только мои студенты'),
+    ('Только мои студенты и научные руководители'),
+    ('Все пользователи'),
+    ('Только для проекта');
 
 insert into document_type (type) values
     ('Научно-исследовательская работа'),
