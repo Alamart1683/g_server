@@ -82,15 +82,6 @@ create table project (
     foreign key (scientific_advisor_id) references scientific_advisor_data (id) on delete cascade on update cascade
 );
 
-create table occupied_students (
-    id int primary key auto_increment,
-    student_id int not null unique,
-    project_id int not null,
-    foreign key (student_id) references student_data (id) on delete cascade on update cascade,
-    foreign key (student_id) references associated_students (student) on delete cascade on update cascade,
-    foreign key (project_id) references project (id) on delete cascade on update cascade
-);
-
 create table associated_students (
     id int primary key auto_increment,
     scientific_advisor int not null,
@@ -100,6 +91,15 @@ create table associated_students (
     foreign key (scientific_advisor) references users (id) on delete cascade on update cascade,
     foreign key (student) references users (id) on delete cascade on update cascade,
     foreign key (theme) references project_theme (id)
+);
+
+create table occupied_students (
+    id int primary key auto_increment,
+    student_id int not null unique,
+    project_id int not null,
+    foreign key (student_id) references student_data (id) on delete cascade on update cascade,
+    foreign key (student_id) references associated_students (student) on delete cascade on update cascade,
+    foreign key (project_id) references project (id) on delete cascade on update cascade
 );
 
 create table document_type (
@@ -196,10 +196,10 @@ insert into document_kind (kind) values
     ('Пример отчёта');
 
 insert into project_theme (theme) values
-    ('Обучающие программы для портала Госуслуги, на основе технологии опережающего, деятельного, ситуационного обучения'),
-    ('Дизайн и исследование интерфейсов клиентских приложений, на основе ментальных моделей пользователя'),
-    ('Мобильные и WEB приложения, базирующиеся на клиент-серверной архитектуре'),
-    ('Анализ, разработка, внедрение и сопровождение распределенных, гетерогенных систем');
+    (2, 'Обучающие программы для портала Госуслуги, на основе технологии опережающего, деятельного, ситуационного обучения'),
+    (2, 'Дизайн и исследование интерфейсов клиентских приложений, на основе ментальных моделей пользователя'),
+    (2, 'Мобильные и WEB приложения, базирующиеся на клиент-серверной архитектуре'),
+    (2, 'Анализ, разработка, внедрение и сопровождение распределенных, гетерогенных систем');
 
 /*
 Событие для планировщика, которое будет удалять неподтвердившихся
