@@ -32,7 +32,7 @@ public class JwtProvider {
     public String generateToken(String email) {
         ZonedDateTime dateTime = ZonedDateTime.now();
         email = email + "$" + dateTime;
-        Date date = Date.from(LocalDate.now().plusDays(15).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date date = Date.from(LocalDate.now().plusDays(7).atStartOfDay(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .setSubject(email)
                 .setExpiration(date)

@@ -17,6 +17,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -59,6 +61,9 @@ public class UsersService implements UserDetailsService {
 
     @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
+
+    @Autowired
+    private RolesService rolesService;
 
     @Override
     // Загрузить пользователя по email
@@ -319,6 +324,30 @@ public class UsersService implements UserDetailsService {
             PersonalStudentView personalStudentView = new PersonalStudentView(student, advisorName, projectName);
             return personalStudentView;
         }
+    }
+
+    public String getUserRoleByRoleID(int userID) {
+        UsersRoles userRole = usersRolesRepository.findUsersRolesByUserId(userID);
+        String role;
+        try {
+            role = rolesService.findById(userRole.getRoleId()).get().getRole();
+        } catch (NoSuchElementException noSuchElementException) {
+            return "";
+        }
+        return role;
+    }
+
+    public String getExpirationDate(ZonedDateTime dateTime) {
+        String day = Integer.toString(dateTime.getDayOfMonth());
+        if (dateTime.getDayOfMonth() < 10) {
+            day = "0" + day;
+        }
+        String month = Integer.toString(dateTime.getMonth().getValue());
+        if (dateTime.getMonth().getValue() < 10) {
+            month = "0" + month;
+        }
+        String year = Integer.toString(dateTime.getYear());
+        return  day + "." + month + "." + year + " " + "00:00:00";
     }
 
     // TODO Сформировать личный кабинет научного руководителя или заведующего кафедрой

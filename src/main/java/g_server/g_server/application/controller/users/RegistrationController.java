@@ -22,7 +22,7 @@ public class RegistrationController {
     private Integer registrationCode;
     private String studentRegistrationEmail;
     private String confirmUrl;
-    @Value("$(api.url)")
+    @Value("${api.url}")
     private String apiUrl;
 
     @Autowired
@@ -39,27 +39,26 @@ public class RegistrationController {
 
     // Отправить форму регистрации на клиент, сгенерировать код подтверждения
     @GetMapping("/registration/student")
-    public String StudentRegistrationPreparing(Model model) {
+    public String StudentRegistrationPreparing() {
         registrationCode = (int) ((Math.random() * (1000000 - 100000)) + 100000);
         StudentForm studentForm = new StudentForm();
-        model.addAttribute("studentForm", studentForm);
-        return "studentForm";
+        return "Код подтверждения сгенерирован";
     }
 
     @PostMapping("/registration/mail/check/valid")
     public String CheckEmail(@ModelAttribute("email") String email) {
         if (mailService.checkMail(email))
-            return "email is valid";
+            return "Email корректный";
         else
-            return "email is not valid";
+            return "Email некорректный";
     }
 
     @PostMapping("/registration/mail/check/free")
     public String isFree(@ModelAttribute("email") String email) {
         if (!usersService.isEmailExist(email))
-            return "email is free";
+            return "Email свободный";
         else
-            return "email is not free";
+            return "Email занят";
     }
 
     @PostMapping("/registration/student")
@@ -167,17 +166,9 @@ public class RegistrationController {
             confirmUrl = null;
             mailService.sendSuccessRegistrationMailForStudent(user);
             return "Аккаунт был успешно подтвержден";
-        }
-        else {
+        } else {
             return "Чексумма не совпадает, возможно вы выслали код заново и данный код стал недействителен";
         }
-    }
-
-    @GetMapping("/admin/registration/scientific_advisor")
-    public String ScientificAdvisorRegistrationPreparing(Model model) {
-        ScientificAdvisorForm scientificAdvisorForm = new ScientificAdvisorForm();
-        model.addAttribute("scientificAdvisorForm", scientificAdvisorForm);
-        return "scientificAdvisorForm";
     }
 
     @PostMapping("/admin/registration/scientific_advisor")
@@ -208,12 +199,6 @@ public class RegistrationController {
             }
         }
         return messageList;
-    }
-
-    @GetMapping("/admin/registration/head_of_cathedra")
-    public String HeadOfCathedraRegistrationPreparing(Model model) {
-        model.addAttribute("scientificAdvisorForm", new ScientificAdvisorForm());
-        return "scientificAdvisorForm";
     }
 
     @PostMapping("/admin/registration/head_of_cathedra")
@@ -247,12 +232,6 @@ public class RegistrationController {
             }
         }
         return messageList;
-    }
-
-    @GetMapping("/root/registration/admin")
-    public String AdminRegistrationPreparing(Model model) {
-        model.addAttribute("adminForm", new AdminForm());
-        return "adminForm";
     }
 
     @PostMapping("/root/registration/admin")
