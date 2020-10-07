@@ -1,5 +1,8 @@
 package g_server.g_server.application.config.jwt;
 
+import g_server.g_server.application.entity.users.RefreshToken;
+import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.repository.users.RefreshTokenRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -7,7 +10,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -19,6 +25,12 @@ public class JwtProvider {
     @Autowired
     UsersRepository usersRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -28,22 +40,54 @@ public class JwtProvider {
     @Value("&{request.handle.secret}")
     private String requestHandleSecret;
 
-    // Сгенерировать токен по email
-    public String generateToken(String email) {
-        ZonedDateTime dateTime = ZonedDateTime.now();
-        email = email + "$" + dateTime;
-        Date date = Date.from(LocalDate.now().plusDays(7).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    // Сгенерировать refresh-токен
+    public String generateRefreshToken(String email, String password, long issue, long expire) {
+        Users user = usersRepository.findByEmail(email);
+        String rawToken = email + " " + password + " " + issue + " " + expire;
+        RefreshToken refreshToken = new RefreshToken(
+                user.getId(),
+                bCryptPasswordEncoder.encode(rawToken),
+                issue,
+                expire
+        );
+        refreshTokenRepository.save(refreshToken);
+        return bCryptPasswordEncoder.encode(refreshToken.getRefreshToken());
+    }
+
+    public boolean validateRefreshToken(String token) {
+        RefreshToken refreshToken;
+        try {
+            refreshToken = refreshTokenRepository.findByRefreshToken(token);
+        } catch (Exception e) {
+            refreshToken = null;
+        }
+        if (refreshToken != null && (refreshToken.getExpire() - java.time.Instant.now().getEpochSecond() < 0)) {
+            return true;
+        }
+        return false;
+    }
+
+    // Сгенерировать access-токен по email
+    public String generateAccessToken(String email, String password, long issue, long expire) {
+        email = email + " " + password + " " + issue + " " + expire;
         return Jwts.builder()
                 .setSubject(email)
-                .setExpiration(date)
+                .setIssuedAt(Date.from(Instant.ofEpochSecond(issue)))
+                .setExpiration(Date.from(Instant.ofEpochSecond(expire)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateAccessToken(String token) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
-            return true;
+            Users users = usersRepository.findByEmail(getEmailFromToken(token));
+            if (users != null) {
+                if (users.getPassword().equals(getPasswordFromToken(token))) {
+                    return true;
+                }
+            }
+            return false;
         } catch (Exception e) {
             log.severe("invalid token");
         }
@@ -53,9 +97,19 @@ public class JwtProvider {
     // Получить токен из email
     public String getEmailFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-        if (claims.getSubject().lastIndexOf("$") == -1)
+        if (claims.getSubject().lastIndexOf(' ') == -1)
             return null;
-        return claims.getSubject().substring(0, claims.getSubject().lastIndexOf("$"));
+        return claims.getSubject().substring(0, claims.getSubject().indexOf(' '));
+    }
+
+    public String getPasswordFromToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+        if (claims.getSubject().lastIndexOf(' ') == -1)
+            return null;
+        String password = claims.getSubject().substring(claims.getSubject().indexOf(' '));
+        password = password.substring(1);
+        password = password.substring(0, password.indexOf(' '));
+        return password;
     }
 
     // Токен подтверждения регистрации

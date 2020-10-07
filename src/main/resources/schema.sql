@@ -160,6 +160,14 @@ create table project_document (
     foreign key (document) references document (id) on delete cascade on update cascade
 );
 
+create table refresh_tokens (
+    id int primary key not null,
+    refresh_token varchar(1024) not null default 'Не назначен',
+    issue long not null,
+    expire long not null,
+    foreign key (id) references users (id) on delete cascade on update cascade
+);
+
 insert into roles (role) values
     ('ROLE_STUDENT'),
     ('ROLE_SCIENTIFIC_ADVISOR'),

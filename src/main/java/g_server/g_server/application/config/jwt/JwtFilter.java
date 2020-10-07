@@ -31,7 +31,7 @@ public class JwtFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // logger.info("Аутентифицирую запрос согласно токену...");
         String token = getTokenFromRequest((HttpServletRequest) servletRequest);
-        if (token != null && jwtProvider.validateToken(token)) {
+        if (token != null && jwtProvider.validateAccessToken(token)) {
             String email = jwtProvider.getEmailFromToken(token);
             UsernamePasswordAuthenticationToken auth = null;
             if (usersService.loadUserByUsername(email) != null) {
