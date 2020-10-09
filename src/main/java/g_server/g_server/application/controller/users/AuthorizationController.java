@@ -71,11 +71,11 @@ public class AuthorizationController {
                 }
             }
             else {
-                return new AuthorizationResponseForm("Для авторизации необходимо подтвердить регистрацию аккаунта");
+                return new AuthorizationResponseForm("Аккаунт не подтвержден");
             }
         }
         else {
-            return new AuthorizationResponseForm("Неверная комбинация логина и пароля");
+            return new AuthorizationResponseForm("Неверный логин или пароль");
         }
     }
 
