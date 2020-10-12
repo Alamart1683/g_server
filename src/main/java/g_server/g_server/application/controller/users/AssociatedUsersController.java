@@ -146,7 +146,7 @@ public class AssociatedUsersController {
         return associatedStudentsService.getAdvisorProjectNames(getTokenFromRequest(httpServletRequest));
     }
 
-    @GetMapping("/student/request/task/data")
+    @GetMapping("/student/request/NIR/task/data")
     public TaskDataViewWithMessage getStudentTaskData(HttpServletRequest httpServletRequest) {
         return associatedStudentsService.getTaskDataView(getTokenFromRequest(httpServletRequest));
     }
