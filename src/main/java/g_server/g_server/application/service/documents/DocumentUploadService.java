@@ -328,6 +328,9 @@ public class DocumentUploadService {
                 documentDirectory.mkdir();
             else
                 messagesList.add("Файл с таким именем уже существует");
+            // Проверим что код специальности декодируется
+            if (specialityEncoder(documentOrderForm.getSpeciality()).equals(""))
+                messagesList.add("Указан некорректный код специальности");
             // Сохраним файл на сервере, создав необходимую директорию
             if (messagesList.size() == 0) {
                 String currentDate = getCurrentDate();
@@ -347,9 +350,9 @@ public class DocumentUploadService {
                             OrderProperties orderProperties = new OrderProperties(
                                     document.getId(),
                                     documentOrderForm.getNumber(),
-                                    documentOrderForm.getOrderDate(),
-                                    documentOrderForm.getStartDate(),
-                                    documentOrderForm.getEndDate(),
+                                    convertRussianDateToSqlDate(documentOrderForm.getOrderDate()),
+                                    convertRussianDateToSqlDate(documentOrderForm.getStartDate()),
+                                    convertRussianDateToSqlDate(documentOrderForm.getEndDate()),
                                     specialityEncoder(documentOrderForm.getSpeciality())
                             );
                             orderPropertiesRepository.save(orderProperties);
@@ -497,6 +500,13 @@ public class DocumentUploadService {
         if (second.length() == 1)
             second = '0' + second;
         return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
+    }
+
+    public String convertRussianDateToSqlDate(String russianDate) {
+        String year = russianDate.substring(6, 10);
+        String month = russianDate.substring(3, 5);
+        String day = russianDate.substring(0, 2);
+        return year + '-' + month + '-' + day;
     }
 
     // Необходимо конвертировать месяца в номера
