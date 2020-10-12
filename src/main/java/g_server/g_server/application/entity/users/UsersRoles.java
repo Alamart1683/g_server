@@ -24,4 +24,6 @@ public class UsersRoles {
     public int getRoleId() {
         return roleId;
     }
+
+    public int getUserId() { return  userId; }
 }

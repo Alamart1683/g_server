@@ -1,20 +1,25 @@
 package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.documents.Document;
+import g_server.g_server.application.entity.documents.OrderProperties;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectTheme;
+import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.*;
 import g_server.g_server.application.entity.view.*;
+import g_server.g_server.application.repository.documents.DocumentRepository;
+import g_server.g_server.application.repository.documents.OrderPropertiesRepository;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.project.ProjectThemeRepository;
+import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.StudentDataRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.mail.MailService;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,6 +62,15 @@ public class AssociatedStudentsService {
 
     @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
+
+    @Autowired
+    private OrderPropertiesRepository orderPropertiesRepository;
+
+    @Autowired
+    private SpecialityRepository specialityRepository;
+
+    @Autowired
+    private DocumentRepository documentRepository;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -586,6 +600,75 @@ public class AssociatedStudentsService {
         }
     }
 
+    // Метод получения всех известных данных для заполнения задания для конкретного студента
+    public TaskDataViewWithMessage getTaskDataView(String token) {
+        TaskDataViewWithMessage taskDataViewWithMessage = new TaskDataViewWithMessage();
+        Integer userID;
+        try {
+            userID = getUserId(token);
+        } catch (Exception e) {
+            return null;
+        }
+        Users student;
+        try {
+            student = usersRepository.findById(userID).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            return null;
+        }
+        if (student != null) {
+            AssociatedStudents associatedStudents;
+            try {
+                associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+            } catch (NullPointerException nullPointerException) {
+                associatedStudents = null;
+            }
+            if (associatedStudents != null) {
+                Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
+                        .getStudentGroup().getStudentGroup().substring(0, 4));
+                OrderProperties orderProperty;
+                try {
+                    orderProperty = orderPropertiesRepository.findBySpeciality(speciality.getId());
+                } catch (NullPointerException nullPointerException) {
+                    orderProperty = null;
+                }
+                if (orderProperty != null) {
+                    Document document = documentRepository.findById(orderProperty.getId()).get();
+                    Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
+                    Users headOfCathedra = usersRepository.findById(
+                            usersRolesRepository.findByRoleId(3).getUserId()).get();
+                    TaskDataView taskDataView = new TaskDataView();
+                    taskDataView.setTaskType(document.getDocumentType().getType());
+                    taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
+                            " " + student.getSecond_name());
+                    taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
+                    taskDataView.setStudentTheme("Введите тему, которую вы согласовали с научным руководителем");
+                    taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
+                            " " + advisor.getSecond_name());
+                    taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
+                            " " + headOfCathedra.getSecond_name());
+                    taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
+                    taskDataView.setOrderNumber(orderProperty.getNumber());
+                    taskDataView.setOrderDate(convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+                    taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+                    taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+                    taskDataView.setOrderSpeciality(speciality.getCode());
+                    taskDataViewWithMessage.setTaskDataView(taskDataView);
+                    taskDataViewWithMessage.setMessage("Данные получены успешно");
+                    return taskDataViewWithMessage;
+                } else {
+                    taskDataViewWithMessage.setMessage("Приказ еще не вышел");
+                    return taskDataViewWithMessage;
+                }
+            } else {
+                taskDataViewWithMessage.setMessage("Студенту не назначен научный руководитель");
+                return taskDataViewWithMessage;
+            }
+        } else {
+            taskDataViewWithMessage.setMessage("Студент не найден");
+            return taskDataViewWithMessage;
+        }
+    }
+
     // TODO Сделать смену темы студента
 
     // Получение списка имен проектов конкретного НР
@@ -664,4 +747,12 @@ public class AssociatedStudentsService {
             return null;
         }
     }
+
+    public String convertSQLDateToRussianFormat(String sqlDate) {
+        String year = sqlDate.substring(0, 4);
+        String month = sqlDate.substring(5, 7);
+        String day = sqlDate.substring(8);
+        return day + '.' + month + '.' + year;
+    }
+
 }

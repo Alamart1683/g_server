@@ -19,4 +19,6 @@ public interface OrderPropertiesRepository extends JpaRepository<OrderProperties
 
     @Override
     void deleteAll();
+
+    OrderProperties findBySpeciality(int speciality);
 }

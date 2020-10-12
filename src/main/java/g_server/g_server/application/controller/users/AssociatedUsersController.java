@@ -146,6 +146,11 @@ public class AssociatedUsersController {
         return associatedStudentsService.getAdvisorProjectNames(getTokenFromRequest(httpServletRequest));
     }
 
+    @GetMapping("/student/request/task/data")
+    public TaskDataViewWithMessage getStudentTaskData(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.getTaskDataView(getTokenFromRequest(httpServletRequest));
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {
