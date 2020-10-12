@@ -237,8 +237,8 @@ insert into scientific_advisor_data values
     ('5', '1', '3');
 
 insert into associated_students values
-    ('2', '7'),
-    ('4', '6');
+    ('2', '7', '3', '1'),
+    ('4', '6', '3', '1');
 
 insert into view_rights (view_right) values
     ('Только я'),
