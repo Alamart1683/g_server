@@ -115,7 +115,7 @@ public class AuthorizationController {
                 );
                 return authorizationResponseForm;
             } else {
-                return new AuthorizationResponseForm("Произошла непредвиденная ошибка");
+                return new AuthorizationResponseForm("Нет связи с сервером");
             }
         }
         else {

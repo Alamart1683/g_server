@@ -3,12 +3,14 @@ package g_server.g_server.application.service.documents;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.forms.DocumentForm;
+import g_server.g_server.application.entity.forms.DocumentOrderForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
+import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.crud.DocumentVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +65,16 @@ public class DocumentUploadService {
     @Autowired
     private ViewRightsProjectRepository viewRightsProjectRepository;
 
+    @Autowired
+    private OrderPropertiesRepository orderPropertiesRepository;
+
+    @Autowired
+    private UsersRolesRepository usersRolesRepository;
+
+    // TODO Подумать над тем, чтобы шаблон задания мог существовать строго один для одной фазы
+    // TODO Также подумать над тем, чтобы одновременно для одной фазы и направления мог быть забит только
+    // TODO Только один приказ
+    // Метод загрузки документа
     public List<String> uploadDocument(DocumentForm documentForm) {
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
@@ -74,7 +86,6 @@ public class DocumentUploadService {
                 messagesList.add("Ошибка аутентификации: токен пуст");
             else
                 creator_id = getCreatorId(documentForm.getToken());
-
         if (creator_id == null)
             messagesList.add("Пользователь не найден, загрузить файл невозможно");
         // Определим айди типа документа
@@ -101,11 +112,16 @@ public class DocumentUploadService {
         String fileExtension = getFileExtension(documentForm.getFile());
         if (fileExtension.length() == 0)
             messagesList.add("Попытка загрузить документ с некорректным разрешением");
+        Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
+        if (roleID != 3 && viewRights == 5) {
+            messagesList.add("Попытка загрузить документ с" +
+                    " областью видимости доступной только заведующему кафедрой");
+        }
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             // Создание директории документов научного руководителя
-            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" + File.separator + "resources"
-                    + File.separator + "users_documents" + File.separator + creator_id;
+            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" +
+                    File.separator + "resources" + File.separator + "users_documents" + File.separator + creator_id;
             File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
             if (!scientificAdvisorDirectory.exists())
                 scientificAdvisorDirectory.mkdir();
@@ -249,6 +265,120 @@ public class DocumentUploadService {
             else {
                 messagesList.add("Загрузить новую версию документа невозможно, так как документ не был найден");
             }
+        }
+        return messagesList;
+    }
+
+    // Метод загрузки приказа с указанием его данных для заведующего кафедрой
+    public List<String> uploadDocumentOrder(DocumentOrderForm documentOrderForm) {
+        List<String> messagesList = new ArrayList<String>();
+        Integer creator_id = null;
+        if (documentOrderForm.getToken() == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (messagesList.size() == 0)
+            if (documentOrderForm.getToken().equals(""))
+                messagesList.add("Ошибка аутентификации: токен пуст");
+            else
+                creator_id = getCreatorId(documentOrderForm.getToken());
+        if (creator_id == null)
+            messagesList.add("Пользователь не найден, загрузить файл невозможно");
+        // Определим айди типа документа
+        Integer type_id = getTypeId(documentOrderForm.getDocumentFormType());
+        if (type_id == null)
+            messagesList.add("Указан несуществующий тип документа");
+        // Определим айди вида документа
+        Integer kind_id = getKindId(documentOrderForm.getDocumentFormKind());
+        if (kind_id == null)
+            messagesList.add("Указан несуществующий вид докумета");
+        // Проверим права доступа
+        Integer viewRights = getViewRights(documentOrderForm.getDocumentFormViewRights());
+        String projectName = documentOrderForm.getProjectName();
+        if (viewRights == null) {
+            messagesList.add("Указаны некорректные права доступа");
+        }
+        else if (viewRights == 6 && projectName == null) {
+            messagesList.add("Не указано имя проекта для добавления ему документа");
+        }
+        // Проверим что файл был загружен
+        if (documentOrderForm.getFile() == null)
+            messagesList.add("Ошибка загрузки файла. Такого файла не существует");
+        // Проверим корректное разрешение файла
+        String fileExtension = getFileExtension(documentOrderForm.getFile());
+        if (fileExtension.length() == 0)
+            messagesList.add("Попытка загрузить документ с некорректным разрешением");
+        // После этого разместим файл на сервере
+        if (messagesList.size() == 0) {
+            // Создание директории документов научного руководителя
+            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" + File.separator + "resources"
+                    + File.separator + "users_documents" + File.separator + creator_id;
+            File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
+            if (!scientificAdvisorDirectory.exists())
+                scientificAdvisorDirectory.mkdir();
+            // TODO Здесь сокрыт функционал для реализации разрешения версий файлов разных разрешений
+            // TODO Получим имя файла без разрешения
+            //String withoutExtension = documentForm.getFile().getOriginalFilename().substring(0,
+            //        documentForm.getFile().getOriginalFilename().lastIndexOf('.'));
+            // TODO Его можно ввести снова при необходимости, заменив имя файла на его версию без расширения
+            String fileName = documentOrderForm.getFile().getOriginalFilename();
+            // Создание директории версий файла
+            String documentPath = scientificAdvisorDocumentsPath + File.separator + fileName;
+            File documentDirectory = new File(documentPath);
+            // Проверим что одноименный файл не был загружен пользователем
+            if (!documentDirectory.exists())
+                documentDirectory.mkdir();
+            else
+                messagesList.add("Файл с таким именем уже существует");
+            // Сохраним файл на сервере, создав необходимую директорию
+            if (messagesList.size() == 0) {
+                String currentDate = getCurrentDate();
+                String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
+                String versionPath = documentDirectory.getPath() + File.separator +
+                        "version_" + currentDate + "." + fileExtension;
+                Path uploadingFilePath = Paths.get(versionPath);
+                try {
+                    if (documentRepository.findByCreatorAndName(creator_id, fileName) == null) {
+                        if (multipartFileToFileWrite(documentOrderForm.getFile(), uploadingFilePath)) {
+                            // После этого занесем загруженный файл в таблицу документов
+                            Document document = documentOrderForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
+                                    type_id, kind_id, viewRights
+                            );
+                            documentService.save(document);
+                            // Сохраним данные, специфические именно для приказа
+                            OrderProperties orderProperties = new OrderProperties(
+                                    document.getId(),
+                                    documentOrderForm.getNumber(),
+                                    documentOrderForm.getOrderDate(),
+                                    documentOrderForm.getStartDate(),
+                                    documentOrderForm.getEndDate(),
+                                    specialityEncoder(documentOrderForm.getSpeciality())
+                            );
+                            orderPropertiesRepository.save(orderProperties);
+                            // Далее создадим запись о первой версии документа в таблице версий
+                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
+                            DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
+                                    sqlDateTime, "Загрузка документа на сайт", versionPath);
+                            documentVersionService.save(documentVersion);
+                            messagesList.add("Документ был успешно загружен");
+                        } else {
+                            messagesList.add("Непредвиденная ошибка загрузки файла");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
+                    } else {
+                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                        if (documentDirectory.listFiles().length == 0) {
+                            documentDirectory.delete();
+                        }
+                    }
+                } catch (IOException ioException) {
+                    messagesList.add("IOException");
+                }
+            } else {
+                return messagesList;
+            }
+        } else {
+            return messagesList;
         }
         return messagesList;
     }
@@ -418,6 +548,34 @@ public class DocumentUploadService {
         }
         catch (IOException ioException) {
             return false;
+        }
+    }
+
+    // Метод получения из кода специальности названия групп
+    public String specialityEncoder(String speciality) {
+        switch (speciality) {
+            case "09.03.04":
+                return "ИКБО";
+            case "09.03.01":
+                return "ИВБО";
+            case "09.03.03":
+                return "ИНБО";
+            default:
+                return "";
+        }
+    }
+
+    // Метод получения из названия группы кода спциальностей
+    public String specialityDecoder(String groupName) {
+        switch (groupName) {
+            case "ИКБО":
+                return "09.03.04";
+            case "ИВБО":
+                return "09.03.01";
+            case "ИНБО":
+                return "09.03.03";
+            default:
+                return "";
         }
     }
 }

@@ -168,6 +168,16 @@ create table refresh_tokens (
     foreign key (id) references users (id) on delete cascade on update cascade
 );
 
+create table order_properties (
+    id int primary key not null,
+    number varchar(20) not null,
+    order_date date not null,
+    start_date date not null,
+    end_date date not null,
+    speciality varchar(16) not null,
+    foreign key (id) references document(id) on delete cascade on update cascade
+);
+
 insert into roles (role) values
     ('ROLE_STUDENT'),
     ('ROLE_SCIENTIFIC_ADVISOR'),
@@ -178,7 +188,9 @@ insert into roles (role) values
 insert into cathedras (cathedra_name) values
     ('МОСИТ'),
     ('ИППО'),
-    ('КИС');
+    ('КИС'),
+    ('ВТ'),
+    ('ПИ');
 
 insert into student_type (type) values
     ('Бакалавр'),
@@ -188,7 +200,45 @@ insert into student_type (type) values
 insert into student_group (student_group) values
     ('ИКБО-12-17'),
     ('ИКБО-07-17'),
-    ('ИНБО-15-16');
+    ('ИНБО-13-17'),
+    ('ИВБО-06-17');
+
+insert into users values
+    ('Alamart1683@gmail.com', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$hHGIOI8bYFvC7GdN1tc3tOjnNlswdVIRq.5foa5/v0YG9DVNDqNOy', '+79160571756', '1', '1', '2020-09-08 21:05:16'),
+    ('vkgrig490@mail.ru', 'Виктор', 'Григорьев', 'Карлович', '$2a$10$lFlTSE0v19WaLKktY1X0b.xDRVTf/5msJCrIR6SSXoDOx2GRvEG16', '+79652812343', '1', '1', '2020-09-09 13:57:00'),
+    ('kakoyetomylo@mirea.ru', 'Иван', 'Иванов', 'Иванович', '$2a$10$YwXR/8QNQ9tO.cfcmA5MMur0yYRdxSS1dznFmrwVYUfCKMBCnClJu', '+79991488228', '1', '1', '2020-09-09 13:57:00'),
+    ('korrafox@gmail.com', 'Немарина', 'Некарева', 'Неандреевна', '$2a$10$ok3ph7j8SjxHI1YbCshtDeu9PE2vZOn6s6puMt46dqgIFXKdnsv22', '+79991488228', '1', '1', '2020-09-09 13:57:00'),
+    ('s_golovin256@mirea.ru', 'Сергей', 'Головин', 'Анатольевич', '$2a$10$YRMcPsGnMz2QMMa7dEHisueWbvU14VmQMAN9WU3JBR6QiUOFtRviK', '+74954349743', '1', '1', '2020-09-09 13:57:00'),
+    ('korra-m@yandex.ru', 'Марина', 'Карева', 'Андреевна', '$2a$10$edTSIRTfoeT23qbuAUvjs.bVL4xRA4ib2WONBubjhSbEf7DUDPd2a', '+79855727332', '1', '1', '2020-09-09 13:57:00'),
+    ('Alamart1683@yandex.ru', 'Ганнибал', 'Барка', 'Гамилькарович', '$2a$10$2qq.z.VNoFt8T6Mqkekw/u4QlpKmt4SaLhMv1c6Ql9dkbZzmyIGA2', '+78889992212', '1', '1', '2020-09-09 13:57:00'),
+    ('andrey.lis2012@yandex.ru', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$bhcj/eTrEjVHNYtCkmTL5uMSskaXjwGCHWf9U8EzT2vpk9MEsenN6', '+79160571756', '1', '1', '2020-09-09 13:57:00'),
+    ('Delamart1683@yandex.ru', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$lAABmHuK6vsqV187OVUIquNm3fwAcjCGo7J0.rISuXis89boU/Oga', '+79160571756', '1', '1', '2020-09-09 13:57:00');
+
+insert into users_roles values
+    ('1', '5'),
+    ('2', '2'),
+    ('3', '2'),
+    ('4', '2'),
+    ('5', '3'),
+    ('6', '1'),
+    ('7', '1'),
+    ('8', '4'),
+    ('9', '1');
+
+insert into student_data values
+    ('6', '1', '1', '1'),
+    ('7', '1', '1', '1'),
+    ('9', '4', '1', '1');
+
+insert into scientific_advisor_data values
+    ('2', '1', '8'),
+    ('3', '1', '10'),
+    ('4', '1', '15'),
+    ('5', '1', '3');
+
+insert into associated_students values
+    ('2', '7'),
+    ('4', '6');
 
 insert into view_rights (view_right) values
     ('Только я'),
@@ -205,12 +255,9 @@ insert into document_type (type) values
     ('ВКР');
 
 insert into document_kind (kind) values
-    ('Отчёт'),
     ('Приказ'),
-    ('Титульный лист'),
-    ('Методическое пособие'),
-    ('Презентация'),
-    ('Пример отчёта');
+    ('Задание'),
+    ('Отчёт');
 
 insert into project_theme (theme) values
     (2, 'Обучающие программы для портала Госуслуги, на основе технологии опережающего, деятельного, ситуационного обучения'),

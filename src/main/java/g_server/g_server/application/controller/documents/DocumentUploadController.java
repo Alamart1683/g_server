@@ -1,6 +1,7 @@
 package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.forms.DocumentForm;
+import g_server.g_server.application.entity.forms.DocumentOrderForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
 import g_server.g_server.application.service.documents.DocumentUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,6 @@ public class DocumentUploadController {
 
     public static final String AUTHORIZATION = "Authorization";
 
-    @GetMapping("/scientific_advisor/document/upload")
-    public String PreparingUploadDocument(Model model) {
-        DocumentForm documentForm = new DocumentForm();
-        model.addAttribute("documentForm", documentForm);
-        return "documentForm";
-    }
-
     @PostMapping("/scientific_advisor/document/upload")
     public List<String> UploadDocument(
             @ModelAttribute("documentForm") @Validated DocumentForm documentForm,
@@ -36,19 +30,20 @@ public class DocumentUploadController {
         return documentUploadService.uploadDocument(documentForm);
     }
 
-    @GetMapping("/scientific_advisor/document/upload/version")
-    public String PreparingUploadDocumentVersion(Model model) {
-        DocumentVersionForm documentVersionForm = new DocumentVersionForm();
-        model.addAttribute("documentVersionForm", documentVersionForm);
-        return "documentVersionForm";
-    }
-
     @PostMapping("/scientific_advisor/document/upload/version")
     public List<String> UploadDocumentVersion(
             @ModelAttribute("documentVersionForm") @Validated DocumentVersionForm documentVersionForm,
             HttpServletRequest httpServletRequest) {
         documentVersionForm.setToken(getTokenFromRequest(httpServletRequest));
         return documentUploadService.uploadDocumentVersion(documentVersionForm);
+    }
+
+    @PostMapping("head_of_cathedra/document/order/upload")
+    public List<String> UploadOrder (
+            @ModelAttribute("documentOrderForm") @Validated DocumentOrderForm documentOrderForm,
+            HttpServletRequest httpServletRequest) {
+        documentOrderForm.setToken(getTokenFromRequest(httpServletRequest));
+        return documentUploadService.uploadDocumentOrder(documentOrderForm);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
