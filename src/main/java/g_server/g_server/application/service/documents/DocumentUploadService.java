@@ -6,9 +6,11 @@ import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.forms.DocumentOrderForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
 import g_server.g_server.application.entity.project.Project;
+import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectRepository;
+import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
@@ -70,6 +72,9 @@ public class DocumentUploadService {
 
     @Autowired
     private UsersRolesRepository usersRolesRepository;
+
+    @Autowired
+    private SpecialityRepository specialityRepository;
 
     // TODO Подумать над тем, чтобы шаблон задания мог существовать строго один для одной фазы
     // TODO Также подумать над тем, чтобы одновременно для одной фазы и направления мог быть забит только
@@ -329,7 +334,8 @@ public class DocumentUploadService {
             else
                 messagesList.add("Файл с таким именем уже существует");
             // Проверим что код специальности декодируется
-            if (specialityEncoder(documentOrderForm.getSpeciality()).equals(""))
+            Speciality speciality = specialityRepository.findByCode(documentOrderForm.getSpeciality());
+            if (speciality == null)
                 messagesList.add("Указан некорректный код специальности");
             // Сохраним файл на сервере, создав необходимую директорию
             if (messagesList.size() == 0) {
@@ -353,7 +359,7 @@ public class DocumentUploadService {
                                     convertRussianDateToSqlDate(documentOrderForm.getOrderDate()),
                                     convertRussianDateToSqlDate(documentOrderForm.getStartDate()),
                                     convertRussianDateToSqlDate(documentOrderForm.getEndDate()),
-                                    specialityEncoder(documentOrderForm.getSpeciality())
+                                    speciality.getId()
                             );
                             orderPropertiesRepository.save(orderProperties);
                             // Далее создадим запись о первой версии документа в таблице версий
@@ -558,34 +564,6 @@ public class DocumentUploadService {
         }
         catch (IOException ioException) {
             return false;
-        }
-    }
-
-    // Метод получения из кода специальности названия групп
-    public String specialityEncoder(String speciality) {
-        switch (speciality) {
-            case "09.03.04":
-                return "ИКБО";
-            case "09.03.01":
-                return "ИВБО";
-            case "09.03.03":
-                return "ИНБО";
-            default:
-                return "";
-        }
-    }
-
-    // Метод получения из названия группы кода спциальностей
-    public String specialityDecoder(String groupName) {
-        switch (groupName) {
-            case "ИКБО":
-                return "09.03.04";
-            case "ИВБО":
-                return "09.03.01";
-            case "ИНБО":
-                return "09.03.03";
-            default:
-                return "";
         }
     }
 }

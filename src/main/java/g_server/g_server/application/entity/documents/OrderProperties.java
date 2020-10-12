@@ -1,9 +1,9 @@
 package g_server.g_server.application.entity.documents;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import g_server.g_server.application.entity.system_data.Speciality;
+import g_server.g_server.application.entity.system_data.StudentGroup;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "order_properties")
@@ -24,12 +24,16 @@ public class OrderProperties {
     private String endDate;
 
     @Column(name = "speciality")
-    private String speciality;
+    private int speciality;
+
+    @ManyToOne
+    @JoinColumn(name = "speciality", referencedColumnName = "id", insertable = false, updatable = false)
+    private Speciality specialityTable;
 
     public OrderProperties() { }
 
     public OrderProperties(int id, String number, String orderDate, String startDate,
-        String endDate, String speciality) {
+        String endDate, int speciality) {
         this.id = id;
         this.number = number;
         this.orderDate = orderDate;
@@ -78,11 +82,11 @@ public class OrderProperties {
         this.endDate = endDate;
     }
 
-    public String getSpeciality() {
+    public int getSpeciality() {
         return speciality;
     }
 
-    public void setSpeciality(String speciality) {
+    public void setSpeciality(int speciality) {
         this.speciality = speciality;
     }
 }
