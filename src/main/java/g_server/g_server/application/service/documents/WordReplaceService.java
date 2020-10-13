@@ -1,6 +1,6 @@
 package g_server.g_server.application.service.documents;
 
-import g_server.g_server.application.service.documents.TextReplace.TextReplacer;
+import g_server.g_server.application.service.documents.text_processor.TextReplacer;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import java.io.*;
 

@@ -1,4 +1,4 @@
-package g_server.g_server.application.service.documents.TextReplace;
+package g_server.g_server.application.service.documents.text_processor;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.CharacterRun;
 import org.apache.poi.hwpf.usermodel.Paragraph;
