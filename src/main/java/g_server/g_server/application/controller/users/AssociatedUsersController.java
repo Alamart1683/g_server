@@ -148,7 +148,7 @@ public class AssociatedUsersController {
 
     @GetMapping("/student/request/NIR/task/data")
     public TaskDataViewWithMessage getStudentTaskData(HttpServletRequest httpServletRequest) {
-        return associatedStudentsService.getTaskDataView(getTokenFromRequest(httpServletRequest));
+        return associatedStudentsService.getNirTaskDataView(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

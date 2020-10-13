@@ -24,4 +24,6 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     List<Document> findByCreator(Integer creator_id);
 
     Document findByCreatorAndName(Integer creator_id, String name);
+
+    List<Document> findByTypeAndKind(Integer type, Integer kind);
  }

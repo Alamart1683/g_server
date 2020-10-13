@@ -2,6 +2,7 @@ package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
+import g_server.g_server.application.entity.documents.DocumentKind;
 import g_server.g_server.application.entity.documents.OrderProperties;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
@@ -9,7 +10,9 @@ import g_server.g_server.application.entity.project.ProjectTheme;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.*;
 import g_server.g_server.application.entity.view.*;
+import g_server.g_server.application.repository.documents.DocumentKindRepository;
 import g_server.g_server.application.repository.documents.DocumentRepository;
+import g_server.g_server.application.repository.documents.DocumentTypeRepository;
 import g_server.g_server.application.repository.documents.OrderPropertiesRepository;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
@@ -71,6 +74,12 @@ public class AssociatedStudentsService {
 
     @Autowired
     private DocumentRepository documentRepository;
+
+    @Autowired
+    private DocumentTypeRepository documentTypeRepository;
+
+    @Autowired
+    private DocumentKindRepository documentKindRepository;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -601,7 +610,7 @@ public class AssociatedStudentsService {
     }
 
     // Метод получения всех известных данных для заполнения задания для конкретного студента
-    public TaskDataViewWithMessage getTaskDataView(String token) {
+    public TaskDataViewWithMessage getNirTaskDataView(String token) {
         TaskDataViewWithMessage taskDataViewWithMessage = new TaskDataViewWithMessage();
         Integer userID;
         try {
@@ -636,29 +645,33 @@ public class AssociatedStudentsService {
                     Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
                     Users headOfCathedra = usersRepository.findById(
                             usersRolesRepository.findByRoleId(3).getUserId()).get();
-                    TaskDataView taskDataView = new TaskDataView();
-                    taskDataView.setTaskType(document.getDocumentType().getType());
-                    taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
-                            " " + student.getSecond_name());
-                    taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
-                    taskDataView.setStudentTheme("Введите тему, которую вы согласовали с научным руководителем");
-                    taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
-                            " " + advisor.getSecond_name());
-                    taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
-                            " " + headOfCathedra.getSecond_name());
-                    taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
-                    taskDataView.setOrderNumber(orderProperty.getNumber());
-                    taskDataView.setOrderDate(convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
-                    taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
-                    taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
-                    taskDataView.setOrderSpeciality(speciality.getCode());
-                    taskDataViewWithMessage.setTaskDataView(taskDataView);
-                    taskDataViewWithMessage.setMessage("Данные получены успешно");
-                    return taskDataViewWithMessage;
+                    List<Document> taskList = documentRepository.findByTypeAndKind(1, 2);
+                    if (taskList.size() > 0) {
+                        TaskDataView taskDataView = new TaskDataView();
+                        taskDataView.setTaskType(document.getDocumentType().getType());
+                        taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
+                                " " + student.getSecond_name());
+                        taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
+                        taskDataView.setStudentTheme("«Введите тему, которую вы согласовали с научным руководителем»");
+                        taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
+                                " " + advisor.getSecond_name());
+                        taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
+                                " " + headOfCathedra.getSecond_name());
+                        taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
+                        taskDataView.setOrderNumber(orderProperty.getNumber());
+                        taskDataView.setOrderDate(convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+                        taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+                        taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+                        taskDataView.setOrderSpeciality(speciality.getCode());
+                        taskDataViewWithMessage.setTaskDataView(taskDataView);
+                        taskDataViewWithMessage.setMessage("Данные получены успешно");
+                    } else {
+                        taskDataViewWithMessage.setMessage("Образец задания еще не был загружен в систему");
+                    }
                 } else {
                     taskDataViewWithMessage.setMessage("Приказ еще не вышел");
-                    return taskDataViewWithMessage;
                 }
+                return taskDataViewWithMessage;
             } else {
                 taskDataViewWithMessage.setMessage("Студенту не назначен научный руководитель");
                 return taskDataViewWithMessage;
@@ -754,5 +767,4 @@ public class AssociatedStudentsService {
         String day = sqlDate.substring(8);
         return day + '.' + month + '.' + year;
     }
-
 }

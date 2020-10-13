@@ -7,19 +7,15 @@ import g_server.g_server.application.repository.documents.DocumentVersionReposit
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @Service
 public class DocumentDownloadService {
-    @Autowired
-    private DocumentViewService documentViewService;
-
-    @Autowired
-    private DocumentUploadService documentUploadService;
-
-    @Autowired
-    private DocumentService documentService;
 
     @Autowired
     private DocumentRepository documentRepository;
@@ -119,4 +115,6 @@ public class DocumentDownloadService {
             return "";
         return document.getName();
     }
+
+
 }
