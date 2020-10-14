@@ -652,7 +652,7 @@ public class AssociatedStudentsService {
                         taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
                                 " " + student.getSecond_name());
                         taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
-                        taskDataView.setStudentTheme("«Введите тему, которую вы согласовали с научным руководителем»");
+                        taskDataView.setStudentTheme("Введите согласованную тему НИР");
                         taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
                                 " " + advisor.getSecond_name());
                         taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +

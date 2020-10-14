@@ -91,13 +91,14 @@ public class DocumentProcessorService {
                     DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
                     XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
                     WordReplaceService wordReplaceService = new WordReplaceService(template);
+                    String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
 
                     // Заменим слова в тексте документа
                     wordReplaceService.replaceWordsInText("Короткая дата начала НИР", taskDataView.getOrderStartDate());
                     wordReplaceService.replaceWordsInText("Короткая дата конца НИР", taskDataView.getOrderEndDate());
                     wordReplaceService.replaceWordsInText("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
                     wordReplaceService.replaceWordsInText("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
-                    wordReplaceService.replaceWordsInText("Согласованное название темы", taskDataView.getStudentTheme());
+                    wordReplaceService.replaceWordsInText("Согласованное название темы", studentTheme);
                     wordReplaceService.replaceWordsInText("Дата выхода приказа", getFirstDateType(taskDataView.getOrderDate()));
                     wordReplaceService.replaceWordsInText("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
                     wordReplaceService.replaceWordsInText("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
@@ -116,7 +117,7 @@ public class DocumentProcessorService {
                     wordReplaceService.replaceWordsInTables("Короткая дата конца НИР", taskDataView.getOrderEndDate());
                     wordReplaceService.replaceWordsInTables("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
                     wordReplaceService.replaceWordsInTables("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
-                    wordReplaceService.replaceWordsInTables("Согласованное название темы", taskDataView.getStudentTheme());
+                    wordReplaceService.replaceWordsInTables("Согласованное название темы", studentTheme);
                     wordReplaceService.replaceWordsInTables("Дата выхода приказа", getFirstDateType(taskDataView.getOrderDate()));
                     wordReplaceService.replaceWordsInTables("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
                     wordReplaceService.replaceWordsInTables("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
