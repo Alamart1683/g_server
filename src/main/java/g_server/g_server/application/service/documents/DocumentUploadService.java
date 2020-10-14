@@ -76,11 +76,21 @@ public class DocumentUploadService {
     @Autowired
     private SpecialityRepository specialityRepository;
 
+    public void createDocumentRootDirIfIsNotExist() {
+        String rootDocDirPath = "src" + File.separator + "main" +
+                File.separator + "resources" + File.separator + "users_documents";
+        File rootDocDir = new File(rootDocDirPath);
+        if (!rootDocDir.exists()) {
+            rootDocDir.mkdir();
+        }
+    }
+
     // TODO Подумать над тем, чтобы шаблон задания мог существовать строго один для одной фазы
     // TODO Также подумать над тем, чтобы одновременно для одной фазы и направления мог быть забит только
     // TODO Только один приказ
     // Метод загрузки документа
     public List<String> uploadDocument(DocumentForm documentForm) {
+        createDocumentRootDirIfIsNotExist();
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
         Integer creator_id = null;
@@ -188,8 +198,10 @@ public class DocumentUploadService {
                         }
                         else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
-                            if (documentDirectory.listFiles().length == 0) {
-                                documentDirectory.delete();
+                            if (documentDirectory != null) {
+                                if (documentDirectory.listFiles().length == 0) {
+                                    documentDirectory.delete();
+                                }
                             }
                         }
                     }
@@ -276,6 +288,7 @@ public class DocumentUploadService {
 
     // Метод загрузки приказа с указанием его данных для заведующего кафедрой
     public List<String> uploadDocumentOrder(DocumentOrderForm documentOrderForm) {
+        createDocumentRootDirIfIsNotExist();
         List<String> messagesList = new ArrayList<String>();
         Integer creator_id = null;
         if (documentOrderForm.getToken() == null)
