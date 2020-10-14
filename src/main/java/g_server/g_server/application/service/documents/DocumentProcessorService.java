@@ -106,8 +106,7 @@ public class DocumentProcessorService {
                     wordReplaceService.replaceWordsInText("ГРУППА", taskDataView.getStudentGroup());
                     wordReplaceService.replaceWordsInText("Код специальности", taskDataView.getOrderSpeciality());
                     wordReplaceService.replaceWordsInText("Название специальности", speciality.getSpeciality());
-                    wordReplaceService.replaceWordsInText("ФИО С ДП", taskDataView.getStudentFio());
-                    wordReplaceService.replaceWordsInText("ФИО С РП", taskDataView.getStudentFio());
+                    wordReplaceService.replaceWordsInText("ФИОП", taskDataView.getStudentFio());
                     wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
                     wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
                     wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
@@ -126,8 +125,7 @@ public class DocumentProcessorService {
                     wordReplaceService.replaceWordsInTables("ГРУППА", taskDataView.getStudentGroup());
                     wordReplaceService.replaceWordsInTables("Код специальности", taskDataView.getOrderSpeciality());
                     wordReplaceService.replaceWordsInTables("Название специальности", speciality.getSpeciality());
-                    wordReplaceService.replaceWordsInTables("ФИО С ДП", taskDataView.getStudentFio());
-                    wordReplaceService.replaceWordsInTables("ФИО С РП", taskDataView.getStudentFio());
+                    wordReplaceService.replaceWordsInTables("ФИОП", taskDataView.getStudentFio());
                     wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
                     wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
                     wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
