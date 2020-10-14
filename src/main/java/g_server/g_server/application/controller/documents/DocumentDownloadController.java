@@ -72,7 +72,7 @@ public class DocumentDownloadController {
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
-        // file.delete();
+        file.delete();
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

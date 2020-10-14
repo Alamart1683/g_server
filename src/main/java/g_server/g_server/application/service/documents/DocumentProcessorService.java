@@ -130,7 +130,6 @@ public class DocumentProcessorService {
                     wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
                     wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
                     wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
-
                     File file = wordReplaceService.saveAndGetModdedFile(studentDocumentsPath + File.separator + "temp.docx");
                     return file;
                 } else {
