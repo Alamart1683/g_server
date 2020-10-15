@@ -3,25 +3,25 @@ package g_server.g_server.application.service.documents;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
+import g_server.g_server.application.entity.documents.OrderProperties;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.entity.view.TaskDataView;
 import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
+import g_server.g_server.application.repository.documents.OrderPropertiesRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
+import g_server.g_server.application.repository.users.UsersRolesRepository;
+import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
@@ -45,6 +45,15 @@ public class DocumentProcessorService {
     @Autowired
     private SpecialityRepository specialityRepository;
 
+    @Autowired
+    private OrderPropertiesRepository orderPropertiesRepository;
+
+    @Autowired
+    private UsersRolesRepository usersRolesRepository;
+
+    @Autowired
+    private AssociatedStudentsService associatedStudentsService;
+
     // Обработать шаблон задания для студента
     public File studentTaskProcessing(String token, TaskDataView taskDataView) throws Exception {
         Integer userID;
@@ -67,9 +76,32 @@ public class DocumentProcessorService {
                 associatedStudents = null;
             }
             if (associatedStudents != null) {
-                List<Document> taskList = documentRepository.findByTypeAndKind(1, 2);
+                Integer type;
+                Integer kind;
+                switch (taskDataView.getTaskType()) {
+                    case "Научно-исследовательская работа":
+                        type = 1;
+                        kind = 2;
+                        break;
+                    case "Практика по получению знаний и умений":
+                        type = 2;
+                        kind = 2;
+                        break;
+                    case "Преддипломная практика":
+                        type = 3;
+                        kind = 2;
+                        break;
+                    case "ВКР":
+                        type = 4;
+                        kind = 2;
+                        break;
+                    default:
+                        type = 0;
+                        kind = 0;
+                }
+                List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
                 if (taskList.size() > 0) {
-                    String specialityName;
+                    String specialityName = "";
                     Speciality speciality = null;
                     try {
                         speciality = specialityRepository.findByCode(taskDataView.getOrderSpeciality());
@@ -90,48 +122,7 @@ public class DocumentProcessorService {
                     List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
                     DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
                     XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                    WordReplaceService wordReplaceService = new WordReplaceService(template);
-                    String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
-
-                    // Заменим слова в тексте документа
-                    wordReplaceService.replaceWordsInText("Короткая дата начала НИР", taskDataView.getOrderStartDate());
-                    wordReplaceService.replaceWordsInText("Короткая дата конца НИР", taskDataView.getOrderEndDate());
-                    wordReplaceService.replaceWordsInText("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
-                    wordReplaceService.replaceWordsInText("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
-                    wordReplaceService.replaceWordsInText("Согласованное название темы", studentTheme);
-                    wordReplaceService.replaceWordsInText("Дата выхода приказа", getFirstDateType(taskDataView.getOrderDate()));
-                    wordReplaceService.replaceWordsInText("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
-                    wordReplaceService.replaceWordsInText("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
-                    wordReplaceService.replaceWordsInText("Номер приказа", taskDataView.getOrderNumber());
-                    wordReplaceService.replaceWordsInText("КАФЕДРА", taskDataView.getCathedra());
-                    wordReplaceService.replaceWordsInText("ГРУППА", taskDataView.getStudentGroup());
-                    wordReplaceService.replaceWordsInText("Код специальности", taskDataView.getOrderSpeciality());
-                    wordReplaceService.replaceWordsInText("Название специальности", speciality.getSpeciality());
-                    wordReplaceService.replaceWordsInText("ФИОП", taskDataView.getStudentFio());
-                    wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
-                    wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
-                    wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
-
-                    // Заменим слова в таблицах документа
-                    wordReplaceService.replaceWordsInTables("Короткая дата начала НИР", taskDataView.getOrderStartDate());
-                    wordReplaceService.replaceWordsInTables("Короткая дата конца НИР", taskDataView.getOrderEndDate());
-                    wordReplaceService.replaceWordsInTables("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
-                    wordReplaceService.replaceWordsInTables("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
-                    wordReplaceService.replaceWordsInTables("Согласованное название темы", studentTheme);
-                    wordReplaceService.replaceWordsInTables("Дата выхода приказа", getFirstDateType(taskDataView.getOrderDate()));
-                    wordReplaceService.replaceWordsInTables("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
-                    wordReplaceService.replaceWordsInTables("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
-                    wordReplaceService.replaceWordsInTables("Номер приказа", taskDataView.getOrderNumber());
-                    wordReplaceService.replaceWordsInTables("КАФЕДРА", taskDataView.getCathedra());
-                    wordReplaceService.replaceWordsInTables("ГРУППА", taskDataView.getStudentGroup());
-                    wordReplaceService.replaceWordsInTables("Код специальности", taskDataView.getOrderSpeciality());
-                    wordReplaceService.replaceWordsInTables("Название специальности", speciality.getSpeciality());
-                    wordReplaceService.replaceWordsInTables("ФИОП", taskDataView.getStudentFio());
-                    wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
-                    wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
-                    wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
-                    File file = wordReplaceService.saveAndGetModdedFile(studentDocumentsPath + File.separator + "temp.docx");
-                    return file;
+                    return taskProcessing(template, taskDataView, specialityName, studentDocumentsPath);
                 } else {
                     return null;
                 }
@@ -141,6 +132,165 @@ public class DocumentProcessorService {
         } else {
             return null;
         }
+    }
+
+    // Обработать укороченный шаблон задания для студента
+    public File studentShortTaskProcessing(String token, ShortTaskDataView shortTaskDataView) throws Exception {
+        Integer userID;
+        try {
+            userID = getUserId(token);
+        } catch (Exception e) {
+            return null;
+        }
+        Users student;
+        try {
+            student = usersRepository.findById(userID).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            return null;
+        }
+        if (student != null) {
+            AssociatedStudents associatedStudents;
+            try {
+                associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+            } catch (NullPointerException nullPointerException) {
+                associatedStudents = null;
+            }
+            if (associatedStudents != null) {
+                Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
+                        .getStudentGroup().getStudentGroup().substring(0, 4));
+                OrderProperties orderProperty;
+                try {
+                    orderProperty = orderPropertiesRepository.findBySpeciality(speciality.getId());
+                } catch (NullPointerException nullPointerException) {
+                    orderProperty = null;
+                }
+                if (orderProperty != null) {
+                    Document document = documentRepository.findById(orderProperty.getId()).get();
+                    Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
+                    Users headOfCathedra = usersRepository.findById(
+                            usersRolesRepository.findByRoleId(3).getUserId()).get();
+                    Integer type;
+                    Integer kind;
+                    switch (shortTaskDataView.getTaskType()) {
+                        case "Научно-исследовательская работа":
+                            type = 1;
+                            kind = 2;
+                            break;
+                        case "Практика по получению знаний и умений":
+                            type = 2;
+                            kind = 2;
+                            break;
+                        case "Преддипломная практика":
+                            type = 3;
+                            kind = 2;
+                            break;
+                        case "ВКР":
+                            type = 4;
+                            kind = 2;
+                            break;
+                        default:
+                            type = 0;
+                            kind = 0;
+                    }
+                    List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
+                    if (taskList.size() > 0) {
+                        TaskDataView taskDataView = new TaskDataView();
+                        taskDataView.setTaskType(document.getDocumentType().getType());
+                        taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
+                                " " + student.getSecond_name());
+                        taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
+                        taskDataView.setStudentTheme(shortTaskDataView.getStudentTheme());
+                        taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
+                                " " + advisor.getSecond_name());
+                        taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
+                                " " + headOfCathedra.getSecond_name());
+                        taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
+                        taskDataView.setOrderNumber(orderProperty.getNumber());
+                        taskDataView.setOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+                        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+                        taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+                        taskDataView.setOrderSpeciality(speciality.getCode());
+                        taskDataView.setToExplore(shortTaskDataView.getToExplore());
+                        taskDataView.setToCreate(shortTaskDataView.getToCreate());
+                        taskDataView.setToFamiliarize(shortTaskDataView.getToFamiliarize());
+                        taskDataView.setAdditionalTask(shortTaskDataView.getAdditionalTask());
+                        String studentDocumentsPath = "src" + File.separator + "main" +
+                                File.separator + "resources" + File.separator + "users_documents" +
+                                File.separator + student.getId();
+                        File studentDir = new File(studentDocumentsPath);
+                        if (!studentDir.exists()) {
+                            studentDir.mkdir();
+                        }
+                        Document currentTask = taskList.get(taskList.size() - 1);
+                        List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                        DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                        XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                        return taskProcessing(template, taskDataView, speciality.getSpeciality(), studentDocumentsPath);
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    // Обработать шаблон
+    public File taskProcessing(XWPFDocument template, TaskDataView taskDataView,
+                               String speciality, String studentDocumentsPath) throws Exception {
+        WordReplaceService wordReplaceService = new WordReplaceService(template);
+        String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
+        // Заменим слова в тексте документа
+        wordReplaceService.replaceWordsInText("Короткая дата начала НИР", taskDataView.getOrderStartDate());
+        wordReplaceService.replaceWordsInText("Короткая дата конца НИР", taskDataView.getOrderEndDate());
+        wordReplaceService.replaceWordsInText("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInText("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInText("Согласованное название темы", studentTheme);
+        wordReplaceService.replaceWordsInText("Дата выхода приказа", getFirstDateType(taskDataView.getOrderDate()));
+        wordReplaceService.replaceWordsInText("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInText("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInText("Номер приказа", taskDataView.getOrderNumber());
+        wordReplaceService.replaceWordsInText("КАФЕДРА", taskDataView.getCathedra());
+        wordReplaceService.replaceWordsInText("ГРУППА", taskDataView.getStudentGroup());
+        wordReplaceService.replaceWordsInText("Код специальности", taskDataView.getOrderSpeciality());
+        wordReplaceService.replaceWordsInText("Название специальности", speciality);
+        wordReplaceService.replaceWordsInText("ФИОП", taskDataView.getStudentFio());
+        wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
+        wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
+        wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInText("ИЗУЧИТЬ", taskDataView.getToExplore());
+        wordReplaceService.replaceWordsInText("СОЗДАТЬ", taskDataView.getToCreate());
+        wordReplaceService.replaceWordsInText("ОЗНАКОМИТЬСЯ", taskDataView.getToFamiliarize());
+        wordReplaceService.replaceWordsInText("ДОПЗАДАНИЕ", taskDataView.getAdditionalTask());
+        // Заменим слова в таблицах документа
+        wordReplaceService.replaceWordsInTables("Короткая дата начала НИР", taskDataView.getOrderStartDate());
+        wordReplaceService.replaceWordsInTables("Короткая дата конца НИР", taskDataView.getOrderEndDate());
+        wordReplaceService.replaceWordsInTables("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInTables("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInTables("Согласованное название темы", studentTheme);
+        wordReplaceService.replaceWordsInTables("Дата выхода приказа", getFirstDateType(taskDataView.getOrderDate()));
+        wordReplaceService.replaceWordsInTables("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInTables("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInTables("Номер приказа", taskDataView.getOrderNumber());
+        wordReplaceService.replaceWordsInTables("КАФЕДРА", taskDataView.getCathedra());
+        wordReplaceService.replaceWordsInTables("ГРУППА", taskDataView.getStudentGroup());
+        wordReplaceService.replaceWordsInTables("Код специальности", taskDataView.getOrderSpeciality());
+        wordReplaceService.replaceWordsInTables("Название специальности", speciality);
+        wordReplaceService.replaceWordsInTables("ФИОП", taskDataView.getStudentFio());
+        wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
+        wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
+        wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", "Изучить " + taskDataView.getToExplore());
+        wordReplaceService.replaceWordsInTables("СОЗДАТЬ", toUpperCaseFirstSymbol(taskDataView.getToCreate()));
+        wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомисться" + taskDataView.getToFamiliarize());
+        wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
+        File file = wordReplaceService.saveAndGetModdedFile(studentDocumentsPath + File.separator + "temp.docx");
+        return file;
     }
 
     // Преобразование даты вида ДД.ММ.ГГГГ к виду «XX» месяца YYYY
@@ -180,6 +330,13 @@ public class DocumentProcessorService {
     public String getRpFio(String Fio) {
         // TODO Сделать это когда-нибудь
         return "";
+    }
+
+    // Повысить регистр первой буквы допзадания в таблице
+    public String toUpperCaseFirstSymbol(String additionalTask) {
+        String firstSymbol = additionalTask.substring(0, 1).toUpperCase();
+        additionalTask = firstSymbol + additionalTask.substring(1);
+        return additionalTask;
     }
 
     // Получить слово месяца

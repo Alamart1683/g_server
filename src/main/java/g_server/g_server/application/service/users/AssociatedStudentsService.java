@@ -75,12 +75,6 @@ public class AssociatedStudentsService {
     @Autowired
     private DocumentRepository documentRepository;
 
-    @Autowired
-    private DocumentTypeRepository documentTypeRepository;
-
-    @Autowired
-    private DocumentKindRepository documentKindRepository;
-
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
         Integer scientificAdvisorId, String theme) {
@@ -663,6 +657,10 @@ public class AssociatedStudentsService {
                         taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
                         taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
                         taskDataView.setOrderSpeciality(speciality.getCode());
+                        taskDataView.setToCreate("Создать");
+                        taskDataView.setToExplore("Изучить");
+                        taskDataView.setToFamiliarize("Ознакомиться");
+                        taskDataView.setAdditionalTask("Дополнительное задание");
                         taskDataViewWithMessage.setTaskDataView(taskDataView);
                         taskDataViewWithMessage.setMessage("Данные получены успешно");
                     } else {

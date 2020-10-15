@@ -1,6 +1,6 @@
 package g_server.g_server.application.controller.documents;
 
-import g_server.g_server.application.entity.forms.DocumentOrderForm;
+import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.entity.view.TaskDataView;
 import g_server.g_server.application.service.documents.DocumentDownloadService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import static org.springframework.util.StringUtils.hasText;
 
 @RestController
@@ -73,6 +71,28 @@ public class DocumentDownloadController {
             ioException.printStackTrace();
         }
         file.delete();
+    }
+
+    @GetMapping("/student/document/download/task/nir/short")
+    public void nirTaskDownload(
+            @ModelAttribute("shortTaskDataView") @Validated ShortTaskDataView shortTaskDataView,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
+            ) throws Exception {
+        File file = documentProcessorService.studentShortTaskProcessing(
+                getTokenFromRequest(httpServletRequest), shortTaskDataView);
+        String contentType = documentDownloadService.getContentType(file.getName());
+        String mainName = "Индивидуальное задание на НИР";
+        Path path = Paths.get(file.getPath());
+        httpServletResponse.setContentType(contentType);
+        httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
+        try {
+            Files.copy(path, httpServletResponse.getOutputStream());
+            httpServletResponse.getOutputStream().flush();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        //file.delete();
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

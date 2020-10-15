@@ -13,12 +13,17 @@ public class TaskDataView {
     private String orderStartDate;
     private String orderEndDate;
     private String orderSpeciality;
+    private String toExplore;
+    private String toCreate;
+    private String toFamiliarize;
+    private String additionalTask;
 
     public TaskDataView() { }
 
     public TaskDataView(String taskType, String studentFio, String studentGroup, String studentTheme, String advisorFio,
                         String headFio, String cathedra, String orderNumber, String orderDate, String orderStartDate,
-                        String orderEndDate, String orderSpeciality) {
+                        String orderEndDate, String orderSpeciality, String toExplore, String toCreate, String toFamiliarize,
+                        String additionalTask) {
         this.taskType = taskType;
         this.studentFio = studentFio;
         this.studentGroup = studentGroup;
@@ -31,6 +36,10 @@ public class TaskDataView {
         this.orderStartDate = orderStartDate;
         this.orderEndDate = orderEndDate;
         this.orderSpeciality = orderSpeciality;
+        this.toExplore = toExplore;
+        this.toCreate = toCreate;
+        this.toFamiliarize = toFamiliarize;
+        this.additionalTask = additionalTask;
     }
 
     public String getStudentFio() {
@@ -127,5 +136,37 @@ public class TaskDataView {
 
     public void setTaskType(String taskType) {
         this.taskType = taskType;
+    }
+
+    public String getToExplore() {
+        return toExplore;
+    }
+
+    public void setToExplore(String toExplore) {
+        this.toExplore = toExplore;
+    }
+
+    public String getToCreate() {
+        return toCreate;
+    }
+
+    public void setToCreate(String toCreate) {
+        this.toCreate = toCreate;
+    }
+
+    public String getToFamiliarize() {
+        return toFamiliarize;
+    }
+
+    public void setToFamiliarize(String toFamiliarize) {
+        this.toFamiliarize = toFamiliarize;
+    }
+
+    public String getAdditionalTask() {
+        return additionalTask;
+    }
+
+    public void setAdditionalTask(String additionalTask) {
+        this.additionalTask = additionalTask;
     }
 }
