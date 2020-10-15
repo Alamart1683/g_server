@@ -84,6 +84,11 @@
             <version>3.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.aleksandy</groupId>
+            <artifactId>petrovich</artifactId>
+            <version>1.2.1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

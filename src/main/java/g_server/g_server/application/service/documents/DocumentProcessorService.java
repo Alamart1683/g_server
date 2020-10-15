@@ -1,5 +1,11 @@
 package g_server.g_server.application.service.documents;
 
+import com.github.aleksandy.petrovich.Case;
+import com.github.aleksandy.petrovich.Gender;
+import com.github.aleksandy.petrovich.Petrovich;
+import com.github.aleksandy.petrovich.rules.RulesProvider;
+import com.github.aleksandy.petrovich.rules.data.Rules;
+import com.github.aleksandy.petrovich.rules.loader.RulesLoader;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
@@ -122,7 +128,7 @@ public class DocumentProcessorService {
                     List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
                     DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
                     XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                    return taskProcessing(template, taskDataView, specialityName, studentDocumentsPath);
+                    return taskProcessing(template, taskDataView, specialityName, studentDocumentsPath, student);
                 } else {
                     return null;
                 }
@@ -225,7 +231,8 @@ public class DocumentProcessorService {
                         List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
                         DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
                         XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                        return taskProcessing(template, taskDataView, speciality.getSpeciality(), studentDocumentsPath);
+                        return taskProcessing(template, taskDataView,
+                                speciality.getSpeciality(), studentDocumentsPath, student);
                     } else {
                         return null;
                     }
@@ -242,7 +249,7 @@ public class DocumentProcessorService {
 
     // Обработать шаблон
     public File taskProcessing(XWPFDocument template, TaskDataView taskDataView,
-                               String speciality, String studentDocumentsPath) throws Exception {
+                               String speciality, String studentDocumentsPath, Users student) throws Exception {
         WordReplaceService wordReplaceService = new WordReplaceService(template);
         String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
         // Заменим слова в тексте документа
@@ -259,7 +266,8 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("ГРУППА", taskDataView.getStudentGroup());
         wordReplaceService.replaceWordsInText("Код специальности", taskDataView.getOrderSpeciality());
         wordReplaceService.replaceWordsInText("Название специальности", speciality);
-        wordReplaceService.replaceWordsInText("ФИОП", taskDataView.getStudentFio());
+        wordReplaceService.replaceWordsInText("ФИОПД", getDpFio(student.getSurname(), student.getName(), student.getSecond_name()));
+        wordReplaceService.replaceWordsInText("ФИОПР", getRpFio(student.getSurname(), student.getName(), student.getSecond_name()));
         wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
         wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
@@ -281,13 +289,14 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ГРУППА", taskDataView.getStudentGroup());
         wordReplaceService.replaceWordsInTables("Код специальности", taskDataView.getOrderSpeciality());
         wordReplaceService.replaceWordsInTables("Название специальности", speciality);
-        wordReplaceService.replaceWordsInTables("ФИОП", taskDataView.getStudentFio());
+        wordReplaceService.replaceWordsInText("ФИОПД", getDpFio(student.getSurname(), student.getName(), student.getSecond_name()));
+        wordReplaceService.replaceWordsInText("ФИОПР", getRpFio(student.getSurname(), student.getName(), student.getSecond_name()));
         wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
         wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
         wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", "Изучить " + taskDataView.getToExplore());
         wordReplaceService.replaceWordsInTables("СОЗДАТЬ", toUpperCaseFirstSymbol(taskDataView.getToCreate()));
-        wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомисться" + taskDataView.getToFamiliarize());
+        wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомиться" + taskDataView.getToFamiliarize());
         wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
         File file = wordReplaceService.saveAndGetModdedFile(studentDocumentsPath + File.separator + "temp.docx");
         return file;
@@ -321,15 +330,19 @@ public class DocumentProcessorService {
     }
 
     // Преобразование ФИО к дательному падежу
-    public String getDpFio(String Fio) {
-        // TODO Сделать это когда-нибудь
-        return "";
+    public String getDpFio(String Surname, String Name, String Second_name) throws Exception {
+        Petrovich petrovich = new Petrovich();
+        Petrovich.Names names = new Petrovich.Names(Surname, Name, Second_name, Gender.detect(Second_name));
+        Petrovich.Names complete = petrovich.inflectTo(names, Case.DATIVE);
+        return complete.lastName + " " + complete.firstName + " " + complete.middleName;
     }
 
     // Преобразование ФИО к родительному падежу
-    public String getRpFio(String Fio) {
-        // TODO Сделать это когда-нибудь
-        return "";
+    public String getRpFio(String Surname, String Name, String Second_name) throws Exception {
+        Petrovich petrovich = new Petrovich();
+        Petrovich.Names names = new Petrovich.Names(Surname, Name, Second_name, Gender.detect(Second_name));
+        Petrovich.Names complete = petrovich.inflectTo(names, Case.GENITIVE);
+        return complete.lastName + " " + complete.firstName + " " + complete.middleName;
     }
 
     // Повысить регистр первой буквы допзадания в таблице
