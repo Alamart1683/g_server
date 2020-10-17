@@ -516,6 +516,8 @@ public class DocumentUploadService {
         return messagesList;
     }
 
+    // TODO Сделать возможность студентам загружать документ в его проект
+
     // Необходимо получить id пользователя-создателя документа из токена
     public Integer getCreatorId(String token) {
         String email = jwtProvider.getEmailFromToken(token);

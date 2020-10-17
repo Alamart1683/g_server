@@ -52,9 +52,6 @@ public class DocumentViewService {
     private ViewRightsProjectRepository viewRightsProjectRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
 
     // Проверить, может ли студент видеть данный документ
@@ -113,28 +110,28 @@ public class DocumentViewService {
     }
 
     // Проверить, может ли научный руководитель/заведующий кафедрой видеть данный документ
-    private boolean checkAdvisorDocumentView(Users lookingAdvisor, Users documentCreatorAdvisor, Document document) {
+    private boolean checkAdvisorDocumentView(Users lookingAdvisor, Users documentCreator, Document document) {
         // Определим уровень видимости документа
         Integer documentView = document.getView_rights();
         // Проверим соответствие ролей
         Integer lookingAdvisorRoleID = usersRolesRepository.
                 findUsersRolesByUserId(lookingAdvisor.getId()).getRoleId();
-        Integer documentCreatorAdvisorRoleID = usersRolesRepository.
-                findUsersRolesByUserId(documentCreatorAdvisor.getId()).getRoleId();
+        Integer documentCreatorRoleID = usersRolesRepository.
+                findUsersRolesByUserId(documentCreator.getId()).getRoleId();
         if ((lookingAdvisorRoleID == 2 || lookingAdvisorRoleID == 3) &&
-            documentCreatorAdvisorRoleID == 2 || documentCreatorAdvisorRoleID == 3) {
+                (documentCreatorRoleID == 1 || documentCreatorRoleID == 2 || documentCreatorRoleID == 3)) {
             // Если зона видимости документа только для создателя и других НР или для всех
             // TODO Предполагается, что документы с правом видимости для всех может загружать
             // TODO только заведующий кафедрой и это документы типа приказов и всего такого
             // TODO этот момент надо учесть при загрузке прав видимости документов на клиент
             // TODO то есть в идеале надо сделать отдельную выдачу списка типов документов и прав видимостей
             // TODO для научных руководителей и заведующего кафедрой
-            if (documentView > 0 || documentView < 7) {
+            if (documentView > 0 || documentView < 8) {
                 // Если документ может видеть только его создатель или документ привязан к проекту и
                 // его может видеть созадтель проекта
                 if (documentView == 1 || documentView == 6) {
                     // Если желающий увидеть документ НР сам его загрузил
-                    if (lookingAdvisor.getId() == documentCreatorAdvisor.getId()) {
+                    if (lookingAdvisor.getId() == documentCreator.getId()) {
                         return true;
                     }
                     else {
@@ -143,11 +140,26 @@ public class DocumentViewService {
                 }
                 // Если документ могут видеть все НР
                 else if (documentView == 3) {
-                    // Если желающий увидеть документ НР сам его загрузил
-                    if (lookingAdvisor.getId() == documentCreatorAdvisor.getId()) {
+                    // Если желающий увидеть документ сам его загрузил
+                    if (lookingAdvisor.getId() == documentCreator.getId()) {
                         return true;
                     }
                     else {
+                        return false;
+                    }
+                }
+                // Если документ загрузил студент и смотрящий - его научный руководитель
+                else if (documentView == 7) {
+                    AssociatedStudents associatedStudent;
+                    try {
+                        associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(
+                                lookingAdvisor.getId(), documentCreator.getId());
+                    } catch (NullPointerException nullPointerException) {
+                        associatedStudent = null;
+                    }
+                    if (associatedStudent != null) {
+                        return true;
+                    } else {
                         return false;
                     }
                 }
