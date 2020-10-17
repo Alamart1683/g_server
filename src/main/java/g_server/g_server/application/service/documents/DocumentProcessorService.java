@@ -3,9 +3,6 @@ package g_server.g_server.application.service.documents;
 import com.github.aleksandy.petrovich.Case;
 import com.github.aleksandy.petrovich.Gender;
 import com.github.aleksandy.petrovich.Petrovich;
-import com.github.aleksandy.petrovich.rules.RulesProvider;
-import com.github.aleksandy.petrovich.rules.data.Rules;
-import com.github.aleksandy.petrovich.rules.loader.RulesLoader;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
@@ -301,10 +298,10 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
         wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
-        wordReplaceService.replaceWordsInText("ИЗУЧИТЬ", taskDataView.getToExplore());
-        wordReplaceService.replaceWordsInText("СОЗДАТЬ", taskDataView.getToCreate());
-        wordReplaceService.replaceWordsInText("ОЗНАКОМИТЬСЯ", taskDataView.getToFamiliarize());
-        wordReplaceService.replaceWordsInText("ДОПЗАДАНИЕ", taskDataView.getAdditionalTask());
+        wordReplaceService.replaceWordsInText("ИЗУЧИТЬ", toLowerCaseFirstSymbol(taskDataView.getToExplore()));
+        wordReplaceService.replaceWordsInText("СОЗДАТЬ", toLowerCaseFirstSymbol(taskDataView.getToCreate()));
+        wordReplaceService.replaceWordsInText("ОЗНАКОМИТЬСЯ", toLowerCaseFirstSymbol(taskDataView.getToFamiliarize()));
+        wordReplaceService.replaceWordsInText("ДОПЗАДАНИЕ", toLowerCaseFirstSymbol(taskDataView.getAdditionalTask()));
         // Заменим слова в таблицах документа
         wordReplaceService.replaceWordsInTables("Короткая дата начала НИР", taskDataView.getOrderStartDate());
         wordReplaceService.replaceWordsInTables("Короткая дата конца НИР", taskDataView.getOrderEndDate());
@@ -386,6 +383,13 @@ public class DocumentProcessorService {
     // Повысить регистр первой буквы допзадания в таблице
     public String toUpperCaseFirstSymbol(String additionalTask) {
         String firstSymbol = additionalTask.substring(0, 1).toUpperCase();
+        additionalTask = firstSymbol + additionalTask.substring(1);
+        return additionalTask;
+    }
+
+    // Повысить регистр первой буквы допзадания в таблице
+    public String toLowerCaseFirstSymbol(String additionalTask) {
+        String firstSymbol = additionalTask.substring(0, 1).toLowerCase();
         additionalTask = firstSymbol + additionalTask.substring(1);
         return additionalTask;
     }
