@@ -107,6 +107,21 @@ public class DocumentProcessorService {
                 }
                 List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
                 if (taskList.size() > 0) {
+                    if (taskDataView.getStudentTheme().length() < 1) {
+                        taskDataView.setStudentTheme("Введите тему НИР");
+                    }
+                    if (taskDataView.getToCreate().length() < 1) {
+                        taskDataView.setToCreate("Создать");
+                    }
+                    if (taskDataView.getToExplore().length() < 1) {
+                        taskDataView.setToExplore("Изучить");
+                    }
+                    if (taskDataView.getToFamiliarize().length() < 1) {
+                        taskDataView.setToFamiliarize("Ознакомиться");
+                    }
+                    if (taskDataView.getAdditionalTask().length() < 1) {
+                        taskDataView.setAdditionalTask("Дополнительное задание");
+                    }
                     String specialityName = "";
                     Speciality speciality = null;
                     try {
@@ -200,6 +215,21 @@ public class DocumentProcessorService {
                     }
                     List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
                     if (taskList.size() > 0) {
+                        if (shortTaskDataView.getStudentTheme().length() < 1) {
+                            shortTaskDataView.setStudentTheme("Введите тему НИР");
+                        }
+                        if (shortTaskDataView.getToCreate().length() < 1) {
+                            shortTaskDataView.setToCreate("Создать");
+                        }
+                        if (shortTaskDataView.getToExplore().length() < 1) {
+                            shortTaskDataView.setToExplore("Изучить");
+                        }
+                        if (shortTaskDataView.getToFamiliarize().length() < 1) {
+                            shortTaskDataView.setToFamiliarize("Ознакомиться");
+                        }
+                        if (shortTaskDataView.getAdditionalTask().length() < 1) {
+                            shortTaskDataView.setAdditionalTask("Дополнительное задание");
+                        }
                         TaskDataView taskDataView = new TaskDataView();
                         taskDataView.setTaskType(document.getDocumentType().getType());
                         taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
@@ -294,9 +324,17 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
         wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
-        wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", "Изучить " + taskDataView.getToExplore());
+        if (taskDataView.getToExplore().equals("Изучить")) {
+            wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", taskDataView.getToExplore());
+        } else {
+            wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", "Изучить " + taskDataView.getToExplore());
+        }
         wordReplaceService.replaceWordsInTables("СОЗДАТЬ", toUpperCaseFirstSymbol(taskDataView.getToCreate()));
-        wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомиться" + taskDataView.getToFamiliarize());
+        if (taskDataView.getToFamiliarize().equals("Ознакомиться")) {
+            wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", taskDataView.getToFamiliarize());
+        } else {
+            wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомиться " + taskDataView.getToFamiliarize());
+        }
         wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
         File file = wordReplaceService.saveAndGetModdedFile(studentDocumentsPath + File.separator + "temp.docx");
         return file;

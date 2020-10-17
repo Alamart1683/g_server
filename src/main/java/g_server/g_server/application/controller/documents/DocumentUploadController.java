@@ -38,12 +38,22 @@ public class DocumentUploadController {
         return documentUploadService.uploadDocumentVersion(documentVersionForm);
     }
 
-    @PostMapping("head_of_cathedra/document/order/upload")
+    @PostMapping("/head_of_cathedra/document/order/upload")
     public List<String> UploadOrder (
             @ModelAttribute("documentOrderForm") @Validated DocumentOrderForm documentOrderForm,
-            HttpServletRequest httpServletRequest) {
+            HttpServletRequest httpServletRequest
+    ) {
         documentOrderForm.setToken(getTokenFromRequest(httpServletRequest));
         return documentUploadService.uploadDocumentOrder(documentOrderForm);
+    }
+
+    @PostMapping("/student/document/report/upload")
+    public List<String> UploadReport (
+            @ModelAttribute("documentForm") @Validated DocumentForm documentForm,
+            HttpServletRequest httpServletRequest
+    ) {
+        documentForm.setToken(getTokenFromRequest(httpServletRequest));
+        return documentUploadService.uploadStudentReport(documentForm);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

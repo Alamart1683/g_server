@@ -405,6 +405,117 @@ public class DocumentUploadService {
         return messagesList;
     }
 
+    // Метод загрузки студентом отчёта по работе:
+    public List<String> uploadStudentReport(DocumentForm documentForm) {
+        List<String> messagesList = new ArrayList<String>();
+        Integer creator_id = null;
+        if (documentForm.getToken() == null) {
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        }
+        if (messagesList.size() == 0) {
+
+        }
+            if (documentForm.getToken().equals("")) {
+                messagesList.add("Ошибка аутентификации: токен пуст");
+            }
+            else {
+                creator_id = getCreatorId(documentForm.getToken());
+            }
+        if (creator_id == null) {
+            messagesList.add("Пользователь не найден, загрузить файл невозможно");
+        }
+        Integer type_id = getTypeId(documentForm.getDocumentFormType());
+        if (type_id == null) {
+            messagesList.add("Указан несуществующий тип документа");
+        }
+        Integer kind_id = getKindId(documentForm.getDocumentFormKind());
+        if (kind_id == null) {
+            messagesList.add("Указан несуществующий вид докумета");
+        }
+        Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
+        if (viewRights == null) {
+            messagesList.add("Указаны некорректные права доступа");
+        }
+        if (documentForm.getFile() == null) {
+            messagesList.add("Ошибка загрузки файла. Такого файла не существует");
+        }
+        String fileExtension = getFileExtension(documentForm.getFile());
+        if (fileExtension.length() == 0) {
+            messagesList.add("Попытка загрузить документ с некорректным разрешением");
+        }
+        Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
+        if (roleID != 1 && viewRights != 7) {
+            messagesList.add("Попытка применить запрос на загрузку отчёта студентом не по назначению");
+        }
+        // После этого разместим файл на сервере
+        if (messagesList.size() == 0) {
+            String studentDocumentsPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "users_documents" + File.separator + creator_id;
+            File scientificAdvisorDirectory = new File(studentDocumentsPath);
+            if (!scientificAdvisorDirectory.exists()) {
+                scientificAdvisorDirectory.mkdir();
+            }
+            String fileName = documentForm.getFile().getOriginalFilename();
+            String documentPath = studentDocumentsPath + File.separator + fileName;
+            File documentDirectory = new File(documentPath);
+            // Проверим что одноименный файл не был загружен пользователем
+            if (!documentDirectory.exists()) {
+                documentDirectory.mkdir();
+            }
+            else {
+                messagesList.add("Файл с таким именем уже существует");
+            }
+            // Сохраним файл на сервере, создав необходимую директорию
+            if (messagesList.size() == 0) {
+                String currentDate = getCurrentDate();
+                String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
+                String versionPath = documentDirectory.getPath() + File.separator +
+                        "version_" + currentDate + "." + fileExtension;
+                Path uploadingFilePath = Paths.get(versionPath);
+                try {
+                    if (documentRepository.findByCreatorAndName(creator_id, fileName) == null) {
+                        if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                            // После этого занесем загруженный файл в таблицу документов
+                            Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
+                                    type_id, kind_id, viewRights
+                            );
+                            documentService.save(document);
+                            // Далее создадим запись о первой версии документа в таблице версий
+                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
+                            DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
+                                    sqlDateTime, "Загрузка документа на сайт", versionPath);
+                            documentVersionService.save(documentVersion);
+                            messagesList.add("Документ был успешно загружен");
+                        }
+                        else {
+                            messagesList.add("Непредвиденная ошибка загрузки файла");
+                            if (documentDirectory != null) {
+                                if (documentDirectory.listFiles().length == 0) {
+                                    documentDirectory.delete();
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                        if (documentDirectory.listFiles().length == 0) {
+                            documentDirectory.delete();
+                        }
+                    }
+                }
+                catch (IOException ioException) {
+                    messagesList.add("IOException");
+                }
+            }
+            else {
+                return messagesList;
+            }
+        }
+        else {
+            return messagesList;
+        }
+        return messagesList;
+    }
+
     // Необходимо получить id пользователя-создателя документа из токена
     public Integer getCreatorId(String token) {
         String email = jwtProvider.getEmailFromToken(token);
