@@ -55,20 +55,20 @@ public class DocumentViewService {
     private OccupiedStudentsRepository occupiedStudentsRepository;
 
     // Проверить, может ли студент видеть данный документ
-    private boolean checkStudentDocumentView(Users student, Users advisor, Document document) {
+    private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
         // TODO иначе его придется переделывать
         // Определим уровень видимости документа
         Integer documentView = document.getView_rights();
         // Проверим соответствие ролей
-        Integer advisorRoleID = usersRolesRepository.findUsersRolesByUserId(advisor.getId()).getRoleId();
+        Integer documentCreatorRoleID = usersRolesRepository.findUsersRolesByUserId(documentCreator.getId()).getRoleId();
         Integer studentRoleID = usersRolesRepository.findUsersRolesByUserId(student.getId()).getRoleId();
-        if (studentRoleID == 1 && (advisorRoleID == 2 || advisorRoleID == 3)) {
+        if (studentRoleID == 1 && (documentCreatorRoleID == 1 || documentCreatorRoleID == 2 || documentCreatorRoleID == 3)) {
             if (documentView > 2) {
                 // Документ могут видеть только студенты данного научного руководителя
                 if (documentView == 3 || documentView == 4) {
                     AssociatedStudents associatedStudent = associatedStudentsRepository.
-                            findByScientificAdvisorAndStudent(advisor.getId(), student.getId());
+                            findByScientificAdvisorAndStudent(documentCreator.getId(), student.getId());
                     if (associatedStudent != null) {
                         if (associatedStudent.isAccepted()) {
                             return true;
@@ -95,6 +95,13 @@ public class DocumentViewService {
                         }
                     }
                     return false;
+                }
+                else if (documentView == 7) {
+                    if (student.getId() == document.getCreator()) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
                 else {
                     return false;
