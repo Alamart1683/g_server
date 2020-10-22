@@ -86,6 +86,75 @@ public class DocumentManagementController {
         );
     }
 
+    @DeleteMapping("/student/document/delete/")
+    public List<String> studentDeleteDocument(
+            @RequestParam String documentName,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.deleteDocument(documentName, getTokenFromRequest(httpServletRequest));
+    }
+
+    @DeleteMapping("/student/document/delete/version/")
+    public List<String> studentDeleteDocumentVersion(
+            @RequestParam String documentName,
+            @RequestParam String documentEditionDate,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.deleteDocumentVersion(documentName, documentEditionDate,
+                getTokenFromRequest(httpServletRequest));
+    }
+
+    @PutMapping("/student/document/rename")
+    public List<String> studentRenameDocument(
+            @RequestParam String oldDocumentName,
+            @RequestParam String newDocumentName,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.renameDocument(oldDocumentName, newDocumentName,
+                getTokenFromRequest(httpServletRequest));
+    }
+
+    @PutMapping("/student/document/change/description/")
+    public List<String> studentChangeDocumentDescription(
+            @RequestParam String documentName,
+            @RequestParam String newDescription,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.editDescription(documentName, newDescription,
+                getTokenFromRequest(httpServletRequest));
+    }
+
+    @PutMapping("/student/document/change/type/")
+    public List<String> studentChangeDocumentType(
+            @RequestParam String documentName,
+            @RequestParam String newType,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.editType(documentName, newType, getTokenFromRequest(httpServletRequest));
+    }
+
+    @PutMapping("/student/document/change/kind/")
+    public List<String> studentChangeDocumentKind(
+            @RequestParam String documentName,
+            @RequestParam String newKind,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.editKind(documentName, newKind, getTokenFromRequest(httpServletRequest));
+    }
+
+    @PutMapping("/student/document/change/view_rights/")
+    public List<String> studentChangeDocumentViewRights(
+            @ModelAttribute("newThemeForm") @Validated NewRightViewForm newRightViewForm,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.editViewRights(
+                newRightViewForm.getDocumentName(),
+                newRightViewForm.getNewViewRights(),
+                newRightViewForm.getProjectName(),
+                getTokenFromRequest(httpServletRequest)
+        );
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {
