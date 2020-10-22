@@ -1,10 +1,12 @@
 package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.forms.AutomaticStudentForm;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.*;
+import g_server.g_server.application.entity.users.passwords.PasswordGenerator;
 import g_server.g_server.application.entity.view.PersonalStudentView;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
@@ -12,17 +14,24 @@ import g_server.g_server.application.repository.system_data.CathedrasRepository;
 import g_server.g_server.application.repository.system_data.StudentGroupRepository;
 import g_server.g_server.application.repository.system_data.StudentTypeRepository;
 import g_server.g_server.application.repository.users.*;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.logging.Logger;
 
 @Service
 public class UsersService implements UserDetailsService {
@@ -158,6 +167,16 @@ public class UsersService implements UserDetailsService {
             return false;
         else
             return true;
+    }
+
+    // Существует ли пользователь в базе данных
+    public boolean isUserExistsInDB(Users user) {
+        Users testUser = usersRepository.findByEmail(user.getEmail());
+        if (testUser == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     // Существует ли кафедра для формы студента
@@ -355,4 +374,182 @@ public class UsersService implements UserDetailsService {
     // TODO Сформировать личный кабинет администратора/рута
 
     // TODO Сделать функционал для восстановления пароля
+
+    // Зарегистрировать студентов автоматически на базе *.xls файла
+    public String studentAutomaticRegistration(AutomaticStudentForm automaticStudentForm) throws IOException {
+        MultipartFile multipartFile = automaticStudentForm.getStudentData();
+        String cathedra = automaticStudentForm.getCathedra();
+        String type = automaticStudentForm.getType();
+        File temp = new File("src" + File.separator + "main" + File.separator +
+                "resources" + File.separator + "users_documents" + File.separator + "temp");
+        if (!temp.exists()) {
+            temp.mkdir();
+        }
+        // Загрузим xls-файл в систему
+        try (OutputStream os = Files.newOutputStream(Paths.get(temp.getPath() + File.separator +
+                "studentData.xls"))) {
+            os.write(multipartFile.getBytes());
+            HSSFWorkbook excelStudentData = new HSSFWorkbook(
+                    new FileInputStream(new File(temp.getPath() + File.separator + "studentData.xls")));
+            File deleteFile = new File(temp.getPath() + File.separator + "studentData.xls");
+            HSSFSheet studentSheet = excelStudentData.getSheet("Обучающиеся");
+            // Теперь последовательно зарегестрируем студентов
+            try {
+                List<Users> studentList = new ArrayList<>(); // Список пользователей-студентов
+                List<StudentData> studentDataList = new ArrayList<>(); // Список данных студентов
+                List<String> decodePasswords = new ArrayList<>();
+                Iterator rowIter = studentSheet.rowIterator();
+                // Переведем данные о студентах из таблицы в вид, поддерживаемый системой
+                while (rowIter.hasNext()) {
+                    HSSFRow hssfRow = (HSSFRow) rowIter.next();
+                    // Проверим что это не первая строка с легендой
+                    if (hssfRow.getRowNum() > 0) {
+                        Users student = new Users();
+                        StudentData studentData = new StudentData();
+
+                        // Определим ФИО студента
+                        String fio = hssfRow.getCell(1).getRichStringCellValue().getString();
+                        String[] names = fio.split(" ");
+                        if (!names[0].equals("")) {
+                            student.setSurname(names[0]);
+                        } else {
+                            deleteFile.delete();
+                            return "Ошибка чтения ФИО";
+                        }
+                        if (!names[1].equals("")) {
+                            student.setName(names[1]);
+                        } else {
+                            deleteFile.delete();
+                            return "Ошибка чтения ФИО";
+                        }
+                        if (!names[2].equals("")) {
+                            student.setSecond_name(names[2]);
+                        } else {
+                            deleteFile.delete();
+                            return "Ошибка чтения ФИО";
+                        }
+
+                        // Определим его группу и прочие данные
+                        String group = hssfRow.getCell(6).getRichStringCellValue().getString();
+                        if (group.equals("")) {
+                            deleteFile.delete();
+                            return "Ошибка чтения группы";
+                        }
+                        Integer groupId = studentGroupRepository.getByStudentGroup(group).getId();
+                        studentData.setStudent_group(groupId);
+                        studentData.setCathedra(cathedrasRepository.getCathedrasByCathedraName(cathedra).getId());
+                        studentData.setType(studentTypeRepository.getByStudentType(type).getId());
+                        studentDataList.add(studentData);
+
+                        // Определим телефон студента
+                        // TODO Сделать приведение телефона к уницифицированнному виду
+                        String phone = hssfRow.getCell(7).getRichStringCellValue().getString();
+                        if (!phone.equals("")) {
+                            student.setPhone(phone);
+                        } else if (phone.equals("")) {
+                            phone = hssfRow.getCell(9).getRichStringCellValue().getString();
+                            if (!phone.equals("")) {
+                                student.setPhone(phone);
+                            }
+                        }
+
+                        // Определим почту студента
+                        String email = hssfRow.getCell(10).getRichStringCellValue().getString();
+                        if (!email.equals("")) {
+                            student.setEmail(email);
+                        } else if (email.equals("")) {
+                            email = hssfRow.getCell(11).getRichStringCellValue().getString();
+                            if (!email.equals("")) {
+                                student.setEmail(email);
+                            } else {
+                                deleteFile.delete();
+                                return "Не у всех студентов удалось найти почту, операция отменена";
+                            }
+                        }
+
+                        // Установим сгенерированный пароль студенту
+                        String password = generatePassword();
+                        decodePasswords.add(password);
+                        student.setPassword(bCryptPasswordEncoder.encode(password));
+
+                        // Укажем, что аккаунт подтвержден и согласен на почтовую рассылку
+                        student.setConfirmed(true);
+                        student.setSendMailAccepted(true);
+
+                        studentList.add(student);
+                    }
+                }
+                // Теперь сохраним студентов в базе, тем самым их зарегистрировав
+                if (studentList.size() != studentDataList.size()) {
+                    deleteFile.delete();
+                    return "Ошибка чтения файла, количество данных студентов и студентов не совпадает!";
+                }
+                // Проверим, нет ли данных студентов в базе
+                for (int i = 0; i < studentList.size(); i++) {
+                    if (isUserExistsInDB(studentList.get(i))) {
+                        deleteFile.delete();
+                        return "Операция отменена для поддержания целостности данных." +
+                                " Часть студентов уже существует в базе";
+                    }
+                }
+                for (int i = 0; i < studentList.size(); i++) {
+                    studentList.get(i).setRoles(Collections.singleton(new Roles(1, "ROLE_STUDENT")));
+                    usersRepository.save(studentList.get(i));
+                    studentDataList.get(i).setId(studentList.get(i).getId());
+                    studentDataRepository.save(studentDataList.get(i));
+                    String decodePassword = decodePasswords.get(i);
+                    // TODO Сделать рассылку писем о регистрации
+                }
+                testListToFile(decodePasswords, studentList);
+                deleteFile.delete();
+                return "Студенты были успешно зарегестрированы!";
+            } catch (NullPointerException e) {
+                deleteFile.delete();
+                return "Произошла ошибка чтения файла";
+            }
+        } catch (IOException ioException) {
+            return "Произошла ошибка!";
+        }
+    }
+
+    // Сгенерируем пароль
+    public String generatePassword() {
+        PasswordGenerator passwordGenerator = new PasswordGenerator.PasswordGeneratorBuilder()
+                .useDigits(true).useLower(true).useUpper(true).build();
+        String password = passwordGenerator.generate(12);
+        return password;
+    }
+
+    // Тестовый метод для сохранения логинов и паролей студентов перед включением почтовой рассылки
+    public void testListToFile(List<String> passwords, List<Users> students) {
+        File file = new File("src" + File.separator + "main" + File.separator +
+                "resources" + File.separator + "testFioLoginAndPassword.txt");
+        if (file.exists()) {
+            file.delete();
+        }
+        Writer writer = null;
+        try {
+            writer = new FileWriter("src" + File.separator + "main" + File.separator +
+                    "resources" + File.separator + "testFioLoginAndPassword.txt");
+            for (int i = 0; i < students.size(); i++) {
+                writer.write(i + 1 + ")"
+                        + " " + students.get(i).getSurname()
+                        + " " + students.get(i).getName()
+                        + " " + students.get(i).getSecond_name()
+                        + " email: " + students.get(i).getEmail()
+                        + " password: " + passwords.get(i));
+                writer.write(System.getProperty("line.separator"));
+            }
+            writer.flush();
+        } catch (Exception e) {
+
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
+    }
 }

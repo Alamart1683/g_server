@@ -12,7 +12,7 @@ create table users (
     surname varchar(100) not null,
     second_name varchar(100) not null,
     password varchar(256) not null,
-    phone varchar(50) not null,
+    phone varchar(50) default 'Не указан',
     is_accepted_mail_sending bool not null,
     is_confirmed bool not null,
     registration_date timestamp not null default current_timestamp

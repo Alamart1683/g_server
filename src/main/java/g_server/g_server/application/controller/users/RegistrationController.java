@@ -2,6 +2,7 @@ package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.forms.AdminForm;
+import g_server.g_server.application.entity.forms.AutomaticStudentForm;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
 import g_server.g_server.application.entity.users.Users;
@@ -14,6 +15,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -261,5 +264,11 @@ public class RegistrationController {
             }
         }
         return messageList;
+    }
+
+    @PostMapping("/root/registration/students/automatic")
+    public String AutomaticStudentsRegistration (@ModelAttribute("automaticStudentForm")
+            @Validated AutomaticStudentForm automaticStudentForm) throws IOException {
+        return usersService.studentAutomaticRegistration(automaticStudentForm);
     }
 }
