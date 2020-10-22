@@ -50,7 +50,13 @@ public class JwtProvider {
                 issue,
                 expire
         );
-        refreshTokenRepository.save(refreshToken);
+        RefreshToken testToken = refreshTokenRepository.findByUserID(refreshToken.getUserID());
+        if (testToken == null) {
+            refreshTokenRepository.save(refreshToken);
+        } else {
+            refreshTokenRepository.deleteById(testToken.getId());
+            refreshTokenRepository.save(refreshToken);
+        }
         return bCryptPasswordEncoder.encode(refreshToken.getRefreshToken());
     }
 

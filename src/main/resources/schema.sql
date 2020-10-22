@@ -161,11 +161,12 @@ create table project_document (
 );
 
 create table refresh_tokens (
-    id int primary key not null,
+    id int primary key auto_increment,
+    userID int not null unique,
     refresh_token varchar(1024) not null default 'Не назначен',
     issue long not null,
     expire long not null,
-    foreign key (id) references users (id) on delete cascade on update cascade
+    foreign key (userID) references users (id) on delete cascade on update cascade
 );
 
 create table speciality (

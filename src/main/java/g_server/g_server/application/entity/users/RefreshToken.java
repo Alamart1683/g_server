@@ -1,15 +1,16 @@
 package g_server.g_server.application.entity.users;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "refresh_tokens")
 public class RefreshToken {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "userID")
+    private int userID;
 
     @Column(name = "refresh_token")
     private String refreshToken;
@@ -22,19 +23,11 @@ public class RefreshToken {
 
     public RefreshToken() { }
 
-    public RefreshToken(int id, String refreshToken, long issue, long expire) {
-        this.id = id;
+    public RefreshToken(int userID, String refreshToken, long issue, long expire) {
+        this.userID = userID;
         this.refreshToken = refreshToken;
         this.issue = issue;
         this.expire = expire;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getRefreshToken() {
@@ -59,5 +52,15 @@ public class RefreshToken {
 
     public void setExpire(int expire) {
         this.expire = expire;
+    }
+
+    public int getUserID() { return userID; }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public int getId() {
+        return id;
     }
 }

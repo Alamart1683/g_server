@@ -86,7 +86,7 @@ public class AuthorizationController {
                     refreshTokenRepository.findByRefreshToken(getTokenFromRequest(httpServletRequest));
             Users user;
             try {
-                user = usersRepository.findById(refreshToken.getId()).get();
+                user = usersRepository.findById(refreshToken.getUserID()).get();
             } catch (NoSuchElementException noSuchElementException) {
                 user = null;
             }
