@@ -42,7 +42,7 @@ public class RefreshToken {
         return issue;
     }
 
-    public void setIssue(int issue) {
+    public void setIssue(long issue) {
         this.issue = issue;
     }
 
@@ -50,7 +50,7 @@ public class RefreshToken {
         return expire;
     }
 
-    public void setExpire(int expire) {
+    public void setExpire(long expire) {
         this.expire = expire;
     }
 
@@ -62,5 +62,9 @@ public class RefreshToken {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

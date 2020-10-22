@@ -55,6 +55,10 @@ public class Users implements UserDetails {
     @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
     private ScientificAdvisorData scientificAdvisorData;
 
+    @OneToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "id", referencedColumnName = "userID", insertable = false, updatable = false)
+    private RefreshToken refreshToken;
+
     public Users() { }
 
     public Users(String email, String name, String surname, String second_name,
@@ -207,5 +211,13 @@ public class Users implements UserDetails {
 
     public void setConfirmed(boolean confirmed) {
         isConfirmed = confirmed;
+    }
+
+    public RefreshToken getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

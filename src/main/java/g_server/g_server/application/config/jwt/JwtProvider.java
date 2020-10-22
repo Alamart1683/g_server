@@ -8,11 +8,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.java.Log;
+import org.hibernate.StaleStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -44,17 +47,24 @@ public class JwtProvider {
     public String generateRefreshToken(String email, String password, long issue, long expire) {
         Users user = usersRepository.findByEmail(email);
         String rawToken = email + " " + password + " " + issue + " " + expire;
-        RefreshToken refreshToken = new RefreshToken(
-                user.getId(),
-                bCryptPasswordEncoder.encode(rawToken),
-                issue,
-                expire
-        );
-        RefreshToken testToken = refreshTokenRepository.findByUserID(refreshToken.getUserID());
-        if (testToken == null) {
-            refreshTokenRepository.save(refreshToken);
+        RefreshToken refreshToken = refreshTokenRepository.findByUserID(user.getId());
+        if (refreshToken == null) {
+            try {
+                refreshToken = new RefreshToken(
+                        user.getId(),
+                        bCryptPasswordEncoder.encode(rawToken),
+                        issue,
+                        expire
+                );
+                refreshTokenRepository.save(refreshToken);
+            } catch (Exception e) {
+                System.out.println("Обработано исключение вызванное " +
+                        "несовершенством токенной библиотеки и не несущее угрозы целостности базе данных");
+            }
         } else {
-            refreshTokenRepository.deleteById(testToken.getId());
+            refreshToken.setRefreshToken(bCryptPasswordEncoder.encode(rawToken));
+            refreshToken.setIssue(issue);
+            refreshToken.setExpire(expire);
             refreshTokenRepository.save(refreshToken);
         }
         return bCryptPasswordEncoder.encode(refreshToken.getRefreshToken());
