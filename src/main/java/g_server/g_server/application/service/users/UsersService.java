@@ -445,11 +445,11 @@ public class UsersService implements UserDetailsService {
                         // TODO Сделать приведение телефона к уницифицированнному виду
                         String phone = hssfRow.getCell(7).getRichStringCellValue().getString();
                         if (!phone.equals("")) {
-                            student.setPhone(phone);
+                            student.setPhone(getNormalPhone(phone));
                         } else if (phone.equals("")) {
                             phone = hssfRow.getCell(9).getRichStringCellValue().getString();
                             if (!phone.equals("")) {
-                                student.setPhone(phone);
+                                student.setPhone(getNormalPhone(phone));
                             }
                         }
 
@@ -502,7 +502,7 @@ public class UsersService implements UserDetailsService {
                 }
                 testListToFile(decodePasswords, studentList);
                 deleteFile.delete();
-                return "Студенты были успешно зарегестрированы!";
+                return "Студенты были успешно зарегистрированы!";
             } catch (NullPointerException e) {
                 deleteFile.delete();
                 return "Произошла ошибка чтения файла";
@@ -518,6 +518,15 @@ public class UsersService implements UserDetailsService {
                 .useDigits(true).useLower(true).useUpper(true).build();
         String password = passwordGenerator.generate(12);
         return password;
+    }
+
+    // Приведем все телефоны к унифицированному виду
+    public String getNormalPhone(String phone) {
+        String temp = phone.replaceAll("\\D+","");
+        String normalPhone = "+" + temp.charAt(0) + " " + temp.charAt(1) + temp.charAt(2) + temp.charAt(3) + " " +
+                temp.charAt(4) + temp.charAt(5) + temp.charAt(6) + "-" + temp.charAt(7) + temp.charAt(8) + "-" +
+                temp.charAt(9) + temp.charAt(10);
+        return normalPhone;
     }
 
     // Тестовый метод для сохранения логинов и паролей студентов перед включением почтовой рассылки
