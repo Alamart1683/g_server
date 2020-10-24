@@ -387,7 +387,7 @@ public class UsersService implements UserDetailsService {
             temp.mkdir();
         }
         // Загрузим xls-файл в систему
-        try (OutputStream os = Files.newOutputStream(Paths.get(temp.getPath() + File.separator +
+        try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
                 "studentData.xls"))) {
             os.write(multipartFile.getBytes());
             HSSFWorkbook excelStudentData = new HSSFWorkbook(
