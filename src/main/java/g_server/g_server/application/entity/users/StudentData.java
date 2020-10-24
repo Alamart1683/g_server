@@ -1,5 +1,6 @@
 package g_server.g_server.application.entity.users;
 
+import g_server.g_server.application.entity.documents.NirTask;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.system_data.Cathedras;
 import g_server.g_server.application.entity.system_data.StudentGroup;

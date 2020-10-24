@@ -30,6 +30,10 @@ public class DocumentVersion {
     @JoinColumn(name = "document", referencedColumnName = "id", insertable = false, updatable = false)
     private Document parentDocument;
 
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private NirTask nirTask;
+
     // Привязка айди редактора версии документа напрямую из версии к пользователю в будущем даст
     // реализации возможности выдачи прав на чтение и запись для созданных пользователем документов,
     // тогда как если привязать его к айди создателя документа, это поставит крест на этой возможости, ибо
@@ -103,5 +107,13 @@ public class DocumentVersion {
 
     public void setUser(Users user) {
         this.user = user;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

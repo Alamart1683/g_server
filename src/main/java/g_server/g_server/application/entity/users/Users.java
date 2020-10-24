@@ -55,7 +55,7 @@ public class Users implements UserDetails {
     @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
     private ScientificAdvisorData scientificAdvisorData;
 
-    @OneToOne(fetch=FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "userID", insertable = false, updatable = false)
     private RefreshToken refreshToken;
 

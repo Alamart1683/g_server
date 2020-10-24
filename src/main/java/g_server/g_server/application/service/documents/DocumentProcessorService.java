@@ -6,6 +6,7 @@ import com.github.aleksandy.petrovich.Petrovich;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
+import g_server.g_server.application.entity.documents.NirTask;
 import g_server.g_server.application.entity.documents.OrderProperties;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
@@ -14,6 +15,7 @@ import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.entity.view.TaskDataView;
 import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
+import g_server.g_server.application.repository.documents.NirTaskRepository;
 import g_server.g_server.application.repository.documents.OrderPropertiesRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
@@ -57,114 +59,25 @@ public class DocumentProcessorService {
     @Autowired
     private AssociatedStudentsService associatedStudentsService;
 
-    // Обработать шаблон задания для студента
-    public File studentTaskProcessing(String token, TaskDataView taskDataView) throws Exception {
-        Integer userID;
-        try {
-            userID = getUserId(token);
-        } catch (Exception e) {
-            return null;
-        }
-        Users student;
-        try {
-            student = usersRepository.findById(userID).get();
-        } catch (NoSuchElementException noSuchElementException) {
-            return null;
-        }
-        if (student != null) {
-            AssociatedStudents associatedStudents;
-            try {
-                associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
-            } catch (NullPointerException nullPointerException) {
-                associatedStudents = null;
-            }
-            if (associatedStudents != null) {
-                Integer type;
-                Integer kind;
-                switch (taskDataView.getTaskType()) {
-                    case "Научно-исследовательская работа":
-                        type = 1;
-                        kind = 2;
-                        break;
-                    case "Практика по получению знаний и умений":
-                        type = 2;
-                        kind = 2;
-                        break;
-                    case "Преддипломная практика":
-                        type = 3;
-                        kind = 2;
-                        break;
-                    case "ВКР":
-                        type = 4;
-                        kind = 2;
-                        break;
-                    default:
-                        type = 0;
-                        kind = 0;
-                }
-                List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
-                if (taskList.size() > 0) {
-                    if (taskDataView.getStudentTheme().length() < 1) {
-                        taskDataView.setStudentTheme("Введите тему НИР");
-                    }
-                    if (taskDataView.getToCreate().length() < 1) {
-                        taskDataView.setToCreate("Создать");
-                    }
-                    if (taskDataView.getToExplore().length() < 1) {
-                        taskDataView.setToExplore("Изучить");
-                    }
-                    if (taskDataView.getToFamiliarize().length() < 1) {
-                        taskDataView.setToFamiliarize("Ознакомиться");
-                    }
-                    if (taskDataView.getAdditionalTask().length() < 1) {
-                        taskDataView.setAdditionalTask("Дополнительное задание");
-                    }
-                    String specialityName = "";
-                    Speciality speciality = null;
-                    try {
-                        speciality = specialityRepository.findByCode(taskDataView.getOrderSpeciality());
-                    } catch (NullPointerException nullPointerException){
-                        specialityName = "Введите название специальности";
-                    }
-                    if (speciality != null) {
-                        specialityName = speciality.getSpeciality();
-                    }
-                    String studentDocumentsPath = "src" + File.separator + "main" +
-                            File.separator + "resources" + File.separator + "users_documents" +
-                            File.separator + student.getId();
-                    File studentDir = new File(studentDocumentsPath);
-                    if (!studentDir.exists()) {
-                        studentDir.mkdir();
-                    }
-                    Document currentTask = taskList.get(taskList.size() - 1);
-                    List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
-                    DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
-                    XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                    return taskProcessing(template, taskDataView, specialityName, studentDocumentsPath, student);
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
+    @Autowired
+    private NirTaskRepository nirTaskRepository;
+
+    @Autowired
+    private DocumentUploadService documentUploadService;
 
     // Обработать укороченный шаблон задания для студента
-    public File studentShortTaskProcessing(String token, ShortTaskDataView shortTaskDataView) throws Exception {
+    public String studentShortTaskProcessing(String token, ShortTaskDataView shortTaskDataView) throws Exception {
         Integer userID;
         try {
             userID = getUserId(token);
         } catch (Exception e) {
-            return null;
+            return "ID студента не найден";
         }
         Users student;
         try {
             student = usersRepository.findById(userID).get();
         } catch (NoSuchElementException noSuchElementException) {
-            return null;
+            return "Пользователь не найден";
         }
         if (student != null) {
             AssociatedStudents associatedStudents;
@@ -187,30 +100,10 @@ public class DocumentProcessorService {
                     Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
                     Users headOfCathedra = usersRepository.findById(
                             usersRolesRepository.findByRoleId(3).getUserId()).get();
-                    Integer type;
-                    Integer kind;
-                    switch (shortTaskDataView.getTaskType()) {
-                        case "Научно-исследовательская работа":
-                            type = 1;
-                            kind = 2;
-                            break;
-                        case "Практика по получению знаний и умений":
-                            type = 2;
-                            kind = 2;
-                            break;
-                        case "Преддипломная практика":
-                            type = 3;
-                            kind = 2;
-                            break;
-                        case "ВКР":
-                            type = 4;
-                            kind = 2;
-                            break;
-                        default:
-                            type = 0;
-                            kind = 0;
-                    }
-                    List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
+                    Integer type = determineType(shortTaskDataView.getTaskType());
+                    Integer kind = 2;
+                    List<Document> taskList = documentRepository.findByTypeAndKindAndCreator(
+                            type, kind, headOfCathedra.getId());
                     if (taskList.size() > 0) {
                         if (shortTaskDataView.getStudentTheme().length() < 1) {
                             shortTaskDataView.setStudentTheme("Введите тему НИР");
@@ -254,29 +147,38 @@ public class DocumentProcessorService {
                         if (!studentDir.exists()) {
                             studentDir.mkdir();
                         }
+                        String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                taskDataView.getStudentGroup() + " задание на НИР.docx";
+                        File taskDir = new File(studentDocumentsPath + File.separator + fileName);
+                        if (taskDir.exists()) {
+                            return "Задание уже было сгенерировано";
+                        } else {
+                            taskDir.mkdir();
+                        }
                         Document currentTask = taskList.get(taskList.size() - 1);
                         List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
                         DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
                         XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
                         return taskProcessing(template, taskDataView,
-                                speciality.getSpeciality(), studentDocumentsPath, student);
+                                speciality.getSpeciality(), taskDir.getPath(), fileName, student);
                     } else {
-                        return null;
+                        return "Шаблон задания еще не был загружен";
                     }
                 } else {
-                    return null;
+                    return "Приказ еще не был загружен";
                 }
             } else {
-                return null;
+                return "Вы еще не были назначены вашему Научному Руководителю";
             }
         } else {
-            return null;
+            return "Студент не найден";
         }
     }
 
     // Обработать шаблон
-    public File taskProcessing(XWPFDocument template, TaskDataView taskDataView,
-                               String speciality, String studentDocumentsPath, Users student) throws Exception {
+    public String taskProcessing(XWPFDocument template, TaskDataView taskDataView,
+            String speciality, String studentDocumentsPath, String filename, Users student)
+            throws Exception {
         WordReplaceService wordReplaceService = new WordReplaceService(template);
         String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
         // Заменим слова в тексте документа
@@ -333,8 +235,61 @@ public class DocumentProcessorService {
             wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомиться " + taskDataView.getToFamiliarize());
         }
         wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
-        File file = wordReplaceService.saveAndGetModdedFile(studentDocumentsPath + File.separator + "temp.docx");
-        return file;
+        String documentVersionPath = studentDocumentsPath + File.separator + "version_" + documentUploadService.getCurrentDate() + ".docx";
+        File file = wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+        saveTaskAsDocument(filename, student, studentDocumentsPath, taskDataView, documentVersionPath);
+        return "Задание на " + taskDataView.getTaskType() + " успешно сгенерировано!";
+    }
+
+    // Сохранить задание на НИР как документ
+    public void saveTaskAsDocument(String filename, Users student, String studentDocumentsPath,
+                                   TaskDataView taskDataView, String documentVersionPath) {
+        Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
+        if (document == null) {
+            Integer kind = 2;
+            Integer type = determineType(taskDataView.getTaskType());
+            Document newDocument = new Document(
+                    student.getId(),
+                    filename,
+                    studentDocumentsPath,
+                    documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
+                    type,
+                    kind,
+                    "Задание на " + taskDataView.getTaskType() + " " + getShortFio(
+                            student.getSurname() + " " + student.getName() + " " + student.getSecond_name()) + " " +
+                            student.getStudentData().getStudentGroup().getStudentGroup()
+                    ,
+                    7
+            );
+            documentRepository.save(newDocument);
+            DocumentVersion documentVersion = new DocumentVersion(
+                    student.getId(),
+                    newDocument.getId(),
+                    documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
+                    "Генерация задания на сайте",
+                    documentVersionPath
+            );
+            documentVersionRepository.save(documentVersion);
+            NirTask nirTask = new NirTask(
+                    documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                    taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
+            );
+            nirTaskRepository.save(nirTask);
+        } else if (document != null) {
+            DocumentVersion documentVersion = new DocumentVersion(
+                    student.getId(),
+                    document.getId(),
+                    documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
+                    "Генерация задания на сайте",
+                    documentVersionPath
+            );
+            documentVersionRepository.save(documentVersion);
+            NirTask nirTask = new NirTask(
+                    documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                    taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
+            );
+            nirTaskRepository.save(nirTask);
+        }
     }
 
     // Преобразование даты вида ДД.ММ.ГГГГ к виду «XX» месяца YYYY
@@ -447,6 +402,27 @@ public class DocumentProcessorService {
         InputStream is = new FileInputStream(file);
         document = new XWPFDocument(is);
         return document;
+    }
+
+    public Integer determineType(String stringType) {
+        Integer type;
+        switch (stringType) {
+            case "Научно-исследовательская работа":
+                type = 1;
+                break;
+            case "Практика по получению знаний и умений":
+                type = 2;
+                break;
+            case "Преддипломная практика":
+                type = 3;
+                break;
+            case "ВКР":
+                type = 4;
+                break;
+            default:
+                type = 0;
+        }
+        return type;
     }
 
     public Integer getUserId(String token) {

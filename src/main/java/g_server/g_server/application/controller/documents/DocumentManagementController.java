@@ -1,12 +1,20 @@
 package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.forms.NewRightViewForm;
+import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.service.documents.DocumentManagementService;
+import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -14,6 +22,9 @@ import static org.springframework.util.StringUtils.hasText;
 public class DocumentManagementController {
     @Autowired
     private DocumentManagementService documentManagementService;
+
+    @Autowired
+    private DocumentProcessorService documentProcessorService;
 
     public static final String AUTHORIZATION = "Authorization";
 
@@ -161,5 +172,15 @@ public class DocumentManagementController {
             return bearer.substring(7);
         }
         return null;
+    }
+
+    @PostMapping("/student/document/management/task/nir/create")
+    public String nirTaskCreate(
+            @ModelAttribute("shortTaskDataView") @Validated ShortTaskDataView shortTaskDataView,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        String response = documentProcessorService.studentShortTaskProcessing(
+                getTokenFromRequest(httpServletRequest), shortTaskDataView);
+        return response;
     }
 }

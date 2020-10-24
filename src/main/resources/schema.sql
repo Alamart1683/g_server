@@ -187,6 +187,29 @@ create table order_properties (
     foreign key (speciality) references speciality(id)
 );
 
+create table document_status (
+    id int primary key auto_increment,
+    status varchar(30) not null
+);
+
+create table nir_task (
+    versionID int not null,
+    theme varchar(128) not null,
+    to_explore varchar(256) not null,
+    to_create varchar(256) not null,
+    to_familiarize varchar(256) not null,
+    additional_task varchar(256) not null,
+    nir_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
+    foreign key (nir_status) references document_status (id)
+);
+
+insert into document_status (status) values
+    ('Не отправлено'),
+    ('Одобрено'),
+    ('Замечания'),
+    ('Рассматривается');
+
 insert into roles (role) values
     ('ROLE_STUDENT'),
     ('ROLE_SCIENTIFIC_ADVISOR'),

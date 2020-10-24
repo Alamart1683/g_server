@@ -24,9 +24,6 @@ public class DocumentDownloadController {
     @Autowired
     private DocumentDownloadService documentDownloadService;
 
-    @Autowired
-    private DocumentProcessorService documentProcessorService;
-
     public static final String AUTHORIZATION = "Authorization";
 
     @GetMapping("/document/download/")
@@ -49,50 +46,6 @@ public class DocumentDownloadController {
                 ioException.printStackTrace();
             }
         }
-    }
-
-    @GetMapping("/student/document/download/task/nir")
-    public void nirTaskDownload (
-            @ModelAttribute("taskDataView") @Validated TaskDataView taskDataView,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse
-    ) throws Exception {
-        File file = documentProcessorService.studentTaskProcessing(getTokenFromRequest(httpServletRequest), taskDataView);
-        String contentType = documentDownloadService.getContentType(file.getName());
-        String mainName = documentProcessorService.getShortFio(taskDataView.getStudentFio()) + " " +
-                taskDataView.getStudentGroup() + " " + " Индивидуальное задание на НИР";
-        Path path = Paths.get(file.getPath());
-        httpServletResponse.setContentType(contentType);
-        httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
-        try {
-            Files.copy(path, httpServletResponse.getOutputStream());
-            httpServletResponse.getOutputStream().flush();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-        file.delete();
-    }
-
-    @GetMapping("/student/document/download/task/nir/short")
-    public void nirTaskDownload(
-            @ModelAttribute("shortTaskDataView") @Validated ShortTaskDataView shortTaskDataView,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse
-            ) throws Exception {
-        File file = documentProcessorService.studentShortTaskProcessing(
-                getTokenFromRequest(httpServletRequest), shortTaskDataView);
-        String contentType = documentDownloadService.getContentType(file.getName());
-        String mainName = "Индивидуальное задание на НИР";
-        Path path = Paths.get(file.getPath());
-        httpServletResponse.setContentType(contentType);
-        httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
-        try {
-            Files.copy(path, httpServletResponse.getOutputStream());
-            httpServletResponse.getOutputStream().flush();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-        file.delete();
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
