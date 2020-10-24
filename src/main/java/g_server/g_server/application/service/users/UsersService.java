@@ -380,8 +380,9 @@ public class UsersService implements UserDetailsService {
         MultipartFile multipartFile = automaticStudentForm.getStudentData();
         String cathedra = automaticStudentForm.getCathedra();
         String type = automaticStudentForm.getType();
-        File temp = new File("src" + File.separator + "main" + File.separator +
-                "resources" + File.separator + "users_documents" + File.separator + "temp");
+        String tempPath = "src" + File.separator + "main" + File.separator +
+                "resources" + File.separator + "users_documents" + File.separator + "temp";
+        File temp = new File(tempPath);
         if (!temp.exists()) {
             temp.mkdir();
         }
@@ -390,8 +391,8 @@ public class UsersService implements UserDetailsService {
                 "studentData.xls"))) {
             os.write(multipartFile.getBytes());
             HSSFWorkbook excelStudentData = new HSSFWorkbook(
-                    new FileInputStream(new File(temp.getPath() + File.separator + "studentData.xls")));
-            File deleteFile = new File(temp.getPath() + File.separator + "studentData.xls");
+                    new FileInputStream(new File(tempPath + File.separator + "studentData.xls")));
+            File deleteFile = new File(tempPath + File.separator + "studentData.xls");
             HSSFSheet studentSheet = excelStudentData.getSheet("Обучающиеся");
             // Теперь последовательно зарегестрируем студентов
             try {
