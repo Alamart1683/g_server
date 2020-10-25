@@ -230,10 +230,10 @@ insert into student_type (type) values
     ('Аспирант');
 
 insert into student_group (student_group) values
-    ('ИКБО-12-17'),
+    ('ИКБО-06-17'),
     ('ИКБО-07-17'),
-    ('ИНБО-13-17'),
-    ('ИВБО-06-17');
+    ('ИКБО-11-17'),
+    ('ИКБО-12-17');
 
 insert into users values
     (1, 'Alamart1683@gmail.com', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$hHGIOI8bYFvC7GdN1tc3tOjnNlswdVIRq.5foa5/v0YG9DVNDqNOy', '+79160571756', '1', '1', '2020-09-08 21:05:16'),
