@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class DocumentManagementService {
@@ -41,6 +42,9 @@ public class DocumentManagementService {
 
     @Autowired
     private ViewRightsProjectRepository viewRightsProjectRepository;
+
+    @Autowired
+    private NirTaskRepository nirTaskRepository;
 
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
@@ -389,5 +393,89 @@ public class DocumentManagementService {
             }
         }
         return messagesList;
+    }
+
+    // Студент отправляет версию задания научному руководителю
+    public String studentSendingTask(String token, String newStatus, Integer versionID) {
+        if (newStatus.equals("Рассматривается")) {
+            Integer studentID = documentUploadService.getCreatorId(token);
+            if (studentID != null && versionID != null) {
+                DocumentVersion documentVersion;
+                try {
+                    documentVersion = documentVersionRepository.findById(versionID).get();
+                } catch (NoSuchElementException noSuchElementException) {
+                    documentVersion = null;
+                }
+                if (documentVersion != null) {
+                    documentVersion.getNirTask().setStatus(4);
+                    nirTaskRepository.save(documentVersion.getNirTask());
+                    return "Версия документа успешно отправлена";
+                } else {
+                    return "Версия документа не найдена";
+                }
+            } else {
+                return "ID студента или версии не найден";
+            }
+        } else {
+            return "Неверный параметр статуса. Невозможно отправить задание";
+        }
+    }
+
+    // Научный руководитель одобряет или замечает
+    public String advisorCheckTask(String token, String newStatus, Integer versionID) {
+        if (newStatus.equals("Одобрено") || newStatus.equals("Замечания")) {
+            Integer advisorID = documentUploadService.getCreatorId(token);
+            if (advisorID != null && versionID != null) {
+                DocumentVersion documentVersion;
+                try {
+                    documentVersion = documentVersionRepository.findById(versionID).get();
+                } catch (NoSuchElementException noSuchElementException) {
+                    documentVersion = null;
+                }
+                if (documentVersion != null) {
+                    if (newStatus.equals("Одобрено")) {
+                        documentVersion.getNirTask().setStatus(2);
+                        nirTaskRepository.save(documentVersion.getNirTask());
+                    } else if (newStatus.equals("Замечания")) {
+                        documentVersion.getNirTask().setStatus(3);
+                        nirTaskRepository.save(documentVersion.getNirTask());
+                    }
+                    return "Версия документа успешно прорецензирована";
+                } else {
+                    return "Версия документа не найдена";
+                }
+            } else {
+                return "ID научного руководителя или версии не найден";
+            }
+        } else {
+            return "Неверный параметр статуса. Невозможно прорецензировать задание";
+        }
+    }
+
+    // Студент удаляет версию задания
+    public String studentDeleteTaskVersion(String token, Integer versionID) {
+        Integer studentID = documentUploadService.getCreatorId(token);
+        DocumentVersion documentVersion;
+        try {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            if (studentID != null) {
+                if (documentVersion.getEditor() == studentID) {
+                    if (documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                        File deleteFile = new File(documentVersion.getThis_version_document_path());
+                        deleteFile.delete();
+                        documentVersionRepository.delete(documentVersion);
+                        return "Версия документа успешно удалена";
+                    } else {
+                        return "Запрещено удалять версии документа после его отправки";
+                    }
+                } else {
+                    return "Вы не можете удалить версию документа, которую создали не вы";
+                }
+            } else {
+                return "ID студента не найден";
+            }
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Версия документа не найдена";
+        }
     }
 }

@@ -2,6 +2,7 @@ package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
+import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,9 @@ public class AssociatedUsersController {
 
     @Autowired
     private AssociatedStudentsService associatedStudentsService;
+
+    @Autowired
+    private UsersService usersService;
 
     @PostMapping("/student/request/for_scientific_advisor/")
     public List<String> sendRequestForScientificAdvisor(
@@ -149,6 +153,12 @@ public class AssociatedUsersController {
     @GetMapping("/student/request/NIR/task/data")
     public TaskDataViewWithMessage getStudentTaskData(HttpServletRequest httpServletRequest) {
         return associatedStudentsService.getNirTaskDataView(getTokenFromRequest(httpServletRequest));
+    }
+
+    // Получить данные научного руководителя по айди студента
+    @GetMapping("/student/advisor/data")
+    public StudentAdvisorView getStudentAdvisorData(HttpServletRequest httpServletRequest) {
+        return usersService.getAdvisorDataByStudentToken(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

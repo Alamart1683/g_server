@@ -1,6 +1,7 @@
 package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.forms.NewRightViewForm;
+import g_server.g_server.application.entity.view.AdvisorShortTaskDataView;
 import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.service.documents.DocumentManagementService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
@@ -9,12 +10,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -175,12 +170,51 @@ public class DocumentManagementController {
     }
 
     @PostMapping("/student/document/management/task/nir/create")
-    public String nirTaskCreate(
+    public String nirTaskCreateOrCangeByStudent(
             @ModelAttribute("shortTaskDataView") @Validated ShortTaskDataView shortTaskDataView,
             HttpServletRequest httpServletRequest
     ) throws Exception {
-        String response = documentProcessorService.studentShortTaskProcessing(
+        String response = documentProcessorService.studentTaskGeneration(
                 getTokenFromRequest(httpServletRequest), shortTaskDataView);
         return response;
+    }
+
+    @PostMapping("/scientific_advisor/document/management/task/nir/update")
+    public String nirTaskChangeByAdvisor(
+            @ModelAttribute("advisorShortTaskDataView") @Validated AdvisorShortTaskDataView advisorShortTaskDataView,
+            HttpServletRequest httpServletRequest
+            ) throws Exception {
+        String response = documentProcessorService.advisorTaskVersionAdd(
+                getTokenFromRequest(httpServletRequest), advisorShortTaskDataView);
+        return response;
+    }
+
+    @PostMapping("/student/document/management/task/nir/send")
+    public String sentTaskToAdvisorByStudent(
+        HttpServletRequest httpServletRequest,
+        @RequestParam String newStatus,
+        @RequestParam Integer versionID
+    ) {
+        return documentManagementService.studentSendingTask(
+                getTokenFromRequest(httpServletRequest), newStatus, versionID);
+    }
+
+    @PostMapping("/scientific_advisor/document/management/task/nir/check")
+    public String checkTaskByAdvisor(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String newStatus,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.advisorCheckTask(
+                getTokenFromRequest(httpServletRequest), newStatus, versionID);
+    }
+
+    @DeleteMapping("/student/document/version/delete")
+    public String deleteVersionByStudent(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.studentDeleteTaskVersion(
+                getTokenFromRequest(httpServletRequest), versionID);
     }
 }

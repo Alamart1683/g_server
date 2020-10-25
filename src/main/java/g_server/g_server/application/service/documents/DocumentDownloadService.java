@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -33,6 +34,25 @@ public class DocumentDownloadService {
             DocumentVersion lastVersion = documentVersions.get(documentVersions.size() - 1);
             String path = lastVersion.getThis_version_document_path();
             File downloadFile = new File(path);
+            return downloadFile;
+        }
+        else {
+            return null;
+        }
+    }
+
+    // Метод скачивания документа выбранной версии
+    public File findDownloadDocumentVersion(Integer versionID) {
+        if (versionID == null)
+            return null;
+        DocumentVersion documentVersion;
+        try {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            documentVersion = null;
+        }
+        if (documentVersion != null) {
+            File downloadFile = new File(documentVersion.getThis_version_document_path());
             return downloadFile;
         }
         else {

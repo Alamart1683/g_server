@@ -11,6 +11,7 @@ import g_server.g_server.application.entity.documents.OrderProperties;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.view.AdvisorShortTaskDataView;
 import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.entity.view.TaskDataView;
 import g_server.g_server.application.repository.documents.DocumentRepository;
@@ -22,6 +23,7 @@ import g_server.g_server.application.repository.users.AssociatedStudentsReposito
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
+import org.apache.catalina.User;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,8 +67,8 @@ public class DocumentProcessorService {
     @Autowired
     private DocumentUploadService documentUploadService;
 
-    // Обработать укороченный шаблон задания для студента
-    public String studentShortTaskProcessing(String token, ShortTaskDataView shortTaskDataView) throws Exception {
+    // Сгенерировать шаблон задания или создать его версию для студента
+    public String studentTaskGeneration(String token, ShortTaskDataView shortTaskDataView) throws Exception {
         Integer userID;
         try {
             userID = getUserId(token);
@@ -105,41 +107,8 @@ public class DocumentProcessorService {
                     List<Document> taskList = documentRepository.findByTypeAndKindAndCreator(
                             type, kind, headOfCathedra.getId());
                     if (taskList.size() > 0) {
-                        if (shortTaskDataView.getStudentTheme().length() < 1) {
-                            shortTaskDataView.setStudentTheme("Введите тему НИР");
-                        }
-                        if (shortTaskDataView.getToCreate().length() < 1) {
-                            shortTaskDataView.setToCreate("Создать");
-                        }
-                        if (shortTaskDataView.getToExplore().length() < 1) {
-                            shortTaskDataView.setToExplore("Изучить");
-                        }
-                        if (shortTaskDataView.getToFamiliarize().length() < 1) {
-                            shortTaskDataView.setToFamiliarize("Ознакомиться");
-                        }
-                        if (shortTaskDataView.getAdditionalTask().length() < 1) {
-                            shortTaskDataView.setAdditionalTask("Дополнительное задание");
-                        }
-                        TaskDataView taskDataView = new TaskDataView();
-                        taskDataView.setTaskType(document.getDocumentType().getType());
-                        taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
-                                " " + student.getSecond_name());
-                        taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
-                        taskDataView.setStudentTheme(shortTaskDataView.getStudentTheme());
-                        taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
-                                " " + advisor.getSecond_name());
-                        taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
-                                " " + headOfCathedra.getSecond_name());
-                        taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
-                        taskDataView.setOrderNumber(orderProperty.getNumber());
-                        taskDataView.setOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
-                        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getStartDate()));
-                        taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getEndDate()));
-                        taskDataView.setOrderSpeciality(speciality.getCode());
-                        taskDataView.setToExplore(shortTaskDataView.getToExplore());
-                        taskDataView.setToCreate(shortTaskDataView.getToCreate());
-                        taskDataView.setToFamiliarize(shortTaskDataView.getToFamiliarize());
-                        taskDataView.setAdditionalTask(shortTaskDataView.getAdditionalTask());
+                        TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
+                                advisor,headOfCathedra, document, orderProperty, speciality);
                         String studentDocumentsPath = "src" + File.separator + "main" +
                                 File.separator + "resources" + File.separator + "users_documents" +
                                 File.separator + student.getId();
@@ -149,18 +118,25 @@ public class DocumentProcessorService {
                         }
                         String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
                                 taskDataView.getStudentGroup() + " задание на НИР.docx";
-                        File taskDir = new File(studentDocumentsPath + File.separator + fileName);
-                        if (taskDir.exists()) {
-                            return "Задание уже было сгенерировано";
-                        } else {
+                        String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                        File taskDir = new File(taskDirPath);
+                        if (!taskDir.exists()) {
                             taskDir.mkdir();
                         }
                         Document currentTask = taskList.get(taskList.size() - 1);
                         List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
                         DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
                         XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                        return taskProcessing(template, taskDataView,
-                                speciality.getSpeciality(), taskDir.getPath(), fileName, student);
+                        taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                        String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                documentUploadService.getCurrentDate() + ".docx";
+                        String response = saveTaskAsDocument(fileName, student, advisor, studentDocumentsPath,
+                                taskDataView, documentVersionPath, false);
+                        if (!response.equals("Попытка создать версию чужого документа")) {
+                            WordReplaceService wordReplaceService = new WordReplaceService(template);
+                            wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                        }
+                        return response;
                     } else {
                         return "Шаблон задания еще не был загружен";
                     }
@@ -175,9 +151,138 @@ public class DocumentProcessorService {
         }
     }
 
+    // Создать версию задания студента от его НР
+    public String advisorTaskVersionAdd(String token, AdvisorShortTaskDataView shortTaskDataView) throws Exception {
+        Integer userID;
+        try {
+            userID = getUserId(token);
+        } catch (Exception e) {
+            return "ID научного руководителя не найден";
+        }
+        Users student;
+        Users advisor;
+        try {
+            student = usersRepository.findById(shortTaskDataView.getStudentID()).get();
+            advisor = usersRepository.findById(userID).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Пользователь не найден";
+        }
+        if (student != null && advisor != null) {
+            AssociatedStudents associatedStudents;
+            try {
+                associatedStudents = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisor.getId(), student.getId());
+            } catch (NullPointerException nullPointerException) {
+                associatedStudents = null;
+            }
+            if (associatedStudents != null) {
+                Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
+                        .getStudentGroup().getStudentGroup().substring(0, 4));
+                OrderProperties orderProperty;
+                try {
+                    orderProperty = orderPropertiesRepository.findBySpeciality(speciality.getId());
+                } catch (NullPointerException nullPointerException) {
+                    orderProperty = null;
+                }
+                if (orderProperty != null) {
+                    Document document = documentRepository.findById(orderProperty.getId()).get();
+                    Users headOfCathedra = usersRepository.findById(
+                            usersRolesRepository.findByRoleId(3).getUserId()).get();
+                    Integer type = determineType(shortTaskDataView.getTaskType());
+                    Integer kind = 2;
+                    List<Document> taskList = documentRepository.findByTypeAndKindAndCreator(
+                            type, kind, headOfCathedra.getId());
+                    if (taskList.size() > 0) {
+                        TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
+                                advisor,headOfCathedra, document, orderProperty, speciality);
+                        String studentDocumentsPath = "src" + File.separator + "main" +
+                                File.separator + "resources" + File.separator + "users_documents" +
+                                File.separator + student.getId();
+                        File studentDir = new File(studentDocumentsPath);
+                        if (!studentDir.exists()) {
+                            return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
+                        }
+                        String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                taskDataView.getStudentGroup() + " задание на НИР.docx";
+                        String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                        File taskDir = new File(taskDirPath);
+                        if (!taskDir.exists()) {
+                            return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
+                        }
+                        Document currentTask = taskList.get(taskList.size() - 1);
+                        List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                        DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                        XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                        taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                        String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                documentUploadService.getCurrentDate() + ".docx";
+                        String response = saveTaskAsDocument(fileName, student, advisor, studentDocumentsPath,
+                                taskDataView, documentVersionPath, true);
+                        if (!response.equals("Попытка создать версию чужого документа")) {
+                            WordReplaceService wordReplaceService = new WordReplaceService(template);
+                            wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                        }
+                        return response;
+                    } else {
+                        return "Шаблон задания еще не был загружен";
+                    }
+                } else {
+                    return "Приказ еще не был загружен";
+                }
+            } else {
+                return "Запрещено вносить изменения в задания не ваших студентов";
+            }
+        } else {
+            return "Студент не найден";
+        }
+    }
+
+    // Заполнить taskDataView
+    public TaskDataView fillingTaskDataView(
+            ShortTaskDataView shortTaskDataView,
+            Users student, Users advisor, Users headOfCathedra,
+            Document document, OrderProperties orderProperty,
+            Speciality speciality
+    ) {
+        if (shortTaskDataView.getStudentTheme().length() < 1) {
+            shortTaskDataView.setStudentTheme("Введите тему НИР");
+        }
+        if (shortTaskDataView.getToCreate().length() < 1) {
+            shortTaskDataView.setToCreate("Создать");
+        }
+        if (shortTaskDataView.getToExplore().length() < 1) {
+            shortTaskDataView.setToExplore("Изучить");
+        }
+        if (shortTaskDataView.getToFamiliarize().length() < 1) {
+            shortTaskDataView.setToFamiliarize("Ознакомиться");
+        }
+        if (shortTaskDataView.getAdditionalTask().length() < 1) {
+            shortTaskDataView.setAdditionalTask("Дополнительное задание");
+        }
+        TaskDataView taskDataView = new TaskDataView();
+        taskDataView.setTaskType(document.getDocumentType().getType());
+        taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
+                " " + student.getSecond_name());
+        taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
+        taskDataView.setStudentTheme(shortTaskDataView.getStudentTheme());
+        taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
+                " " + advisor.getSecond_name());
+        taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
+                " " + headOfCathedra.getSecond_name());
+        taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
+        taskDataView.setOrderNumber(orderProperty.getNumber());
+        taskDataView.setOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+        taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+        taskDataView.setOrderSpeciality(speciality.getCode());
+        taskDataView.setToExplore(shortTaskDataView.getToExplore());
+        taskDataView.setToCreate(shortTaskDataView.getToCreate());
+        taskDataView.setToFamiliarize(shortTaskDataView.getToFamiliarize());
+        taskDataView.setAdditionalTask(shortTaskDataView.getAdditionalTask());
+        return taskDataView;
+    }
+
     // Обработать шаблон
-    public String taskProcessing(XWPFDocument template, TaskDataView taskDataView,
-            String speciality, String studentDocumentsPath, String filename, Users student)
+    public void taskProcessing(XWPFDocument template, TaskDataView taskDataView, String speciality, Users student)
             throws Exception {
         WordReplaceService wordReplaceService = new WordReplaceService(template);
         String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
@@ -235,17 +340,13 @@ public class DocumentProcessorService {
             wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомиться " + taskDataView.getToFamiliarize());
         }
         wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
-        String documentVersionPath = studentDocumentsPath + File.separator + "version_" + documentUploadService.getCurrentDate() + ".docx";
-        File file = wordReplaceService.saveAndGetModdedFile(documentVersionPath);
-        saveTaskAsDocument(filename, student, studentDocumentsPath, taskDataView, documentVersionPath);
-        return "Задание на " + taskDataView.getTaskType() + " успешно сгенерировано!";
     }
 
     // Сохранить задание на НИР как документ
-    public void saveTaskAsDocument(String filename, Users student, String studentDocumentsPath,
-                                   TaskDataView taskDataView, String documentVersionPath) {
+    public String saveTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
+                                   TaskDataView taskDataView, String documentVersionPath, boolean flag) {
         Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
-        if (document == null) {
+        if (document == null && !flag) {
             Integer kind = 2;
             Integer type = determineType(taskDataView.getTaskType());
             Document newDocument = new Document(
@@ -265,7 +366,7 @@ public class DocumentProcessorService {
             DocumentVersion documentVersion = new DocumentVersion(
                     student.getId(),
                     newDocument.getId(),
-                    documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
+                    documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
                     "Генерация задания на сайте",
                     documentVersionPath
             );
@@ -275,12 +376,33 @@ public class DocumentProcessorService {
                     taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
             );
             nirTaskRepository.save(nirTask);
-        } else if (document != null) {
+            return "Задание на " + taskDataView.getTaskType() + " успешно сгенерировано!";
+        } else if (document != null && !flag) {
+            if (document.getCreator() == student.getId()) {
+                DocumentVersion documentVersion = new DocumentVersion(
+                        student.getId(),
+                        document.getId(),
+                        documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                        "Добавление новой версии задания",
+                        documentVersionPath
+                );
+                documentVersionRepository.save(documentVersion);
+                NirTask nirTask = new NirTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
+                );
+                nirTaskRepository.save(nirTask);
+                return "Версия задания на " + taskDataView.getTaskType() + " успешно добавлена!";
+            } else {
+                return "Попытка создать версию чужого документа";
+            }
+        } else if (document != null && flag) {
             DocumentVersion documentVersion = new DocumentVersion(
-                    student.getId(),
+                    advisor.getId(),
                     document.getId(),
-                    documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
-                    "Генерация задания на сайте",
+                    documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                    "Добавление новой версии задания научным руководителем "
+                            + getShortFio(advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name()),
                     documentVersionPath
             );
             documentVersionRepository.save(documentVersion);
@@ -289,7 +411,9 @@ public class DocumentProcessorService {
                     taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
             );
             nirTaskRepository.save(nirTask);
+            return "Версия задания на " + taskDataView.getTaskType() + " успешно добавлена!";
         }
+        return "Извините, что-то пошло не так";
     }
 
     // Преобразование даты вида ДД.ММ.ГГГГ к виду «XX» месяца YYYY

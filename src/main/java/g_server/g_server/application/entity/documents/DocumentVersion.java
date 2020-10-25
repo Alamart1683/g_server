@@ -116,4 +116,12 @@ public class DocumentVersion {
     public void setId(int id) {
         this.id = id;
     }
+
+    public NirTask getNirTask() {
+        return nirTask;
+    }
+
+    public void setNirTask(NirTask nirTask) {
+        this.nirTask = nirTask;
+    }
 }

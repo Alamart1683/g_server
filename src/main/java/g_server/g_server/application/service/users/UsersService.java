@@ -8,6 +8,7 @@ import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.*;
 import g_server.g_server.application.entity.users.passwords.PasswordGenerator;
 import g_server.g_server.application.entity.view.PersonalStudentView;
+import g_server.g_server.application.entity.view.StudentAdvisorView;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.system_data.CathedrasRepository;
@@ -561,5 +562,21 @@ public class UsersService implements UserDetailsService {
                 }
             }
         }
+    }
+
+    public StudentAdvisorView getAdvisorDataByStudentToken(String token) {
+        Integer studentID = getUserId(token);
+        StudentAdvisorView studentAdvisorView = new StudentAdvisorView();
+        if (studentID != null) {
+            AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(studentID);
+            if (associatedStudent != null) {
+                Users advisor = associatedStudent.getAdvisorUser();
+                studentAdvisorView.setSystemAdvisorID(advisor.getId());
+                studentAdvisorView.setAdvsiorFio(advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name());
+                studentAdvisorView.setAdvisorPhone(advisor.getPhone());
+                studentAdvisorView.setAdvisorEmail(advisor.getEmail());
+            }
+        }
+        return studentAdvisorView;
     }
 }

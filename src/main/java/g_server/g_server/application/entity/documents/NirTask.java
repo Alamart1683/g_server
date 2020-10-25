@@ -99,4 +99,12 @@ public class NirTask {
     public void setStatus(int status) {
         this.status = status;
     }
+
+    public DocumentStatus getDocumentStatus() {
+        return documentStatus;
+    }
+
+    public void setDocumentStatus(DocumentStatus documentStatus) {
+        this.documentStatus = documentStatus;
+    }
 }

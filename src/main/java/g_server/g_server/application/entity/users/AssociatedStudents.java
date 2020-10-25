@@ -91,4 +91,20 @@ public class AssociatedStudents {
     public void setProjectTheme(ProjectTheme projectTheme) {
         this.projectTheme = projectTheme;
     }
+
+    public Users getAdvisorUser() {
+        return advisorUser;
+    }
+
+    public void setAdvisorUser(Users advisorUser) {
+        this.advisorUser = advisorUser;
+    }
+
+    public Users getStudentUser() {
+        return studentUser;
+    }
+
+    public void setStudentUser(Users studentUser) {
+        this.studentUser = studentUser;
+    }
 }

@@ -19,4 +19,6 @@ public interface NirTaskRepository extends JpaRepository<NirTask, Integer> {
 
     @Override
     void deleteById(Integer integer);
+
+    NirTask findByVersionID(Integer versionID);
 }

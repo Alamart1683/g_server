@@ -9,7 +9,10 @@ import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.view.DocumentVersionView;
 import g_server.g_server.application.entity.view.DocumentView;
+import g_server.g_server.application.entity.view.TaskDocumentVersionView;
+import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
+import g_server.g_server.application.repository.documents.NirTaskRepository;
 import g_server.g_server.application.repository.documents.ViewRightsProjectRepository;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
@@ -53,6 +56,15 @@ public class DocumentViewService {
 
     @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
+
+    @Autowired
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private DocumentProcessorService documentProcessorService;
+
+    @Autowired
+    private NirTaskRepository nirTaskRepository;
 
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
@@ -266,5 +278,108 @@ public class DocumentViewService {
             documentViewList.add(documentView);
         }
         return documentViewList;
+    }
+
+    // Сформировать список версий загруженного задания студента
+    public List<TaskDocumentVersionView> getStudentTaskVersions(String token, String taskType) {
+        Integer studentID = associatedStudentsService.getUserId(token);
+        Integer advisorID = associatedStudentsRepository.findByStudent(studentID).getScientificAdvisor();
+        if (studentID != null && advisorID != null) {
+            List<TaskDocumentVersionView> taskVersionView = new ArrayList<>();
+            Integer intTaskType = documentProcessorService.determineType(taskType);
+            List<Document> documentList = documentRepository.findByTypeAndKindAndCreator(
+                    intTaskType,
+                    2,
+                    studentID
+            );
+            if (documentList.size() == 1) {
+                List<DocumentVersion> taskVersions =
+                        documentVersionRepository.findByDocument(documentList.get(0).getId());
+                for (DocumentVersion taskVersion: taskVersions) {
+                    if (intTaskType == 1) {
+                        if (taskVersion.getEditor() == studentID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            nirTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == advisorID &&
+                                !taskVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            nirTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
+                    } else if (intTaskType == 2) {
+                        // TODO Задел под практику по получению знаний и умений
+                    } else if (intTaskType == 3) {
+                        // TODO Задел под преддипломную практику
+                    } else if (intTaskType == 4) {
+                       // TODO Задел под вкр
+                    } else {
+
+                    }
+                }
+                return taskVersionView;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    // Сформировать список версий загруженного задания студента для научного руководителя
+    public List<TaskDocumentVersionView> getAdvisorStudentTaskVersions(String token, String taskType, Integer studentID) {
+        Integer advisorID = associatedStudentsService.getUserId(token);
+        if (studentID != null && advisorID != null) {
+            List<TaskDocumentVersionView> taskVersionView = new ArrayList<>();
+            Integer intTaskType = documentProcessorService.determineType(taskType);
+            List<Document> documentList = documentRepository.findByTypeAndKindAndCreator(
+                    intTaskType,
+                    2,
+                    studentID
+            );
+            if (documentList.size() == 1) {
+                List<DocumentVersion> taskVersions =
+                        documentVersionRepository.findByDocument(documentList.get(0).getId());
+                for (DocumentVersion taskVersion: taskVersions) {
+                    if (intTaskType == 1) {
+                        if (taskVersion.getEditor() == advisorID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            nirTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == studentID &&
+                                !taskVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            nirTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
+                    } else if (intTaskType == 2) {
+                        // TODO Задел под практику по получению знаний и умений
+                    } else if (intTaskType == 3) {
+                        // TODO Задел под преддипломную практику
+                    } else if (intTaskType == 4) {
+                        // TODO Задел под вкр
+                    } else {
+
+                    }
+                }
+                return taskVersionView;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 }

@@ -48,6 +48,27 @@ public class DocumentDownloadController {
         }
     }
 
+    @GetMapping("/document/download/version")
+    public void documentVersionDownload(
+            @RequestParam Integer versionID,
+            HttpServletResponse httpServletResponse
+    ) {
+        File file = documentDownloadService.findDownloadDocumentVersion(versionID);
+        if (file != null) {
+            String contentType = documentDownloadService.getContentType(file.getName());
+            String mainName = "Версия документа.docx";
+            Path path = Paths.get(file.getPath());
+            httpServletResponse.setContentType(contentType);
+            httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
+            try {
+                Files.copy(path, httpServletResponse.getOutputStream());
+                httpServletResponse.getOutputStream().flush();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

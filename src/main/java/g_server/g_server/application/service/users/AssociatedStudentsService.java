@@ -257,7 +257,9 @@ public class AssociatedStudentsService {
                 }
                 String currentTheme = associatedStudent.getProjectTheme().getTheme();
                 AssociatedStudentView activeStudentForm = new AssociatedStudentView(currentStudent,
-                        currentTheme, associatedStudent.getId(), projectTheme);
+                        currentTheme, associatedStudent.getId(), projectTheme,
+                        associatedStudent.getStudentUser().getPhone(),
+                        associatedStudent.getStudentUser().getEmail());
                 activeStudents.add(activeStudentForm);
             }
             return activeStudents;
@@ -291,8 +293,11 @@ public class AssociatedStudentsService {
                 }
                 if (project == null) {
                     String currentTheme = associatedStudent.getProjectTheme().getTheme();
-                    AssociatedStudentViewWithoutProject associatedStudentViewWithoutProject
-                            = new AssociatedStudentViewWithoutProject(currentStudent, currentTheme, associatedStudent.getId());
+                    AssociatedStudentViewWithoutProject associatedStudentViewWithoutProject = new AssociatedStudentViewWithoutProject(
+                            currentStudent, currentTheme,
+                            associatedStudent.getId(),
+                            associatedStudent.getStudentUser().getPhone(),
+                            associatedStudent.getStudentUser().getEmail());
                     associatedStudentViewWithoutProjects.add(associatedStudentViewWithoutProject);
                 }
             }
@@ -553,7 +558,11 @@ public class AssociatedStudentsService {
                         Users student = usersRepository.findById(occupiedStudent.getStudentID()).get();
                         // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
                         AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
-                                student, project.getProjectTheme().getTheme(), student.getId()
+                                student,
+                                project.getProjectTheme().getTheme(),
+                                student.getId(),
+                                student.getPhone(),
+                                student.getEmail()
                         );
                         occupiedStudentViews.add(currentStudentView);
                     }
@@ -580,7 +589,11 @@ public class AssociatedStudentsService {
                             Users student = usersRepository.findById(occupiedStudent.getStudentID()).get();
                             // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
                             AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
-                                    student, advisorProject.getProjectTheme().getTheme(), student.getId()
+                                    student,
+                                    advisorProject.getProjectTheme().getTheme(),
+                                    student.getId(),
+                                    student.getPhone(),
+                                    student.getEmail()
                             );
                             occupiedStudentViews.add(currentStudentView);
                         }
