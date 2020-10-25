@@ -247,4 +247,23 @@ public class DocumentManagementController {
         return documentManagementService.advisorDeleteTaskVersion(
                 getTokenFromRequest(httpServletRequest), versionID, studentID);
     }
+
+    @DeleteMapping("/student/document/report/version/delete")
+    public String deleteReportVersionByStudent(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.studentDeleteReportVersion(
+                getTokenFromRequest(httpServletRequest), versionID);
+    }
+
+    @DeleteMapping("/scientific_advisor/document/report/version/delete")
+    public String deleteReportVersionByAdvisor(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer versionID,
+            @RequestParam Integer studentID
+    ) {
+        return documentManagementService.advisorDeleteReportVersion(
+                getTokenFromRequest(httpServletRequest), versionID, studentID);
+    }
 }

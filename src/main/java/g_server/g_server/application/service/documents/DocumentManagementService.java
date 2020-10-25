@@ -581,4 +581,61 @@ public class DocumentManagementService {
             return "Неверный параметр статуса. Невозможно прорецензировать задание";
         }
     }
+
+    // Студент удаляет версию отчета
+    public String studentDeleteReportVersion(String token, Integer versionID) {
+        Integer studentID = documentUploadService.getCreatorId(token);
+        DocumentVersion documentVersion;
+        try {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            if (studentID != null) {
+                if (documentVersion.getEditor() == studentID) {
+                    if (documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                        File deleteFile = new File(documentVersion.getThis_version_document_path());
+                        deleteFile.delete();
+                        documentVersionRepository.delete(documentVersion);
+                        return "Версия отчета успешно удалена";
+                    } else {
+                        return "Запрещено удалять версии отчета после его отправки";
+                    }
+                } else {
+                    return "Вы не можете удалить версию отчета, которую создали не вы";
+                }
+            } else {
+                return "ID студента не найден";
+            }
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Версия отчета не найдена";
+        }
+    }
+
+    // Научный руководитель удаляет версию задания
+    public String advisorDeleteReportVersion(String token, Integer versionID, Integer studentID) {
+        Integer advisorID = documentUploadService.getCreatorId(token);
+        DocumentVersion documentVersion;
+        try {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            if (advisorID != null && studentID != null) {
+                AssociatedStudents associatedStudent =
+                        associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
+                if (associatedStudent != null) {
+                    if (documentVersion.getEditor() == advisorID &&
+                            documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                        File deleteFile = new File(documentVersion.getThis_version_document_path());
+                        deleteFile.delete();
+                        documentVersionRepository.delete(documentVersion);
+                        return "Версия отчета успешно удалена";
+                    } else {
+                        return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
+                    }
+                } else {
+                    return "Попытка удалить чужую версию отчета";
+                }
+            } else {
+                return "Переданные ID руководителя и студента не найдены";
+            }
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Версия отчета не найдена";
+        }
+    }
 }
