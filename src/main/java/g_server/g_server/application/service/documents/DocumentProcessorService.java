@@ -201,7 +201,7 @@ public class DocumentProcessorService {
                             return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
                         }
                         String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
-                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + " .docx";
+                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
                         String taskDirPath = studentDocumentsPath + File.separator + fileName;
                         File taskDir = new File(taskDirPath);
                         if (!taskDir.exists()) {

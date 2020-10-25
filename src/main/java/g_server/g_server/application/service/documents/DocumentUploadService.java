@@ -505,8 +505,7 @@ public class DocumentUploadService {
                                 messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
                                 nirReportRepository.save(nirReport);
-                            }
-                            else {
+                            } else {
                                 messagesList.add("Непредвиденная ошибка загрузки файла");
                                 if (documentDirectory != null) {
                                     if (documentDirectory.listFiles().length == 0) {
@@ -525,8 +524,7 @@ public class DocumentUploadService {
                                 messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
                                 nirReportRepository.save(nirReport);
-                            }
-                            else {
+                            } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
                                     if (documentDirectory.listFiles().length == 0) {
@@ -534,8 +532,7 @@ public class DocumentUploadService {
                                     }
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             messagesList.add("Ошибка синхронизации файловой системы с базой данных");
                             if (documentDirectory.listFiles().length == 0) {
                                 documentDirectory.delete();
