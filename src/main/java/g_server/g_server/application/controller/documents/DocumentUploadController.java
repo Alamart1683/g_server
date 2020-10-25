@@ -1,5 +1,6 @@
 package g_server.g_server.application.controller.documents;
 
+import g_server.g_server.application.entity.forms.AdvisorReportDocumentForm;
 import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.forms.DocumentOrderForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
@@ -48,12 +49,21 @@ public class DocumentUploadController {
     }
 
     @PostMapping("/student/document/report/upload")
-    public List<String> UploadReport (
+    public List<String> studentUploadReport (
             @ModelAttribute("documentForm") @Validated DocumentForm documentForm,
             HttpServletRequest httpServletRequest
     ) {
         documentForm.setToken(getTokenFromRequest(httpServletRequest));
         return documentUploadService.uploadStudentReport(documentForm);
+    }
+
+    @PostMapping("/scientific_advisor/document/report/upload/version")
+    public List<String> advisorUploadReportVersion (
+            @ModelAttribute("documentForm") @Validated AdvisorReportDocumentForm documentForm,
+            HttpServletRequest httpServletRequest
+    ) {
+        documentForm.setToken(getTokenFromRequest(httpServletRequest));
+        return documentUploadService.uploadAdvisorStudentReportVersion(documentForm);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

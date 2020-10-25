@@ -2,15 +2,18 @@ package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.*;
+import g_server.g_server.application.entity.forms.AdvisorReportDocumentForm;
 import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.forms.DocumentOrderForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.system_data.Speciality;
+import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
+import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
@@ -82,6 +85,9 @@ public class DocumentUploadService {
 
     @Autowired
     private NirReportRepository nirReportRepository;
+
+    @Autowired
+    private AssociatedStudentsRepository associatedStudentsRepository;
 
     public void createDocumentRootDirIfIsNotExist() {
         String rootDocDirPath = "src" + File.separator + "main" +
@@ -414,7 +420,7 @@ public class DocumentUploadService {
 
     // Метод загрузки студентом отчёта по работе:
     public List<String> uploadStudentReport(DocumentForm documentForm) {
-        List<String> messagesList = new ArrayList<String>();
+        List<String> messagesList = new ArrayList<>();
         Integer creator_id = null;
         if (documentForm.getToken() == null) {
             messagesList.add("Ошибка аутентификации: токен равен null");
@@ -422,12 +428,12 @@ public class DocumentUploadService {
         if (messagesList.size() == 0) {
 
         }
-            if (documentForm.getToken().equals("")) {
-                messagesList.add("Ошибка аутентификации: токен пуст");
-            }
-            else {
-                creator_id = getCreatorId(documentForm.getToken());
-            }
+        if (documentForm.getToken().equals("")) {
+            messagesList.add("Ошибка аутентификации: токен пуст");
+        }
+        else {
+            creator_id = getCreatorId(documentForm.getToken());
+        }
         if (creator_id == null) {
             messagesList.add("Пользователь не найден, загрузить файл невозможно");
         }
@@ -524,6 +530,154 @@ public class DocumentUploadService {
                                 messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
                                 nirReportRepository.save(nirReport);
+                            } else {
+                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
+                                if (documentDirectory != null) {
+                                    if (documentDirectory.listFiles().length == 0) {
+                                        documentDirectory.delete();
+                                    }
+                                }
+                            }
+                        } else {
+                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
+                    }
+                    // Если тип отчёта - Знания и умения
+                    else if (reportType == 2) {
+                        // TODO сделать загрузку отчёта
+                    }
+                    // Если тип отчёта - Преддиплом
+                    else if (reportType == 3) {
+                        // TODO сделать загрузку отчёта
+                    }
+                    // Если тип отчёта - ВКР
+                    else if (reportType == 4) {
+                        // TODO сделать загрузку отчёта
+                    } else {
+                        messagesList.add("Некорректный тип отчёта!");
+                    }
+
+                }
+                catch (IOException ioException) {
+                    messagesList.add("IOException");
+                }
+            }
+            else {
+                return messagesList;
+            }
+        }
+        else {
+            return messagesList;
+        }
+        return messagesList;
+    }
+
+    // Метод загрузки студентом отчёта по работе:
+    public List<String> uploadAdvisorStudentReportVersion(AdvisorReportDocumentForm documentForm) {
+        List<String> messagesList = new ArrayList<String>();
+        Integer advisorID = null;
+        if (documentForm.getToken() == null) {
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        }
+        if (messagesList.size() == 0) {
+            if (documentForm.getToken().equals("")) {
+                messagesList.add("Ошибка аутентификации: токен пуст");
+            }
+            else {
+                advisorID = getCreatorId(documentForm.getToken());
+            }
+        }
+        if (advisorID == null) {
+            messagesList.add("Пользователь не найден, загрузить файл невозможно");
+        }
+        Integer type_id = getTypeId(documentForm.getDocumentFormType());
+        if (type_id == null) {
+            messagesList.add("Указан несуществующий тип документа");
+        }
+        Integer kind_id = getKindId(documentForm.getDocumentFormKind());
+        if (kind_id == null) {
+            messagesList.add("Указан несуществующий вид докумета");
+        }
+        Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
+        if (viewRights == null) {
+            messagesList.add("Указаны некорректные права доступа");
+        }
+        if (documentForm.getFile() == null) {
+            messagesList.add("Ошибка загрузки файла. Такого файла не существует");
+        }
+        String fileExtension = getFileExtension(documentForm.getFile());
+        if (fileExtension.length() == 0) {
+            messagesList.add("Попытка загрузить документ с некорректным разрешением");
+        }
+        Integer roleID = usersRolesRepository.findUsersRolesByUserId(advisorID).getRoleId();
+        if ((roleID != 2 || roleID != 3) && viewRights != 7) {
+            messagesList.add("Попытка применить запрос на загрузку версии отчёта" +
+                    " руководителем студенту не по назначению");
+        }
+        Users advisor;
+        Users student;
+        try {
+            advisor = usersRepository.findById(advisorID).get();
+            student = usersRepository.findById(documentForm.getStudentID()).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            advisor = null;
+            student = null;
+            messagesList.add("Пользователь не найден");
+        }
+        // После этого разместим файл на сервере
+        if (messagesList.size() == 0) {
+            String studentDocumentsPath = "src" + File.separator + "main" + File.separator + "resources" +
+                    File.separator + "users_documents" + File.separator + student.getId();
+            File scientificAdvisorDirectory = new File(studentDocumentsPath);
+            if (!scientificAdvisorDirectory.exists()) {
+                scientificAdvisorDirectory.mkdir();
+            }
+            String fileName =
+                    documentProcessorService.getShortFio(student.getSurname() + " " +
+                            student.getName() + " " + student.getSecond_name()) + " " +
+                            student.getStudentData().getStudentGroup().getStudentGroup() +
+                            " содержание отчёта по " + documentForm.getDocumentFormType() + ".docx";
+            String documentPath = studentDocumentsPath + File.separator + fileName;
+            File documentDirectory = new File(documentPath);
+            // Проверим что одноименный файл не был загружен пользователем
+            if (!documentDirectory.exists()) {
+                messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
+                return messagesList;
+            }
+            // Сохраним файл на сервере, создав необходимую директорию
+            if (messagesList.size() == 0) {
+                String currentDate = getCurrentDate();
+                String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
+                String versionPath = documentDirectory.getPath() + File.separator +
+                        "version_" + currentDate + "." + fileExtension;
+                Path uploadingFilePath = Paths.get(versionPath);
+                try {
+                    Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
+                    // Если тип отчтёта - НИР
+                    if (reportType == 1) {
+                        if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
+                            messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
+                            return messagesList;
+                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                        } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
+                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                                AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
+                                if (associatedStudent != null) {
+                                    // Далее создадим запись о новой версии отчёта в таблице версий
+                                    int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
+                                    DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
+                                            sqlDateTime, "Загрузка версии отчёта по " +
+                                            documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
+                                    documentVersionService.save(documentVersion);
+                                    messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                    NirReport nirReport = new NirReport(documentVersion.getId(), 1);
+                                    nirReportRepository.save(nirReport);
+                                } else {
+                                    messagesList.add("Разрешено загружать версии отчетов только своим студентам");
+                                }
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
