@@ -193,7 +193,7 @@ create table document_status (
 );
 
 create table nir_task (
-    versionID int not null,
+    versionID int not null unique,
     theme varchar(128) not null,
     to_explore varchar(256) not null,
     to_create varchar(256) not null,
@@ -202,6 +202,13 @@ create table nir_task (
     nir_status int not null,
     foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
     foreign key (nir_status) references document_status (id)
+);
+
+create table nir_report (
+    versionID int not null unique,
+    nir_report_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (nir_report_status) references  document_status (id)
 );
 
 insert into document_status (status) values

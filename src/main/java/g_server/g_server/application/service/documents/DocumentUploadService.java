@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 // TODO Сделать проверку размера загружаемого файла
@@ -75,6 +76,12 @@ public class DocumentUploadService {
 
     @Autowired
     private SpecialityRepository specialityRepository;
+
+    @Autowired
+    private DocumentProcessorService documentProcessorService;
+
+    @Autowired
+    private NirReportRepository nirReportRepository;
 
     public void createDocumentRootDirIfIsNotExist() {
         String rootDocDirPath = "src" + File.separator + "main" +
@@ -447,22 +454,29 @@ public class DocumentUploadService {
         if (roleID != 1 && viewRights != 7) {
             messagesList.add("Попытка применить запрос на загрузку отчёта студентом не по назначению");
         }
+        Users student;
+        try {
+            student = usersRepository.findById(creator_id).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            student = null;
+            messagesList.add("Пользователь не найден");
+        }
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             String studentDocumentsPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "users_documents" + File.separator + creator_id;
             File scientificAdvisorDirectory = new File(studentDocumentsPath);
+
             if (!scientificAdvisorDirectory.exists()) {
                 scientificAdvisorDirectory.mkdir();
             }
-            String fileName = documentForm.getFile().getOriginalFilename();
+            String fileName =
+                    documentProcessorService.getShortFio(student.getSurname() + " " + student.getName() + " " + student.getSecond_name())
+                            + " " + student.getStudentData().getStudentGroup().getStudentGroup() + " содержание отчёта по " + documentForm.getDocumentFormType() + ".docx";
             String documentPath = studentDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
             // Проверим что одноименный файл не был загружен пользователем
             if (!documentDirectory.exists()) {
                 documentDirectory.mkdir();
-            }
-            else {
-                messagesList.add("Файл с таким именем уже существует");
             }
             // Сохраним файл на сервере, создав необходимую директорию
             if (messagesList.size() == 0) {
@@ -472,35 +486,77 @@ public class DocumentUploadService {
                         "version_" + currentDate + "." + fileExtension;
                 Path uploadingFilePath = Paths.get(versionPath);
                 try {
-                    if (documentRepository.findByCreatorAndName(creator_id, fileName) == null) {
-                        if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
-                            // После этого занесем загруженный файл в таблицу документов
-                            Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
-                                    type_id, kind_id, viewRights
-                            );
-                            documentService.save(document);
-                            // Далее создадим запись о первой версии документа в таблице версий
-                            int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
-                            DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
-                                    sqlDateTime, "Загрузка документа на сайт", versionPath);
-                            documentVersionService.save(documentVersion);
-                            messagesList.add("Документ был успешно загружен");
-                        }
-                        else {
-                            messagesList.add("Непредвиденная ошибка загрузки файла");
-                            if (documentDirectory != null) {
-                                if (documentDirectory.listFiles().length == 0) {
-                                    documentDirectory.delete();
+                    Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
+                    // Если тип отчтёта - НИР
+                    if (reportType == 1) {
+                        if (documentRepository.findByCreatorAndName(creator_id, fileName) == null) {
+                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                                // После этого занесем загруженный файл в таблицу документов
+                                Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
+                                        type_id, kind_id, viewRights
+                                );
+                                document.setName(fileName);
+                                documentService.save(document);
+                                // Далее создадим запись о первой версии документа в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath);
+                                documentVersionService.save(documentVersion);
+                                messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
+                                NirReport nirReport = new NirReport(documentVersion.getId(), 1);
+                                nirReportRepository.save(nirReport);
+                            }
+                            else {
+                                messagesList.add("Непредвиденная ошибка загрузки файла");
+                                if (documentDirectory != null) {
+                                    if (documentDirectory.listFiles().length == 0) {
+                                        documentDirectory.delete();
+                                    }
+                                }
+                            }
+                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                        } else if (documentRepository.findByCreatorAndName(creator_id, fileName) != null) {
+                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                                // Далее создадим запись о новой версии отчёта в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка версии отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath);
+                                documentVersionService.save(documentVersion);
+                                messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                NirReport nirReport = new NirReport(documentVersion.getId(), 1);
+                                nirReportRepository.save(nirReport);
+                            }
+                            else {
+                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
+                                if (documentDirectory != null) {
+                                    if (documentDirectory.listFiles().length == 0) {
+                                        documentDirectory.delete();
+                                    }
                                 }
                             }
                         }
-                    }
-                    else {
-                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
-                        if (documentDirectory.listFiles().length == 0) {
-                            documentDirectory.delete();
+                        else {
+                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
                         }
                     }
+                    // Если тип отчёта - Знания и умения
+                    else if (reportType == 2) {
+                        // TODO сделать загрузку отчёта
+                    }
+                    // Если тип отчёта - Преддиплом
+                    else if (reportType == 3) {
+                        // TODO сделать загрузку отчёта
+                    }
+                    // Если тип отчёта - ВКР
+                    else if (reportType == 4) {
+                        // TODO сделать загрузку отчёта
+                    } else {
+                        messagesList.add("Некорректный тип отчёта!");
+                    }
+
                 }
                 catch (IOException ioException) {
                     messagesList.add("IOException");

@@ -209,12 +209,22 @@ public class DocumentManagementController {
                 getTokenFromRequest(httpServletRequest), newStatus, versionID);
     }
 
-    @DeleteMapping("/student/document/version/delete")
-    public String deleteVersionByStudent(
+    @DeleteMapping("/student/document/task/version/delete")
+    public String deleteTaskVersionByStudent(
             HttpServletRequest httpServletRequest,
             @RequestParam Integer versionID
     ) {
         return documentManagementService.studentDeleteTaskVersion(
                 getTokenFromRequest(httpServletRequest), versionID);
+    }
+
+    @DeleteMapping("/scientific_advisor/document/task/version/delete")
+    public String deleteTaskVersionByAdvisor(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer versionID,
+            @RequestParam Integer studentID
+    ) {
+        return documentManagementService.advisorDeleteTaskVersion(
+                getTokenFromRequest(httpServletRequest), versionID, studentID);
     }
 }

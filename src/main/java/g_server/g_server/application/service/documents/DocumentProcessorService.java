@@ -23,7 +23,6 @@ import g_server.g_server.application.repository.users.AssociatedStudentsReposito
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
-import org.apache.catalina.User;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -117,7 +116,7 @@ public class DocumentProcessorService {
                             studentDir.mkdir();
                         }
                         String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
-                                taskDataView.getStudentGroup() + " задание на НИР.docx";
+                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
                         String taskDirPath = studentDocumentsPath + File.separator + fileName;
                         File taskDir = new File(taskDirPath);
                         if (!taskDir.exists()) {
@@ -130,7 +129,7 @@ public class DocumentProcessorService {
                         taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
                         String documentVersionPath = taskDirPath + File.separator + "version_" +
                                 documentUploadService.getCurrentDate() + ".docx";
-                        String response = saveTaskAsDocument(fileName, student, advisor, studentDocumentsPath,
+                        String response = saveNirTaskAsDocument(fileName, student, advisor, taskDirPath,
                                 taskDataView, documentVersionPath, false);
                         if (!response.equals("Попытка создать версию чужого документа")) {
                             WordReplaceService wordReplaceService = new WordReplaceService(template);
@@ -202,7 +201,7 @@ public class DocumentProcessorService {
                             return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
                         }
                         String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
-                                taskDataView.getStudentGroup() + " задание на НИР.docx";
+                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + " .docx";
                         String taskDirPath = studentDocumentsPath + File.separator + fileName;
                         File taskDir = new File(taskDirPath);
                         if (!taskDir.exists()) {
@@ -215,7 +214,7 @@ public class DocumentProcessorService {
                         taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
                         String documentVersionPath = taskDirPath + File.separator + "version_" +
                                 documentUploadService.getCurrentDate() + ".docx";
-                        String response = saveTaskAsDocument(fileName, student, advisor, studentDocumentsPath,
+                        String response = saveNirTaskAsDocument(fileName, student, advisor, taskDirPath,
                                 taskDataView, documentVersionPath, true);
                         if (!response.equals("Попытка создать версию чужого документа")) {
                             WordReplaceService wordReplaceService = new WordReplaceService(template);
@@ -343,8 +342,8 @@ public class DocumentProcessorService {
     }
 
     // Сохранить задание на НИР как документ
-    public String saveTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
-                                   TaskDataView taskDataView, String documentVersionPath, boolean flag) {
+    public String saveNirTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
+                                        TaskDataView taskDataView, String documentVersionPath, boolean flag) {
         Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
         if (document == null && !flag) {
             Integer kind = 2;
@@ -356,7 +355,7 @@ public class DocumentProcessorService {
                     documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
                     type,
                     kind,
-                    "Задание на " + taskDataView.getTaskType() + " " + getShortFio(
+                    "Задание по " + taskDataView.getTaskType() + " " + getShortFio(
                             student.getSurname() + " " + student.getName() + " " + student.getSecond_name()) + " " +
                             student.getStudentData().getStudentGroup().getStudentGroup()
                     ,
@@ -367,7 +366,7 @@ public class DocumentProcessorService {
                     student.getId(),
                     newDocument.getId(),
                     documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
-                    "Генерация задания на сайте",
+                    "Генерация задания по " + taskDataView.getTaskType() + " на сайте",
                     documentVersionPath
             );
             documentVersionRepository.save(documentVersion);
@@ -376,14 +375,14 @@ public class DocumentProcessorService {
                     taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
             );
             nirTaskRepository.save(nirTask);
-            return "Задание на " + taskDataView.getTaskType() + " успешно сгенерировано!";
+            return "Задание по " + taskDataView.getTaskType() + " успешно сгенерировано!";
         } else if (document != null && !flag) {
             if (document.getCreator() == student.getId()) {
                 DocumentVersion documentVersion = new DocumentVersion(
                         student.getId(),
                         document.getId(),
                         documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
-                        "Добавление новой версии задания",
+                        "Добавление новой версии задания по " + taskDataView.getTaskType(),
                         documentVersionPath
                 );
                 documentVersionRepository.save(documentVersion);
@@ -392,7 +391,7 @@ public class DocumentProcessorService {
                         taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
                 );
                 nirTaskRepository.save(nirTask);
-                return "Версия задания на " + taskDataView.getTaskType() + " успешно добавлена!";
+                return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
             } else {
                 return "Попытка создать версию чужого документа";
             }
@@ -401,7 +400,7 @@ public class DocumentProcessorService {
                     advisor.getId(),
                     document.getId(),
                     documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
-                    "Добавление новой версии задания научным руководителем "
+                    "Добавление новой версии задания по " + taskDataView.getTaskType() + " научным руководителем "
                             + getShortFio(advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name()),
                     documentVersionPath
             );
@@ -411,7 +410,7 @@ public class DocumentProcessorService {
                     taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
             );
             nirTaskRepository.save(nirTask);
-            return "Версия задания на " + taskDataView.getTaskType() + " успешно добавлена!";
+            return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
         }
         return "Извините, что-то пошло не так";
     }

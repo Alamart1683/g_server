@@ -475,7 +475,7 @@ public class UsersService implements UserDetailsService {
                         student.setPassword(bCryptPasswordEncoder.encode(password));
 
                         // Укажем, что аккаунт подтвержден и согласен на почтовую рассылку
-                        student.setConfirmed(true);
+                        student.setConfirmed(false);
                         student.setSendMailAccepted(true);
 
                         studentList.add(student);

@@ -4,8 +4,10 @@ import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.entity.documents.ViewRightsProject;
 import g_server.g_server.application.entity.project.Project;
+import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectRepository;
+import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,9 @@ public class DocumentManagementService {
 
     @Autowired
     private NirTaskRepository nirTaskRepository;
+
+    @Autowired
+    private AssociatedStudentsRepository associatedStudentsRepository;
 
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
@@ -476,6 +481,36 @@ public class DocumentManagementService {
             }
         } catch (NoSuchElementException noSuchElementException) {
             return "Версия документа не найдена";
+        }
+    }
+
+    // Научный руководитель удаляет версию задания
+    public String advisorDeleteTaskVersion(String token, Integer versionID, Integer studentID) {
+        Integer advisorID = documentUploadService.getCreatorId(token);
+        DocumentVersion documentVersion;
+        try {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            if (advisorID != null && studentID != null) {
+                AssociatedStudents associatedStudent =
+                        associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
+                if (associatedStudent != null) {
+                    if (documentVersion.getEditor() == advisorID &&
+                            documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                        File deleteFile = new File(documentVersion.getThis_version_document_path());
+                        deleteFile.delete();
+                        documentVersionRepository.delete(documentVersion);
+                        return "Версия документа успешно удалена";
+                    } else {
+                        return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                    }
+                } else {
+                    return "Попытка удалить чужую версию документа";
+                }
+            } else {
+                return "Переданные ID руководителя и студента не найдены";
+            }
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Версия доумента не найдена";
         }
     }
 }
