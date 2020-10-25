@@ -51,6 +51,9 @@ public class DocumentManagementService {
     @Autowired
     private AssociatedStudentsRepository associatedStudentsRepository;
 
+    @Autowired
+    private NirReportRepository nirReportRepository;
+
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
@@ -511,6 +514,32 @@ public class DocumentManagementService {
             }
         } catch (NoSuchElementException noSuchElementException) {
             return "Версия доумента не найдена";
+        }
+    }
+
+    // Студент отправляет версию задания научному руководителю
+    public String studentSendingReport(String token, String newStatus, Integer versionID) {
+        if (newStatus.equals("Рассматривается")) {
+            Integer studentID = documentUploadService.getCreatorId(token);
+            if (studentID != null && versionID != null) {
+                DocumentVersion documentVersion;
+                try {
+                    documentVersion = documentVersionRepository.findById(versionID).get();
+                } catch (NoSuchElementException noSuchElementException) {
+                    documentVersion = null;
+                }
+                if (documentVersion != null) {
+                    documentVersion.getNirReport().setNirReportStatus(4);
+                    nirReportRepository.save(documentVersion.getNirReport());
+                    return "Версия отчёта успешно отправлена";
+                } else {
+                    return "Версия отчёта не найдена";
+                }
+            } else {
+                return "ID студента или версии не найден";
+            }
+        } else {
+            return "Неверный параметр статуса. Невозможно отправить задание";
         }
     }
 }

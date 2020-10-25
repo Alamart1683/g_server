@@ -19,4 +19,6 @@ public interface NirReportRepository extends JpaRepository<NirReport, Integer> {
 
     @Override
     void deleteById(Integer integer);
+
+    NirReport findByVersionID(Integer versionID);
 }

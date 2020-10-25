@@ -199,6 +199,16 @@ public class DocumentManagementController {
                 getTokenFromRequest(httpServletRequest), newStatus, versionID);
     }
 
+    @PostMapping("/student/document/management/report/nir/send")
+    public String sentReportToAdvisorByStudent(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String newStatus,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.studentSendingReport(
+                getTokenFromRequest(httpServletRequest), newStatus, versionID);
+    }
+
     @PostMapping("/scientific_advisor/document/management/task/nir/check")
     public String checkTaskByAdvisor(
             HttpServletRequest httpServletRequest,

@@ -1,6 +1,7 @@
 package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.view.DocumentView;
+import g_server.g_server.application.entity.view.ReportVersionDocumentView;
 import g_server.g_server.application.entity.view.TaskDocumentVersionView;
 import g_server.g_server.application.service.documents.DocumentViewService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,24 @@ public class DocumentViewController {
             @RequestParam Integer studentID
     ) {
         return documentViewService.getAdvisorStudentTaskVersions(
+                getTokenFromRequest(httpServletRequest), taskType, studentID);
+    }
+
+    @GetMapping("/student/document/report/view")
+    private List<ReportVersionDocumentView> getStudentReportVersions(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String taskType
+    ) {
+        return documentViewService.getStudentReportVersions(getTokenFromRequest(httpServletRequest), taskType);
+    }
+
+    @GetMapping("/scientific_advisor/document/report/view")
+    private List<ReportVersionDocumentView> getAdvisorStudentReportVersions(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String taskType,
+            @RequestParam Integer studentID
+    ) {
+        return documentViewService.getAdvisorStudentReportVersions(
                 getTokenFromRequest(httpServletRequest), taskType, studentID);
     }
 
