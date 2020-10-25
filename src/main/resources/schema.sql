@@ -279,8 +279,8 @@ insert into project_theme values
 (1, 2, 'Заглушка тем проекта для будущей реализации проектов');
 
 insert into associated_students values
-    (1, 2, 7, 3, 1),
-    (2, 4, 6, 3, 1);
+    (1, 2, 7, 1, 1),
+    (2, 4, 6, 1, 1);
 
 insert into view_rights (view_right) values
     ('Только я'),

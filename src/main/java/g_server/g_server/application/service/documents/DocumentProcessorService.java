@@ -372,7 +372,7 @@ public class DocumentProcessorService {
             documentVersionRepository.save(documentVersion);
             NirTask nirTask = new NirTask(
                     documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
-                    taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
+                    taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
             );
             nirTaskRepository.save(nirTask);
             return "Задание по " + taskDataView.getTaskType() + " успешно сгенерировано!";
@@ -388,7 +388,7 @@ public class DocumentProcessorService {
                 documentVersionRepository.save(documentVersion);
                 NirTask nirTask = new NirTask(
                         documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
-                        taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
                 );
                 nirTaskRepository.save(nirTask);
                 return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
@@ -407,7 +407,7 @@ public class DocumentProcessorService {
             documentVersionRepository.save(documentVersion);
             NirTask nirTask = new NirTask(
                     documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
-                    taskDataView.getToFamiliarize(), taskDataView.getToCreate(), taskDataView.getAdditionalTask(), 1
+                    taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
             );
             nirTaskRepository.save(nirTask);
             return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
