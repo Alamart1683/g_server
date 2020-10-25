@@ -219,6 +219,16 @@ public class DocumentManagementController {
                 getTokenFromRequest(httpServletRequest), newStatus, versionID);
     }
 
+    @PostMapping("/scientific_advisor/document/management/report/nir/check")
+    public String checkReportByAdvisor(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String newStatus,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.advisorCheckReport(
+                getTokenFromRequest(httpServletRequest), newStatus, versionID);
+    }
+
     @DeleteMapping("/student/document/task/version/delete")
     public String deleteTaskVersionByStudent(
             HttpServletRequest httpServletRequest,

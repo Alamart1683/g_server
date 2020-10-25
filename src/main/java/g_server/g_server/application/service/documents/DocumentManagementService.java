@@ -429,7 +429,7 @@ public class DocumentManagementService {
         }
     }
 
-    // Научный руководитель одобряет или замечает
+    // Научный руководитель одобряет или замечает задание
     public String advisorCheckTask(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Одобрено") || newStatus.equals("Замечания")) {
             Integer advisorID = documentUploadService.getCreatorId(token);
@@ -441,14 +441,18 @@ public class DocumentManagementService {
                     documentVersion = null;
                 }
                 if (documentVersion != null) {
-                    if (newStatus.equals("Одобрено")) {
+                    if (newStatus.equals("Одобрено") &&
+                            documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                         documentVersion.getNirTask().setStatus(2);
                         nirTaskRepository.save(documentVersion.getNirTask());
-                    } else if (newStatus.equals("Замечания")) {
+                        return "Версия документа успешно прорецензирована";
+                    } else if (newStatus.equals("Замечания") &&
+                            documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
                         documentVersion.getNirTask().setStatus(3);
                         nirTaskRepository.save(documentVersion.getNirTask());
+                        return "Версия документа успешно прорецензирована";
                     }
-                    return "Версия документа успешно прорецензирована";
+                    return "Вы не можете оценить не отправленную студентом версию";
                 } else {
                     return "Версия документа не найдена";
                 }
@@ -517,7 +521,7 @@ public class DocumentManagementService {
         }
     }
 
-    // Студент отправляет версию задания научному руководителю
+    // Студент отправляет версию отчета научному руководителю
     public String studentSendingReport(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Рассматривается")) {
             Integer studentID = documentUploadService.getCreatorId(token);
@@ -540,6 +544,41 @@ public class DocumentManagementService {
             }
         } else {
             return "Неверный параметр статуса. Невозможно отправить задание";
+        }
+    }
+
+    // Научный руководитель одобряет или замечает задание
+    public String advisorCheckReport(String token, String newStatus, Integer versionID) {
+        if (newStatus.equals("Одобрено") || newStatus.equals("Замечания")) {
+            Integer advisorID = documentUploadService.getCreatorId(token);
+            if (advisorID != null && versionID != null) {
+                DocumentVersion documentVersion;
+                try {
+                    documentVersion = documentVersionRepository.findById(versionID).get();
+                } catch (NoSuchElementException noSuchElementException) {
+                    documentVersion = null;
+                }
+                if (documentVersion != null) {
+                    if (newStatus.equals("Одобрено") &&
+                            documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
+                        documentVersion.getNirReport().setNirReportStatus(2);
+                        nirReportRepository.save(documentVersion.getNirReport());
+                        return "Версия документа успешно прорецензирована";
+                    } else if (newStatus.equals("Замечания") &&
+                            documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
+                        documentVersion.getNirReport().setNirReportStatus(3);
+                        nirReportRepository.save(documentVersion.getNirReport());
+                        return "Версия документа успешно прорецензирована";
+                    }
+                    return "Вы не можете оценить не отправленную студентом версию";
+                } else {
+                    return "Версия документа не найдена";
+                }
+            } else {
+                return "ID научного руководителя или версии не найден";
+            }
+        } else {
+            return "Неверный параметр статуса. Невозможно прорецензировать задание";
         }
     }
 }
