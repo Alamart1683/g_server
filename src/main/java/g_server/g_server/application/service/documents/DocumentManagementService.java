@@ -451,8 +451,18 @@ public class DocumentManagementService {
                         documentVersion.getNirTask().setStatus(3);
                         nirTaskRepository.save(documentVersion.getNirTask());
                         return "Версия документа успешно прорецензирована";
+                    } else if (documentVersion.getEditor() == advisorID) {
+                        if (newStatus.equals("Одобрено")) {
+                            documentVersion.getNirTask().setStatus(2);
+                            nirTaskRepository.save(documentVersion.getNirTask());
+                            return "Вы отправили студенту свою версию задания с статусом одобрено";
+                        } else if (newStatus.equals("Замечания")) {
+                            documentVersion.getNirTask().setStatus(3);
+                            nirTaskRepository.save(documentVersion.getNirTask());
+                            return "Вы отправили студенту свою версию задания с статусом замечания";
+                        }
                     }
-                    return "Вы не можете оценить не отправленную студентом версию";
+                    return "Вы не можете оценить не отправленную студентом или уже оцененную версию";
                 } else {
                     return "Версия документа не найдена";
                 }
@@ -570,7 +580,18 @@ public class DocumentManagementService {
                         nirReportRepository.save(documentVersion.getNirReport());
                         return "Версия документа успешно прорецензирована";
                     }
-                    return "Вы не можете оценить не отправленную студентом версию";
+                    else if (documentVersion.getEditor() == advisorID) {
+                        if (newStatus.equals("Одобрено")) {
+                            documentVersion.getNirReport().setNirReportStatus(2);
+                            nirReportRepository.save(documentVersion.getNirReport());
+                            return "Вы отправили студенту свою версию задания с статусом одобрено";
+                        } else if (newStatus.equals("Замечания")) {
+                            documentVersion.getNirReport().setNirReportStatus(3);
+                            nirReportRepository.save(documentVersion.getNirReport());
+                            return "Вы отправили студенту свою версию задания с статусом замечания";
+                        }
+                    }
+                    return "Вы не можете оценить не отправленную студентом или уже оцененную версию";
                 } else {
                     return "Версия документа не найдена";
                 }
