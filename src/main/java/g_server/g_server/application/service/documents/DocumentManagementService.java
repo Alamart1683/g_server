@@ -447,7 +447,7 @@ public class DocumentManagementService {
                         nirTaskRepository.save(documentVersion.getNirTask());
                         return "Версия документа успешно прорецензирована";
                     } else if (newStatus.equals("Замечания") &&
-                            documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
+                            documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                         documentVersion.getNirTask().setStatus(3);
                         nirTaskRepository.save(documentVersion.getNirTask());
                         return "Версия документа успешно прорецензирована";
@@ -547,7 +547,7 @@ public class DocumentManagementService {
         }
     }
 
-    // Научный руководитель одобряет или замечает задание
+    // Научный руководитель одобряет или замечает отчет
     public String advisorCheckReport(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Одобрено") || newStatus.equals("Замечания")) {
             Integer advisorID = documentUploadService.getCreatorId(token);
