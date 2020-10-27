@@ -94,6 +94,32 @@ public class DocumentDownloadController {
         }
     }
 
+    @GetMapping("/scientific_advisor/document/download/report")
+    public void advisorDownloadReport(
+            @RequestParam String type,
+            @RequestParam Integer reportVersion,
+            @RequestParam Integer studentID,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
+    ) {
+        File reportFile = documentDownloadService.advisorDownloadReportVersionWithApprovedTask(
+                getTokenFromRequest(httpServletRequest), type, reportVersion, studentID);
+        if (reportFile != null) {
+            String contentType = documentDownloadService.getContentType(reportFile.getName());
+            String mainName = "Версия отчёта.docx";
+            Path reportPath = Paths.get(reportFile.getPath());
+            httpServletResponse.setContentType(contentType);
+            httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
+            try {
+                Files.copy(reportPath, httpServletResponse.getOutputStream());
+                httpServletResponse.getOutputStream().flush();
+                reportFile.delete();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

@@ -106,6 +106,48 @@ public class DocumentDownloadService {
         }
     }
 
+    public File advisorDownloadReportVersionWithApprovedTask(String token, String stringType, Integer reportVersion, Integer studentID) {
+        Integer advisorID = associatedStudentsService.getUserId(token);
+        if (advisorID != null && studentID != null) {
+            Document task;
+            List<DocumentVersion> taskVersions;
+            try {
+                task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(stringType), 2, studentID).get(0);
+                taskVersions = documentVersionRepository.findByDocument(task.getId());
+                List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                for (DocumentVersion taskVersion: taskVersions) {
+                    if (taskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        approvedTaskVersions.add(taskVersion);
+                    }
+                }
+                DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                DocumentVersion lastReportVersion = documentVersionRepository.findById(reportVersion).get();
+                File lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                File lastReportVersionFile = new File(lastReportVersion.getThis_version_document_path());
+                File advisorDir = new File("src" + File.separator + "main" + File.separator + "resources" +
+                        File.separator + "users_documents" + File.separator + advisorID);
+                if (!advisorDir.exists()) {
+                    advisorDir.mkdir();
+                }
+                File destinationFile = new File("src" + File.separator + "main" + File.separator + "resources" +
+                        File.separator + "users_documents" + File.separator + advisorID + File.separator + "temp.docx");
+                InputStream taskStream = new FileInputStream(lastTaskVersionFile);
+                InputStream reportStream = new FileInputStream(lastReportVersionFile);
+                OutputStream outputStream = new FileOutputStream(destinationFile);
+                documentProcessorService.makeUsWhole(taskStream, reportStream, outputStream);
+                return destinationFile;
+            } catch (NoSuchElementException noSuchElementException) {
+                return null;
+            } catch (FileNotFoundException fileNotFoundException) {
+                return null;
+            } catch (Exception e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     // Метод определения типа контента
     public String getContentType(String path) {
         String extension = getFileExtension(path);
