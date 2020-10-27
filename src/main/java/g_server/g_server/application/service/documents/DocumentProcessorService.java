@@ -23,7 +23,10 @@ import g_server.g_server.application.repository.users.AssociatedStudentsReposito
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.xmlbeans.XmlOptions;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.*;
@@ -299,6 +302,7 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("ГРУППА", taskDataView.getStudentGroup());
         wordReplaceService.replaceWordsInText("Код специальности", taskDataView.getOrderSpeciality());
         wordReplaceService.replaceWordsInText("Название специальности", speciality);
+        wordReplaceService.replaceWordsInText("ФИОРС", getShortFio(getRpFio(student.getSurname(), student.getName(), student.getSecond_name())));
         wordReplaceService.replaceWordsInText("ФИОПД", getDpFio(student.getSurname(), student.getName(), student.getSecond_name()));
         wordReplaceService.replaceWordsInText("ФИОПР", getRpFio(student.getSurname(), student.getName(), student.getSecond_name()));
         wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
@@ -322,6 +326,7 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ГРУППА", taskDataView.getStudentGroup());
         wordReplaceService.replaceWordsInTables("Код специальности", taskDataView.getOrderSpeciality());
         wordReplaceService.replaceWordsInTables("Название специальности", speciality);
+        wordReplaceService.replaceWordsInTables("ФИОРС", getShortFio(getRpFio(student.getSurname(), student.getName(), student.getSecond_name())));
         wordReplaceService.replaceWordsInText("ФИОПД", getDpFio(student.getSurname(), student.getName(), student.getSecond_name()));
         wordReplaceService.replaceWordsInText("ФИОПР", getRpFio(student.getSurname(), student.getName(), student.getSecond_name()));
         wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
@@ -413,6 +418,32 @@ public class DocumentProcessorService {
             return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
         }
         return "Извините, что-то пошло не так";
+    }
+
+    // Объединить задание с отчётом
+    public void makeUsWhole(InputStream taskVersion, InputStream reportVersion, OutputStream destination) throws Exception {
+        OPCPackage taskPackage = OPCPackage.open(taskVersion);
+        OPCPackage reportPackage = OPCPackage.open(reportVersion);
+        XWPFDocument taskDocument = new XWPFDocument(taskPackage);
+        CTBody taskBody = taskDocument.getDocument().getBody();
+        XWPFDocument reportDocument = new XWPFDocument(reportPackage);
+        CTBody reportBody = reportDocument.getDocument().getBody();
+        appendBody(taskBody, reportBody);
+        taskDocument.write(destination);
+    }
+
+    // Метод добавления тела документу
+    private static void appendBody(CTBody src, CTBody append) throws Exception {
+        XmlOptions optionsOuter = new XmlOptions();
+        optionsOuter.setSaveOuter();
+        String appendString = append.xmlText(optionsOuter);
+        String srcString = src.xmlText();
+        String prefix = srcString.substring(0,srcString.indexOf(">")+1);
+        String mainPart = srcString.substring(srcString.indexOf(">")+1,srcString.lastIndexOf("<"));
+        String sufix = srcString.substring( srcString.lastIndexOf("<") );
+        String addPart = appendString.substring(appendString.indexOf(">") + 1, appendString.lastIndexOf("<"));
+        CTBody makeBody = CTBody.Factory.parse(prefix+mainPart+addPart+sufix);
+        src.set(makeBody);
     }
 
     // Преобразование даты вида ДД.ММ.ГГГГ к виду «XX» месяца YYYY
