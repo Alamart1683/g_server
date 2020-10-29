@@ -7,21 +7,30 @@ public class StudentDocumentsStatusView {
     private int ppppuipdReportStatus;
     private int ppTaskStatus;
     private int ppReportStatus;
+    private int vkrAdvisorFeedback;
+    private int vkrAllowance;
     private int vkrTask;
-    private int vkrReport;
+    private int vkrRPZ;
+    private int vkrAntiplagiat;
+    private int vkrPresentation;
 
     public StudentDocumentsStatusView() { }
 
     public StudentDocumentsStatusView(int nirTaskStatus, int nirReportStatus, int ppppuipdTaskStatus,
-                                      int ppppuipdReportStatus, int ppTaskStatus, int ppReportStatus, int vkrTask, int vkrReport) {
+             int ppppuipdReportStatus, int ppTaskStatus, int ppReportStatus, int vkrAdvisorFeedback,
+             int vkrAllowance, int vkrTask, int vkrRPZ, int vkrAntiplagiat, int vkrPresentation) {
         this.nirTaskStatus = nirTaskStatus;
         this.nirReportStatus = nirReportStatus;
         this.ppppuipdTaskStatus = ppppuipdTaskStatus;
         this.ppppuipdReportStatus = ppppuipdReportStatus;
         this.ppTaskStatus = ppTaskStatus;
         this.ppReportStatus = ppReportStatus;
+        this.vkrAdvisorFeedback = vkrAdvisorFeedback;
+        this.vkrAllowance = vkrAllowance;
         this.vkrTask = vkrTask;
-        this.vkrReport = vkrReport;
+        this.vkrRPZ = vkrRPZ;
+        this.vkrAntiplagiat = vkrAntiplagiat;
+        this.vkrPresentation = vkrPresentation;
     }
 
     public int getNirTaskStatus() {
@@ -70,21 +79,5 @@ public class StudentDocumentsStatusView {
 
     public void setPpReportStatus(int ppReportStatus) {
         this.ppReportStatus = ppReportStatus;
-    }
-
-    public int getVkrTask() {
-        return vkrTask;
-    }
-
-    public void setVkrTask(int vkrTask) {
-        this.vkrTask = vkrTask;
-    }
-
-    public int getVkrReport() {
-        return vkrReport;
-    }
-
-    public void setVkrReport(int vkrReport) {
-        this.vkrReport = vkrReport;
     }
 }

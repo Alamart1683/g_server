@@ -280,13 +280,19 @@ public class DocumentViewService {
                     currentView.getDocumentKind().equals("Отчёт")) {
                         Integer userID = currentView.getSystemCreatorID();
                         UsersRoles usersRole;
+                        AssociatedStudents associatedStudents;
                         try {
                             usersRole = usersRolesRepository.findUsersRolesByUserId(userID);
                             if (usersRole.getRoleId() == 1) {
-                                studentsDocumentsList.add(currentView);
+                                associatedStudents = associatedStudentsRepository.
+                                        findByScientificAdvisorAndStudent(advisorID, userID);
+                                if (associatedStudents != null) {
+                                    studentsDocumentsList.add(currentView);
+                                }
                             }
                         } catch (NullPointerException nullPointerException) {
                             usersRole = null;
+                            associatedStudents = null;
                         }
                     }
                 }

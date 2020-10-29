@@ -667,7 +667,8 @@ public class DocumentManagementService {
 
     public StudentDocumentsStatusView getStudentsDocumentStatus(Integer studentID) {
         StudentDocumentsStatusView statusView = new StudentDocumentsStatusView(0, 0,
-                0, 0, 0, 0, 0, 0);
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0);
         Document nirTask;
         Document nirReport;
         // TODO Сделать обработку остальных документов когда они появятся
@@ -695,7 +696,8 @@ public class DocumentManagementService {
             return statusView;
         } catch (NullPointerException nullPointerException) {
             return new StudentDocumentsStatusView(-1, -1, -1,
-                    -1, -1, -1, -1, -1);
+                    -1, -1, -1, -1, -1, -1,
+                    -1, -1, -1);
         }
     }
 }
