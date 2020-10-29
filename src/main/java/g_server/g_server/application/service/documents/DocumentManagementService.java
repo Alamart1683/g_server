@@ -5,6 +5,7 @@ import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.entity.documents.ViewRightsProject;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.AssociatedStudents;
+import g_server.g_server.application.entity.view.StudentDocumentsStatusView;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
@@ -482,7 +483,8 @@ public class DocumentManagementService {
             documentVersion = documentVersionRepository.findById(versionID).get();
             if (studentID != null) {
                 if (documentVersion.getEditor() == studentID) {
-                    if (documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                    if (documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")
+                    || documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Замечания")) {
                         File deleteFile = new File(documentVersion.getThis_version_document_path());
                         deleteFile.delete();
                         documentVersionRepository.delete(documentVersion);
@@ -512,7 +514,8 @@ public class DocumentManagementService {
                         associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
                 if (associatedStudent != null) {
                     if (documentVersion.getEditor() == advisorID &&
-                            documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")
+                            || documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Замечания")) {
                         File deleteFile = new File(documentVersion.getThis_version_document_path());
                         deleteFile.delete();
                         documentVersionRepository.delete(documentVersion);
@@ -611,7 +614,8 @@ public class DocumentManagementService {
             documentVersion = documentVersionRepository.findById(versionID).get();
             if (studentID != null) {
                 if (documentVersion.getEditor() == studentID) {
-                    if (documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                    if (documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")
+                    || documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Замечания")) {
                         File deleteFile = new File(documentVersion.getThis_version_document_path());
                         deleteFile.delete();
                         documentVersionRepository.delete(documentVersion);
@@ -641,7 +645,8 @@ public class DocumentManagementService {
                         associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
                 if (associatedStudent != null) {
                     if (documentVersion.getEditor() == advisorID &&
-                            documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            (documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")
+                            || documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Замечания"))) {
                         File deleteFile = new File(documentVersion.getThis_version_document_path());
                         deleteFile.delete();
                         documentVersionRepository.delete(documentVersion);
@@ -657,6 +662,40 @@ public class DocumentManagementService {
             }
         } catch (NoSuchElementException noSuchElementException) {
             return "Версия отчета не найдена";
+        }
+    }
+
+    public StudentDocumentsStatusView getStudentsDocumentStatus(Integer studentID) {
+        StudentDocumentsStatusView statusView = new StudentDocumentsStatusView(0, 0,
+                0, 0, 0, 0, 0, 0);
+        Document nirTask;
+        Document nirReport;
+        // TODO Сделать обработку остальных документов когда они появятся
+        try {
+            if (documentRepository.findByTypeAndKindAndCreator(1, 2, studentID).size() == 1) {
+                nirTask = documentRepository.findByTypeAndKindAndCreator(1, 2, studentID).get(0);
+                List<DocumentVersion> nirTaskVersions = documentVersionRepository.findByDocument(nirTask.getId());
+                // Пройдем по версиям задания студента
+                for (DocumentVersion nirTaskVersion : nirTaskVersions) {
+                    if (nirTaskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setNirTaskStatus(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(1, 3, studentID).size() == 1) {
+                nirReport = documentRepository.findByTypeAndKindAndCreator(1, 3, studentID).get(0);
+                List<DocumentVersion> nirReportVersions = documentVersionRepository.findByDocument(nirReport.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion nirReportVersion: nirReportVersions) {
+                    if (nirReportVersion.getNirReport().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setNirReportStatus(1);
+                    }
+                }
+            }
+            return statusView;
+        } catch (NullPointerException nullPointerException) {
+            return new StudentDocumentsStatusView(-1, -1, -1,
+                    -1, -1, -1, -1, -1);
         }
     }
 }

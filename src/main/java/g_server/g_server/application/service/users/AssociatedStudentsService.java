@@ -22,6 +22,7 @@ import g_server.g_server.application.repository.users.AssociatedStudentsReposito
 import g_server.g_server.application.repository.users.StudentDataRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
+import g_server.g_server.application.service.documents.DocumentManagementService;
 import g_server.g_server.application.service.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,6 +75,9 @@ public class AssociatedStudentsService {
 
     @Autowired
     private DocumentRepository documentRepository;
+
+    @Autowired
+    private DocumentManagementService documentManagementService;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -297,7 +301,9 @@ public class AssociatedStudentsService {
                             currentStudent, currentTheme,
                             associatedStudent.getId(),
                             associatedStudent.getStudentUser().getPhone(),
-                            associatedStudent.getStudentUser().getEmail());
+                            associatedStudent.getStudentUser().getEmail(),
+                            documentManagementService.getStudentsDocumentStatus(studentID)
+                            );
                     associatedStudentViewWithoutProjects.add(associatedStudentViewWithoutProject);
                 }
             }
@@ -562,7 +568,8 @@ public class AssociatedStudentsService {
                                 project.getProjectTheme().getTheme(),
                                 student.getId(),
                                 student.getPhone(),
-                                student.getEmail()
+                                student.getEmail(),
+                                documentManagementService.getStudentsDocumentStatus(student.getId())
                         );
                         occupiedStudentViews.add(currentStudentView);
                     }
@@ -593,7 +600,8 @@ public class AssociatedStudentsService {
                                     advisorProject.getProjectTheme().getTheme(),
                                     student.getId(),
                                     student.getPhone(),
-                                    student.getEmail()
+                                    student.getEmail(),
+                                    documentManagementService.getStudentsDocumentStatus(student.getId())
                             );
                             occupiedStudentViews.add(currentStudentView);
                         }
