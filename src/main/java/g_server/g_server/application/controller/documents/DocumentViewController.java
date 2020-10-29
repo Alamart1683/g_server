@@ -20,8 +20,22 @@ public class DocumentViewController {
     private DocumentViewService documentViewService;
 
     @GetMapping("/document/view")
-    public List<DocumentView> GetDocumentView(HttpServletRequest httpServletRequest) {
+    public List<DocumentView> getDocumentView(HttpServletRequest httpServletRequest) {
         return documentViewService.getUserDocumentView(getTokenFromRequest(httpServletRequest));
+    }
+
+    @GetMapping("/document/view/orders")
+    public List<DocumentView> getOrdersView(HttpServletRequest httpServletRequest) {
+        return documentViewService.getOrders(getTokenFromRequest(httpServletRequest));
+    }
+    @GetMapping("/document/view/templates")
+    public List<DocumentView> getTemplatesView(HttpServletRequest httpServletRequest) {
+        return documentViewService.getTemplates(getTokenFromRequest(httpServletRequest));
+    }
+
+    @GetMapping("/scientific_advisor/document/view/students")
+    public List<DocumentView> getStudentsDocumentView(HttpServletRequest httpServletRequest) {
+        return documentViewService.getAdvisorStudentsDocuments(getTokenFromRequest(httpServletRequest));
     }
 
     @GetMapping("/student/document/task/view")

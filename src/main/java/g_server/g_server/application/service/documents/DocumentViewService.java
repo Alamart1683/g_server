@@ -7,6 +7,7 @@ import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.users.UsersRoles;
 import g_server.g_server.application.entity.view.DocumentVersionView;
 import g_server.g_server.application.entity.view.DocumentView;
 import g_server.g_server.application.entity.view.ReportVersionDocumentView;
@@ -263,6 +264,76 @@ public class DocumentViewService {
             }
         }
         return documentViewList;
+    }
+
+    // Сформировать список документов студентов научного рукводителя
+    public List<DocumentView> getAdvisorStudentsDocuments(String token) {
+        Integer advisorID = associatedStudentsService.getUserId(token);
+        Users advisor;
+        try {
+            advisor = usersService.findById(advisorID).get();
+            List<DocumentView> allDocumentViewList = getAdminDocumentView(advisor);
+            List<DocumentView> studentsDocumentsList = new ArrayList<>();
+            if (allDocumentViewList != null) {
+                for (DocumentView currentView: allDocumentViewList) {
+                    if (currentView.getDocumentKind().equals("Задание") ||
+                    currentView.getDocumentKind().equals("Отчёт")) {
+                        Integer userID = currentView.getSystemCreatorID();
+                        UsersRoles usersRole;
+                        try {
+                            usersRole = usersRolesRepository.findUsersRolesByUserId(userID);
+                            if (usersRole.getRoleId() == 1) {
+                                studentsDocumentsList.add(currentView);
+                            }
+                        } catch (NullPointerException nullPointerException) {
+                            usersRole = null;
+                        }
+                    }
+                }
+                return studentsDocumentsList;
+            } else {
+                return null;
+            }
+        } catch (NoSuchElementException noSuchElementException) {
+            return null;
+        }
+    }
+
+    // Сформировать список приказов
+    public List<DocumentView> getOrders(String token) {
+        List<DocumentView> allDocumentViewList = getUserDocumentView(token);
+        List<DocumentView> orderList = new ArrayList<>();
+        if (allDocumentViewList != null) {
+            for (DocumentView currentView: allDocumentViewList) {
+                if (currentView.getDocumentKind().equals("Приказ")) {
+                    orderList.add(currentView);
+                }
+            }
+        }
+        return orderList;
+    }
+
+    // Сформировать список шаблонов
+    public List<DocumentView> getTemplates(String token) {
+        List<DocumentView> allDocumentViewList = getUserDocumentView(token);
+        List<DocumentView> templatesList = new ArrayList<>();
+        if (allDocumentViewList != null) {
+            for (DocumentView currentView: allDocumentViewList) {
+                if (currentView.getDocumentKind().equals("Задание")) {
+                    Integer headID = currentView.getSystemCreatorID();
+                    UsersRoles userRole;
+                    try {
+                        userRole = usersRolesRepository.findUsersRolesByUserId(headID);
+                        if (userRole.getRoleId() == 3) {
+                            templatesList.add(currentView);
+                        }
+                    } catch (NullPointerException nullPointerException) {
+                        userRole = null;
+                    }
+                }
+            }
+        }
+        return templatesList;
     }
 
     // Сформировать список видимых документов для админа и выше
