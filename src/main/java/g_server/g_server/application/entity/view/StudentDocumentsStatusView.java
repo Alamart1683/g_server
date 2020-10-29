@@ -80,4 +80,52 @@ public class StudentDocumentsStatusView {
     public void setPpReportStatus(int ppReportStatus) {
         this.ppReportStatus = ppReportStatus;
     }
+
+    public int getVkrAdvisorFeedback() {
+        return vkrAdvisorFeedback;
+    }
+
+    public void setVkrAdvisorFeedback(int vkrAdvisorFeedback) {
+        this.vkrAdvisorFeedback = vkrAdvisorFeedback;
+    }
+
+    public int getVkrAllowance() {
+        return vkrAllowance;
+    }
+
+    public void setVkrAllowance(int vkrAllowance) {
+        this.vkrAllowance = vkrAllowance;
+    }
+
+    public int getVkrTask() {
+        return vkrTask;
+    }
+
+    public void setVkrTask(int vkrTask) {
+        this.vkrTask = vkrTask;
+    }
+
+    public int getVkrRPZ() {
+        return vkrRPZ;
+    }
+
+    public void setVkrRPZ(int vkrRPZ) {
+        this.vkrRPZ = vkrRPZ;
+    }
+
+    public int getVkrAntiplagiat() {
+        return vkrAntiplagiat;
+    }
+
+    public void setVkrAntiplagiat(int vkrAntiplagiat) {
+        this.vkrAntiplagiat = vkrAntiplagiat;
+    }
+
+    public int getVkrPresentation() {
+        return vkrPresentation;
+    }
+
+    public void setVkrPresentation(int vkrPresentation) {
+        this.vkrPresentation = vkrPresentation;
+    }
 }
