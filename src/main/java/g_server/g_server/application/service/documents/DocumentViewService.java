@@ -1,17 +1,12 @@
 package g_server.g_server.application.service.documents;
 
-import g_server.g_server.application.entity.documents.Document;
-import g_server.g_server.application.entity.documents.DocumentVersion;
-import g_server.g_server.application.entity.documents.ViewRightsProject;
+import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.users.UsersRoles;
-import g_server.g_server.application.entity.view.DocumentVersionView;
-import g_server.g_server.application.entity.view.DocumentView;
-import g_server.g_server.application.entity.view.ReportVersionDocumentView;
-import g_server.g_server.application.entity.view.TaskDocumentVersionView;
+import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
@@ -267,13 +262,13 @@ public class DocumentViewService {
     }
 
     // Сформировать список документов студентов научного рукводителя
-    public List<DocumentView> getAdvisorStudentsDocuments(String token) {
+    public List<AdvisorsStudentDocumentView> getAdvisorStudentsDocuments(String token) {
         Integer advisorID = associatedStudentsService.getUserId(token);
         Users advisor;
         try {
             advisor = usersService.findById(advisorID).get();
             List<DocumentView> allDocumentViewList = getAdminDocumentView(advisor);
-            List<DocumentView> studentsDocumentsList = new ArrayList<>();
+            List<AdvisorsStudentDocumentView> studentsDocumentsList = new ArrayList<>();
             if (allDocumentViewList != null) {
                 for (DocumentView currentView: allDocumentViewList) {
                     if (currentView.getDocumentKind().equals("Задание") ||
@@ -287,7 +282,27 @@ public class DocumentViewService {
                                 associatedStudents = associatedStudentsRepository.
                                         findByScientificAdvisorAndStudent(advisorID, userID);
                                 if (associatedStudents != null) {
-                                    studentsDocumentsList.add(currentView);
+                                    if (currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Задание")) {
+                                        Document currentTask = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentTaskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                                        List<TaskDocumentVersionView> currentTaskVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentTaskVersion: currentTaskVersions) {
+                                            NirTask currentNirTask = nirTaskRepository.findByVersionID(currentTaskVersion.getId());
+                                            currentTaskVersionsView.add(new TaskDocumentVersionView(currentTaskVersion, currentNirTask));
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentTask, currentTaskVersionsView, null));
+                                    } else if ((currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Отчёт"))) {
+                                        Document currentReport = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentReportVersions = documentVersionRepository.findByDocument(currentReport.getId());
+                                        List<ReportVersionDocumentView> currentReportVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentReportVersion: currentReportVersions) {
+                                            NirReport currentNirReport = nirReportRepository.findByVersionID(currentReportVersion.getId());
+                                            currentReportVersionsView.add(new ReportVersionDocumentView(currentReportVersion, currentNirReport));
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentReport, null, currentReportVersionsView));
+                                    }
                                 }
                             }
                         } catch (NullPointerException nullPointerException) {

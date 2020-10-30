@@ -1,5 +1,6 @@
 package g_server.g_server.application.controller.documents;
 
+import g_server.g_server.application.entity.view.AdvisorsStudentDocumentView;
 import g_server.g_server.application.entity.view.DocumentView;
 import g_server.g_server.application.entity.view.ReportVersionDocumentView;
 import g_server.g_server.application.entity.view.TaskDocumentVersionView;
@@ -34,7 +35,7 @@ public class DocumentViewController {
     }
 
     @GetMapping("/scientific_advisor/document/view/students")
-    public List<DocumentView> getStudentsDocumentView(HttpServletRequest httpServletRequest) {
+    public List<AdvisorsStudentDocumentView> getStudentsDocumentView(HttpServletRequest httpServletRequest) {
         return documentViewService.getAdvisorStudentsDocuments(getTokenFromRequest(httpServletRequest));
     }
 
