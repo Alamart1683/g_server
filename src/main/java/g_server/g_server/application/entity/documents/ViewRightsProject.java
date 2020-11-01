@@ -4,6 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "project_document")
+// Класс таблицы привзяки области видимости документа к конкретному проекту
 public class ViewRightsProject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

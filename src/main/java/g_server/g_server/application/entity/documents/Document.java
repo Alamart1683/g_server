@@ -1,8 +1,10 @@
 package g_server.g_server.application.entity.documents;
 
+import g_server.g_server.application.entity.users.Roles;
 import g_server.g_server.application.entity.users.Users;
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "document")

@@ -63,6 +63,9 @@ public class DocumentViewService {
     @Autowired
     private NirReportRepository nirReportRepository;
 
+    @Autowired
+    private ViewRightsAreaRepository viewRightsAreaRepository;
+
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
@@ -94,6 +97,7 @@ public class DocumentViewService {
                     return true;
                 }
                 else if (documentView == 6) {
+                    /** @deprecated  Старый функционал для обеспечения видимости документов конкретного проекта
                     Integer documentID = document.getId();
                     ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(documentID);
                     List<OccupiedStudents> occupiedStudents =
@@ -101,6 +105,16 @@ public class DocumentViewService {
                     for (OccupiedStudents occupiedStudent: occupiedStudents) {
                         if (occupiedStudent.getStudentID() == student.getId()) {
                             return true;
+                        }
+                    }
+                    **/
+                    ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocumentAndArea(document.getId(), student.getId());
+                    if (viewRightsArea != null) {
+                        AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(student.getId());
+                        if (associatedStudent != null) {
+                            if (associatedStudent.getArea() == viewRightsArea.getArea()) {
+                                return true;
+                            }
                         }
                     }
                     return false;
@@ -144,7 +158,7 @@ public class DocumentViewService {
             // TODO для научных руководителей и заведующего кафедрой
             if (documentView > 0 || documentView < 8) {
                 // Если документ может видеть только его создатель или документ привязан к проекту и
-                // его может видеть созадтель проекта
+                // его может видеть создатель проектной области
                 if (documentView == 1 || documentView == 6) {
                     // Если желающий увидеть документ НР сам его загрузил
                     if (lookingAdvisor.getId() == documentCreator.getId()) {

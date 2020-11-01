@@ -3,8 +3,8 @@ package g_server.g_server.application.entity.project;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "project_theme")
-public class ProjectTheme {
+@Table(name = "project_area")
+public class ProjectArea {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -12,12 +12,12 @@ public class ProjectTheme {
     @Column(name = "advisor")
     private int advisor;
 
-    @Column(name = "theme")
+    @Column(name = "area")
     private String theme;
 
-    public ProjectTheme() { }
+    public ProjectArea() { }
 
-    public ProjectTheme(Integer advisor, String theme) {
+    public ProjectArea(Integer advisor, String theme) {
         this.advisor = advisor;
         this.theme = theme;
     }

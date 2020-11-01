@@ -2,21 +2,18 @@ package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
-import g_server.g_server.application.entity.documents.DocumentKind;
 import g_server.g_server.application.entity.documents.OrderProperties;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
-import g_server.g_server.application.entity.project.ProjectTheme;
+import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.*;
 import g_server.g_server.application.entity.view.*;
-import g_server.g_server.application.repository.documents.DocumentKindRepository;
 import g_server.g_server.application.repository.documents.DocumentRepository;
-import g_server.g_server.application.repository.documents.DocumentTypeRepository;
 import g_server.g_server.application.repository.documents.OrderPropertiesRepository;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
-import g_server.g_server.application.repository.project.ProjectThemeRepository;
+import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.StudentDataRepository;
@@ -50,7 +47,7 @@ public class AssociatedStudentsService {
     private MailService mailService;
 
     @Autowired
-    private ProjectThemeRepository projectThemeRepository;
+    private ProjectAreaRepository projectAreaRepository;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -92,7 +89,7 @@ public class AssociatedStudentsService {
             messageList.add("Ошибка: получен null вместо int в качестве параметра");
         }
         // Проверка, корректно ли указана тема ВКР
-        if (projectThemeRepository.findByThemeAndAdvisor(theme, scientificAdvisorId) == null) {
+        if (projectAreaRepository.findByThemeAndAdvisor(theme, scientificAdvisorId) == null) {
             messageList.add("Ошибка: желаемая тема ВКР указана некорректно");
         }
         // Формирование и отправка заявки
@@ -130,7 +127,7 @@ public class AssociatedStudentsService {
             if (messageList.size() == 0) {
                 // Сформируем заявку
                 AssociatedStudents associatedStudent = new AssociatedStudents(scientificAdvisorId, student_id,
-                        projectThemeRepository.findByThemeAndAdvisor(theme, scientificAdvisorId).getId(), false);
+                        projectAreaRepository.findByThemeAndAdvisor(theme, scientificAdvisorId).getId(), false);
                 // Сохраним заявку
                 associatedStudentsRepository.save(associatedStudent);
                 // Сгенерируем её уникальный идентификатор
@@ -271,7 +268,7 @@ public class AssociatedStudentsService {
         return null;
     }
 
-    // Показать список студентов данного научного рукводителя, которые не участвуют в проектах
+    // Показать список студентов данного научного руководителя, которые не участвуют в проектах
     public List<AssociatedStudentViewWithoutProject> getStudentsWithoutProject(String token) {
         Integer scientificAdvisorId = getUserId(token);
         List<AssociatedStudentView> activeStudents = new ArrayList<>();
@@ -502,10 +499,10 @@ public class AssociatedStudentsService {
             List<AssociatedStudents> associatedStudents = new ArrayList<>();
             List<AssociatedStudents> associatedStudentsRaw =
                     associatedStudentsRepository.findByScientificAdvisor(currentAdvisorData.getId());
-            List<ProjectTheme> projectThemesRaw = projectThemeRepository.findByAdvisor(currentAdvisorData.getId());
+            List<ProjectArea> projectThemesRaw = projectAreaRepository.findByAdvisor(currentAdvisorData.getId());
             List<String> projectThemes = new ArrayList<>();
-            for (ProjectTheme projectThemeRaw: projectThemesRaw) {
-                projectThemes.add(projectThemeRaw.getTheme());
+            for (ProjectArea projectAreaRaw : projectThemesRaw) {
+                projectThemes.add(projectAreaRaw.getTheme());
             }
             for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
                 if (associatedStudentRaw.isAccepted()) {
@@ -565,7 +562,7 @@ public class AssociatedStudentsService {
                         // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
                         AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
                                 student,
-                                project.getProjectTheme().getTheme(),
+                                project.getProjectArea().getTheme(),
                                 student.getId(),
                                 student.getPhone(),
                                 student.getEmail(),
@@ -577,7 +574,7 @@ public class AssociatedStudentsService {
                             projectID,
                             advisor.getId(),
                             project.getName(),
-                            project.getProjectTheme().getTheme(),
+                            project.getProjectArea().getTheme(),
                             advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name(),
                             occupiedStudentViews
                     );
@@ -597,7 +594,7 @@ public class AssociatedStudentsService {
                             // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
                             AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
                                     student,
-                                    advisorProject.getProjectTheme().getTheme(),
+                                    advisorProject.getProjectArea().getTheme(),
                                     student.getId(),
                                     student.getPhone(),
                                     student.getEmail(),
@@ -609,7 +606,7 @@ public class AssociatedStudentsService {
                                 advisorProject.getId(),
                                 userID,
                                 advisorProject.getName(),
-                                advisorProject.getProjectTheme().getTheme(),
+                                advisorProject.getProjectArea().getTheme(),
                                 user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
                                 occupiedStudentViews
                         );
@@ -701,7 +698,9 @@ public class AssociatedStudentsService {
         }
     }
 
-    // TODO Сделать смену темы студента
+    // TODO Сделать назначение области проекта студенту
+
+    // TODO Сделать создание области проекта преподавателем
 
     // Получение списка имен проектов конкретного НР
     public List<String> getAdvisorProjectNames(String token) {

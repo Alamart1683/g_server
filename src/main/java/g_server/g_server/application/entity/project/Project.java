@@ -10,7 +10,7 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "type")
+    @Column(name = "area")
     private int type;
 
     @Column(name = "name")
@@ -23,8 +23,8 @@ public class Project {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "type", insertable = false, updatable = false)
-    private ProjectTheme projectTheme;
+    @JoinColumn(name = "area", insertable = false, updatable = false)
+    private ProjectArea projectArea;
 
     @ManyToOne
     @JoinColumn(name = "scientific_advisor_id", insertable = false, updatable = false)
@@ -79,12 +79,12 @@ public class Project {
         this.description = description;
     }
 
-    public ProjectTheme getProjectTheme() {
-        return projectTheme;
+    public ProjectArea getProjectArea() {
+        return projectArea;
     }
 
-    public void setProjectTheme(ProjectTheme projectTheme) {
-        this.projectTheme = projectTheme;
+    public void setProjectArea(ProjectArea projectArea) {
+        this.projectArea = projectArea;
     }
 
     public ScientificAdvisorData getScientificAdvisorData() {

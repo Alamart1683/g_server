@@ -65,20 +65,20 @@ create table student_data (
     foreign key (student_group) references student_group (id)
 );
 
-create table project_theme (
+create table project_area (
     id int primary key auto_increment,
     advisor int not null,
-    theme varchar (256),
+    area varchar (256),
     foreign key (advisor) references scientific_advisor_data (id) on delete cascade on update cascade
 );
 
 create table project (
     id int primary key auto_increment,
-    type int not null,
+    area int not null,
     name varchar (100),
     scientific_advisor_id int not null,
     description varchar(512) default 'Описание отсутствует',
-    foreign key (type) references project_theme (id),
+    foreign key (area) references project_area (id),
     foreign key (scientific_advisor_id) references scientific_advisor_data (id) on delete cascade on update cascade
 );
 
@@ -90,7 +90,7 @@ create table associated_students (
     is_accepted bool not null default false,
     foreign key (scientific_advisor) references users (id) on delete cascade on update cascade,
     foreign key (student) references users (id) on delete cascade on update cascade,
-    foreign key (theme) references project_theme (id)
+    foreign key (theme) references project_area (id)
 );
 
 create table occupied_students (
@@ -211,6 +211,14 @@ create table nir_report (
     foreign key (nir_report_status) references  document_status (id)
 );
 
+create table area_document (
+  id int primary key auto_increment,
+  document int not null,
+  area int not null,
+  foreign key (area) references project_area (id) on delete cascade on update cascade,
+  foreign key (document) references document (id) on delete cascade on update cascade
+);
+
 insert into document_status (status) values
     ('Не отправлено'),
     ('Одобрено'),
@@ -270,13 +278,14 @@ insert into student_data values
     ('9', '4', '1', '1');
 
 insert into scientific_advisor_data values
+    ('1', '1', '0'),
     ('2', '1', '8'),
     ('3', '1', '10'),
     ('4', '1', '15'),
     ('5', '1', '3');
 
-insert into project_theme values
-(1, 2, 'Заглушка тем проекта для будущей реализации проектов');
+insert into project_area values
+(1, 0, 'Заглушка тем проекта для будущей реализации проектов');
 
 insert into associated_students values
     (1, 2, 7, 1, 1),

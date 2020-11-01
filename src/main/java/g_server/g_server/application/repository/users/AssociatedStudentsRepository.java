@@ -26,5 +26,5 @@ public interface AssociatedStudentsRepository extends JpaRepository<AssociatedSt
 
     AssociatedStudents findByScientificAdvisorAndStudent(int scientificAdvisorId, int studentId);
 
-    boolean existsByTheme(Integer themeID);
+    boolean existsByArea(Integer areaID);
 }

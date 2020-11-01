@@ -5,7 +5,7 @@ import g_server.g_server.application.entity.forms.ProjectForm;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.project.ProjectRepository;
-import g_server.g_server.application.repository.project.ProjectThemeRepository;
+import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class ProjectService {
     private UsersRepository usersRepository;
 
     @Autowired
-    private ProjectThemeRepository projectThemeRepository;
+    private ProjectAreaRepository projectAreaRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -36,7 +36,7 @@ public class ProjectService {
         }
         Integer themeID;
         try {
-            themeID = projectThemeRepository.findByThemeAndAdvisor(projectForm.getProjectTheme(), advisorID).getId();
+            themeID = projectAreaRepository.findByThemeAndAdvisor(projectForm.getProjectTheme(), advisorID).getId();
         } catch (Exception e) {
             themeID = null;
         }
@@ -156,7 +156,7 @@ public class ProjectService {
         if (projectID == null) {
             messageList.add("Проект не найден");
         }
-        if (projectThemeRepository.findByThemeAndAdvisor(newTheme, advisorID) == null) {
+        if (projectAreaRepository.findByThemeAndAdvisor(newTheme, advisorID) == null) {
             messageList.add("Тема не найдена");
         }
         Project project = null;
@@ -167,7 +167,7 @@ public class ProjectService {
                 messageList.add("Вы не можете изменить тему проекта другого научного руководителя");
             }
             else {
-                project.setType(projectThemeRepository.findByThemeAndAdvisor(newTheme, advisorID).getId());
+                project.setType(projectAreaRepository.findByThemeAndAdvisor(newTheme, advisorID).getId());
                 projectRepository.save(project);
                 messageList.add("Тема проекта успешно изменена");
             }

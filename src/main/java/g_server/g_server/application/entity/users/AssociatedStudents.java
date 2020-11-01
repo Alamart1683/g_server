@@ -1,6 +1,6 @@
 package g_server.g_server.application.entity.users;
 
-import g_server.g_server.application.entity.project.ProjectTheme;
+import g_server.g_server.application.entity.project.ProjectArea;
 
 import javax.persistence.*;
 
@@ -17,8 +17,8 @@ public class AssociatedStudents {
     @Column(name = "student")
     private int student;
 
-    @Column(name = "theme")
-    private int theme;
+    @Column(name = "area")
+    private int area;
 
     @Column(name = "is_accepted")
     private boolean Accepted;
@@ -32,15 +32,15 @@ public class AssociatedStudents {
     private Users studentUser;
 
     @ManyToOne
-    @JoinColumn(name = "theme", referencedColumnName = "id", insertable = false, updatable = false)
-    private ProjectTheme projectTheme;
+    @JoinColumn(name = "area", referencedColumnName = "id", insertable = false, updatable = false)
+    private ProjectArea projectArea;
 
     public AssociatedStudents() { }
 
     public AssociatedStudents(int scientificAdvisor, int student, int theme, boolean Accepted) {
         this.scientificAdvisor = scientificAdvisor;
         this.student = student;
-        this.theme = theme;
+        this.area = theme;
         this.Accepted = Accepted;
     }
 
@@ -68,12 +68,12 @@ public class AssociatedStudents {
         this.student = student;
     }
 
-    public int getTheme() {
-        return theme;
+    public int getArea() {
+        return area;
     }
 
-    public void setTheme(int theme) {
-        this.theme = theme;
+    public void setArea(int theme) {
+        this.area = theme;
     }
 
     public boolean isAccepted() {
@@ -84,12 +84,12 @@ public class AssociatedStudents {
         Accepted = accepted;
     }
 
-    public ProjectTheme getProjectTheme() {
-        return projectTheme;
+    public ProjectArea getProjectTheme() {
+        return projectArea;
     }
 
-    public void setProjectTheme(ProjectTheme projectTheme) {
-        this.projectTheme = projectTheme;
+    public void setProjectTheme(ProjectArea projectArea) {
+        this.projectArea = projectArea;
     }
 
     public Users getAdvisorUser() {

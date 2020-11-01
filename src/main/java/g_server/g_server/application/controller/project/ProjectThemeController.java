@@ -1,6 +1,6 @@
 package g_server.g_server.application.controller.project;
 
-import g_server.g_server.application.service.project.ProjectThemeService;
+import g_server.g_server.application.service.project.ProjectAreaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +10,7 @@ import static org.springframework.util.StringUtils.hasText;
 @RestController
 public class ProjectThemeController {
     @Autowired
-    private ProjectThemeService projectThemeService;
+    private ProjectAreaService projectThemeService;
 
     @GetMapping("/scientific_advisor/project/theme/all")
     public List<String> getAll(HttpServletRequest httpServletRequest) {

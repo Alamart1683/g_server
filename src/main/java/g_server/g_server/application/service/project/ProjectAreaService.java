@@ -1,10 +1,10 @@
 package g_server.g_server.application.service.project;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.project.ProjectTheme;
+import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.project.ProjectRepository;
-import g_server.g_server.application.repository.project.ProjectThemeRepository;
+import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ProjectThemeService {
+public class ProjectAreaService {
     @Autowired
-    private ProjectThemeRepository projectThemeRepository;
+    private ProjectAreaRepository projectThemeRepository;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -37,12 +37,12 @@ public class ProjectThemeService {
             messageList.add("ID научного руководителя не найден");
         }
         if (messageList.size() == 0) {
-            ProjectTheme isFree = projectThemeRepository.findByThemeAndAdvisor(theme, advisorID);
+            ProjectArea isFree = projectThemeRepository.findByThemeAndAdvisor(theme, advisorID);
             if (isFree != null) {
                 messageList.add("Тема с таким именем уже существует");
             }
             else {
-                projectThemeRepository.save(new ProjectTheme(advisorID, theme));
+                projectThemeRepository.save(new ProjectArea(advisorID, theme));
                 messageList.add("Тема успешно добавлена");
             }
         }
@@ -58,7 +58,7 @@ public class ProjectThemeService {
         }
         if (messageList.size() == 0) {
             for (String theme: themes) {
-                ProjectTheme newTheme = new ProjectTheme(advisorID, theme);
+                ProjectArea newTheme = new ProjectArea(advisorID, theme);
                 projectThemeRepository.save(newTheme);
             }
             messageList.add("Темы были успешно добавлены");
@@ -74,9 +74,9 @@ public class ProjectThemeService {
             messageList.add("ID научного руководителя не найден");
         }
         if (messageList.size() == 0) {
-            ProjectTheme changingTheme = projectThemeRepository.findByThemeAndAdvisor(oldTheme, advisorID);
+            ProjectArea changingTheme = projectThemeRepository.findByThemeAndAdvisor(oldTheme, advisorID);
             if (changingTheme != null) {
-                ProjectTheme isFree = projectThemeRepository.findByThemeAndAdvisor(newTheme, advisorID);
+                ProjectArea isFree = projectThemeRepository.findByThemeAndAdvisor(newTheme, advisorID);
                 if (isFree != null) {
                     messageList.add("Тема с таким именем уже существует");
                 }
@@ -101,10 +101,10 @@ public class ProjectThemeService {
             messageList.add("ID научного руководителя не найден");
         }
         if (messageList.size() == 0) {
-            ProjectTheme deletingTheme = projectThemeRepository.findByThemeAndAdvisor(theme, advisorID);
+            ProjectArea deletingTheme = projectThemeRepository.findByThemeAndAdvisor(theme, advisorID);
             if (deletingTheme != null) {
                 if (projectRepository.existsByType(deletingTheme.getId()) ||
-                        associatedStudentsRepository.existsByTheme(deletingTheme.getId())) {
+                        associatedStudentsRepository.existsByArea(deletingTheme.getId())) {
                     messageList.add("Невозможно удалить данную тему, так как она уже задействована");
                 }
                 else {
@@ -122,12 +122,12 @@ public class ProjectThemeService {
     // Получить список тем для научного руководителя
     public List<String> getAll(String token) {
         List<String> projectThemes = new ArrayList<>();
-        List<ProjectTheme> projectThemesRaw = new ArrayList<>();
+        List<ProjectArea> projectThemesRaw = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID != null) {
             projectThemesRaw = projectThemeRepository.findByAdvisor(advisorID);
-            for (ProjectTheme projectThemeRaw: projectThemesRaw) {
-                projectThemes.add(projectThemeRaw.getTheme());
+            for (ProjectArea projectAreaRaw : projectThemesRaw) {
+                projectThemes.add(projectAreaRaw.getTheme());
             }
         }
         return projectThemes;

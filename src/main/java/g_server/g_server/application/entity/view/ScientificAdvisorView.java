@@ -1,6 +1,5 @@
 package g_server.g_server.application.entity.view;
 
-import g_server.g_server.application.entity.project.ProjectTheme;
 import java.util.List;
 
 // Представление научного руководителя для отправки заявки студенту
