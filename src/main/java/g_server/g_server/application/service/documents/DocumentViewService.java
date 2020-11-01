@@ -297,29 +297,37 @@ public class DocumentViewService {
                                         findByScientificAdvisorAndStudent(advisorID, userID);
                                 if (associatedStudents != null) {
                                     if (currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Задание")) {
-                                        Document currentTask = documentRepository.findByCreatorAndName(
+                                        Document currentNirTaskDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
-                                        List<DocumentVersion> currentTaskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                                        List<DocumentVersion> currentNirTaskVersions = documentVersionRepository.findByDocument(currentNirTaskDocument.getId());
                                         List<TaskDocumentVersionView> currentTaskVersionsView = new ArrayList<>();
-                                        for (DocumentVersion currentTaskVersion: currentTaskVersions) {
-                                            NirTask currentNirTask = nirTaskRepository.findByVersionID(currentTaskVersion.getId());
+                                        for (DocumentVersion currentNirTaskVersion: currentNirTaskVersions) {
+                                            NirTask currentNirTask = nirTaskRepository.findByVersionID(currentNirTaskVersion.getId());
+                                            if (currentNirTask.getDocumentStatus().getStatus().equals("Не отправлено") &&
+                                                currentNirTaskVersion.getEditor() == advisor.getId()) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentNirTaskVersion, currentNirTask));
+                                            }
                                             if (!currentNirTask.getDocumentStatus().getStatus().equals("Не отправлено")) {
-                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentTaskVersion, currentNirTask));
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentNirTaskVersion, currentNirTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentTask, currentTaskVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirTaskDocument, currentTaskVersionsView, null));
                                     } else if ((currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Отчёт"))) {
-                                        Document currentReport = documentRepository.findByCreatorAndName(
+                                        Document currentNirReportDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
-                                        List<DocumentVersion> currentReportVersions = documentVersionRepository.findByDocument(currentReport.getId());
+                                        List<DocumentVersion> currentNirReportVersions = documentVersionRepository.findByDocument(currentNirReportDocument.getId());
                                         List<ReportVersionDocumentView> currentReportVersionsView = new ArrayList<>();
-                                        for (DocumentVersion currentReportVersion: currentReportVersions) {
-                                            NirReport currentNirReport = nirReportRepository.findByVersionID(currentReportVersion.getId());
-                                            if (!currentNirReport.getDocumentStatus().getStatus().equals("Не отправлено")) {
-                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentReportVersion, currentNirReport));
+                                        for (DocumentVersion currentNirReportVersion: currentNirReportVersions) {
+                                            NirReport currentNirReport = nirReportRepository.findByVersionID(currentNirReportVersion.getId());
+                                            if (currentNirReport.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                    && currentNirReportVersion.getEditor() == advisor.getId()) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentNirReportVersion, currentNirReport));
+                                            }
+                                            else if (!currentNirReport.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentNirReportVersion, currentNirReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentReport, null, currentReportVersionsView));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirReportDocument, null, currentReportVersionsView));
                                     }
                                 }
                             }
