@@ -303,7 +303,9 @@ public class DocumentViewService {
                                         List<TaskDocumentVersionView> currentTaskVersionsView = new ArrayList<>();
                                         for (DocumentVersion currentTaskVersion: currentTaskVersions) {
                                             NirTask currentNirTask = nirTaskRepository.findByVersionID(currentTaskVersion.getId());
-                                            currentTaskVersionsView.add(new TaskDocumentVersionView(currentTaskVersion, currentNirTask));
+                                            if (!currentNirTask.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentTaskVersion, currentNirTask));
+                                            }
                                         }
                                         studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentTask, currentTaskVersionsView, null));
                                     } else if ((currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Отчёт"))) {
@@ -313,7 +315,9 @@ public class DocumentViewService {
                                         List<ReportVersionDocumentView> currentReportVersionsView = new ArrayList<>();
                                         for (DocumentVersion currentReportVersion: currentReportVersions) {
                                             NirReport currentNirReport = nirReportRepository.findByVersionID(currentReportVersion.getId());
-                                            currentReportVersionsView.add(new ReportVersionDocumentView(currentReportVersion, currentNirReport));
+                                            if (!currentNirReport.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentReportVersion, currentNirReport));
+                                            }
                                         }
                                         studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentReport, null, currentReportVersionsView));
                                     }
