@@ -53,6 +53,10 @@ public class Document {
     @JoinColumn(name = "creator_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Users user;
 
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
+    private OrderProperties orderProperties;
+
     public Document() { }
 
     public Document(int creator_id, String name, String document_path,
@@ -169,5 +173,13 @@ public class Document {
 
     public void setDocumentKind(DocumentKind documentKind) {
         this.documentKind = documentKind;
+    }
+
+    public OrderProperties getOrderProperties() {
+        return orderProperties;
+    }
+
+    public void setOrderProperties(OrderProperties orderProperties) {
+        this.orderProperties = orderProperties;
     }
 }

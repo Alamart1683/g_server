@@ -94,13 +94,24 @@ public class DocumentProcessorService {
                 Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
                         .getStudentGroup().getStudentGroup().substring(0, 4));
                 OrderProperties orderProperty;
+                Document documentOrder = null;
                 try {
-                    orderProperty = orderPropertiesRepository.findBySpeciality(speciality.getId());
+                    List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortTaskDataView.getTaskType()), 1);
+                    for (Document order: orderList) {
+                        if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
+                            documentOrder = order;
+                            break;
+                        }
+                    }
+                    if (documentOrder != null) {
+                        orderProperty = documentOrder.getOrderProperties();
+                    } else {
+                        orderProperty = null;
+                    }
                 } catch (NullPointerException nullPointerException) {
                     orderProperty = null;
                 }
                 if (orderProperty != null) {
-                    Document document = documentRepository.findById(orderProperty.getId()).get();
                     Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
                     Users headOfCathedra = usersRepository.findById(
                             usersRolesRepository.findByRoleId(3).getUserId()).get();
@@ -110,7 +121,7 @@ public class DocumentProcessorService {
                             type, kind, headOfCathedra.getId());
                     if (taskList.size() > 0) {
                         TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
-                                advisor,headOfCathedra, document, orderProperty, speciality);
+                                advisor,headOfCathedra, documentOrder, orderProperty, speciality);
                         String studentDocumentsPath = "src" + File.separator + "main" +
                                 File.separator + "resources" + File.separator + "users_documents" +
                                 File.separator + student.getId();
