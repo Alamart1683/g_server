@@ -161,6 +161,12 @@ public class AssociatedUsersController {
         return usersService.getAdvisorDataByStudentToken(getTokenFromRequest(httpServletRequest));
     }
 
+    // Получить даты этапов для всех пользователей
+    @GetMapping("/date/all")
+    public StagesDatesView getStagesDates() {
+        return usersService.getStagesDates();
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

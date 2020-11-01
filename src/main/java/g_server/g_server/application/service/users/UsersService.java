@@ -1,6 +1,7 @@
 package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.forms.AutomaticStudentForm;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
@@ -8,14 +9,16 @@ import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.*;
 import g_server.g_server.application.entity.users.passwords.PasswordGenerator;
 import g_server.g_server.application.entity.view.PersonalStudentView;
+import g_server.g_server.application.entity.view.StagesDatesView;
 import g_server.g_server.application.entity.view.StudentAdvisorView;
+import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.system_data.CathedrasRepository;
 import g_server.g_server.application.repository.system_data.StudentGroupRepository;
 import g_server.g_server.application.repository.system_data.StudentTypeRepository;
 import g_server.g_server.application.repository.users.*;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import g_server.g_server.application.service.documents.DocumentUploadService;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -28,11 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.logging.Logger;
 
 @Service
 public class UsersService implements UserDetailsService {
@@ -74,6 +75,12 @@ public class UsersService implements UserDetailsService {
 
     @Autowired
     private RolesService rolesService;
+
+    @Autowired
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private DocumentUploadService documentUploadService;
 
     @Override
     // Загрузить пользователя по email
@@ -578,5 +585,79 @@ public class UsersService implements UserDetailsService {
             }
         }
         return studentAdvisorView;
+    }
+
+    public StagesDatesView getStagesDates() {
+        StagesDatesView stagesDatesView = new StagesDatesView();
+        List<Document> nirOrders = new ArrayList<>();
+        List<Document> ppppuipdOrders = new ArrayList<>();
+        List<Document> ppOrders = new ArrayList<>();
+        List<Document> vkrOrders = new ArrayList<>();
+        List<Document> orderList = documentRepository.findByKind(1);
+        for (Document currentOrder: orderList) {
+            if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
+                nirOrders.add(currentOrder);
+            } else if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
+                ppppuipdOrders.add(currentOrder);
+            } else if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
+                ppOrders.add(currentOrder);
+            } else if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
+                vkrOrders.add(currentOrder);
+            }
+        }
+        // НИР
+        if (nirOrders.size() > 0) {
+            stagesDatesView.setNirStart(getRussianDate(nirOrders.get(0).getOrderProperties().getStartDate()));
+            stagesDatesView.setNirEnd(getRussianDate(nirOrders.get(0).getOrderProperties().getEndDate()));
+        } else {
+            stagesDatesView.setNirStart("Приказ не вышел");
+            stagesDatesView.setNirEnd("Приказ не вышел");
+        }
+        // ППпПиУПД
+        if (ppppuipdOrders.size() > 0) {
+            stagesDatesView.setPpppuipdStart(getRussianDate(ppppuipdOrders.get(0).getOrderProperties().getStartDate()));
+            stagesDatesView.setPpppuipdEnd(getRussianDate(ppppuipdOrders.get(0).getOrderProperties().getEndDate()));
+        } else {
+            stagesDatesView.setPpppuipdStart("Приказ не вышел");
+            stagesDatesView.setPpppuipdEnd("Приказ не вышел");
+        }
+        // ПП
+        if (ppOrders.size() > 0) {
+            stagesDatesView.setPpStart(getRussianDate(ppOrders.get(0).getOrderProperties().getStartDate()));
+            stagesDatesView.setPpEnd(getRussianDate(ppOrders.get(0).getOrderProperties().getEndDate()));
+        } else {
+            stagesDatesView.setPpStart("Приказ не вышел");
+            stagesDatesView.setPpEnd("Приказ не вышел");
+        }
+        // ВКР
+        if (vkrOrders.size() > 0) {
+            stagesDatesView.setVkrStart(getRussianDate(vkrOrders.get(0).getOrderProperties().getStartDate()));
+            stagesDatesView.setVkrEnd(getRussianDate(vkrOrders.get(0).getOrderProperties().getEndDate()));
+        } else {
+            stagesDatesView.setVkrStart("Приказ не вышел");
+            stagesDatesView.setVkrEnd("Приказ не вышел");
+        }
+        // Текущая дата
+        stagesDatesView.setCurrentDate(getCurrentDate());
+        return stagesDatesView;
+    }
+
+    public String getRussianDate(String date) {
+        String year = date.substring(0, 4);
+        String month = date.substring(5, 7);
+        String day = date.substring(8, 10);
+        return day + "." + month + "." + year;
+    }
+
+    public String getCurrentDate() {
+        ZonedDateTime dateTime = ZonedDateTime.now();
+        String currentDay;
+        if (dateTime.getDayOfMonth() < 10)
+            currentDay = "0" + dateTime.getDayOfMonth();
+        else
+            currentDay = dateTime.getDayOfMonth() + "";
+        String currentDate = currentDay + "." + documentUploadService.monthWordToMonthNumber(dateTime.getMonth().toString()) +
+                "." + dateTime.getYear() + ".";
+        return currentDate;
     }
 }

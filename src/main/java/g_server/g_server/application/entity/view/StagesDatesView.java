@@ -1,7 +1,7 @@
 package g_server.g_server.application.entity.view;
 
 // Класс представления дат этапов учебного процесса
-public class StagesDataView {
+public class StagesDatesView {
     private String nirStart;
     private String nirEnd;
     private String ppppuipdStart;
@@ -10,11 +10,13 @@ public class StagesDataView {
     private String ppEnd;
     private String vkrStart;
     private String vkrEnd;
+    private String currentDate;
 
-    public StagesDataView() { }
+    public StagesDatesView() { }
 
-    public StagesDataView(String nirStart, String nirEnd, String ppppuipdStart,
-                          String ppppuipdEnd, String ppStart, String ppEnd, String vkrStart, String vkrEnd) {
+    public StagesDatesView(String nirStart, String nirEnd, String ppppuipdStart,
+                           String ppppuipdEnd, String ppStart, String ppEnd, String vkrStart,
+                           String vkrEnd, String currentDate) {
         this.nirStart = nirStart;
         this.nirEnd = nirEnd;
         this.ppppuipdStart = ppppuipdStart;
@@ -23,6 +25,7 @@ public class StagesDataView {
         this.ppEnd = ppEnd;
         this.vkrStart = vkrStart;
         this.vkrEnd = vkrEnd;
+        this.currentDate = currentDate;
     }
 
     public String getNirStart() {
@@ -87,5 +90,13 @@ public class StagesDataView {
 
     public void setVkrEnd(String vkrEnd) {
         this.vkrEnd = vkrEnd;
+    }
+
+    public String getCurrentDate() {
+        return currentDate;
+    }
+
+    public void setCurrentDate(String currentDate) {
+        this.currentDate = currentDate;
     }
 }
