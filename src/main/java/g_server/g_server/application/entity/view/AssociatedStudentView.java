@@ -4,6 +4,7 @@ import g_server.g_server.application.entity.users.Users;
 
 // Представление списка студентов научного руководителя
 public class AssociatedStudentView extends AssociatedRequestView {
+    private int systemStudentID;
     private String projectName;
     private String projectArea;
     private String phone;
@@ -12,6 +13,7 @@ public class AssociatedStudentView extends AssociatedRequestView {
 
     public AssociatedStudentView(Users user, int systemID, String projectName, String projectArea,
                                  String phone, String email, StudentDocumentsStatusView statusView) {
+        this.systemStudentID = user.getId();
         this.setSystemID(systemID);
         this.setFIO(user.getSurname() + ' ' + user.getName() + ' ' + user.getSecond_name());
         this.setGroup(user.getStudentData().getStudentGroup().getStudentGroup());
@@ -62,5 +64,13 @@ public class AssociatedStudentView extends AssociatedRequestView {
 
     public void setProjectArea(String projectArea) {
         this.projectArea = projectArea;
+    }
+
+    public int getSystemStudentID() {
+        return systemStudentID;
+    }
+
+    public void setSystemStudentID(int systemStudentID) {
+        this.systemStudentID = systemStudentID;
     }
 }
