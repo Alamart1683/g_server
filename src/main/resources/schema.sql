@@ -282,8 +282,8 @@ insert into scientific_advisor_data values
     ('5', '1', '3');
 
 insert into associated_students values
-    (1, 2, 7, 1, 1),
-    (2, 2, 6, 1, 1);
+    (1, 2, 7, 1),
+    (2, 2, 6, 1);
 
 insert into view_rights (view_right) values
     ('Только я'),
