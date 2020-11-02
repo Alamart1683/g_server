@@ -9,17 +9,15 @@ public class AssociatedRequestView {
     private String group;
     private String type;
     private String cathedra;
-    private String theme;
 
     public AssociatedRequestView() { }
 
-    public AssociatedRequestView(Users users, String theme, int systemID) {
+    public AssociatedRequestView(Users users, int systemID) {
         this.systemID = systemID;
         this.FIO = users.getSurname() + ' ' + users.getName() + ' ' + users.getSecond_name();
         this.group = users.getStudentData().getStudentGroup().getStudentGroup();
         this.type = users.getStudentData().getStudentType().getStudentType();
         this.cathedra = users.getStudentData().getCathedras().getCathedraName();
-        this.theme = theme;
     }
 
     public String getFIO() {
@@ -52,14 +50,6 @@ public class AssociatedRequestView {
 
     public void setCathedra(String cathedra) {
         this.cathedra = cathedra;
-    }
-
-    public String getTheme() {
-        return theme;
-    }
-
-    public void setTheme(String theme) {
-        this.theme = theme;
     }
 
     public int getSystemID() {

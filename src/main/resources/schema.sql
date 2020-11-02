@@ -86,11 +86,9 @@ create table associated_students (
     id int primary key auto_increment,
     scientific_advisor int not null,
     student int not null unique,
-    area int not null,
     is_accepted bool not null default false,
     foreign key (scientific_advisor) references users (id) on delete cascade on update cascade,
-    foreign key (student) references users (id) on delete cascade on update cascade,
-    foreign key (area) references project_area (id)
+    foreign key (student) references users (id) on delete cascade on update cascade
 );
 
 create table occupied_students (
@@ -278,14 +276,10 @@ insert into student_data values
     ('9', '4', '1', '1');
 
 insert into scientific_advisor_data values
-    ('1', '1', '0'),
     ('2', '1', '8'),
     ('3', '1', '10'),
     ('4', '1', '15'),
     ('5', '1', '3');
-
-insert into project_area values
-(1, 1, 'Заглушка тем проекта для будущей реализации проектов');
 
 insert into associated_students values
     (1, 2, 7, 1, 1),

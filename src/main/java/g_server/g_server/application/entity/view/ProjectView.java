@@ -5,18 +5,20 @@ import java.util.List;
 // Представление проекта
 public class ProjectView {
     private int systemProjectID;
+    private int systemProjectAreaID;
     private int systemProjectAdvisorID;
     private String projectName;
-    private String projectTheme;
+    private String projectArea;
     private String projectAdvisor;
     private List<AssociatedStudentViewWithoutProject> occupiedStudents;
 
-    public ProjectView(int systemID, int systemProjectAdvisorID, String projectName, String projectTheme, String projectAdvisor,
+    public ProjectView(int systemID, int areaID, int systemProjectAdvisorID, String projectName, String projectArea, String projectAdvisor,
                        List<AssociatedStudentViewWithoutProject> occupiedStudents) {
         this.systemProjectID = systemID;
+        this.systemProjectAreaID = areaID;
         this.systemProjectAdvisorID = systemProjectAdvisorID;
         this.projectName = projectName;
-        this.projectTheme = projectTheme;
+        this.projectArea = projectArea;
         this.projectAdvisor = projectAdvisor;
         this.occupiedStudents = occupiedStudents;
     }
@@ -45,12 +47,12 @@ public class ProjectView {
         this.projectName = projectName;
     }
 
-    public String getProjectTheme() {
-        return projectTheme;
+    public String getProjectArea() {
+        return projectArea;
     }
 
-    public void setProjectTheme(String projectTheme) {
-        this.projectTheme = projectTheme;
+    public void setProjectArea(String projectArea) {
+        this.projectArea = projectArea;
     }
 
     public String getProjectAdvisor() {
@@ -67,5 +69,13 @@ public class ProjectView {
 
     public void setOccupiedStudents(List<AssociatedStudentViewWithoutProject> occupiedStudents) {
         this.occupiedStudents = occupiedStudents;
+    }
+
+    public int getSystemProjectAreaID() {
+        return systemProjectAreaID;
+    }
+
+    public void setSystemProjectAreaID(int systemProjectAreaID) {
+        this.systemProjectAreaID = systemProjectAreaID;
     }
 }

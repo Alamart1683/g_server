@@ -88,10 +88,6 @@ public class AssociatedStudentsService {
         if (scientificAdvisorId == null) {
             messageList.add("Ошибка: получен null вместо int в качестве параметра");
         }
-        // Проверка, корректно ли указана тема ВКР
-        if (projectAreaRepository.findByThemeAndAdvisor(theme, scientificAdvisorId) == null) {
-            messageList.add("Ошибка: желаемая тема ВКР указана некорректно");
-        }
         // Формирование и отправка заявки
         if (messageList.size() == 0) {
             Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
@@ -126,8 +122,7 @@ public class AssociatedStudentsService {
             // Если не возникло ошибок, добавим заявку
             if (messageList.size() == 0) {
                 // Сформируем заявку
-                AssociatedStudents associatedStudent = new AssociatedStudents(scientificAdvisorId, student_id,
-                        projectAreaRepository.findByThemeAndAdvisor(theme, scientificAdvisorId).getId(), false);
+                AssociatedStudents associatedStudent = new AssociatedStudents(scientificAdvisorId, student_id, false);
                 // Сохраним заявку
                 associatedStudentsRepository.save(associatedStudent);
                 // Сгенерируем её уникальный идентификатор
@@ -173,9 +168,8 @@ public class AssociatedStudentsService {
             }
             for (AssociatedStudents associatedStudent: associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
-                String currentTheme = associatedStudent.getProjectTheme().getTheme();
                 AssociatedRequestView associatedStudentForm = new AssociatedRequestView(currentStudent,
-                        currentTheme, associatedStudent.getId());
+                        associatedStudent.getId());
                 activeRequests.add(associatedStudentForm);
             }
             return activeRequests;
@@ -246,7 +240,8 @@ public class AssociatedStudentsService {
             for (AssociatedStudents associatedStudent: associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
                 Integer studentID = associatedStudent.getStudent();
-                String projectTheme = "Проект не назначен";
+                String projectName = "Проект не назначен";
+                String projectArea = "Нет проектной области";
                 OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
                 Project project = null;
                 if (occupiedStudent != null) {
@@ -254,13 +249,15 @@ public class AssociatedStudentsService {
                     catch (NoSuchElementException noSuchElementException) { }
                 }
                 if (project != null) {
-                    projectTheme = project.getName();
+                    projectName = project.getName();
+                    projectArea = project.getProjectArea().getArea();
                 }
-                String currentTheme = associatedStudent.getProjectTheme().getTheme();
                 AssociatedStudentView activeStudentForm = new AssociatedStudentView(currentStudent,
-                        currentTheme, associatedStudent.getId(), projectTheme,
+                        associatedStudent.getId(), projectName, projectArea,
                         associatedStudent.getStudentUser().getPhone(),
-                        associatedStudent.getStudentUser().getEmail());
+                        associatedStudent.getStudentUser().getEmail(),
+                        documentManagementService.getStudentsDocumentStatus(studentID)
+                        );
                 activeStudents.add(activeStudentForm);
             }
             return activeStudents;
@@ -293,9 +290,8 @@ public class AssociatedStudentsService {
                     catch (NoSuchElementException noSuchElementException) { }
                 }
                 if (project == null) {
-                    String currentTheme = associatedStudent.getProjectTheme().getTheme();
                     AssociatedStudentViewWithoutProject associatedStudentViewWithoutProject = new AssociatedStudentViewWithoutProject(
-                            currentStudent, currentTheme,
+                            currentStudent,
                             associatedStudent.getId(),
                             associatedStudent.getStudentUser().getPhone(),
                             associatedStudent.getStudentUser().getEmail(),
@@ -502,7 +498,7 @@ public class AssociatedStudentsService {
             List<ProjectArea> projectThemesRaw = projectAreaRepository.findByAdvisor(currentAdvisorData.getId());
             List<String> projectThemes = new ArrayList<>();
             for (ProjectArea projectAreaRaw : projectThemesRaw) {
-                projectThemes.add(projectAreaRaw.getTheme());
+                projectThemes.add(projectAreaRaw.getArea());
             }
             for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
                 if (associatedStudentRaw.isAccepted()) {
@@ -549,10 +545,10 @@ public class AssociatedStudentsService {
         Integer userRole = usersRoles.getRoleId();
         Project project;
         List<OccupiedStudents> occupiedStudents;
-        List<AssociatedStudentViewWithoutProject> occupiedStudentViews = new ArrayList<>();
         switch (userRole) {
             case 1:
                 try {
+                    List<AssociatedStudentViewWithoutProject> occupiedStudentViews = new ArrayList<>();
                     Integer projectID = occupiedStudentsRepository.findByStudentID(userID).getProjectID();
                     project = projectRepository.findById(projectID).get();
                     occupiedStudents = occupiedStudentsRepository.findAllByProjectID(projectID);
@@ -562,7 +558,6 @@ public class AssociatedStudentsService {
                         // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
                         AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
                                 student,
-                                project.getProjectArea().getTheme(),
                                 student.getId(),
                                 student.getPhone(),
                                 student.getEmail(),
@@ -572,9 +567,10 @@ public class AssociatedStudentsService {
                     }
                     ProjectView projectView = new ProjectView(
                             projectID,
+                            project.getProjectArea().getId(),
                             advisor.getId(),
                             project.getName(),
-                            project.getProjectArea().getTheme(),
+                            project.getProjectArea().getArea(),
                             advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name(),
                             occupiedStudentViews
                     );
@@ -588,13 +584,13 @@ public class AssociatedStudentsService {
                 try {
                     advisorProjects = projectRepository.findAllByScientificAdvisorID(userID);
                     for (Project advisorProject: advisorProjects) {
+                        List<AssociatedStudentViewWithoutProject> occupiedStudentViews = new ArrayList<>();
                         occupiedStudents = occupiedStudentsRepository.findAllByProjectID(advisorProject.getId());
                         for (OccupiedStudents occupiedStudent: occupiedStudents) {
                             Users student = usersRepository.findById(occupiedStudent.getStudentID()).get();
                             // В данном случае системный айди будет не айди записи ассоциации, а сам айди студента
                             AssociatedStudentViewWithoutProject currentStudentView = new AssociatedStudentViewWithoutProject(
                                     student,
-                                    advisorProject.getProjectArea().getTheme(),
                                     student.getId(),
                                     student.getPhone(),
                                     student.getEmail(),
@@ -604,9 +600,10 @@ public class AssociatedStudentsService {
                         }
                         ProjectView projectView = new ProjectView(
                                 advisorProject.getId(),
+                                advisorProject.getProjectArea().getId(),
                                 userID,
                                 advisorProject.getName(),
-                                advisorProject.getProjectArea().getTheme(),
+                                advisorProject.getProjectArea().getArea(),
                                 user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
                                 occupiedStudentViews
                         );

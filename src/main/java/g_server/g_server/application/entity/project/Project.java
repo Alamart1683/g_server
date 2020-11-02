@@ -11,7 +11,7 @@ public class Project {
     private int id;
 
     @Column(name = "area")
-    private int type;
+    private int area;
 
     @Column(name = "name")
     private String name;
@@ -32,8 +32,8 @@ public class Project {
 
     public Project() { }
 
-    public Project(int type, String name, int scientificAdvisorID, String description) {
-        this.type = type;
+    public Project(int area, String name, int scientificAdvisorID, String description) {
+        this.area = area;
         this.name = name;
         this.scientificAdvisorID = scientificAdvisorID;
         this.description = description;
@@ -47,12 +47,12 @@ public class Project {
         this.id = id;
     }
 
-    public int getType() {
-        return type;
+    public int getArea() {
+        return area;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setArea(int type) {
+        this.area = type;
     }
 
     public String getName() {

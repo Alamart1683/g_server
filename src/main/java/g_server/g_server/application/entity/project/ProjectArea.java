@@ -13,13 +13,13 @@ public class ProjectArea {
     private int advisor;
 
     @Column(name = "area")
-    private String theme;
+    private String area;
 
     public ProjectArea() { }
 
-    public ProjectArea(Integer advisor, String theme) {
+    public ProjectArea(Integer advisor, String area) {
         this.advisor = advisor;
-        this.theme = theme;
+        this.area = area;
     }
 
     public int getId() {
@@ -30,12 +30,12 @@ public class ProjectArea {
         this.id = id;
     }
 
-    public String getTheme() {
-        return theme;
+    public String getArea() {
+        return area;
     }
 
-    public void setTheme(String theme) {
-        this.theme = theme;
+    public void setArea(String theme) {
+        this.area = theme;
     }
 
     public int getAdvisor() {

@@ -29,9 +29,20 @@ public class DocumentViewController {
     public List<DocumentView> getOrdersView(HttpServletRequest httpServletRequest) {
         return documentViewService.getOrders(getTokenFromRequest(httpServletRequest));
     }
+
     @GetMapping("/document/view/templates")
     public List<DocumentView> getTemplatesView(HttpServletRequest httpServletRequest) {
         return documentViewService.getTemplates(getTokenFromRequest(httpServletRequest));
+    }
+
+    @GetMapping("/document/view/templates/advisor")
+    public List<DocumentView> getAdvisorsDownloadedTemplatesView(HttpServletRequest httpServletRequest) {
+        return documentViewService.getAdvisorsLoadedTaskAndReportsTemplates(getTokenFromRequest(httpServletRequest));
+    }
+
+    @GetMapping("/document/view/templates/student")
+    public List<DocumentView> getAdvisorsDownloadedTemplatesViewForStudent(HttpServletRequest httpServletRequest) {
+        return documentViewService.getAdvisorsLoadedTaskAndReportsTemplatesForStudent(getTokenFromRequest(httpServletRequest));
     }
 
     @GetMapping("/scientific_advisor/document/view/students")

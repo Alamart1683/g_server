@@ -6,12 +6,12 @@ import g_server.g_server.application.entity.forms.AdvisorReportDocumentForm;
 import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.forms.DocumentOrderForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
-import g_server.g_server.application.entity.project.Project;
+import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.*;
-import g_server.g_server.application.repository.project.ProjectRepository;
+import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
@@ -66,10 +66,10 @@ public class DocumentUploadService {
     private ViewRightsRepository viewRightsRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    private ProjectAreaRepository projectAreaRepository;
 
     @Autowired
-    private ViewRightsProjectRepository viewRightsProjectRepository;
+    private ViewRightsAreaRepository viewRightsAreaRepository;
 
     @Autowired
     private OrderPropertiesRepository orderPropertiesRepository;
@@ -126,11 +126,11 @@ public class DocumentUploadService {
             messagesList.add("Указан несуществующий вид докумета");
         // Проверим права доступа
         Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
-        String projectName = documentForm.getProjectName();
+        String projectAreaName = documentForm.getProjectArea();
         if (viewRights == null) {
             messagesList.add("Указаны некорректные права доступа");
         }
-        else if (viewRights == 6 && projectName == null) {
+        else if (viewRights == 6 && projectAreaName == null) {
             messagesList.add("Не указано имя проекта для добавления ему документа");
         }
         // Проверим что файл был загружен
@@ -182,24 +182,26 @@ public class DocumentUploadService {
                                     type_id, kind_id, viewRights
                             );
                             documentService.save(document);
-                            // Теперь если документ находится в поле видимости проекта, запишем его в таблицу
+                            // Теперь если документ находится в поле видимости проектой области, запишем его в таблицу
                             // согласования документов с проектом, если что-то пошло не так, изменим поле видимости
                             // документа на видимость только создателю
                             if (viewRights == 6) {
-                                Project project;
+                                ProjectArea projectArea;
                                 try {
-                                    project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                                    projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
                                 } catch (NullPointerException nullPointerException) {
-                                    project = null;
+                                    projectArea = null;
                                 }
-                                if (project == null) {
+                                if (projectArea == null) {
                                     Document changingDocument = documentRepository.findByCreatorAndName(creator_id, document.getName());
                                     changingDocument.setView_rights(1);
                                     documentService.save(changingDocument);
                                 }
                                 else {
-                                    ViewRightsProject viewRightsProject = new ViewRightsProject(project.getId(), document.getId());
-                                    viewRightsProjectRepository.save(viewRightsProject);
+                                    ViewRightsArea viewRightsArea = new ViewRightsArea();
+                                    viewRightsArea.setArea(projectArea.getId());
+                                    viewRightsArea.setDocument(document.getId());
+                                    viewRightsAreaRepository.save(viewRightsArea);
                                 }
                             }
                             // Далее создадим запись о первой версии документа в таблице версий
@@ -323,7 +325,7 @@ public class DocumentUploadService {
             messagesList.add("Указан несуществующий вид докумета");
         // Проверим права доступа
         Integer viewRights = getViewRights(documentOrderForm.getDocumentFormViewRights());
-        String projectName = documentOrderForm.getProjectName();
+        String projectName = documentOrderForm.getProjectArea();
         if (viewRights == null) {
             messagesList.add("Указаны некорректные права доступа");
         }

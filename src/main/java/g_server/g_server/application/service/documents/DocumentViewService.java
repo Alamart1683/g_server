@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 
 @Service
 // Сервис ответственный за представление
-// и разграничение документов пользователям\
+// и разграничение документов пользователям
 // TODO Обработать новую, седьмую область видимости
 // TODO Доработать видимость проекта если это необходимо
 public class DocumentViewService {
@@ -97,24 +97,12 @@ public class DocumentViewService {
                     return true;
                 }
                 else if (documentView == 6) {
-                    /** @deprecated  Старый функционал для обеспечения видимости документов конкретного проекта
-                    Integer documentID = document.getId();
-                    ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(documentID);
-                    List<OccupiedStudents> occupiedStudents =
-                            occupiedStudentsRepository.findAllByProjectID(viewRightsProject.getProject());
-                    for (OccupiedStudents occupiedStudent: occupiedStudents) {
-                        if (occupiedStudent.getStudentID() == student.getId()) {
+                    OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(student.getId());
+                    if (occupiedStudent != null) {
+                        ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocumentAndArea(
+                                document.getId(), occupiedStudent.getProject().getProjectArea().getId());
+                        if (viewRightsArea != null) {
                             return true;
-                        }
-                    }
-                    **/
-                    ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocumentAndArea(document.getId(), student.getId());
-                    if (viewRightsArea != null) {
-                        AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(student.getId());
-                        if (associatedStudent != null) {
-                            if (associatedStudent.getArea() == viewRightsArea.getArea()) {
-                                return true;
-                            }
                         }
                     }
                     return false;
@@ -168,13 +156,21 @@ public class DocumentViewService {
                         return false;
                     }
                 }
-                // Если документ могут видеть все НР
+                // Если документ могут видеть только студенты НР
                 else if (documentView == 3) {
                     // Если желающий увидеть документ сам его загрузил
                     if (lookingAdvisor.getId() == documentCreator.getId()) {
                         return true;
                     }
                     else {
+                        return false;
+                    }
+                }
+                // Если документ виден научным руководителям и студентам или только научным руководителям
+                else if (documentView == 2 || documentView == 4) {
+                    if (lookingAdvisorRoleID == 2 || lookingAdvisorRoleID == 3) {
+                        return true;
+                    } else {
                         return false;
                     }
                 }
@@ -603,5 +599,41 @@ public class DocumentViewService {
         } else {
             return null;
         }
+    }
+
+    // Сформировать список представлений загруженных примеров работ научного руководителя
+    public List<DocumentView> getAdvisorsLoadedTaskAndReportsTemplates(String token) {
+        List<DocumentView> documentViews = getUserDocumentView(token);
+        Integer advisorID = associatedStudentsService.getUserId(token);;
+        List<DocumentView> advisorsTemplates = new ArrayList<>();
+        for (DocumentView documentView: documentViews) {
+            if (documentView.getSystemCreatorID() == advisorID) {
+                if (documentView.getDocumentKind().equals("Отчёт") || documentView.getDocumentKind().equals("Задание")) {
+                    advisorsTemplates.add(documentView);
+                }
+            }
+        }
+        return advisorsTemplates;
+    }
+
+    // Сформировать список представлений загруженных примеров работ научного руководителя его студенту
+    public List<DocumentView> getAdvisorsLoadedTaskAndReportsTemplatesForStudent(String token) {
+        Integer studentID = associatedStudentsService.getUserId(token);
+        Integer advisorID;
+        try {
+            advisorID = associatedStudentsRepository.findByStudent(studentID).getScientificAdvisor();
+        } catch (NullPointerException nullPointerException) {
+            return null;
+        }
+        List<DocumentView> documentViews = getUserDocumentView(token);
+        List<DocumentView> advisorsTemplatesForStudent = new ArrayList<>();
+        for (DocumentView documentView: documentViews) {
+            if (documentView.getSystemCreatorID() == advisorID) {
+                if (documentView.getDocumentKind().equals("Отчёт") || documentView.getDocumentKind().equals("Задание")) {
+                    advisorsTemplatesForStudent.add(documentView);
+                }
+            }
+        }
+        return advisorsTemplatesForStudent;
     }
 }

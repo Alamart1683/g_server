@@ -34,13 +34,13 @@ public class ProjectService {
         if (advisorID == null) {
             messageList.add("Научный руководитель не найден");
         }
-        Integer themeID;
+        Integer areaID;
         try {
-            themeID = projectAreaRepository.findByThemeAndAdvisor(projectForm.getProjectTheme(), advisorID).getId();
+            areaID = projectAreaRepository.findByAreaAndAdvisor(projectForm.getProjectTheme(), advisorID).getId();
         } catch (Exception e) {
-            themeID = null;
+            areaID = null;
         }
-        if (themeID == null) {
+        if (areaID == null) {
             messageList.add("Тема не найдена");
         }
         List<Project> projects = projectRepository.findAllByScientificAdvisorID(advisorID);
@@ -53,7 +53,7 @@ public class ProjectService {
         if (messageList.size() == 0) {
             projectRepository.save(
                     new Project(
-                            themeID, projectForm.getProjectName(), advisorID,
+                            areaID, projectForm.getProjectName(), advisorID,
                             projectForm.getProjectDescription()
                     )
             );
@@ -147,7 +147,7 @@ public class ProjectService {
     }
 
     // Изменить тему проекта
-    public List<String> changeProjectTheme(String token, Integer projectID, String newTheme) {
+    public List<String> changeProjectTheme(String token, Integer projectID, String newArea) {
         List<String> messageList = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID == null) {
@@ -156,7 +156,7 @@ public class ProjectService {
         if (projectID == null) {
             messageList.add("Проект не найден");
         }
-        if (projectAreaRepository.findByThemeAndAdvisor(newTheme, advisorID) == null) {
+        if (projectAreaRepository.findByAreaAndAdvisor(newArea, advisorID) == null) {
             messageList.add("Тема не найдена");
         }
         Project project = null;
@@ -167,7 +167,7 @@ public class ProjectService {
                 messageList.add("Вы не можете изменить тему проекта другого научного руководителя");
             }
             else {
-                project.setType(projectAreaRepository.findByThemeAndAdvisor(newTheme, advisorID).getId());
+                project.setArea(projectAreaRepository.findByAreaAndAdvisor(newArea, advisorID).getId());
                 projectRepository.save(project);
                 messageList.add("Тема проекта успешно изменена");
             }

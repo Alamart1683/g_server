@@ -9,7 +9,7 @@ public class AssociatedStudentViewWithoutProject extends AssociatedRequestView {
     private String email;
     private StudentDocumentsStatusView documentsStatusView;
 
-    public AssociatedStudentViewWithoutProject(Users user, String theme, int systemID, String phone, String email,
+    public AssociatedStudentViewWithoutProject(Users user, int systemID, String phone, String email,
              StudentDocumentsStatusView statusView) {
         this.systemStudentID = user.getId();
         this.setSystemID(systemID);
@@ -17,7 +17,6 @@ public class AssociatedStudentViewWithoutProject extends AssociatedRequestView {
         this.setGroup(user.getStudentData().getStudentGroup().getStudentGroup());
         this.setType(user.getStudentData().getStudentType().getStudentType());
         this.setCathedra(user.getStudentData().getCathedras().getCathedraName());
-        this.setTheme(theme);
         this.phone = phone;
         this.email = email;
         this.documentsStatusView = statusView;

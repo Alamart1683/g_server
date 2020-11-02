@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class ProjectAreaService {
     @Autowired
-    private ProjectAreaRepository projectThemeRepository;
+    private ProjectAreaRepository projectAreaRepository;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -30,19 +30,19 @@ public class ProjectAreaService {
     private ProjectRepository projectRepository;
 
     // Добавить новую тему
-    public List<String> addProjectTheme(String token, String theme) {
+    public List<String> addProjectArea(String token, String area) {
         List<String> messageList = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID == null) {
             messageList.add("ID научного руководителя не найден");
         }
         if (messageList.size() == 0) {
-            ProjectArea isFree = projectThemeRepository.findByThemeAndAdvisor(theme, advisorID);
+            ProjectArea isFree = projectAreaRepository.findByAreaAndAdvisor(area, advisorID);
             if (isFree != null) {
                 messageList.add("Тема с таким именем уже существует");
             }
             else {
-                projectThemeRepository.save(new ProjectArea(advisorID, theme));
+                projectAreaRepository.save(new ProjectArea(advisorID, area));
                 messageList.add("Тема успешно добавлена");
             }
         }
@@ -50,7 +50,7 @@ public class ProjectAreaService {
     }
 
     // Добавить список тем препода во время его первой аутентификации
-    public List<String> addProjectThemes(String token, List<String> themes) {
+    public List<String> addProjectAreas(String token, List<String> themes) {
         List<String> messageList = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID == null) {
@@ -59,7 +59,7 @@ public class ProjectAreaService {
         if (messageList.size() == 0) {
             for (String theme: themes) {
                 ProjectArea newTheme = new ProjectArea(advisorID, theme);
-                projectThemeRepository.save(newTheme);
+                projectAreaRepository.save(newTheme);
             }
             messageList.add("Темы были успешно добавлены");
         }
@@ -67,22 +67,22 @@ public class ProjectAreaService {
     }
 
     // Переименовать тему
-    public List<String> changeProjectTheme(String token, String oldTheme, String newTheme) {
+    public List<String> changeProjectArea(String token, String oldTheme, String newTheme) {
         List<String> messageList = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID == null) {
             messageList.add("ID научного руководителя не найден");
         }
         if (messageList.size() == 0) {
-            ProjectArea changingTheme = projectThemeRepository.findByThemeAndAdvisor(oldTheme, advisorID);
-            if (changingTheme != null) {
-                ProjectArea isFree = projectThemeRepository.findByThemeAndAdvisor(newTheme, advisorID);
+            ProjectArea changingArea = projectAreaRepository.findByAreaAndAdvisor(oldTheme, advisorID);
+            if (changingArea != null) {
+                ProjectArea isFree = projectAreaRepository.findByAreaAndAdvisor(newTheme, advisorID);
                 if (isFree != null) {
                     messageList.add("Тема с таким именем уже существует");
                 }
                 else {
-                    changingTheme.setTheme(newTheme);
-                    projectThemeRepository.save(changingTheme);
+                    changingArea.setArea(newTheme);
+                    projectAreaRepository.save(changingArea);
                     messageList.add("Тема успешно переименована");
                 }
             }
@@ -94,21 +94,20 @@ public class ProjectAreaService {
     }
 
     // Удалить тему
-    public List<String> deleteProjectTheme(String token, String theme) {
+    public List<String> deleteProjectArea(String token, String theme) {
         List<String> messageList = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID == null) {
             messageList.add("ID научного руководителя не найден");
         }
         if (messageList.size() == 0) {
-            ProjectArea deletingTheme = projectThemeRepository.findByThemeAndAdvisor(theme, advisorID);
+            ProjectArea deletingTheme = projectAreaRepository.findByAreaAndAdvisor(theme, advisorID);
             if (deletingTheme != null) {
-                if (projectRepository.existsByType(deletingTheme.getId()) ||
-                        associatedStudentsRepository.existsByArea(deletingTheme.getId())) {
+                if (projectRepository.existsByArea(deletingTheme.getId())) {
                     messageList.add("Невозможно удалить данную тему, так как она уже задействована");
                 }
                 else {
-                    projectThemeRepository.deleteById(deletingTheme.getId());
+                    projectAreaRepository.deleteById(deletingTheme.getId());
                     messageList.add("Тема успешно удалена");
                 }
             }
@@ -125,9 +124,9 @@ public class ProjectAreaService {
         List<ProjectArea> projectThemesRaw = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID != null) {
-            projectThemesRaw = projectThemeRepository.findByAdvisor(advisorID);
+            projectThemesRaw = projectAreaRepository.findByAdvisor(advisorID);
             for (ProjectArea projectAreaRaw : projectThemesRaw) {
-                projectThemes.add(projectAreaRaw.getTheme());
+                projectThemes.add(projectAreaRaw.getArea());
             }
         }
         return projectThemes;

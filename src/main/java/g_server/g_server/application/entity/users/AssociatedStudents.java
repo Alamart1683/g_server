@@ -17,9 +17,6 @@ public class AssociatedStudents {
     @Column(name = "student")
     private int student;
 
-    @Column(name = "area")
-    private int area;
-
     @Column(name = "is_accepted")
     private boolean Accepted;
 
@@ -31,16 +28,11 @@ public class AssociatedStudents {
     @JoinColumn(name = "student", referencedColumnName = "id", insertable = false, updatable = false)
     private Users studentUser;
 
-    @ManyToOne
-    @JoinColumn(name = "area", referencedColumnName = "id", insertable = false, updatable = false)
-    private ProjectArea projectArea;
-
     public AssociatedStudents() { }
 
-    public AssociatedStudents(int scientificAdvisor, int student, int theme, boolean Accepted) {
+    public AssociatedStudents(int scientificAdvisor, int student, boolean Accepted) {
         this.scientificAdvisor = scientificAdvisor;
         this.student = student;
-        this.area = theme;
         this.Accepted = Accepted;
     }
 
@@ -68,28 +60,12 @@ public class AssociatedStudents {
         this.student = student;
     }
 
-    public int getArea() {
-        return area;
-    }
-
-    public void setArea(int theme) {
-        this.area = theme;
-    }
-
     public boolean isAccepted() {
         return Accepted;
     }
 
     public void setAccepted(boolean accepted) {
         Accepted = accepted;
-    }
-
-    public ProjectArea getProjectTheme() {
-        return projectArea;
-    }
-
-    public void setProjectTheme(ProjectArea projectArea) {
-        this.projectArea = projectArea;
     }
 
     public Users getAdvisorUser() {

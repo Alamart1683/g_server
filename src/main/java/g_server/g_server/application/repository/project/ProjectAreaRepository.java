@@ -1,5 +1,6 @@
 package g_server.g_server.application.repository.project;
 
+import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.project.ProjectArea;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,7 @@ public interface ProjectAreaRepository extends JpaRepository<ProjectArea, Intege
     @Override
     void deleteById(Integer integer);
 
-    ProjectArea findByThemeAndAdvisor(String theme, Integer advisor);
-
     List<ProjectArea> findByAdvisor(Integer advisor);
+
+    ProjectArea findByAreaAndAdvisor(String area, Integer scientificAdvisorId);
 }
