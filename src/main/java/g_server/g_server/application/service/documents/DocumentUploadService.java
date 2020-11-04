@@ -127,23 +127,26 @@ public class DocumentUploadService {
         // Проверим права доступа
         Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
         String projectAreaName = documentForm.getProjectArea();
-        if (viewRights == null) {
-            messagesList.add("Указаны некорректные права доступа");
-        }
-        else if (viewRights == 6 && projectAreaName == null) {
-            messagesList.add("Не указано имя проекта для добавления ему документа");
-        }
-        // Проверим что файл был загружен
-        if (documentForm.getFile() == null)
-            messagesList.add("Ошибка загрузки файла. Такого файла не существует");
         // Проверим корректное разрешение файла
         String fileExtension = getFileExtension(documentForm.getFile());
         if (fileExtension.length() == 0)
             messagesList.add("Попытка загрузить документ с некорректным разрешением");
-        Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
-        if (roleID != 3 && viewRights == 5) {
-            messagesList.add("Попытка загрузить документ с" +
-                    " областью видимости доступной только заведующему кафедрой");
+        // Проверим что файл был загружен
+        if (documentForm.getFile() == null)
+            messagesList.add("Ошибка загрузки файла. Такого файла не существует");
+        if (viewRights == null) {
+            messagesList.add("Указаны некорректные права доступа");
+        }
+        // Если зоны видимости не нулевые, проверим их
+        if (messagesList.size() == 0) {
+            if (viewRights == 6 && projectAreaName == null) {
+                messagesList.add("Не указано имя проекта для добавления ему документа");
+            }
+            Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
+            if (roleID != 3 && viewRights == 5) {
+                messagesList.add("Попытка загрузить документ с" +
+                        " областью видимости доступной только заведующему кафедрой");
+            }
         }
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
