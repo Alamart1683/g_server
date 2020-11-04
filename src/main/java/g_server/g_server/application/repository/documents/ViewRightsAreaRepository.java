@@ -22,4 +22,8 @@ public interface ViewRightsAreaRepository extends JpaRepository<ViewRightsArea, 
     void deleteById(Integer integer);
 
     ViewRightsArea findByDocumentAndArea(Integer document, Integer area);
+
+    ViewRightsArea findByDocument(Integer document);
+
+    List<ViewRightsArea> findAllByArea(Integer area);
 }

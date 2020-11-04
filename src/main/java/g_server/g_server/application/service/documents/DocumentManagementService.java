@@ -2,11 +2,14 @@ package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
+import g_server.g_server.application.entity.documents.ViewRightsArea;
 import g_server.g_server.application.entity.documents.ViewRightsProject;
 import g_server.g_server.application.entity.project.Project;
+import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.view.StudentDocumentsStatusView;
 import g_server.g_server.application.repository.documents.*;
+import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
@@ -41,10 +44,7 @@ public class DocumentManagementService {
     private DocumentDownloadService documentDownloadService;
 
     @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private ViewRightsProjectRepository viewRightsProjectRepository;
+    private ViewRightsAreaRepository viewRightsAreaRepository;
 
     @Autowired
     private NirTaskRepository nirTaskRepository;
@@ -54,6 +54,12 @@ public class DocumentManagementService {
 
     @Autowired
     private NirReportRepository nirReportRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private ProjectAreaRepository projectAreaRepository;
 
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
@@ -305,7 +311,7 @@ public class DocumentManagementService {
     }
 
     // Метод изменения прав видимости документа
-    public List<String> editViewRights(String documentName, String newViewRightsString, String projectName, String token) {
+    public List<String> editViewRights(String documentName, String newViewRightsString, String projectAreaName, String token) {
         List<String> messagesList = new ArrayList<String>();
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
@@ -323,36 +329,36 @@ public class DocumentManagementService {
                 if (document != null) {
                     // Если зона видимости не затрагивала проект и стала затрагивать
                     if (document.getView_rights() != 6 && newViewRights == 6) {
-                        Project project;
+                        ProjectArea projectArea;
                         try {
-                            project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                            projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
                         } catch (NullPointerException nullPointerException) {
-                            project = null;
+                            projectArea = null;
                         }
-                        if (project == null) {
-                            messagesList.add("Ошибка изменения зоны видимости: проект не найден");
+                        if (projectArea == null) {
+                            messagesList.add("Ошибка изменения зоны видимости: проектная видимость не найдена");
                         } else {
                             document.setView_rights(newViewRights);
                             documentService.save(document);
-                            ViewRightsProject viewRightsProject = new ViewRightsProject(project.getId(), document.getId());
-                            viewRightsProjectRepository.save(viewRightsProject);
+                            ViewRightsArea viewRightsArea = new ViewRightsArea(document.getId(), projectArea.getId());
+                            viewRightsAreaRepository.save(viewRightsArea);
                             messagesList.add("Зона видимости документа успешно изменена");
                         }
                     }
-                    // Если зона видимости затрагивала проект и стала затрагивать другой
+                    // Если зона видимости затрагивала проектную область и стала затрагивать другую
                     else if (document.getView_rights() == 6 && newViewRights == 6) {
                         Project project;
                         try {
-                            project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                            project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectAreaName);
                         } catch (NullPointerException nullPointerException) {
                             project = null;
                         }
                         if (project == null) {
-                            messagesList.add("Ошибка изменения зоны видимости: проект не найден");
+                            messagesList.add("Ошибка изменения зоны видимости: проектная облаасть не найдена");
                         } else {
-                            ViewRightsProject old;
+                            ViewRightsArea old;
                             try {
-                                old = viewRightsProjectRepository.findByDocument(document.getId());
+                                old = viewRightsAreaRepository.findByDocumentAndArea(document.getId(), project.getArea());
                             } catch (NullPointerException nullPointerException) {
                                 old = null;
                             }
@@ -361,18 +367,20 @@ public class DocumentManagementService {
                             }
                             else {
                                 document.setView_rights(newViewRights);
+                                ProjectArea projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
                                 documentService.save(document);
-                                ViewRightsProject viewRightsProject = new ViewRightsProject(project.getId(), document.getId());
-                                viewRightsProjectRepository.save(viewRightsProject);
+                                viewRightsAreaRepository.delete(old);
+                                ViewRightsArea viewRightsArea = new ViewRightsArea(document.getId(), projectArea.getId());
+                                viewRightsAreaRepository.save(viewRightsArea);
                                 messagesList.add("Зона видимости документа успешно изменена");
                             }
                         }
                     }
                     // Если зона видимости затрагивала проект и перестала его затрагивать
                     else if (document.getView_rights() == 6 && newViewRights != 6) {
-                        ViewRightsProject old;
+                        ViewRightsArea old;
                         try {
-                            old = viewRightsProjectRepository.findByDocument(document.getId());
+                            old = viewRightsAreaRepository.findByDocument(document.getId());
                         } catch (NullPointerException nullPointerException) {
                             old = null;
                         }
@@ -380,7 +388,7 @@ public class DocumentManagementService {
                             messagesList.add("Предыдущая проектная принадлежность документа не обнаружена");
                         }
                         else {
-                            viewRightsProjectRepository.deleteById(old.getId());
+                            viewRightsAreaRepository.delete(old);
                             document.setView_rights(newViewRights);
                             documentService.save(document);
                             messagesList.add("Зона видимости документа успешно изменена");

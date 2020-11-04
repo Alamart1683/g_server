@@ -1,8 +1,10 @@
 package g_server.g_server.application.service.project;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
+import g_server.g_server.application.entity.documents.ViewRightsArea;
 import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.repository.documents.ViewRightsAreaRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
@@ -24,7 +26,7 @@ public class ProjectAreaService {
     private UsersRepository usersRepository;
 
     @Autowired
-    private AssociatedStudentsRepository associatedStudentsRepository;
+    private ViewRightsAreaRepository viewRightsAreaRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -94,25 +96,29 @@ public class ProjectAreaService {
     }
 
     // Удалить тему
-    public List<String> deleteProjectArea(String token, String theme) {
+    public List<String> deleteProjectArea(String token, String area) {
         List<String> messageList = new ArrayList<>();
         Integer advisorID = getUserId(token);
         if (advisorID == null) {
             messageList.add("ID научного руководителя не найден");
         }
         if (messageList.size() == 0) {
-            ProjectArea deletingTheme = projectAreaRepository.findByAreaAndAdvisor(theme, advisorID);
-            if (deletingTheme != null) {
-                if (projectRepository.existsByArea(deletingTheme.getId())) {
-                    messageList.add("Невозможно удалить данную тему, так как она уже задействована");
+            ProjectArea deletingArea = projectAreaRepository.findByAreaAndAdvisor(area, advisorID);
+            List<ViewRightsArea> viewRightsAreas = viewRightsAreaRepository.findAllByArea(deletingArea.getId());
+            if (deletingArea != null && viewRightsAreas != null) {
+                if (projectRepository.existsByArea(deletingArea.getId())) {
+                    messageList.add("Невозможно удалить данную тему, так как она уже задействована проектом");
+                }
+                else if (viewRightsAreas.size() > 0) {
+                    messageList.add("Невозможно удалить данную тему, так как она уже является областью видимости для документа");
                 }
                 else {
-                    projectAreaRepository.deleteById(deletingTheme.getId());
+                    projectAreaRepository.deleteById(deletingArea.getId());
                     messageList.add("Тема успешно удалена");
                 }
             }
             else {
-                messageList.add("Удаляемая тема не найдена");
+                messageList.add("Удаляемая проектная область не найдена");
             }
         }
         return messageList;
