@@ -4,6 +4,7 @@ import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
+import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.users.UsersRoles;
@@ -12,6 +13,7 @@ import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
+import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
@@ -67,6 +69,12 @@ public class DocumentViewService {
 
     @Autowired
     private ProjectAreaRepository projectAreaRepository;
+
+    @Autowired
+    private OrderPropertiesRepository orderPropertiesRepository;
+
+    @Autowired
+    private SpecialityRepository specialityRepository;
 
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
@@ -345,13 +353,34 @@ public class DocumentViewService {
     }
 
     // Сформировать список приказов
-    public List<DocumentView> getOrders(String token) {
+    public List<DocumentViewOrder> getOrders(String token) {
         List<DocumentView> allDocumentViewList = getUserDocumentView(token);
-        List<DocumentView> orderList = new ArrayList<>();
+        List<DocumentViewOrder> orderList = new ArrayList<>();
         if (allDocumentViewList != null) {
             for (DocumentView currentView: allDocumentViewList) {
                 if (currentView.getDocumentKind().equals("Приказ")) {
-                    orderList.add(currentView);
+                    Document order = documentRepository.findByCreatorAndName(currentView.getSystemCreatorID(),
+                            currentView.getDocumentName());
+                    OrderProperties orderProperties;
+                    if (orderPropertiesRepository.findById(order.getId()).isPresent()) {
+                        orderProperties = orderPropertiesRepository.findById(order.getId()).get();
+                        Speciality speciality;
+                        if (specialityRepository.findById(orderProperties.getSpeciality()).isPresent()) {
+                            speciality = specialityRepository.findById(orderProperties.getSpeciality()).get();
+                            orderList.add(
+                                new DocumentViewOrder(
+                                    order,
+                                    currentView.getDocumentVersions(),
+                                    currentView.getRussianDate(orderProperties.getOrderDate()),
+                                    currentView.getRussianDate(orderProperties.getStartDate()),
+                                    currentView.getRussianDate(orderProperties.getEndDate()),
+                                    orderProperties.getNumber(),
+                                    speciality.getSpeciality(),
+                                    speciality.getCode()
+                                )
+                            );
+                        }
+                    }
                 }
             }
         }

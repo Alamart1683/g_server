@@ -23,7 +23,7 @@ public class DocumentViewController {
     }
 
     @GetMapping("/document/view/orders")
-    public List<DocumentView> getOrdersView(HttpServletRequest httpServletRequest) {
+    public List<DocumentViewOrder> getOrdersView(HttpServletRequest httpServletRequest) {
         return documentViewService.getOrders(getTokenFromRequest(httpServletRequest));
     }
 
