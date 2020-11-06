@@ -48,9 +48,6 @@ public class DocumentViewService {
     private DocumentVersionRepository documentVersionRepository;
 
     @Autowired
-    private ViewRightsProjectRepository viewRightsProjectRepository;
-
-    @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
 
     @Autowired
