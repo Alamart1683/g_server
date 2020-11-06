@@ -303,7 +303,8 @@ insert into document_type (type) values
 insert into document_kind (kind) values
     ('Приказ'),
     ('Задание'),
-    ('Отчёт');
+    ('Отчёт'),
+    ('Образец');
 
 insert into speciality values
     ('1', '09.03.04', 'ИКБО', 'Программная инженерия'),

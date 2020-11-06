@@ -639,7 +639,7 @@ public class DocumentViewService {
         List<AdvisorsTemplateView> advisorsTemplates = new ArrayList<>();
         for (DocumentView documentView: documentViews) {
             if (documentView.getSystemCreatorID() == advisorID) {
-                if (documentView.getDocumentKind().equals("Отчёт") || documentView.getDocumentKind().equals("Задание")) {
+                if (documentView.getDocumentKind().equals("Образец")) {
                     Document document = documentRepository.findByCreatorAndName(documentView.getSystemCreatorID(),
                             documentView.getDocumentName());
                     try {
@@ -670,7 +670,7 @@ public class DocumentViewService {
         List<AdvisorsTemplateView> advisorsTemplatesForStudent = new ArrayList<>();
         for (DocumentView documentView: documentViews) {
             if (documentView.getSystemCreatorID() == advisorID) {
-                if (documentView.getDocumentKind().equals("Отчёт") || documentView.getDocumentKind().equals("Задание")) {
+                if (documentView.getDocumentKind().equals("Образец")) {
                     Document document = documentRepository.findByCreatorAndName(documentView.getSystemCreatorID(),
                             documentView.getDocumentName());
                     try {
