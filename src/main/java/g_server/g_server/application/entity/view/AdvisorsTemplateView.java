@@ -4,7 +4,7 @@ import g_server.g_server.application.entity.documents.Document;
 import java.util.List;
 
 public class AdvisorsTemplateView extends DocumentView {
-    private int systemAreaID;
+    private Integer systemAreaID;
     private String area;
 
     public AdvisorsTemplateView(Document document, List<DocumentVersionView>
@@ -14,7 +14,7 @@ public class AdvisorsTemplateView extends DocumentView {
         this.area = area;
     }
 
-    public int getSystemAreaID() {
+    public Integer getSystemAreaID() {
         return systemAreaID;
     }
 

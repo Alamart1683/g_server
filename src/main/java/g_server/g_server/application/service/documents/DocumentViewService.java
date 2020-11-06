@@ -621,7 +621,10 @@ public class DocumentViewService {
                         ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
                         advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
                                 projectArea.getId(), projectArea.getArea()));
-                    } catch (NullPointerException nullPointerException) { }
+                    } catch (NullPointerException nullPointerException) {
+                        advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
+                                0, "Не назначена"));
+                    }
                 }
             }
         }
@@ -649,7 +652,10 @@ public class DocumentViewService {
                         ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
                         advisorsTemplatesForStudent.add(new AdvisorsTemplateView(document, null,
                                 projectArea.getId(), projectArea.getArea()));
-                    } catch (NullPointerException nullPointerException) { }
+                    } catch (NullPointerException nullPointerException) {
+                        advisorsTemplatesForStudent.add(new AdvisorsTemplateView(document, null,
+                                0, "Не назначена"));
+                    }
                 }
             }
         }
