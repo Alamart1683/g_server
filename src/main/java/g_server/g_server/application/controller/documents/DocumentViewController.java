@@ -1,9 +1,6 @@
 package g_server.g_server.application.controller.documents;
 
-import g_server.g_server.application.entity.view.AdvisorsStudentDocumentView;
-import g_server.g_server.application.entity.view.DocumentView;
-import g_server.g_server.application.entity.view.ReportVersionDocumentView;
-import g_server.g_server.application.entity.view.TaskDocumentVersionView;
+import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.service.documents.DocumentViewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,12 +33,12 @@ public class DocumentViewController {
     }
 
     @GetMapping("/document/view/templates/advisor")
-    public List<DocumentView> getAdvisorsDownloadedTemplatesView(HttpServletRequest httpServletRequest) {
+    public List<AdvisorsTemplateView> getAdvisorsDownloadedTemplatesView(HttpServletRequest httpServletRequest) {
         return documentViewService.getAdvisorsLoadedTaskAndReportsTemplates(getTokenFromRequest(httpServletRequest));
     }
 
     @GetMapping("/document/view/templates/student")
-    public List<DocumentView> getAdvisorsDownloadedTemplatesViewForStudent(HttpServletRequest httpServletRequest) {
+    public List<AdvisorsTemplateView> getAdvisorsDownloadedTemplatesViewForStudent(HttpServletRequest httpServletRequest) {
         return documentViewService.getAdvisorsLoadedTaskAndReportsTemplatesForStudent(getTokenFromRequest(httpServletRequest));
     }
 

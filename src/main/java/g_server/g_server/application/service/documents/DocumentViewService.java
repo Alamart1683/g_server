@@ -3,12 +3,14 @@ package g_server.g_server.application.service.documents;
 import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
+import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.users.UsersRoles;
 import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
+import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
@@ -65,6 +67,9 @@ public class DocumentViewService {
 
     @Autowired
     private ViewRightsAreaRepository viewRightsAreaRepository;
+
+    @Autowired
+    private ProjectAreaRepository projectAreaRepository;
 
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
@@ -602,14 +607,21 @@ public class DocumentViewService {
     }
 
     // Сформировать список представлений загруженных примеров работ научного руководителя
-    public List<DocumentView> getAdvisorsLoadedTaskAndReportsTemplates(String token) {
+    public List<AdvisorsTemplateView> getAdvisorsLoadedTaskAndReportsTemplates(String token) {
         List<DocumentView> documentViews = getUserDocumentView(token);
         Integer advisorID = associatedStudentsService.getUserId(token);;
-        List<DocumentView> advisorsTemplates = new ArrayList<>();
+        List<AdvisorsTemplateView> advisorsTemplates = new ArrayList<>();
         for (DocumentView documentView: documentViews) {
             if (documentView.getSystemCreatorID() == advisorID) {
                 if (documentView.getDocumentKind().equals("Отчёт") || documentView.getDocumentKind().equals("Задание")) {
-                    advisorsTemplates.add(documentView);
+                    Document document = documentRepository.findByCreatorAndName(documentView.getSystemCreatorID(),
+                            documentView.getDocumentName());
+                    try {
+                        ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
+                        ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
+                        advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
+                                projectArea.getId(), projectArea.getArea()));
+                    } catch (NullPointerException nullPointerException) { }
                 }
             }
         }
@@ -617,7 +629,7 @@ public class DocumentViewService {
     }
 
     // Сформировать список представлений загруженных примеров работ научного руководителя его студенту
-    public List<DocumentView> getAdvisorsLoadedTaskAndReportsTemplatesForStudent(String token) {
+    public List<AdvisorsTemplateView> getAdvisorsLoadedTaskAndReportsTemplatesForStudent(String token) {
         Integer studentID = associatedStudentsService.getUserId(token);
         Integer advisorID;
         try {
@@ -626,11 +638,18 @@ public class DocumentViewService {
             return null;
         }
         List<DocumentView> documentViews = getUserDocumentView(token);
-        List<DocumentView> advisorsTemplatesForStudent = new ArrayList<>();
+        List<AdvisorsTemplateView> advisorsTemplatesForStudent = new ArrayList<>();
         for (DocumentView documentView: documentViews) {
             if (documentView.getSystemCreatorID() == advisorID) {
                 if (documentView.getDocumentKind().equals("Отчёт") || documentView.getDocumentKind().equals("Задание")) {
-                    advisorsTemplatesForStudent.add(documentView);
+                    Document document = documentRepository.findByCreatorAndName(documentView.getSystemCreatorID(),
+                            documentView.getDocumentName());
+                    try {
+                        ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
+                        ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
+                        advisorsTemplatesForStudent.add(new AdvisorsTemplateView(document, null,
+                                projectArea.getId(), projectArea.getArea()));
+                    } catch (NullPointerException nullPointerException) { }
                 }
             }
         }
