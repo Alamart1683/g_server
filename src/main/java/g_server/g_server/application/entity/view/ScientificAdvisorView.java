@@ -13,7 +13,7 @@ public class ScientificAdvisorView {
     private int totalAdvisorPlaces;
     private int freeAdvisorPlaces;
     private int occupiedAdvisorPlaces;
-    private List<String> advisorProjectThemes;
+    private List<String> advisorProjectAreas;
     private boolean isHasFreePlaces;
 
    public ScientificAdvisorView() { }
@@ -21,7 +21,7 @@ public class ScientificAdvisorView {
    public ScientificAdvisorView(int systemID, String advisorSurname, String advisorName,
           String advisorSecondName, String advisorCathedra, String advisorEmail, String advisorPhone,
           int totalAdvisorPlaces, int freeAdvisorPlaces, int occupiedAdvisorPlaces,
-          List<String> advisorProjectThemes) {
+          List<String> advisorProjectAreas) {
        this.systemID = systemID;
        this.advisorName = advisorSurname + " " + advisorName + " " + advisorSecondName;
        this.advisorCathedra = advisorCathedra;
@@ -30,7 +30,7 @@ public class ScientificAdvisorView {
        this.totalAdvisorPlaces = totalAdvisorPlaces;
        this.freeAdvisorPlaces = freeAdvisorPlaces;
        this.occupiedAdvisorPlaces = occupiedAdvisorPlaces;
-       this.advisorProjectThemes = advisorProjectThemes;
+       this.advisorProjectAreas = advisorProjectAreas;
        this.isHasFreePlaces = setHasFreePlaces();
    }
 
@@ -98,12 +98,12 @@ public class ScientificAdvisorView {
         this.occupiedAdvisorPlaces = occupiedAdvisorPlaces;
     }
 
-    public List<String> getAdvisorProjectThemes() {
-        return advisorProjectThemes;
+    public List<String> getAdvisorProjectAreas() {
+        return advisorProjectAreas;
     }
 
-    public void setAdvisorProjectThemes(List<String> advisorProjectThemes) {
-        this.advisorProjectThemes = advisorProjectThemes;
+    public void setAdvisorProjectAreas(List<String> advisorProjectAreas) {
+        this.advisorProjectAreas = advisorProjectAreas;
     }
 
     public boolean setHasFreePlaces() {

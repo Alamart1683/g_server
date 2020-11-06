@@ -167,6 +167,21 @@ public class AssociatedUsersController {
         return usersService.getStagesDates();
     }
 
+    // Получить список всех ассоциированных студентов для завкафедры
+    @GetMapping("/head_of_cathedra/get/associated_students")
+    public List<AssociatedStudentViewWithAdvisor> getAssociatedStudentsWithAdvisor() {
+        return associatedStudentsService.getAllAssociatedStudentsWithAdvisors();
+    }
+
+    // Изменить научного руководителя
+    @PostMapping("/head_of_cathedra/change/advisor")
+    public String changeAdvisor(
+            @RequestParam Integer studentID,
+            @RequestParam Integer advisorID
+    ) {
+        return associatedStudentsService.changeStudentsAdvisor(studentID, advisorID);
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

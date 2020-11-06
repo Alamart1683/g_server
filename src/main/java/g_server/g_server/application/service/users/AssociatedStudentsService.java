@@ -695,9 +695,55 @@ public class AssociatedStudentsService {
         }
     }
 
-    // TODO Сделать назначение области проекта студенту
+    // Получить представление ассоциации всех студентов с их НР для завкафа
+    public List<AssociatedStudentViewWithAdvisor> getAllAssociatedStudentsWithAdvisors() {
+        List<Users> allUsersList = usersRepository.findAll();
+        List<AssociatedStudentViewWithAdvisor> associatedStudentViewWithAdvisorList = new ArrayList<>();
+        for (Users user: allUsersList) {
+            UsersRoles userRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
+            if (userRole.getRoleId() == 1) {
+                AssociatedStudents associatedStudent;
+                AssociatedStudentViewWithAdvisor currentView;
+                try {
+                    associatedStudent = associatedStudentsRepository.findByStudent(user.getId());
+                    Users advisor = usersRepository.findById(associatedStudent.getScientificAdvisor()).get();
+                    Speciality speciality = specialityRepository.findByPrefix(
+                            user.getStudentData().getStudentGroup().getStudentGroup().substring(0, 4));
+                    currentView = new AssociatedStudentViewWithAdvisor(
+                            associatedStudent.getId(),
+                            advisor.getId(),
+                            advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name(),
+                            user.getId(),
+                            user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
+                            user.getStudentData().getStudentGroup().getStudentGroup(),
+                            speciality.getCode()
+                    );
+                } catch (NullPointerException nullPointerException) {
+                    // В системе не может существовать студент без НР, сделал на всякий случай
+                    currentView = null;
+                }
+                if (currentView != null) {
+                    associatedStudentViewWithAdvisorList.add(currentView);
+                }
+            }
+        }
+        return associatedStudentViewWithAdvisorList;
+    }
 
-    // TODO Сделать создание области проекта преподавателем
+    // Изменить студенту научного руководителя
+    public String changeStudentsAdvisor(Integer studentId, Integer newAdvisorID) {
+        try {
+            AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(studentId);
+            associatedStudentsRepository.deleteById(associatedStudent.getId());
+            AssociatedStudents newAssociatedStudent = new AssociatedStudents(newAdvisorID, studentId, true);
+            associatedStudentsRepository.save(newAssociatedStudent);
+            return "Научный руководитель успешно изменен";
+        } catch (Exception e) {
+            return "Переданы некорректные параметры";
+        }
+    }
+
+    // TODO Сделать назначение области проекта студенту (А нужно ли это?)
 
     // Получение списка имен проектов конкретного НР
     public List<String> getAdvisorProjectNames(String token) {
