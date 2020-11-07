@@ -71,7 +71,7 @@ public class AssociatedUsersController {
     }
 
     // Получить представление научных руководителей для отправки заявки
-    @GetMapping("/student/scientific_advisor/all")
+    @GetMapping("/scientific_advisor/all")
     public List<ScientificAdvisorView> getScientificAdvisorView() {
         return associatedStudentsService.getScientificAdvisorViewList();
     }

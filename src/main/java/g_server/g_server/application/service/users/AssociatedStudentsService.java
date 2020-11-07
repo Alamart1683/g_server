@@ -719,8 +719,17 @@ public class AssociatedStudentsService {
                             speciality.getCode()
                     );
                 } catch (NullPointerException nullPointerException) {
-                    // В системе не может существовать студент без НР, сделал на всякий случай
-                    currentView = null;
+                    Speciality speciality = specialityRepository.findByPrefix(
+                            user.getStudentData().getStudentGroup().getStudentGroup().substring(0, 4));
+                    currentView = new AssociatedStudentViewWithAdvisor(
+                            null,
+                            null,
+                            "Не назначен",
+                            user.getId(),
+                            user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
+                            user.getStudentData().getStudentGroup().getStudentGroup(),
+                            speciality.getCode()
+                    );
                 }
                 if (currentView != null) {
                     associatedStudentViewWithAdvisorList.add(currentView);
