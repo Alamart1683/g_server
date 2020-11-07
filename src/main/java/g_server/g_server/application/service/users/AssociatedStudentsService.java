@@ -743,7 +743,9 @@ public class AssociatedStudentsService {
     public String changeStudentsAdvisor(Integer studentId, Integer newAdvisorID) {
         try {
             AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(studentId);
-            associatedStudentsRepository.deleteById(associatedStudent.getId());
+            if (associatedStudent != null) {
+                associatedStudentsRepository.deleteById(associatedStudent.getId());
+            }
             AssociatedStudents newAssociatedStudent = new AssociatedStudents(newAdvisorID, studentId, true);
             associatedStudentsRepository.save(newAssociatedStudent);
             return "Научный руководитель успешно изменен";
