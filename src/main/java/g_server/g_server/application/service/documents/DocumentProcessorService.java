@@ -26,9 +26,19 @@ import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlOptions;
+import org.docx4j.dml.CTBlip;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.Part;
+import org.docx4j.openpackaging.parts.PartName;
+import org.docx4j.openpackaging.parts.WordprocessingML.*;
+import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
+import org.docx4j.relationships.Relationship;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -429,6 +439,48 @@ public class DocumentProcessorService {
             return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
         }
         return "Извините, что-то пошло не так";
+    }
+
+    // Объединить вордовские документы спомощью docx4j
+    public void makeUsWhole(File finalReport, File tempReport) throws Docx4JException, JAXBException {
+        WordprocessingMLPackage f = WordprocessingMLPackage.load(finalReport);
+        WordprocessingMLPackage s = WordprocessingMLPackage.load(tempReport);
+
+        List body = s.getMainDocumentPart().getJAXBNodesViaXPath("//w:body", false);
+        for(Object b : body){
+            List filhos = ((org.docx4j.wml.Body)b).getContent();
+            for(Object k : filhos)
+                f.getMainDocumentPart().addObject(k);
+        }
+
+        List<Object> blips = s.getMainDocumentPart().getJAXBNodesViaXPath("//a:blip", false);
+        for(Object el : blips){
+            try {
+                CTBlip blip = (CTBlip) el;
+                RelationshipsPart parts = s.getMainDocumentPart().getRelationshipsPart();
+                Relationship rel = parts.getRelationshipByID(blip.getEmbed());
+                Part part = parts.getPart(rel);
+                /* Тестирование сохранения изображений
+                if(part instanceof ImagePngPart)
+                    System.out.println(((ImagePngPart) part).getBytes());
+                if(part instanceof ImageJpegPart)
+                    System.out.println(((ImageJpegPart) part).getBytes());
+                if(part instanceof ImageBmpPart)
+                    System.out.println(((ImageBmpPart) part).getBytes());
+                if(part instanceof ImageGifPart)
+                    System.out.println(((ImageGifPart) part).getBytes());
+                if(part instanceof ImageEpsPart)
+                    System.out.println(((ImageEpsPart) part).getBytes());
+                if(part instanceof ImageTiffPart)
+                    System.out.println(((ImageTiffPart) part).getBytes()); */
+                Relationship newrel = f.getMainDocumentPart().addTargetPart(part, RelationshipsPart.AddPartBehaviour.RENAME_IF_NAME_EXISTS);
+                blip.setEmbed(newrel.getId());
+                f.getMainDocumentPart().addTargetPart(s.getParts().getParts().get(new PartName("/word/"+rel.getTarget())));
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        f.save(finalReport);
     }
 
     // Объединить задание с отчётом

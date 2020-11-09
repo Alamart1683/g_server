@@ -535,15 +535,16 @@ public class DocumentUploadService {
                                 documentVersionService.save(documentVersion);
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
                                 nirReportRepository.save(nirReport);
-                                InputStream taskStream = new FileInputStream(lastTaskVersionFile);
+                                // InputStream taskStream = new FileInputStream(lastTaskVersionFile);
                                 File uploadedTempReportVersion = new File(versionPath);
-                                InputStream reportStream = new FileInputStream(uploadedTempReportVersion);
+                                // InputStream reportStream = new FileInputStream(uploadedTempReportVersion);
                                 File finalReportVersion = new File(versionPath.replaceAll("temp_", ""));
-                                OutputStream destinationStream = new FileOutputStream(finalReportVersion);
-                                documentProcessorService.makeUsWhole(taskStream, reportStream, destinationStream);
-                                taskStream.close();
-                                reportStream.close();
-                                destinationStream.close();
+                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                // OutputStream destinationStream = new FileOutputStream(finalReportVersion);
+                                documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                // taskStream.close();
+                                // reportStream.close();
+                                // destinationStream.close();
                                 uploadedTempReportVersion.delete();
                                 messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                             } else {
