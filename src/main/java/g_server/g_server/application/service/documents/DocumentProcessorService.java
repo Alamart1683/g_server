@@ -25,6 +25,7 @@ import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.xmlbeans.XmlOptions;
 import org.docx4j.dml.CTBlip;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -442,7 +443,14 @@ public class DocumentProcessorService {
     }
 
     // Объединить вордовские документы спомощью docx4j
-    public void makeUsWhole(File finalReport, File tempReport) throws Docx4JException, JAXBException {
+    public void makeUsWhole(File finalReport, File tempReport) throws Docx4JException, JAXBException, FileNotFoundException, IOException {
+        InputStream inputStream = new FileInputStream(finalReport);
+        XWPFDocument taskToInsertPageBreak = new XWPFDocument(inputStream);
+        taskToInsertPageBreak.createParagraph().setPageBreak(true);
+        FileOutputStream out = new FileOutputStream(finalReport);
+        taskToInsertPageBreak.write(out);
+        out.close(); inputStream.close();
+
         WordprocessingMLPackage f = WordprocessingMLPackage.load(finalReport);
         WordprocessingMLPackage s = WordprocessingMLPackage.load(tempReport);
 
@@ -460,7 +468,6 @@ public class DocumentProcessorService {
                 RelationshipsPart parts = s.getMainDocumentPart().getRelationshipsPart();
                 Relationship rel = parts.getRelationshipByID(blip.getEmbed());
                 Part part = parts.getPart(rel);
-                /* Тестирование сохранения изображений
                 if(part instanceof ImagePngPart)
                     System.out.println(((ImagePngPart) part).getBytes());
                 if(part instanceof ImageJpegPart)
@@ -472,7 +479,7 @@ public class DocumentProcessorService {
                 if(part instanceof ImageEpsPart)
                     System.out.println(((ImageEpsPart) part).getBytes());
                 if(part instanceof ImageTiffPart)
-                    System.out.println(((ImageTiffPart) part).getBytes()); */
+                    System.out.println(((ImageTiffPart) part).getBytes());
                 Relationship newrel = f.getMainDocumentPart().addTargetPart(part, RelationshipsPart.AddPartBehaviour.RENAME_IF_NAME_EXISTS);
                 blip.setEmbed(newrel.getId());
                 f.getMainDocumentPart().addTargetPart(s.getParts().getParts().get(new PartName("/word/"+rel.getTarget())));

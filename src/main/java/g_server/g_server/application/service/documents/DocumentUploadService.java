@@ -535,16 +535,10 @@ public class DocumentUploadService {
                                 documentVersionService.save(documentVersion);
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
                                 nirReportRepository.save(nirReport);
-                                // InputStream taskStream = new FileInputStream(lastTaskVersionFile);
                                 File uploadedTempReportVersion = new File(versionPath);
-                                // InputStream reportStream = new FileInputStream(uploadedTempReportVersion);
                                 File finalReportVersion = new File(versionPath.replaceAll("temp_", ""));
                                 Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                // OutputStream destinationStream = new FileOutputStream(finalReportVersion);
                                 documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
-                                // taskStream.close();
-                                // reportStream.close();
-                                // destinationStream.close();
                                 uploadedTempReportVersion.delete();
                                 messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                             } else {
@@ -557,7 +551,8 @@ public class DocumentUploadService {
                             }
                         // Если отчет уже был загружен в прошлый раз, добавим его новую версию
                         } else if (documentRepository.findByCreatorAndName(creator_id, fileName) != null) {
-                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                            if (multipartFileToFileWrite(documentForm.getFile(),
+                                    Paths.get(versionPath.replaceAll("temp_", "")))) {
                                 // Далее создадим запись о новой версии отчёта в таблице версий
                                 int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                                 DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
