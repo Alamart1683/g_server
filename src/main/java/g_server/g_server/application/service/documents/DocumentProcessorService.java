@@ -28,6 +28,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.xmlbeans.XmlOptions;
 import org.docx4j.dml.CTBlip;
+import org.docx4j.model.styles.StyleTree;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.Part;
@@ -456,8 +457,8 @@ public class DocumentProcessorService {
 
         List body = s.getMainDocumentPart().getJAXBNodesViaXPath("//w:body", false);
         for(Object b : body){
-            List filhos = ((org.docx4j.wml.Body)b).getContent();
-            for(Object k : filhos)
+            List words = ((org.docx4j.wml.Body)b).getContent();
+            for(Object k : words)
                 f.getMainDocumentPart().addObject(k);
         }
 

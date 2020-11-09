@@ -266,7 +266,7 @@ public class RegistrationController {
         return messageList;
     }
 
-    @PostMapping("/root/registration/students/automatic")
+    @PostMapping("/admin/registration/students/automatic")
     public String AutomaticStudentsRegistration (@ModelAttribute("automaticStudentForm")
             @Validated AutomaticStudentForm automaticStudentForm) throws IOException {
         return usersService.studentAutomaticRegistration(automaticStudentForm);
