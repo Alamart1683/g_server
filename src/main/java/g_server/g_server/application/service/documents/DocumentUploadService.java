@@ -6,12 +6,14 @@ import g_server.g_server.application.entity.forms.AdvisorReportDocumentForm;
 import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.forms.DocumentOrderForm;
 import g_server.g_server.application.entity.forms.DocumentVersionForm;
+import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;
+import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
@@ -88,6 +90,12 @@ public class DocumentUploadService {
     @Autowired
     private AssociatedStudentsRepository associatedStudentsRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private ViewRightsProjectRepository viewRightsProjectRepository;
+
     public void createDocumentRootDirIfIsNotExist() {
         String rootDocDirPath = "src" + File.separator + "main" +
                 File.separator + "resources" + File.separator + "users_documents";
@@ -126,6 +134,7 @@ public class DocumentUploadService {
         // Проверим права доступа
         Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
         String projectAreaName = documentForm.getProjectArea();
+        String projectName = documentForm.getProjectName();
         // Проверим корректное разрешение файла
         String fileExtension = getFileExtension(documentForm.getFile());
         if (fileExtension.length() == 0)
@@ -139,7 +148,9 @@ public class DocumentUploadService {
         // Если зоны видимости не нулевые, проверим их
         if (messagesList.size() == 0) {
             if (viewRights == 6 && projectAreaName == null) {
-                messagesList.add("Не указано имя проекта для добавления ему документа");
+                messagesList.add("Не указано имя проектной области для добавления ей документа");
+            } else if (viewRights == 8 && (projectName == null || projectAreaName == null)) {
+                messagesList.add("Не указано имя проекта или его проектной области для добавления ему документа");
             }
             Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
             if (roleID != 3 && viewRights == 5) {
@@ -205,6 +216,34 @@ public class DocumentUploadService {
                                     viewRightsArea.setDocument(document.getId());
                                     viewRightsAreaRepository.save(viewRightsArea);
                                 }
+                            // Если привзяка документа осуществляется к проекту области
+                            } else if (viewRights == 8) {
+                                ProjectArea projectArea;
+                                Project project;
+                                try {
+                                    projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
+                                    project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                                } catch (NullPointerException nullPointerException) {
+                                    projectArea = null;
+                                    project = null;
+                                }
+                                if (projectArea != null && project != null) {
+                                    if (project.getArea() == projectArea.getId()) {
+                                        ViewRightsProject viewRightsProject = new ViewRightsProject();
+                                        viewRightsProject.setProject(project.getId());
+                                        viewRightsProject.setDocument(document.getId());
+                                        viewRightsProjectRepository.save(viewRightsProject);
+                                    } else {
+                                        Document changingDocument = documentRepository.findByCreatorAndName(creator_id, document.getName());
+                                        changingDocument.setView_rights(1);
+                                        documentService.save(changingDocument);
+                                    }
+                                } else {
+                                    Document changingDocument = documentRepository.findByCreatorAndName(creator_id, document.getName());
+                                    changingDocument.setView_rights(1);
+                                    documentService.save(changingDocument);
+                                }
+
                             }
                             // Далее создадим запись о первой версии документа в таблице версий
                             int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();

@@ -76,6 +76,9 @@ public class DocumentViewService {
     @Autowired
     private SpecialityRepository specialityRepository;
 
+    @Autowired
+    private ViewRightsProjectRepository viewRightsProjectRepository;
+
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
@@ -124,6 +127,23 @@ public class DocumentViewService {
                         return false;
                     }
                 }
+                else if (documentView == 8) {
+                    OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(student.getId());
+                    if (occupiedStudent != null) {
+                        ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                        if (viewRightsProject != null) {
+                            if (viewRightsProject.getProject() == occupiedStudent.getProjectID()) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
                 else {
                     return false;
                 }
@@ -154,10 +174,10 @@ public class DocumentViewService {
             // TODO этот момент надо учесть при загрузке прав видимости документов на клиент
             // TODO то есть в идеале надо сделать отдельную выдачу списка типов документов и прав видимостей
             // TODO для научных руководителей и заведующего кафедрой
-            if (documentView > 0 || documentView < 8) {
+            if (documentView > 0 || documentView < 9) {
                 // Если документ может видеть только его создатель или документ привязан к проекту и
                 // его может видеть создатель проектной области
-                if (documentView == 1 || documentView == 6) {
+                if (documentView == 1 || documentView == 6 || documentView == 8) {
                     // Если желающий увидеть документ НР сам его загрузил
                     if (lookingAdvisor.getId() == documentCreator.getId()) {
                         return true;
