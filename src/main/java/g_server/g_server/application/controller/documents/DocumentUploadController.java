@@ -52,7 +52,7 @@ public class DocumentUploadController {
     public List<String> studentUploadReport (
             @ModelAttribute("documentForm") @Validated DocumentForm documentForm,
             HttpServletRequest httpServletRequest
-    ) {
+    ) throws Exception {
         documentForm.setToken(getTokenFromRequest(httpServletRequest));
         return documentUploadService.uploadStudentReport(documentForm);
     }

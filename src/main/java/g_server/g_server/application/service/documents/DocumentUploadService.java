@@ -21,9 +21,8 @@ import g_server.g_server.application.service.documents.crud.DocumentVersionServi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -424,7 +423,7 @@ public class DocumentUploadService {
     }
 
     // Метод загрузки студентом отчёта по работе:
-    public List<String> uploadStudentReport(DocumentForm documentForm) {
+    public List<String> uploadStudentReport(DocumentForm documentForm) throws Exception {
         List<String> messagesList = new ArrayList<>();
         Integer creator_id = null;
         if (documentForm.getToken() == null) {
@@ -458,7 +457,7 @@ public class DocumentUploadService {
             messagesList.add("Ошибка загрузки файла. Такого файла не существует");
         }
         String fileExtension = getFileExtension(documentForm.getFile());
-        if (fileExtension.length() == 0) {
+        if (fileExtension.length() == 0 || !fileExtension.equals("docx")) {
             messagesList.add("Попытка загрузить документ с некорректным разрешением");
         }
         Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
@@ -482,7 +481,7 @@ public class DocumentUploadService {
             }
             String fileName =
                     documentProcessorService.getShortFio(student.getSurname() + " " + student.getName() + " " + student.getSecond_name())
-                            + " " + student.getStudentData().getStudentGroup().getStudentGroup() + " содержание отчёта по " + documentForm.getDocumentFormType() + ".docx";
+                            + " " + student.getStudentData().getStudentGroup().getStudentGroup() + " отчёт по " + documentForm.getDocumentFormType() + ".docx";
             String documentPath = studentDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
             // Проверим что одноименный файл не был загружен пользователем
@@ -494,13 +493,34 @@ public class DocumentUploadService {
                 String currentDate = getCurrentDate();
                 String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
                 String versionPath = documentDirectory.getPath() + File.separator +
-                        "version_" + currentDate + "." + fileExtension;
+                        "temp_version_" + currentDate + "." + fileExtension;
                 Path uploadingFilePath = Paths.get(versionPath);
+                File lastTaskVersionFile = null;
                 try {
                     Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
                     // Если тип отчтёта - НИР
                     if (reportType == 1) {
-                        if (documentRepository.findByCreatorAndName(creator_id, fileName) == null) {
+                        // Найдем последнюю версию задания, необходимую для загрузки отчёта
+                        Document task;
+                        List<DocumentVersion> taskVersions;
+                        try {
+                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, creator_id).get(0);
+                            taskVersions = documentVersionRepository.findByDocument(task.getId());
+                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                            for (DocumentVersion taskVersion: taskVersions) {
+                                if (taskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                    approvedTaskVersions.add(taskVersion);
+                                }
+                            }
+                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                        } catch (NoSuchElementException noSuchElementException) {
+                            messagesList.add("Не найдено одобренное задание");
+                        } catch (Exception e) {
+                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                        }
+                        // Если найдено задание последней версии, то присоединим к нему файл с содержанием отчёта и запишем как отчёт
+                        if (documentRepository.findByCreatorAndName(creator_id, fileName) == null && messagesList.size() == 0) {
                             if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                                 // После этого занесем загруженный файл в таблицу документов
                                 Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
@@ -511,11 +531,21 @@ public class DocumentUploadService {
                                 // Далее создадим запись о первой версии документа в таблице версий
                                 int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                                 DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
-                                        sqlDateTime, "Загрузка отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath);
+                                        sqlDateTime, "Загрузка отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath.replaceAll("temp_", ""));
                                 documentVersionService.save(documentVersion);
-                                messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
                                 nirReportRepository.save(nirReport);
+                                InputStream taskStream = new FileInputStream(lastTaskVersionFile);
+                                File uploadedTempReportVersion = new File(versionPath);
+                                InputStream reportStream = new FileInputStream(uploadedTempReportVersion);
+                                File finalReportVersion = new File(versionPath.replaceAll("temp_", ""));
+                                OutputStream destinationStream = new FileOutputStream(finalReportVersion);
+                                documentProcessorService.makeUsWhole(taskStream, reportStream, destinationStream);
+                                taskStream.close();
+                                reportStream.close();
+                                destinationStream.close();
+                                uploadedTempReportVersion.delete();
+                                messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки файла");
                                 if (documentDirectory != null) {
@@ -524,13 +554,15 @@ public class DocumentUploadService {
                                     }
                                 }
                             }
-                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                        // Если отчет уже был загружен в прошлый раз, добавим его новую версию
                         } else if (documentRepository.findByCreatorAndName(creator_id, fileName) != null) {
                             if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                                 // Далее создадим запись о новой версии отчёта в таблице версий
                                 int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                                 DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
-                                        sqlDateTime, "Загрузка версии отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath);
+                                        sqlDateTime, "Загрузка версии отчёта по " +
+                                        documentForm.getDocumentFormType() + " на сайт",
+                                        versionPath.replaceAll("temp_", ""));
                                 documentVersionService.save(documentVersion);
                                 messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
@@ -580,7 +612,7 @@ public class DocumentUploadService {
         return messagesList;
     }
 
-    // Метод загрузки студентом отчёта по работе:
+    // Метод загрузки версии отчёта научным руководителем студенту
     public List<String> uploadAdvisorStudentReportVersion(AdvisorReportDocumentForm documentForm) {
         List<String> messagesList = new ArrayList<String>();
         Integer advisorID = null;

@@ -6,8 +6,8 @@ public class AdvisorReportDocumentForm extends DocumentForm {
     private int studentID;
 
     public AdvisorReportDocumentForm(String type, String kind, String description, String viewRights,
-                                     String projectName, String token, MultipartFile file, int studentID) {
-        super(type, kind, description, viewRights, projectName, token, file);
+                                     String projectArea, String projectName, String token, MultipartFile file, int studentID) {
+        super(type, kind, description, viewRights, projectArea, projectName, token, file);
         this.studentID = studentID;
     }
 

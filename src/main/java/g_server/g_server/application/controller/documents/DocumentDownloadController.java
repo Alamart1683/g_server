@@ -76,8 +76,8 @@ public class DocumentDownloadController {
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse
     ) {
-        File reportFile = documentDownloadService.studentDownloadReportVersionWithApprovedTask(
-                getTokenFromRequest(httpServletRequest), type, reportVersion);
+        // File reportFile = documentDownloadService.studentDownloadReportVersionWithApprovedTask(getTokenFromRequest(httpServletRequest), type, reportVersion);
+        File reportFile = documentDownloadService.findDownloadDocumentVersion(reportVersion);
         if (reportFile != null) {
             String contentType = documentDownloadService.getContentType(reportFile.getName());
             String mainName = "Версия отчёта.docx";
@@ -87,7 +87,7 @@ public class DocumentDownloadController {
             try {
                 Files.copy(reportPath, httpServletResponse.getOutputStream());
                 httpServletResponse.getOutputStream().flush();
-                reportFile.delete();
+                // reportFile.delete();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
@@ -102,8 +102,8 @@ public class DocumentDownloadController {
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse
     ) {
-        File reportFile = documentDownloadService.advisorDownloadReportVersionWithApprovedTask(
-                getTokenFromRequest(httpServletRequest), type, reportVersion, studentID);
+        // File reportFile = documentDownloadService.advisorDownloadReportVersionWithApprovedTask(getTokenFromRequest(httpServletRequest), type, reportVersion, studentID);
+        File reportFile = documentDownloadService.findDownloadDocumentVersion(reportVersion);
         if (reportFile != null) {
             String contentType = documentDownloadService.getContentType(reportFile.getName());
             String mainName = "Версия отчёта.docx";
@@ -113,7 +113,7 @@ public class DocumentDownloadController {
             try {
                 Files.copy(reportPath, httpServletResponse.getOutputStream());
                 httpServletResponse.getOutputStream().flush();
-                reportFile.delete();
+                // reportFile.delete();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }

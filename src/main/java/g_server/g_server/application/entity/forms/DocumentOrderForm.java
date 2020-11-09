@@ -12,9 +12,9 @@ public class DocumentOrderForm extends DocumentForm {
     public DocumentOrderForm() { }
 
     public DocumentOrderForm(String type, String kind, String description, String viewRights,
-        String projectName, String token, String number, String orderDate,
+        String projectArea, String projectName, String token, String number, String orderDate,
         String startDate, String endDate, String speciality, MultipartFile file) {
-        super(type, kind, description, viewRights, projectName, token, file);
+        super(type, kind, description, viewRights, projectArea, projectName, token, file);
         this.number = number;
         this.orderDate = orderDate;
         this.startDate = startDate;
