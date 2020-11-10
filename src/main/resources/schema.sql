@@ -213,6 +213,8 @@ create table nir_task (
 
 create table nir_report (
     versionID int not null unique,
+    detailed_content varchar(2048) not null,
+    advisor_conclusion varchar(2048) not null,
     nir_report_status int not null,
     foreign key (versionID) references document_version (id) on delete cascade on update cascade,
     foreign key (nir_report_status) references  document_status (id)

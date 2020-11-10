@@ -4,10 +4,7 @@ import com.aspose.words.ImportFormatMode;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.documents.Document;
-import g_server.g_server.application.entity.forms.AdvisorReportDocumentForm;
-import g_server.g_server.application.entity.forms.DocumentForm;
-import g_server.g_server.application.entity.forms.DocumentOrderForm;
-import g_server.g_server.application.entity.forms.DocumentVersionForm;
+import g_server.g_server.application.entity.forms.*;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.system_data.Speciality;
@@ -22,6 +19,7 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.crud.DocumentVersionService;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -473,16 +471,13 @@ public class DocumentUploadService {
         return messagesList;
     }
 
-    // Метод загрузки студентом отчёта по работе:
-    public List<String> uploadStudentReport(DocumentForm documentForm) throws Exception {
+    // Метод загрузки студентом отчёта по работе с присоединением тела отчёта к титулам:
+    public List<String> uploadStudentReport(DocumentFormReport documentForm) throws Exception {
         createDocumentRootDirIfIsNotExist();
         List<String> messagesList = new ArrayList<>();
         Integer creator_id = null;
         if (documentForm.getToken() == null) {
             messagesList.add("Ошибка аутентификации: токен равен null");
-        }
-        if (messagesList.size() == 0) {
-
         }
         if (documentForm.getToken().equals("")) {
             messagesList.add("Ошибка аутентификации: токен пуст");
@@ -587,11 +582,23 @@ public class DocumentUploadService {
                                 DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
                                         sqlDateTime, "Загрузка отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath);
                                 documentVersionService.save(documentVersion);
-                                NirReport nirReport = new NirReport(documentVersion.getId(), 1);
+                                NirReport nirReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    nirReport = new NirReport(
+                                            documentVersion.getId(),
+                                            documentForm.getDetailedContent(),
+                                            documentForm.getAdvisorConclusion(),
+                                            1
+                                    );
+                                } else {
+                                    nirReport = new NirReport(documentVersion.getId(), 1);
+                                }
                                 nirReportRepository.save(nirReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
                                 Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                documentProcessorService.reportProcessing(finalReportVersion,
+                                        nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
                                 com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
                                 com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
                                 destination.appendDocument(source, ImportFormatMode.KEEP_SOURCE_FORMATTING);
@@ -610,7 +617,7 @@ public class DocumentUploadService {
                         // Если отчет уже был загружен в прошлый раз, добавим его новую версию
                         } else if (documentRepository.findByCreatorAndName(creator_id, fileName) != null) {
                             if (multipartFileToFileWrite(documentForm.getFile(),
-                                    Paths.get(versionPath))) {
+                                    Paths.get(tempVersionPath))) {
                                 // Далее создадим запись о новой версии отчёта в таблице версий
                                 int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                                 DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
@@ -619,8 +626,29 @@ public class DocumentUploadService {
                                         versionPath);
                                 documentVersionService.save(documentVersion);
                                 messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
-                                NirReport nirReport = new NirReport(documentVersion.getId(), 1);
+                                NirReport nirReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    nirReport = new NirReport(
+                                            documentVersion.getId(),
+                                            documentForm.getDetailedContent(),
+                                            documentForm.getAdvisorConclusion(),
+                                            1
+                                    );
+                                } else {
+                                    nirReport = new NirReport(documentVersion.getId(), 1);
+                                }
                                 nirReportRepository.save(nirReport);
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
+                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                documentProcessorService.reportProcessing(finalReportVersion,
+                                        nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
+                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                destination.appendDocument(source, ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                destination.save(finalReportVersion.getPath());
+                                uploadedTempReportVersion.delete();
+                                messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
@@ -666,8 +694,8 @@ public class DocumentUploadService {
         return messagesList;
     }
 
-    // Метод загрузки версии отчёта научным руководителем студенту
-    public List<String> uploadAdvisorStudentReportVersion(AdvisorReportDocumentForm documentForm) {
+    // Метод загрузки версии отчёта научным руководителем студенту с присоединением тела отчёта к титулам
+    public List<String> uploadAdvisorStudentReportVersion(AdvisorReportDocumentForm documentForm) throws Exception {
         createDocumentRootDirIfIsNotExist();
         List<String> messagesList = new ArrayList<String>();
         Integer advisorID = null;
@@ -744,11 +772,33 @@ public class DocumentUploadService {
                 String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
                 String versionPath = documentDirectory.getPath() + File.separator +
                         "version_" + currentDate + "." + fileExtension;
-                Path uploadingFilePath = Paths.get(versionPath);
+                String tempVersionPath = documentDirectory.getPath() + File.separator +
+                        "temp_version_" + currentDate + "." + fileExtension;
+                Path uploadingFilePath = Paths.get(tempVersionPath);
+                File lastTaskVersionFile = null;
                 try {
                     Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
                     // Если тип отчтёта - НИР
                     if (reportType == 1) {
+                        // Найдем последнюю версию задания, необходимую для загрузки отчёта
+                        Document task;
+                        List<DocumentVersion> taskVersions;
+                        try {
+                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, advisorID).get(0);
+                            taskVersions = documentVersionRepository.findByDocument(task.getId());
+                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                            for (DocumentVersion taskVersion: taskVersions) {
+                                if (taskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                    approvedTaskVersions.add(taskVersion);
+                                }
+                            }
+                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                        } catch (NoSuchElementException noSuchElementException) {
+                            messagesList.add("Не найдено одобренное задание");
+                        } catch (Exception e) {
+                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                        }
                         if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
                             messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
                             return messagesList;
@@ -764,8 +814,29 @@ public class DocumentUploadService {
                                             documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
                                     documentVersionService.save(documentVersion);
                                     messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
-                                    NirReport nirReport = new NirReport(documentVersion.getId(), 1);
+                                    NirReport nirReport;
+                                    if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                        nirReport = new NirReport(
+                                                documentVersion.getId(),
+                                                documentForm.getDetailedContent(),
+                                                documentForm.getAdvisorConclusion(),
+                                                1
+                                        );
+                                    } else {
+                                        nirReport = new NirReport(documentVersion.getId(), 1);
+                                    }
                                     nirReportRepository.save(nirReport);
+                                    File uploadedTempReportVersion = new File(tempVersionPath);
+                                    File finalReportVersion = new File(versionPath);
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    uploadedTempReportVersion.delete();
+                                    messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }

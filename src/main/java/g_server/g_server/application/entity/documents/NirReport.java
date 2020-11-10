@@ -9,6 +9,12 @@ public class NirReport {
     @Column(name = "versionID")
     private int versionID;
 
+    @Column(name = "detailed_content")
+    private String detailedContent;
+
+    @Column(name = "advisor_conclusion")
+    private String advisorConclusion;
+
     @Column(name = "nir_report_status")
     private int nirReportStatus;
 
@@ -20,6 +26,16 @@ public class NirReport {
 
     public NirReport(int versionID, int nirReportStatus) {
         this.versionID = versionID;
+        this.detailedContent = "Подробное содержание проделанной работы";
+        this.advisorConclusion = "Заключение научного руководителя о выполненной работе";
+        this.nirReportStatus = nirReportStatus;
+    }
+
+    public NirReport(int versionID, String detailedContent, String advisorConclusion,
+                     int nirReportStatus) {
+        this.versionID = versionID;
+        this.detailedContent = detailedContent;
+        this.advisorConclusion = advisorConclusion;
         this.nirReportStatus = nirReportStatus;
     }
 
@@ -45,5 +61,21 @@ public class NirReport {
 
     public void setDocumentStatus(DocumentStatus documentStatus) {
         this.documentStatus = documentStatus;
+    }
+
+    public String getDetailedContent() {
+        return detailedContent;
+    }
+
+    public void setDetailedContent(String detailedContent) {
+        this.detailedContent = detailedContent;
+    }
+
+    public String getAdvisorConclusion() {
+        return advisorConclusion;
+    }
+
+    public void setAdvisorConclusion(String advisorConclusion) {
+        this.advisorConclusion = advisorConclusion;
     }
 }

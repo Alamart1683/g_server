@@ -337,6 +337,7 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("СОЗДАТЬ", toLowerCaseFirstSymbol(taskDataView.getToCreate()));
         wordReplaceService.replaceWordsInText("ОЗНАКОМИТЬСЯ", toLowerCaseFirstSymbol(taskDataView.getToFamiliarize()));
         wordReplaceService.replaceWordsInText("ДОПЗАДАНИЕ", toLowerCaseFirstSymbol(taskDataView.getAdditionalTask()));
+        wordReplaceService.replaceWordsInText("ГОД", taskDataView.getOrderStartDate().substring(6, 10));
         // Заменим слова в таблицах документа
         wordReplaceService.replaceWordsInTables("Короткая дата начала НИР", taskDataView.getOrderStartDate());
         wordReplaceService.replaceWordsInTables("Короткая дата конца НИР", taskDataView.getOrderEndDate());
@@ -369,6 +370,16 @@ public class DocumentProcessorService {
             wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомиться " + taskDataView.getToFamiliarize());
         }
         wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
+    }
+
+    public void reportProcessing(File templateFile, String detailedContent, String advisorsConclusion) throws Exception {
+        InputStream inputStream = new FileInputStream(templateFile);
+        XWPFDocument template = new XWPFDocument(inputStream);
+        WordReplaceService wordReplaceService = new WordReplaceService(template);
+        wordReplaceService.replaceWordsInText("СОДЕРЖАНИЕ", detailedContent);
+        wordReplaceService.replaceWordsInText("ЗАКЛЮЧЕНИЕ", advisorsConclusion);
+        inputStream.close();
+        wordReplaceService.saveAndGetModdedFile(templateFile);
     }
 
     // Сохранить задание на НИР как документ

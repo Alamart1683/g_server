@@ -1,9 +1,6 @@
 package g_server.g_server.application.controller.documents;
 
-import g_server.g_server.application.entity.forms.AdvisorReportDocumentForm;
-import g_server.g_server.application.entity.forms.DocumentForm;
-import g_server.g_server.application.entity.forms.DocumentOrderForm;
-import g_server.g_server.application.entity.forms.DocumentVersionForm;
+import g_server.g_server.application.entity.forms.*;
 import g_server.g_server.application.service.documents.DocumentUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -50,7 +47,7 @@ public class DocumentUploadController {
 
     @PostMapping("/student/document/report/upload")
     public List<String> studentUploadReport (
-            @ModelAttribute("documentForm") @Validated DocumentForm documentForm,
+            @ModelAttribute("documentForm") @Validated DocumentFormReport documentForm,
             HttpServletRequest httpServletRequest
     ) throws Exception {
         documentForm.setToken(getTokenFromRequest(httpServletRequest));
@@ -61,7 +58,7 @@ public class DocumentUploadController {
     public List<String> advisorUploadReportVersion (
             @ModelAttribute("documentForm") @Validated AdvisorReportDocumentForm documentForm,
             HttpServletRequest httpServletRequest
-    ) {
+    ) throws Exception {
         documentForm.setToken(getTokenFromRequest(httpServletRequest));
         return documentUploadService.uploadAdvisorStudentReportVersion(documentForm);
     }
