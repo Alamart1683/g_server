@@ -1,8 +1,6 @@
 package g_server.g_server.application.entity.documents;
 
 import g_server.g_server.application.entity.system_data.Speciality;
-import g_server.g_server.application.entity.system_data.StudentGroup;
-
 import javax.persistence.*;
 
 @Entity
@@ -25,6 +23,9 @@ public class OrderProperties {
 
     @Column(name = "speciality")
     private int speciality;
+
+    @Column(name = "is_approved")
+    private boolean isApproved;
 
     @ManyToOne
     @JoinColumn(name = "speciality", referencedColumnName = "id", insertable = false, updatable = false)
@@ -88,5 +89,13 @@ public class OrderProperties {
 
     public void setSpeciality(int speciality) {
         this.speciality = speciality;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }

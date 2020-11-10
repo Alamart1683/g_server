@@ -1,5 +1,6 @@
 package g_server.g_server.application.service.documents;
 
+import com.aspose.words.ImportFormatMode;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.documents.Document;
@@ -22,6 +23,7 @@ import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.crud.DocumentVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
@@ -34,8 +36,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-// TODO Сделать проверку размера загружаемого файла
 public class DocumentUploadService {
+    @Value("${storage.location}")
+    private String storageLocation;
+
     @Autowired
     private JwtProvider jwtProvider;
 
@@ -96,9 +100,11 @@ public class DocumentUploadService {
     @Autowired
     private ViewRightsProjectRepository viewRightsProjectRepository;
 
+    @Autowired
+    private TemplatePropertiesRepository templatePropertiesRepository;
+
     public void createDocumentRootDirIfIsNotExist() {
-        String rootDocDirPath = "src" + File.separator + "main" +
-                File.separator + "resources" + File.separator + "users_documents";
+        String rootDocDirPath = storageLocation;
         File rootDocDir = new File(rootDocDirPath);
         if (!rootDocDir.exists()) {
             rootDocDir.mkdir();
@@ -161,8 +167,7 @@ public class DocumentUploadService {
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             // Создание директории документов научного руководителя
-            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" +
-                    File.separator + "resources" + File.separator + "users_documents" + File.separator + creator_id;
+            String scientificAdvisorDocumentsPath = storageLocation + File.separator + creator_id;
             File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
             if (!scientificAdvisorDirectory.exists())
                 scientificAdvisorDirectory.mkdir();
@@ -250,6 +255,13 @@ public class DocumentUploadService {
                             DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
                                     sqlDateTime, "Загрузка документа на сайт", versionPath);
                             documentVersionService.save(documentVersion);
+                            // Если документ является шаблоном задания
+                            if (document.getKind() == 5) {
+                                TemplateProperties templateProperties = new TemplateProperties();
+                                templateProperties.setId(document.getId());
+                                templateProperties.setType(document.getType());
+                                templatePropertiesRepository.save(templateProperties);
+                            }
                             messagesList.add("Документ был успешно загружен");
                         }
                         else {
@@ -284,6 +296,7 @@ public class DocumentUploadService {
 
     // Метод загрузки версии документа
     public List<String> uploadDocumentVersion(DocumentVersionForm documentVersionForm) {
+        createDocumentRootDirIfIsNotExist();
         List<String> messagesList = new ArrayList<String>();
         // Определим айди научного руководителя
         Integer editor_id = null;
@@ -383,8 +396,7 @@ public class DocumentUploadService {
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
             // Создание директории документов научного руководителя
-            String scientificAdvisorDocumentsPath = "src" + File.separator + "main" + File.separator + "resources"
-                    + File.separator + "users_documents" + File.separator + creator_id;
+            String scientificAdvisorDocumentsPath = storageLocation + File.separator + creator_id;
             File scientificAdvisorDirectory = new File(scientificAdvisorDocumentsPath);
             if (!scientificAdvisorDirectory.exists())
                 scientificAdvisorDirectory.mkdir();
@@ -463,6 +475,7 @@ public class DocumentUploadService {
 
     // Метод загрузки студентом отчёта по работе:
     public List<String> uploadStudentReport(DocumentForm documentForm) throws Exception {
+        createDocumentRootDirIfIsNotExist();
         List<String> messagesList = new ArrayList<>();
         Integer creator_id = null;
         if (documentForm.getToken() == null) {
@@ -512,7 +525,7 @@ public class DocumentUploadService {
         }
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
-            String studentDocumentsPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "users_documents" + File.separator + creator_id;
+            String studentDocumentsPath = storageLocation + File.separator + creator_id;
             File scientificAdvisorDirectory = new File(studentDocumentsPath);
 
             if (!scientificAdvisorDirectory.exists()) {
@@ -581,7 +594,7 @@ public class DocumentUploadService {
                                 Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
                                 com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
                                 com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_DIFFERENT_STYLES);
+                                destination.appendDocument(source, ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
                                 uploadedTempReportVersion.delete();
@@ -655,6 +668,7 @@ public class DocumentUploadService {
 
     // Метод загрузки версии отчёта научным руководителем студенту
     public List<String> uploadAdvisorStudentReportVersion(AdvisorReportDocumentForm documentForm) {
+        createDocumentRootDirIfIsNotExist();
         List<String> messagesList = new ArrayList<String>();
         Integer advisorID = null;
         if (documentForm.getToken() == null) {
@@ -707,8 +721,7 @@ public class DocumentUploadService {
         }
         // После этого разместим файл на сервере
         if (messagesList.size() == 0) {
-            String studentDocumentsPath = "src" + File.separator + "main" + File.separator + "resources" +
-                    File.separator + "users_documents" + File.separator + student.getId();
+            String studentDocumentsPath = storageLocation + File.separator + student.getId();
             File scientificAdvisorDirectory = new File(studentDocumentsPath);
             if (!scientificAdvisorDirectory.exists()) {
                 scientificAdvisorDirectory.mkdir();

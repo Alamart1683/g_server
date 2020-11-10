@@ -10,9 +10,10 @@ public class DocumentViewOrder extends DocumentView {
     private String number;
     private String speciality;
     private String specialityCode;
+    private boolean isApproved;
 
     public DocumentViewOrder(Document document, List<DocumentVersionView> documentVersions, String orderDate,
-             String startDate, String endDate, String number, String speciality, String specialityCode) {
+             String startDate, String endDate, String number, String speciality, String specialityCode, boolean isApproved) {
         super(document, documentVersions);
         this.orderDate = orderDate;
         this.startDate = startDate;
@@ -20,6 +21,7 @@ public class DocumentViewOrder extends DocumentView {
         this.number = number;
         this.speciality = speciality;
         this.specialityCode = specialityCode;
+        this.isApproved = isApproved;
     }
 
     public String getOrderDate() {
@@ -68,5 +70,13 @@ public class DocumentViewOrder extends DocumentView {
 
     public void setSpecialityCode(String specialityCode) {
         this.specialityCode = specialityCode;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }

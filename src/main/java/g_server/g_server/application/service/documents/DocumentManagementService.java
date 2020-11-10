@@ -1,9 +1,6 @@
 package g_server.g_server.application.service.documents;
 
-import g_server.g_server.application.entity.documents.Document;
-import g_server.g_server.application.entity.documents.DocumentVersion;
-import g_server.g_server.application.entity.documents.ViewRightsArea;
-import g_server.g_server.application.entity.documents.ViewRightsProject;
+import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.users.AssociatedStudents;
@@ -60,6 +57,12 @@ public class DocumentManagementService {
 
     @Autowired
     private ProjectAreaRepository projectAreaRepository;
+
+    @Autowired
+    private TemplatePropertiesRepository templatePropertiesRepository;
+
+    @Autowired
+    private OrderPropertiesRepository orderPropertiesRepository;
 
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
@@ -707,5 +710,51 @@ public class DocumentManagementService {
                     -1, -1, -1, -1, -1, -1,
                     -1, -1, -1);
         }
+    }
+
+    // Одобрить шаблон
+    public String approveTemplate(String token, Integer documentID) {
+        Integer creatorID = documentUploadService.getCreatorId(token);
+        Document template;
+        try {
+            template = documentRepository.findById(documentID).get();
+            if (template.getKind() == 5) {
+                TemplateProperties templateProperties;
+                try {
+                    templateProperties = templatePropertiesRepository.findById(template.getId()).get();
+                    templateProperties.setApproved(true);
+                    templatePropertiesRepository.save(templateProperties);
+                    return "Шаблон успешно одобрен";
+                } catch (NoSuchElementException noSuchElementException) {
+                    return "У шаблона отсутствует статус, ошибка целостности";
+                }
+            }
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Шаблон не найден";
+        }
+        return "Что-то пошло не так";
+    }
+
+    // Одобрить приказ
+    public String approveOrder(String token, Integer documentID) {
+        Integer creatorID = documentUploadService.getCreatorId(token);
+        Document order;
+        try {
+            order = documentRepository.findById(documentID).get();
+            if (order.getKind() == 1) {
+                OrderProperties orderProperties;
+                try {
+                    orderProperties = orderPropertiesRepository.findById(order.getId()).get();
+                    orderProperties.setApproved(true);
+                    orderPropertiesRepository.save(orderProperties);
+                    return "Приказ успешно одобрен";
+                } catch (NoSuchElementException noSuchElementException) {
+                    return "У приказа отсутствует статус, ошибка целостности";
+                }
+            }
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Приказ не найден";
+        }
+        return "Что-то пошло не так";
     }
 }

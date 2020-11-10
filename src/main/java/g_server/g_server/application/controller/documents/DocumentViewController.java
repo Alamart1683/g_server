@@ -28,7 +28,7 @@ public class DocumentViewController {
     }
 
     @GetMapping("/document/view/templates")
-    public List<DocumentView> getTemplatesView(HttpServletRequest httpServletRequest) {
+    public List<DocumentViewTemplate> getTemplatesView(HttpServletRequest httpServletRequest) {
         return documentViewService.getTemplates(getTokenFromRequest(httpServletRequest));
     }
 

@@ -181,8 +181,17 @@ create table order_properties (
     start_date date not null,
     end_date date not null,
     speciality int not null,
+    is_approved bool not null default false,
     foreign key (id) references document(id) on delete cascade on update cascade,
     foreign key (speciality) references speciality(id)
+);
+
+create table template_properties (
+    id int primary key not null,
+    type int not null unique,
+    is_approved bool not null default false,
+    foreign key (id) references document(id) on delete cascade on update cascade,
+    foreign key (type) references document_type(id)
 );
 
 create table document_status (
@@ -305,7 +314,8 @@ insert into document_kind (kind) values
     ('Приказ'),
     ('Задание'),
     ('Отчёт'),
-    ('Образец');
+    ('Образец'),
+    ('Шаблон');
 
 insert into speciality values
     ('1', '09.03.04', 'ИКБО', 'Программная инженерия'),

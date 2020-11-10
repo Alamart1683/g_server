@@ -266,4 +266,20 @@ public class DocumentManagementController {
         return documentManagementService.advisorDeleteReportVersion(
                 getTokenFromRequest(httpServletRequest), versionID, studentID);
     }
+
+    @PostMapping("/head_of_cathedra/only/approve/template")
+    public String approveTemplate(
+        HttpServletRequest httpServletRequest,
+        @RequestParam Integer documentID
+    ) {
+        return documentManagementService.approveTemplate(getTokenFromRequest(httpServletRequest), documentID);
+    }
+
+    @PostMapping("/head_of_cathedra/only/approve/order")
+    public String approveOrder(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer documentID
+    ) {
+        return documentManagementService.approveOrder(getTokenFromRequest(httpServletRequest), documentID);
+    }
 }

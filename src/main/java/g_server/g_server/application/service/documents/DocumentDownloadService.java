@@ -7,6 +7,7 @@ import g_server.g_server.application.repository.documents.DocumentVersionReposit
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.print.Doc;
@@ -20,6 +21,8 @@ import static org.springframework.util.StringUtils.hasText;
 
 @Service
 public class DocumentDownloadService {
+    @Value("${storage.location}")
+    private String storageLocation;
 
     @Autowired
     private DocumentRepository documentRepository;
@@ -87,8 +90,7 @@ public class DocumentDownloadService {
                 DocumentVersion lastReportVersion = documentVersionRepository.findById(reportVersion).get();
                 File lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
                 File lastReportVersionFile = new File(lastReportVersion.getThis_version_document_path());
-                File destinationFile = new File("src" + File.separator + "main" + File.separator + "resources" +
-                        File.separator + "users_documents" + File.separator + studentID + File.separator + "temp.docx");
+                File destinationFile = new File(storageLocation + File.separator + studentID + File.separator + "temp.docx");
                 InputStream taskStream = new FileInputStream(lastTaskVersionFile);
                 InputStream reportStream = new FileInputStream(lastReportVersionFile);
                 OutputStream outputStream = new FileOutputStream(destinationFile);
@@ -124,13 +126,11 @@ public class DocumentDownloadService {
                 DocumentVersion lastReportVersion = documentVersionRepository.findById(reportVersion).get();
                 File lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
                 File lastReportVersionFile = new File(lastReportVersion.getThis_version_document_path());
-                File advisorDir = new File("src" + File.separator + "main" + File.separator + "resources" +
-                        File.separator + "users_documents" + File.separator + advisorID);
+                File advisorDir = new File(storageLocation + File.separator + advisorID);
                 if (!advisorDir.exists()) {
                     advisorDir.mkdir();
                 }
-                File destinationFile = new File("src" + File.separator + "main" + File.separator + "resources" +
-                        File.separator + "users_documents" + File.separator + advisorID + File.separator + "temp.docx");
+                File destinationFile = new File(storageLocation + File.separator + advisorID + File.separator + "temp.docx");
                 InputStream taskStream = new FileInputStream(lastTaskVersionFile);
                 InputStream reportStream = new FileInputStream(lastReportVersionFile);
                 OutputStream outputStream = new FileOutputStream(destinationFile);

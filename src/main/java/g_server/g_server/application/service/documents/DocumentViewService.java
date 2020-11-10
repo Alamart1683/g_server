@@ -376,6 +376,8 @@ public class DocumentViewService {
     public List<DocumentViewOrder> getOrders(String token) {
         List<DocumentView> allDocumentViewList = getUserDocumentView(token);
         List<DocumentViewOrder> orderList = new ArrayList<>();
+        Integer userID = associatedStudentsService.getUserId(token);
+        Integer userRoleID = usersRolesRepository.findUsersRolesByUserId(userID).getRoleId();
         if (allDocumentViewList != null) {
             for (DocumentView currentView: allDocumentViewList) {
                 if (currentView.getDocumentKind().equals("Приказ")) {
@@ -385,7 +387,9 @@ public class DocumentViewService {
                     if (orderPropertiesRepository.findById(order.getId()).isPresent()) {
                         orderProperties = orderPropertiesRepository.findById(order.getId()).get();
                         Speciality speciality;
-                        if (specialityRepository.findById(orderProperties.getSpeciality()).isPresent()) {
+                        // Завкафедрой видит все приказы, в том числе и неодобренные, остальные только одобренные
+                        if (specialityRepository.findById(orderProperties.getSpeciality()).isPresent()
+                                && (orderProperties.isApproved() || userRoleID == 3)) {
                             speciality = specialityRepository.findById(orderProperties.getSpeciality()).get();
                             orderList.add(
                                 new DocumentViewOrder(
@@ -396,7 +400,8 @@ public class DocumentViewService {
                                     currentView.getRussianDate(orderProperties.getEndDate()),
                                     orderProperties.getNumber(),
                                     speciality.getSpeciality(),
-                                    speciality.getCode()
+                                    speciality.getCode(),
+                                    orderProperties.isApproved()
                                 )
                             );
                         }
@@ -408,18 +413,28 @@ public class DocumentViewService {
     }
 
     // Сформировать список шаблонов
-    public List<DocumentView> getTemplates(String token) {
+    public List<DocumentViewTemplate> getTemplates(String token) {
         List<DocumentView> allDocumentViewList = getUserDocumentView(token);
-        List<DocumentView> templatesList = new ArrayList<>();
+        List<DocumentViewTemplate> templatesList = new ArrayList<>();
+        Integer userID = associatedStudentsService.getUserId(token);
+        Integer userRoleID = usersRolesRepository.findUsersRolesByUserId(userID).getRoleId();
         if (allDocumentViewList != null) {
             for (DocumentView currentView: allDocumentViewList) {
-                if (currentView.getDocumentKind().equals("Задание")) {
+                if (currentView.getDocumentKind().equals("Шаблон")) {
                     Integer headID = currentView.getSystemCreatorID();
                     UsersRoles userRole;
+                    Document template = documentRepository.findByCreatorAndName(
+                            currentView.getSystemCreatorID(), currentView.getDocumentName());
                     try {
                         userRole = usersRolesRepository.findUsersRolesByUserId(headID);
-                        if (userRole.getRoleId() == 3) {
-                            templatesList.add(currentView);
+                        if (userRole.getRoleId() == 3 && (userRoleID == 3 || template.getTemplateProperties().isApproved())) {
+                            templatesList.add(
+                                    new DocumentViewTemplate(
+                                            template,
+                                            currentView.getDocumentVersions(),
+                                            template.getTemplateProperties().isApproved()
+                                    )
+                            );
                         }
                     } catch (NullPointerException nullPointerException) {
                         userRole = null;

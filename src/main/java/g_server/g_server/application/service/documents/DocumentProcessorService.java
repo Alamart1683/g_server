@@ -38,6 +38,7 @@ import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
@@ -47,6 +48,8 @@ import java.util.NoSuchElementException;
 
 @Service
 public class DocumentProcessorService {
+    @Value("${storage.location}")
+    private String storageLocation;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -128,15 +131,14 @@ public class DocumentProcessorService {
                     Users headOfCathedra = usersRepository.findById(
                             usersRolesRepository.findByRoleId(3).getUserId()).get();
                     Integer type = determineType(shortTaskDataView.getTaskType());
-                    Integer kind = 2;
+                    Integer kind = 5;
                     List<Document> taskList = documentRepository.findByTypeAndKindAndCreator(
                             type, kind, headOfCathedra.getId());
-                    if (taskList.size() > 0) {
+                    if (taskList.size() > 0 && taskList.get(0).getTemplateProperties().isApproved()
+                            && orderProperty.isApproved()) {
                         TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
                                 advisor,headOfCathedra, documentOrder, orderProperty, speciality);
-                        String studentDocumentsPath = "src" + File.separator + "main" +
-                                File.separator + "resources" + File.separator + "users_documents" +
-                                File.separator + student.getId();
+                        String studentDocumentsPath = storageLocation + File.separator + student.getId();
                         File studentDir = new File(studentDocumentsPath);
                         if (!studentDir.exists()) {
                             studentDir.mkdir();

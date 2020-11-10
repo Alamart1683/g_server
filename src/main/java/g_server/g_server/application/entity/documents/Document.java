@@ -57,6 +57,10 @@ public class Document {
     @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
     private OrderProperties orderProperties;
 
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
+    private TemplateProperties templateProperties;
+
     public Document() { }
 
     public Document(int creator_id, String name, String document_path,
@@ -181,5 +185,13 @@ public class Document {
 
     public void setOrderProperties(OrderProperties orderProperties) {
         this.orderProperties = orderProperties;
+    }
+
+    public TemplateProperties getTemplateProperties() {
+        return templateProperties;
+    }
+
+    public void setTemplateProperties(TemplateProperties templateProperties) {
+        this.templateProperties = templateProperties;
     }
 }
