@@ -2,6 +2,7 @@ package g_server.g_server.application.service.documents;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.*;
+import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.forms.AdvisorReportDocumentForm;
 import g_server.g_server.application.entity.forms.DocumentForm;
 import g_server.g_server.application.entity.forms.DocumentOrderForm;
@@ -23,7 +24,6 @@ import g_server.g_server.application.service.documents.crud.DocumentVersionServi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -532,8 +532,10 @@ public class DocumentUploadService {
                 String currentDate = getCurrentDate();
                 String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
                 String versionPath = documentDirectory.getPath() + File.separator +
+                        "version_" + currentDate + "." + fileExtension;
+                String tempVersionPath = documentDirectory.getPath() + File.separator +
                         "temp_version_" + currentDate + "." + fileExtension;
-                Path uploadingFilePath = Paths.get(versionPath);
+                Path uploadingFilePath = Paths.get(tempVersionPath);
                 File lastTaskVersionFile = null;
                 try {
                     Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
@@ -570,14 +572,18 @@ public class DocumentUploadService {
                                 // Далее создадим запись о первой версии документа в таблице версий
                                 int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                                 DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
-                                        sqlDateTime, "Загрузка отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath.replaceAll("temp_", ""));
+                                        sqlDateTime, "Загрузка отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath);
                                 documentVersionService.save(documentVersion);
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
                                 nirReportRepository.save(nirReport);
-                                File uploadedTempReportVersion = new File(versionPath);
-                                File finalReportVersion = new File(versionPath.replaceAll("temp_", ""));
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
                                 Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_DIFFERENT_STYLES);
+                                destination.save(finalReportVersion.getPath());
+                                // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
                                 uploadedTempReportVersion.delete();
                                 messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
                             } else {
@@ -591,13 +597,13 @@ public class DocumentUploadService {
                         // Если отчет уже был загружен в прошлый раз, добавим его новую версию
                         } else if (documentRepository.findByCreatorAndName(creator_id, fileName) != null) {
                             if (multipartFileToFileWrite(documentForm.getFile(),
-                                    Paths.get(versionPath.replaceAll("temp_", "")))) {
+                                    Paths.get(versionPath))) {
                                 // Далее создадим запись о новой версии отчёта в таблице версий
                                 int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
                                 DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
                                         sqlDateTime, "Загрузка версии отчёта по " +
                                         documentForm.getDocumentFormType() + " на сайт",
-                                        versionPath.replaceAll("temp_", ""));
+                                        versionPath);
                                 documentVersionService.save(documentVersion);
                                 messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
                                 NirReport nirReport = new NirReport(documentVersion.getId(), 1);
