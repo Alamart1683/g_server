@@ -23,6 +23,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,6 +38,9 @@ import java.util.*;
 
 @Service
 public class UsersService implements UserDetailsService {
+    @Value("${storage.location}")
+    private String storageLocation;
+
     @Autowired
     private UsersRepository usersRepository;
 
@@ -388,8 +392,7 @@ public class UsersService implements UserDetailsService {
         MultipartFile multipartFile = automaticStudentForm.getStudentData();
         String cathedra = automaticStudentForm.getCathedra();
         String type = automaticStudentForm.getType();
-        String tempPath = "src" + File.separator + "main" + File.separator +
-                "resources" + File.separator + "users_documents" + File.separator + "temp";
+        String tempPath = storageLocation + File.separator + "temp";
         File temp = new File(tempPath);
         if (!temp.exists()) {
             temp.mkdir();
@@ -451,7 +454,6 @@ public class UsersService implements UserDetailsService {
                         studentDataList.add(studentData);
 
                         // Определим телефон студента
-                        // TODO Сделать приведение телефона к уницифицированнному виду
                         String phone = hssfRow.getCell(7).getRichStringCellValue().getString();
                         if (!phone.equals("")) {
                             student.setPhone(getNormalPhone(phone));

@@ -3,6 +3,7 @@ package g_server.g_server.application.service.users;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.OrderProperties;
+import g_server.g_server.application.entity.forms.AutomaticStudentForm;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
@@ -21,9 +22,19 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.DocumentManagementService;
 import g_server.g_server.application.service.mail.MailService;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,6 +44,9 @@ import java.util.NoSuchElementException;
 public class AssociatedStudentsService {
     @Value("${api.url}")
     private String apiUrl;
+
+    @Value("${storage.location}")
+    private String storageLocation;
 
     @Autowired
     private UsersRepository usersRepository;
@@ -754,7 +768,34 @@ public class AssociatedStudentsService {
         }
     }
 
-    // TODO Сделать назначение области проекта студенту (А нужно ли это?)
+    public String studentAutomaticAssociation(AutomaticStudentForm automaticStudentForm) throws IOException {
+        MultipartFile multipartFile = automaticStudentForm.getStudentData();
+        String cathedra = automaticStudentForm.getCathedra();
+        String type = automaticStudentForm.getType();
+        String tempPath = storageLocation + File.separator + "temp";
+        File temp = new File(tempPath);
+        if (!temp.exists()) {
+            temp.mkdir();
+        }
+        // Загрузим xls-файл в систему
+        try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
+                "studentAssocData.xls"))) {
+            os.write(multipartFile.getBytes());
+            HSSFWorkbook excelStudentData = new HSSFWorkbook(
+                    new FileInputStream(new File(tempPath + File.separator + "studentAssocData.xls")));
+            File deleteFile = new File(tempPath + File.separator + "studentAssocData.xls");
+            HSSFSheet studentSheet = excelStudentData.getSheet("СПИСОК СТУДЕНТОВ С ТЕМАМИ");
+            // Теперь последовательно зарегестрируем студентов
+            try {
+                // TODO Дописать метод автоассоциации
+            } catch (Exception e) {
+
+            }
+        } catch (IOException ie) {
+
+        }
+        return "";
+    }
 
     // Получение списка имен проектов конкретного НР
     public List<String> getAdvisorProjectNames(String token) {
