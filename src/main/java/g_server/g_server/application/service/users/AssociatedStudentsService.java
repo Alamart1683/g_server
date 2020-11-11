@@ -792,11 +792,12 @@ public class AssociatedStudentsService {
         // Загрузим xlsx-файл в систему
         try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
                 "studentAssocData.xlsx"))) {
-            os.write(multipartFile.getBytes());
+            os.write(multipartFile.getBytes()); os.close();
             XSSFWorkbook excelStudentData = new XSSFWorkbook(
                     new FileInputStream(new File(tempPath + File.separator + "studentAssocData.xlsx")));
             File deleteFile = new File(tempPath + File.separator + "studentAssocData.xlsx");
             XSSFSheet studentSheet = excelStudentData.getSheetAt(1);
+            excelStudentData.close();
             List<Users> usersList = usersRepository.findAll();
             // Теперь последовательно зарегестрируем студентов
             try {

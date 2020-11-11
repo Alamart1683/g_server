@@ -404,7 +404,7 @@ public class UsersService implements UserDetailsService {
             HSSFWorkbook excelStudentData = new HSSFWorkbook(
                     new FileInputStream(new File(tempPath + File.separator + "studentData.xls")));
             File deleteFile = new File(tempPath + File.separator + "studentData.xls");
-            HSSFSheet studentSheet = excelStudentData.getSheet("Обучающиеся");
+            HSSFSheet studentSheet = excelStudentData.getSheetAt(0);
             // Теперь последовательно зарегестрируем студентов
             try {
                 List<Users> studentList = new ArrayList<>(); // Список пользователей-студентов
