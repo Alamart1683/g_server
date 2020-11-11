@@ -1,11 +1,15 @@
 package g_server.g_server.application.controller.users;
 
+import g_server.g_server.application.entity.forms.AutomaticStudentForm;
 import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import static org.springframework.util.StringUtils.hasText;
@@ -180,6 +184,13 @@ public class AssociatedUsersController {
             @RequestParam Integer advisorID
     ) {
         return associatedStudentsService.changeStudentsAdvisor(studentID, advisorID);
+    }
+
+    // Назначить студентам научных руководителей из файла
+    @PostMapping("admin/association/student/automatic")
+    public String studentAutomaticAssociation(@ModelAttribute("automaticStudentForm")
+            @Validated AutomaticStudentForm automaticStudentForm) throws IOException {
+        return associatedStudentsService.studentAutomaticAssociation(automaticStudentForm);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

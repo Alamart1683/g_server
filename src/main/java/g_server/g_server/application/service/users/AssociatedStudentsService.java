@@ -21,14 +21,17 @@ import g_server.g_server.application.repository.users.StudentDataRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.DocumentManagementService;
+import g_server.g_server.application.service.documents.DocumentProcessorService;
+import g_server.g_server.application.service.documents.DocumentUploadService;
 import g_server.g_server.application.service.mail.MailService;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,6 +39,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -89,6 +93,12 @@ public class AssociatedStudentsService {
 
     @Autowired
     private DocumentManagementService documentManagementService;
+
+    @Autowired
+    private DocumentProcessorService documentProcessorService;
+
+    @Autowired
+    private DocumentUploadService documentUploadService;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -768,33 +778,124 @@ public class AssociatedStudentsService {
         }
     }
 
-    public String studentAutomaticAssociation(AutomaticStudentForm automaticStudentForm) throws IOException {
+    public String studentAutomaticAssociation(AutomaticStudentForm automaticStudentForm) {
+        documentUploadService.createDocumentRootDirIfIsNotExist();
         MultipartFile multipartFile = automaticStudentForm.getStudentData();
-        String cathedra = automaticStudentForm.getCathedra();
-        String type = automaticStudentForm.getType();
         String tempPath = storageLocation + File.separator + "temp";
         File temp = new File(tempPath);
         if (!temp.exists()) {
             temp.mkdir();
         }
-        // Загрузим xls-файл в систему
+        if (!documentUploadService.getFileExtension(multipartFile).equals("xlsx")) {
+            return "Поддреживается только формат xlsx!";
+        }
+        // Загрузим xlsx-файл в систему
         try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
-                "studentAssocData.xls"))) {
+                "studentAssocData.xlsx"))) {
             os.write(multipartFile.getBytes());
-            HSSFWorkbook excelStudentData = new HSSFWorkbook(
-                    new FileInputStream(new File(tempPath + File.separator + "studentAssocData.xls")));
-            File deleteFile = new File(tempPath + File.separator + "studentAssocData.xls");
-            HSSFSheet studentSheet = excelStudentData.getSheet("СПИСОК СТУДЕНТОВ С ТЕМАМИ");
+            XSSFWorkbook excelStudentData = new XSSFWorkbook(
+                    new FileInputStream(new File(tempPath + File.separator + "studentAssocData.xlsx")));
+            File deleteFile = new File(tempPath + File.separator + "studentAssocData.xlsx");
+            XSSFSheet studentSheet = excelStudentData.getSheetAt(1);
+            List<Users> usersList = usersRepository.findAll();
             // Теперь последовательно зарегестрируем студентов
             try {
-                // TODO Дописать метод автоассоциации
+                Users currentAdvisor = null;
+                Users currentStudent;
+                Iterator rowIter = studentSheet.rowIterator();
+                while (rowIter.hasNext()) {
+                    XSSFRow xssfRow = (XSSFRow) rowIter.next();
+                    // Проверим что это не первая строка с легендой
+                    if (xssfRow.getRowNum() > 0) {
+                        try {
+                            currentAdvisor = findAdvisorByShortFio(
+                                    xssfRow.getCell(2).getStringCellValue(), usersList);
+                        } catch (NullPointerException nullPointerException) {
+                                currentAdvisor = null;
+                        }
+                        // Найдем студента по имеющимся данным
+                        try {
+                            currentStudent = findStudentByFioAndGroup(
+                                    xssfRow.getCell(0).getStringCellValue(),
+                                    xssfRow.getCell(3).getStringCellValue(),
+                                    usersList
+                            );
+                        } catch (NullPointerException nullPointerException) {
+                            currentStudent = null;
+                        }
+                        // Если удалось найти и студента, и научного руководителя. то ассоциируем их
+                        if (currentAdvisor != null && currentStudent != null) {
+                            // Если он уже проассоциирован, то перезапишем
+                            AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(currentStudent.getId());
+                            if (associatedStudent != null) {
+                                associatedStudent.setScientificAdvisor(currentAdvisor.getId());
+                                associatedStudentsRepository.save(associatedStudent);
+                            // Иначе создадим новую ассоциацию
+                            } else if (associatedStudent == null) {
+                                associatedStudent = new AssociatedStudents(
+                                        currentAdvisor.getId(), currentStudent.getId(), true);
+                                associatedStudentsRepository.save(associatedStudent);
+                            }
+                        }
+                    }
+                }
+                deleteFile.delete();
+                return "Студенты были успешно ассоциированны!";
             } catch (Exception e) {
-
+                deleteFile.delete();
+                return "Ошибка чтения информации внутри файла, проверьте его содержимое";
             }
         } catch (IOException ie) {
-
+            return "Ошибка чтения файла";
         }
-        return "";
+    }
+
+    // Поиск научного руководителя в системе по укороченному имени
+    private Users findAdvisorByShortFio(String shortFio, List<Users> usersList) {
+        Users advisor;
+        for (Users user: usersList) {
+            UsersRoles userRole;
+            try {
+                userRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
+                if (userRole.getRoleId() == 2 || userRole.getRoleId() == 3) {
+                    String currentShortFio = documentProcessorService.getShortFio(
+                            user.getSurname() + " " + user.getName() + " " + user.getSecond_name());
+                    if (currentShortFio.equals(shortFio)) {
+                        advisor = user;
+                        return advisor;
+                    }
+                }
+            } catch (NullPointerException nullPointerException) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    // Поиск студента в системе по фио и группе
+    private Users findStudentByFioAndGroup(String fio, String group, List<Users> usersList) {
+        String[] names = fio.split(" ");
+        Users student;
+        for (Users user: usersList) {
+            UsersRoles userRole;
+            try {
+                userRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
+                if (userRole.getRoleId() == 1) {
+                    String currentGroup = user.getStudentData().getStudentGroup().getStudentGroup();
+                    String currentSurname = user.getSurname();
+                    String currentName = user.getName();
+                    String currentSecondName = user.getSecond_name();
+                    if (currentGroup.equals(group) && currentSurname.equals(names[0]) &&
+                            currentName.equals(names[1]) && currentSecondName.equals(names[2])) {
+                        student = user;
+                        return student;
+                    }
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     // Получение списка имен проектов конкретного НР
