@@ -1,6 +1,5 @@
 package g_server.g_server.application.service.documents;
 
-import com.aspose.words.ImportFormatMode;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.documents.Document;
@@ -600,7 +599,7 @@ public class DocumentUploadService {
                                         nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
                                 com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
                                 com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
                                 uploadedTempReportVersion.delete();
@@ -644,7 +643,7 @@ public class DocumentUploadService {
                                         nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
                                 com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
                                 com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 uploadedTempReportVersion.delete();
                                 messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
@@ -832,7 +831,7 @@ public class DocumentUploadService {
                                             nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
                                     com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
                                     com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                    destination.appendDocument(source, ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                     destination.save(finalReportVersion.getPath());
                                     uploadedTempReportVersion.delete();
                                     messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
