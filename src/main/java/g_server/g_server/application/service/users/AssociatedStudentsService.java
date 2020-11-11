@@ -772,6 +772,14 @@ public class AssociatedStudentsService {
             }
             AssociatedStudents newAssociatedStudent = new AssociatedStudents(newAdvisorID, studentId, true);
             associatedStudentsRepository.save(newAssociatedStudent);
+            Users student;
+            if (usersRepository.findById(studentId).isPresent()) {
+                student = usersRepository.findById(studentId).get();
+                student.setConfirmed(true);
+            } else {
+                return "Студент не найден";
+            }
+            usersRepository.save(student);
             return "Научный руководитель успешно изменен";
         } catch (Exception e) {
             return "Переданы некорректные параметры";
@@ -802,7 +810,7 @@ public class AssociatedStudentsService {
             // Теперь последовательно зарегестрируем студентов
             try {
                 Users currentAdvisor = null;
-                Users currentStudent;
+                Users currentStudent = null;
                 Iterator rowIter = studentSheet.rowIterator();
                 while (rowIter.hasNext()) {
                     XSSFRow xssfRow = (XSSFRow) rowIter.next();
@@ -814,15 +822,17 @@ public class AssociatedStudentsService {
                         } catch (NullPointerException nullPointerException) {
                                 currentAdvisor = null;
                         }
-                        // Найдем студента по имеющимся данным
-                        try {
-                            currentStudent = findStudentByFioAndGroup(
-                                    xssfRow.getCell(0).getStringCellValue(),
-                                    xssfRow.getCell(3).getStringCellValue(),
-                                    usersList
-                            );
-                        } catch (NullPointerException nullPointerException) {
-                            currentStudent = null;
+                        // Если нашли научрука, то найдем студента по имеющимся данным
+                        if (currentAdvisor != null) {
+                            try {
+                                currentStudent = findStudentByFioAndGroup(
+                                        xssfRow.getCell(0).getStringCellValue(),
+                                        xssfRow.getCell(3).getStringCellValue(),
+                                        usersList
+                                );
+                            } catch (NullPointerException nullPointerException) {
+                                currentStudent = null;
+                            }
                         }
                         // Если удалось найти и студента, и научного руководителя. то ассоциируем их
                         if (currentAdvisor != null && currentStudent != null) {
@@ -837,6 +847,8 @@ public class AssociatedStudentsService {
                                         currentAdvisor.getId(), currentStudent.getId(), true);
                                 associatedStudentsRepository.save(associatedStudent);
                             }
+                            currentStudent.setConfirmed(true);
+                            usersRepository.save(currentStudent);
                         }
                     }
                 }

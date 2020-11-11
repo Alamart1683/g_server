@@ -389,6 +389,7 @@ public class UsersService implements UserDetailsService {
 
     // Зарегистрировать студентов автоматически на базе *.xls файла
     public String studentAutomaticRegistration(AutomaticStudentForm automaticStudentForm) throws IOException {
+        documentUploadService.createDocumentRootDirIfIsNotExist();
         MultipartFile multipartFile = automaticStudentForm.getStudentData();
         String cathedra = automaticStudentForm.getCathedra();
         String type = automaticStudentForm.getType();
