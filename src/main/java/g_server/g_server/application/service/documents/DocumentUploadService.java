@@ -155,7 +155,7 @@ public class DocumentUploadService {
                 messagesList.add("Не указано имя проекта или его проектной области для добавления ему документа");
             }
             Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
-            if (roleID != 3 && viewRights == 5) {
+            if ((roleID == 1 || roleID == 2) && viewRights == 5) {
                 messagesList.add("Попытка загрузить документ с" +
                         " областью видимости доступной только заведующему кафедрой");
             }
