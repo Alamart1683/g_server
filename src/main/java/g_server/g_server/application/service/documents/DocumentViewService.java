@@ -88,7 +88,7 @@ public class DocumentViewService {
         // Проверим соответствие ролей
         Integer documentCreatorRoleID = usersRolesRepository.findUsersRolesByUserId(documentCreator.getId()).getRoleId();
         Integer studentRoleID = usersRolesRepository.findUsersRolesByUserId(student.getId()).getRoleId();
-        if (studentRoleID == 1 && (documentCreatorRoleID == 1 || documentCreatorRoleID == 2 || documentCreatorRoleID == 3)) {
+        if (studentRoleID == 1 && (documentCreatorRoleID > 0 && documentCreatorRoleID < 6)) {
             if (documentView > 2) {
                 // Документ могут видеть только студенты данного научного руководителя
                 if (documentView == 3 || documentView == 4) {
@@ -167,13 +167,8 @@ public class DocumentViewService {
         Integer documentCreatorRoleID = usersRolesRepository.
                 findUsersRolesByUserId(documentCreator.getId()).getRoleId();
         if ((lookingAdvisorRoleID == 2 || lookingAdvisorRoleID == 3) &&
-                (documentCreatorRoleID == 1 || documentCreatorRoleID == 2 || documentCreatorRoleID == 3)) {
+                (documentCreatorRoleID > 0 || documentCreatorRoleID < 6)) {
             // Если зона видимости документа только для создателя и других НР или для всех
-            // TODO Предполагается, что документы с правом видимости для всех может загружать
-            // TODO только заведующий кафедрой и это документы типа приказов и всего такого
-            // TODO этот момент надо учесть при загрузке прав видимости документов на клиент
-            // TODO то есть в идеале надо сделать отдельную выдачу списка типов документов и прав видимостей
-            // TODO для научных руководителей и заведующего кафедрой
             if (documentView > 0 || documentView < 9) {
                 // Если документ может видеть только его создатель или документ привязан к проекту и
                 // его может видеть создатель проектной области
@@ -389,7 +384,7 @@ public class DocumentViewService {
                         Speciality speciality;
                         // Завкафедрой видит все приказы, в том числе и неодобренные, остальные только одобренные
                         if (specialityRepository.findById(orderProperties.getSpeciality()).isPresent()
-                                && (orderProperties.isApproved() || userRoleID == 3)) {
+                                && (orderProperties.isApproved() || userRoleID >= 3)) {
                             speciality = specialityRepository.findById(orderProperties.getSpeciality()).get();
                             orderList.add(
                                 new DocumentViewOrder(
@@ -426,8 +421,8 @@ public class DocumentViewService {
                     Document template = documentRepository.findByCreatorAndName(
                             currentView.getSystemCreatorID(), currentView.getDocumentName());
                     try {
-                        userRole = usersRolesRepository.findUsersRolesByUserId(headID);
-                        if (userRole.getRoleId() == 3 && (userRoleID == 3 || template.getTemplateProperties().isApproved())) {
+                        userRole = usersRolesRepository.findUsersRolesByUserId(userID);
+                        if (userRole.getRoleId() >= 3 || (userRoleID < 3 && template.getTemplateProperties().isApproved())) {
                             templatesList.add(
                                     new DocumentViewTemplate(
                                             template,

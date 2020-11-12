@@ -132,8 +132,8 @@ public class DocumentProcessorService {
                             usersRolesRepository.findByRoleId(3).getUserId()).get();
                     Integer type = determineType(shortTaskDataView.getTaskType());
                     Integer kind = 5;
-                    List<Document> taskList = documentRepository.findByTypeAndKindAndCreator(
-                            type, kind, headOfCathedra.getId());
+                    List<Document> taskList = documentRepository.findByTypeAndKind(
+                            type, kind);
                     if (taskList.size() > 0 && taskList.get(0).getTemplateProperties().isApproved()
                             && orderProperty.isApproved()) {
                         TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,

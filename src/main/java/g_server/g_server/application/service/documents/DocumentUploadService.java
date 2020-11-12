@@ -545,7 +545,7 @@ public class DocumentUploadService {
                 File lastTaskVersionFile = null;
                 try {
                     Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
-                    // Если тип отчтёта - НИР
+                    // Если тип отчёта - НИР
                     if (reportType == 1) {
                         // Найдем последнюю версию задания, необходимую для загрузки отчёта
                         Document task;
