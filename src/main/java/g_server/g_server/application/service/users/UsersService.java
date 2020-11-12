@@ -19,6 +19,7 @@ import g_server.g_server.application.repository.system_data.StudentGroupReposito
 import g_server.g_server.application.repository.system_data.StudentTypeRepository;
 import g_server.g_server.application.repository.users.*;
 import g_server.g_server.application.service.documents.DocumentUploadService;
+import g_server.g_server.application.service.mail.MailService;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -86,6 +87,9 @@ public class UsersService implements UserDetailsService {
     @Autowired
     private DocumentUploadService documentUploadService;
 
+    @Autowired
+    private MailService mailService;
+
     @Override
     // Загрузить пользователя по email
     public UserDetails loadUserByUsername(String email) {
@@ -132,12 +136,15 @@ public class UsersService implements UserDetailsService {
             return false;
         }
         else {
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            String password = generatePassword();
+            user.setPassword(bCryptPasswordEncoder.encode(password));
             user.setRoles(Collections.singleton(new Roles(2, "ROLE_SCIENTIFIC_ADVISOR")));
             usersRepository.save(user);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places);
             scientificAdvisorDataRepository.save(scientificAdvisorData);
+            // Отправка письма науч. руководителю
+            mailService.sendLoginEmailAndPassword(user.getEmail(), password, "научного руководителя");
             return true;
         }
     }
@@ -151,10 +158,14 @@ public class UsersService implements UserDetailsService {
         else {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setRoles(Collections.singleton(new Roles(3, "ROLE_HEAD_OF_CATHEDRA")));
+            String password = generatePassword();
+            user.setPassword(bCryptPasswordEncoder.encode(password));
             usersRepository.save(user);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places);
             scientificAdvisorDataRepository.save(scientificAdvisorData);
+            // Отправка письма зав. кафедры
+            mailService.sendLoginEmailAndPassword(user.getEmail(), password, "заведующего кафедрой");
             return true;
         }
     }
@@ -166,9 +177,12 @@ public class UsersService implements UserDetailsService {
             return false;
         }
         else {
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            String password = generatePassword();
+            user.setPassword(bCryptPasswordEncoder.encode(password));
             user.setRoles(Collections.singleton(new Roles(4, "ROLE_ADMIN")));
             usersRepository.save(user);
+            // Отправка письма администратору
+            mailService.sendLoginEmailAndPassword(user.getEmail(), password, "администратора");
             return true;
         }
     }
@@ -484,7 +498,7 @@ public class UsersService implements UserDetailsService {
                         decodePasswords.add(password);
                         student.setPassword(bCryptPasswordEncoder.encode(password));
 
-                        // Укажем, что аккаунт подтвержден и согласен на почтовую рассылку
+                        // Укажем, что аккаунт не подтвержден и согласен на почтовую рассылку
                         student.setConfirmed(false);
                         student.setSendMailAccepted(true);
 

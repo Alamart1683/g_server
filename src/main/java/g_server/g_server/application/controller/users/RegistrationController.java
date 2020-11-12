@@ -167,7 +167,7 @@ public class RegistrationController {
             registrationCode = null;
             studentRegistrationEmail = null;
             confirmUrl = null;
-            mailService.sendSuccessRegistrationMailForStudent(user);
+            // mailService.sendSuccessRegistrationMailForStudent(user);
             return "Аккаунт был успешно подтвержден";
         } else {
             return "Чексумма не совпадает, возможно вы выслали код заново и данный код стал недействителен";
@@ -183,10 +183,6 @@ public class RegistrationController {
         if (bindingResult.hasErrors()) {
             messageList.add("Непредвиденная ошибка");
         }
-        if (!scientificAdvisorForm.getPassword().equals(scientificAdvisorForm.getPasswordConfirm())) {
-            model.addAttribute("passwordError", "Пароли не совпадают");
-            messageList.add("Пароли не совпадают");
-        }
         if (!usersService.isCathedraExist(scientificAdvisorForm)) {
             messageList.add("Указана несуществующая кафедра");
         }
@@ -196,8 +192,6 @@ public class RegistrationController {
                 model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
                 messageList.add("Пользователь с таким email уже есть");
             } else {
-                // Отправка письма науч. руководителю
-                mailService.sendLoginEmailAndPassword(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "научного руководителя");
                 messageList.add("Научный руководитель зарегистрирован!");
             }
         }
@@ -213,10 +207,6 @@ public class RegistrationController {
         if (bindingResult.hasErrors()) {
             messageList.add("Непредвиденная ошибка");
         }
-        if (!scientificAdvisorForm.getPassword().equals(scientificAdvisorForm.getPasswordConfirm())) {
-            model.addAttribute("passwordError", "Пароли не совпадают");
-            messageList.add("Пароли не совпадают");
-        }
         if (!usersService.isCathedraExist(scientificAdvisorForm)) {
             messageList.add("Указана несуществующая кафедра");
         }
@@ -229,8 +219,6 @@ public class RegistrationController {
                 model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
                 messageList.add("Пользователь с таким email уже есть");
             } else {
-                // Отправка письма зав. кафедры
-                mailService.sendLoginEmailAndPassword(scientificAdvisorForm.getEmail(), scientificAdvisorForm.getPassword(), "заведующего кафедрой");
                 messageList.add("Заведующий кафедрой успшено зарегистрирован!");
             }
         }
@@ -246,10 +234,6 @@ public class RegistrationController {
         if (bindingResult.hasErrors()) {
             messageList.add("registration");
         }
-        if (!adminForm.getPassword().equals(adminForm.getPasswordConfirm())) {
-            model.addAttribute("passwordError", "Пароли не совпадают");
-            messageList.add("Пароли не совпадают");
-        }
         if (adminForm.determineMailSendingAccepted(adminForm.getMailSendingAccepted()) == null) {
             messageList.add("Ошибка определения согласия на почтовую рассылку");
         }
@@ -258,8 +242,6 @@ public class RegistrationController {
                 model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
                 messageList.add("Пользователь с таким email уже есть");
             } else {
-                // Отправка письма администратору
-                mailService.sendLoginEmailAndPassword(adminForm.getEmail(), adminForm.getPassword(), "администратора");
                 messageList.add("Администратор успешно зарегистрирован!");
             }
         }

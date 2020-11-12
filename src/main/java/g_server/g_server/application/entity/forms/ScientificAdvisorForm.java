@@ -4,20 +4,15 @@ import g_server.g_server.application.entity.users.Users;
 
 public class ScientificAdvisorForm extends Users {
     private String cathedra;
-    private String passwordConfirm;
     private String mailSendingAccepted;
     private int places;
 
     public ScientificAdvisorForm() { }
 
     public ScientificAdvisorForm(String cathedra, String email, String name, String surname,
-            String second_name, String password, String confirm_password, String phone,
-            String mailSendingAccepted, int places) {
+            String second_name, String phone, String mailSendingAccepted, int places) {
         this.cathedra = cathedra;
         this.setEmail(email);
-        this.setPassword(password);
-        this.passwordConfirm = confirm_password;
-        this.setPasswordConfirm(confirm_password);
         this.setName(name);
         this.setSurname(surname);
         this.setSecond_name(second_name);
@@ -40,14 +35,6 @@ public class ScientificAdvisorForm extends Users {
 
     public void setCathedra(String cathedra) {
         this.cathedra = cathedra;
-    }
-
-    public String getPasswordConfirm() {
-        return passwordConfirm;
-    }
-
-    public void setPasswordConfirm(String passwordConfirm) {
-        this.passwordConfirm = passwordConfirm;
     }
 
     public String getMailSendingAccepted() {
