@@ -740,7 +740,8 @@ public class AssociatedStudentsService {
                             user.getId(),
                             user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
                             user.getStudentData().getStudentGroup().getStudentGroup(),
-                            speciality.getCode()
+                            speciality.getCode(),
+                            user.isConfirmed()
                     );
                 } catch (NullPointerException nullPointerException) {
                     Speciality speciality = specialityRepository.findByPrefix(
@@ -752,7 +753,8 @@ public class AssociatedStudentsService {
                             user.getId(),
                             user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
                             user.getStudentData().getStudentGroup().getStudentGroup(),
-                            speciality.getCode()
+                            speciality.getCode(),
+                            user.isConfirmed()
                     );
                 }
                 if (currentView != null) {

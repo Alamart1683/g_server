@@ -1,7 +1,5 @@
 package g_server.g_server.application.entity.view;
 
-import g_server.g_server.application.entity.users.Users;
-
 public class AssociatedStudentViewWithAdvisor {
     private Integer systemID;
     private Integer systemAdvisorID;
@@ -10,9 +8,11 @@ public class AssociatedStudentViewWithAdvisor {
     private String studentFio;
     private String studentGroup;
     private String studentSpeciality;
+    private boolean studentIsConfirmed;
 
     public AssociatedStudentViewWithAdvisor(Integer systemID, Integer systemAdvisorID, String advisorFio,
-        Integer systemStudentID, String studentFio, String studentGroup, String studentSpeciality) {
+            Integer systemStudentID, String studentFio, String studentGroup, String studentSpeciality,
+            boolean studentIsConfirmed) {
         this.systemID = systemID;
         this.systemAdvisorID = systemAdvisorID;
         this.advisorFio = advisorFio;
@@ -20,6 +20,7 @@ public class AssociatedStudentViewWithAdvisor {
         this.studentFio = studentFio;
         this.studentGroup = studentGroup;
         this.studentSpeciality = studentSpeciality;
+        this.studentIsConfirmed = studentIsConfirmed;
     }
 
     public Integer getSystemAdvisorID() {
@@ -76,5 +77,13 @@ public class AssociatedStudentViewWithAdvisor {
 
     public void setStudentSpeciality(String studentSpeciality) {
         this.studentSpeciality = studentSpeciality;
+    }
+
+    public boolean isStudentIsConfirmed() {
+        return studentIsConfirmed;
+    }
+
+    public void setStudentIsConfirmed(boolean studentIsConfirmed) {
+        this.studentIsConfirmed = studentIsConfirmed;
     }
 }
