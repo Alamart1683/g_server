@@ -228,6 +228,48 @@ create table area_document (
   foreign key (document) references document (id) on delete cascade on update cascade
 );
 
+create table ppppuiopd_task(
+    versionID int not null unique,
+    theme varchar(1024) not null,
+    to_explore varchar(2048) not null,
+    to_create varchar(2048) not null,
+    to_familiarize varchar(2048) not null,
+    additional_task varchar(2048) not null,
+    ppppuiopd_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
+    foreign key (ppppuiopd_status) references document_status (id)
+);
+
+create table ppppuiopd_report(
+    versionID int not null unique,
+    detailed_content varchar(2048) not null,
+    advisor_conclusion varchar(2048) not null,
+    ppppuiopd_report_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (ppppuiopd_report_status) references  document_status (id)
+);
+
+create table pd_task(
+    versionID int not null unique,
+    theme varchar(1024) not null,
+    to_explore varchar(2048) not null,
+    to_create varchar(2048) not null,
+    to_familiarize varchar(2048) not null,
+    additional_task varchar(2048) not null,
+    pd_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
+    foreign key (pd_status) references document_status (id)
+);
+
+create table pd_report(
+    versionID int not null unique,
+    detailed_content varchar(2048) not null,
+    advisor_conclusion varchar(2048) not null,
+    pd_report_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (pd_report_status) references  document_status (id)
+);
+
 insert into document_status (status) values
     ('Не отправлено'),
     ('Одобрено'),

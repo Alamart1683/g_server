@@ -38,6 +38,22 @@ public class DocumentVersion {
     @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
     private NirReport nirReport;
 
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private PpppuiopdTask ppppuiopdTask;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private PpppuiopdReport ppppuiopdReport;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private PdTask pdTask;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private PdReport pdReport;
+
     // Привязка айди редактора версии документа напрямую из версии к пользователю в будущем даст
     // реализации возможности выдачи прав на чтение и запись для созданных пользователем документов,
     // тогда как если привязать его к айди создателя документа, это поставит крест на этой возможости, ибо
@@ -135,5 +151,29 @@ public class DocumentVersion {
 
     public void setNirReport(NirReport nirReport) {
         this.nirReport = nirReport;
+    }
+
+    public PpppuiopdTask getPpppuiopdTask() {
+        return ppppuiopdTask;
+    }
+
+    public void setPpppuiopdTask(PpppuiopdTask ppppuiopdTask) {
+        this.ppppuiopdTask = ppppuiopdTask;
+    }
+
+    public PpppuiopdReport getPpppuiopdReport() {
+        return ppppuiopdReport;
+    }
+
+    public void setPpppuiopdReport(PpppuiopdReport ppppuiopdReport) {
+        this.ppppuiopdReport = ppppuiopdReport;
+    }
+
+    public PdTask getPdTask() {
+        return pdTask;
+    }
+
+    public void setPdTask(PdTask pdTask) {
+        this.pdTask = pdTask;
     }
 }
