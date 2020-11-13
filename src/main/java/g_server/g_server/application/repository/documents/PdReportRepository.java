@@ -1,10 +1,8 @@
 package g_server.g_server.application.repository.documents;
 
 import g_server.g_server.application.entity.documents.PdReport;
-import g_server.g_server.application.entity.documents.PpppuiopdReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
