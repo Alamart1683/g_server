@@ -137,7 +137,7 @@ public class DocumentProcessorService {
                     if (taskList.size() > 0 && taskList.get(0).getTemplateProperties().isApproved()
                             && orderProperty.isApproved()) {
                         TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
-                                advisor,headOfCathedra, documentOrder, orderProperty, speciality);
+                                advisor, headOfCathedra, documentOrder, orderProperty, speciality);
                         String studentDocumentsPath = storageLocation + File.separator + student.getId();
                         File studentDir = new File(studentDocumentsPath);
                         if (!studentDir.exists()) {
@@ -217,13 +217,11 @@ public class DocumentProcessorService {
                     Integer type = determineType(shortTaskDataView.getTaskType());
                     Integer kind = 2;
                     List<Document> taskList = documentRepository.findByTypeAndKindAndCreator(
-                            type, kind, headOfCathedra.getId());
+                            type, kind, student.getId());
                     if (taskList.size() > 0) {
                         TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
                                 advisor,headOfCathedra, document, orderProperty, speciality);
-                        String studentDocumentsPath = "src" + File.separator + "main" +
-                                File.separator + "resources" + File.separator + "users_documents" +
-                                File.separator + student.getId();
+                        String studentDocumentsPath = storageLocation + File.separator + student.getId();
                         File studentDir = new File(studentDocumentsPath);
                         if (!studentDir.exists()) {
                             return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";

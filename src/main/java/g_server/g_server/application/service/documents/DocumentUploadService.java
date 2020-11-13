@@ -717,7 +717,7 @@ public class DocumentUploadService {
         }
         Integer kind_id = getKindId(documentForm.getDocumentFormKind());
         if (kind_id == null) {
-            messagesList.add("Указан несуществующий вид докумета");
+            messagesList.add("Указан несуществующий вид документа");
         }
         Integer viewRights = getViewRights(documentForm.getDocumentFormViewRights());
         if (viewRights == null) {
@@ -756,7 +756,7 @@ public class DocumentUploadService {
                     documentProcessorService.getShortFio(student.getSurname() + " " +
                             student.getName() + " " + student.getSecond_name()) + " " +
                             student.getStudentData().getStudentGroup().getStudentGroup() +
-                            " содержание отчёта по " + documentForm.getDocumentFormType() + ".docx";
+                            " отчёт по " + documentForm.getDocumentFormType() + ".docx";
             String documentPath = studentDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
             // Проверим что одноименный файл не был загружен пользователем
@@ -782,7 +782,7 @@ public class DocumentUploadService {
                         Document task;
                         List<DocumentVersion> taskVersions;
                         try {
-                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, advisorID).get(0);
+                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
                             taskVersions = documentVersionRepository.findByDocument(task.getId());
                             List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
                             for (DocumentVersion taskVersion: taskVersions) {
