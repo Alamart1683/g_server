@@ -62,7 +62,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(
                         "/registration/student",
                         "/authorization",
-                        "/student_group/all",
                         "/student_type/all",
                         "/cathedras/all",
                         "/registration/student/mail",
