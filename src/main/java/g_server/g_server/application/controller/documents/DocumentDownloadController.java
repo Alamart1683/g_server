@@ -148,7 +148,7 @@ public class DocumentDownloadController {
             Document document;
             if (documentRepository.findById(documentVersion.getDocument()).isPresent()) {
                 document = documentRepository.findById(documentVersion.getDocument()).get();
-                if (document.getKind() == 2) {
+                if (document.getKind() == 2 && document.getType() == 1) {
                     return true;
                 }
             }
