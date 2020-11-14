@@ -2,7 +2,7 @@ package g_server.g_server.application.service.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
-import g_server.g_server.application.entity.forms.AutomaticStudentForm;
+import g_server.g_server.application.entity.forms.AutomaticRegistrationForm;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
 import g_server.g_server.application.entity.project.Project;
@@ -23,6 +23,9 @@ import g_server.g_server.application.service.mail.MailService;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -402,15 +406,18 @@ public class UsersService implements UserDetailsService {
     // TODO Сделать функционал для восстановления пароля
 
     // Зарегистрировать студентов автоматически на базе *.xls файла
-    public String studentAutomaticRegistration(AutomaticStudentForm automaticStudentForm) throws IOException {
+    public String studentAutomaticRegistration(AutomaticRegistrationForm automaticRegistrationForm) throws IOException {
         documentUploadService.createDocumentRootDirIfIsNotExist();
-        MultipartFile multipartFile = automaticStudentForm.getStudentData();
-        String cathedra = automaticStudentForm.getCathedra();
-        String type = automaticStudentForm.getType();
+        MultipartFile multipartFile = automaticRegistrationForm.getStudentData();
+        String cathedra = automaticRegistrationForm.getCathedra();
+        String type = automaticRegistrationForm.getType();
         String tempPath = storageLocation + File.separator + "temp";
         File temp = new File(tempPath);
         if (!temp.exists()) {
             temp.mkdir();
+        }
+        if (!documentUploadService.getFileExtension(multipartFile).equals("xls")) {
+            return "Поддреживается только формат xls!";
         }
         // Загрузим xls-файл в систему
         try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
@@ -510,25 +517,130 @@ public class UsersService implements UserDetailsService {
                     deleteFile.delete();
                     return "Ошибка чтения файла, количество данных студентов и студентов не совпадает!";
                 }
-                // Проверим, нет ли данных студентов в базе
                 for (int i = 0; i < studentList.size(); i++) {
-                    if (isUserExistsInDB(studentList.get(i))) {
-                        deleteFile.delete();
-                        return "Операция отменена для поддержания целостности данных." +
-                                " Часть студентов уже существует в базе";
+                    try {
+                        studentList.get(i).setRoles(Collections.singleton(new Roles(1, "ROLE_STUDENT")));
+                        usersRepository.save(studentList.get(i));
+                        studentDataList.get(i).setId(studentList.get(i).getId());
+                        studentDataRepository.save(studentDataList.get(i));
+                        String decodePassword = decodePasswords.get(i);
+                        // TODO Сделать рассылку писем о регистрации
+                    } catch (Exception e) {
+                        System.out.println("Попытка зарегистрировать уже имеющегося пользователя");
                     }
                 }
-                for (int i = 0; i < studentList.size(); i++) {
-                    studentList.get(i).setRoles(Collections.singleton(new Roles(1, "ROLE_STUDENT")));
-                    usersRepository.save(studentList.get(i));
-                    studentDataList.get(i).setId(studentList.get(i).getId());
-                    studentDataRepository.save(studentDataList.get(i));
-                    String decodePassword = decodePasswords.get(i);
-                    // TODO Сделать рассылку писем о регистрации
-                }
-                testListToFile(decodePasswords, studentList);
+                testListToFile(decodePasswords, studentList, false);
                 deleteFile.delete();
                 return "Студенты были успешно зарегистрированы!";
+            } catch (NullPointerException e) {
+                deleteFile.delete();
+                return "Произошла ошибка чтения файла";
+            }
+        } catch (IOException ioException) {
+            return "Произошла ошибка!";
+        }
+    }
+
+    // Регистрация научных руководителей на основе *.xlsx файла
+    public String advisorAutomaticRegistration(AutomaticRegistrationForm automaticRegistrationForm) throws IOException {
+        documentUploadService.createDocumentRootDirIfIsNotExist();
+        MultipartFile multipartFile = automaticRegistrationForm.getStudentData();
+        String cathedra = automaticRegistrationForm.getCathedra();
+        Integer places = 10; // TODO Заглушка для мест, потом можно добавить, если понадобится
+        String tempPath = storageLocation + File.separator + "temp";
+        File temp = new File(tempPath);
+        if (!temp.exists()) {
+            temp.mkdir();
+        }
+        if (!documentUploadService.getFileExtension(multipartFile).equals("xlsx")) {
+            return "Поддреживается только формат xlsx!";
+        }
+        // Загрузим xlsx-файл в систему
+        try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
+                "advisorData.xlsx"))) {
+            os.write(multipartFile.getBytes());
+            XSSFWorkbook excelStudentData = new XSSFWorkbook(
+                    new FileInputStream(new File(tempPath + File.separator + "advisorData.xlsx")));
+            File deleteFile = new File(tempPath + File.separator + "advisorData.xlsx");
+            XSSFSheet studentSheet = excelStudentData.getSheetAt(0);
+            try {
+                List<Users> advisorList = new ArrayList<>();
+                List<ScientificAdvisorData> advisorDataList = new ArrayList<>();
+                List<String> decodePasswords = new ArrayList<>();
+                Iterator rowIter = studentSheet.rowIterator();
+                while (rowIter.hasNext()) {
+                    XSSFRow xssfRow = (XSSFRow) rowIter.next();
+                    if (xssfRow.getRowNum() > 0) {
+                        Users advisor = new Users();
+                        ScientificAdvisorData advisorData = new ScientificAdvisorData();
+
+                        String fio = xssfRow.getCell(1).getRichStringCellValue().getString();
+                        String[] names = fio.split(" ");
+                        if (!names[0].equals("")) {
+                            advisor.setSurname(names[0]);
+                        } else {
+                            deleteFile.delete();
+                            return "Ошибка чтения ФИО";
+                        }
+                        if (!names[1].equals("")) {
+                            advisor.setName(names[1]);
+                        } else {
+                            deleteFile.delete();
+                            return "Ошибка чтения ФИО";
+                        }
+                        if (!names[2].equals("")) {
+                            advisor.setSecond_name(names[2]);
+                        } else {
+                            deleteFile.delete();
+                            return "Ошибка чтения ФИО";
+                        }
+
+                        advisorData.setCathedra(cathedrasRepository.getCathedrasByCathedraName(cathedra).getId());
+                        advisorData.setPlaces(places);
+                        advisorDataList.add(advisorData);
+
+                        String email = xssfRow.getCell(2).getRichStringCellValue().getString();
+                        if (!email.equals("")) {
+                            advisor.setEmail(email);
+                        } else if (email.equals("")) {
+                            email = xssfRow.getCell(3).getRichStringCellValue().getString();
+                            if (!email.equals("")) {
+                                advisor.setEmail(email);
+                            } else {
+                                deleteFile.delete();
+                                return "Не у всех научных руководителей удалось найти почту, операция отменена";
+                            }
+                        }
+                        String password = generatePassword();
+                        decodePasswords.add(password);
+                        advisor.setPhone("Не указан");
+                        advisor.setPassword(bCryptPasswordEncoder.encode(password));
+                        advisor.setConfirmed(true);
+                        advisor.setSendMailAccepted(true);
+                        advisorList.add(advisor);
+                    }
+                }
+                // Теперь сохраним студентов в базе, тем самым их зарегистрировав
+                if (advisorList.size() != advisorDataList.size()) {
+                    deleteFile.delete();
+                    return "Ошибка чтения файла, количество данных научных руководителей и " +
+                            "научных руководителей не совпадает!";
+                }
+                for (int i = 0; i < advisorList.size(); i++) {
+                    try {
+                        advisorList.get(i).setRoles(Collections.singleton(new Roles(2, "ROLE_SCIENTIFIC_ADVISOR")));
+                        usersRepository.save(advisorList.get(i));
+                        advisorDataList.get(i).setId(advisorList.get(i).getId());
+                        scientificAdvisorDataRepository.save(advisorDataList.get(i));
+                        String decodePassword = decodePasswords.get(i);
+                        // TODO Сделать рассылку писем о регистрации
+                    } catch (Exception e) {
+                        System.out.println("Попытка зарегистрировать уже имеющегося пользователя");
+                    }
+                }
+                testListToFile(decodePasswords, advisorList, true);
+                deleteFile.delete();
+                return "Научные руководители были успешно зарегистрированы!";
             } catch (NullPointerException e) {
                 deleteFile.delete();
                 return "Произошла ошибка чтения файла";
@@ -556,7 +668,7 @@ public class UsersService implements UserDetailsService {
     }
 
     // Тестовый метод для сохранения логинов и паролей студентов перед включением почтовой рассылки
-    public void testListToFile(List<String> passwords, List<Users> students) {
+    public void testListToFile(List<String> passwords, List<Users> students, boolean isAdvisor) {
         File file = new File("src" + File.separator + "main" + File.separator +
                 "resources" + File.separator + "testFioLoginAndPassword.txt");
         if (file.exists()) {
@@ -564,8 +676,14 @@ public class UsersService implements UserDetailsService {
         }
         Writer writer = null;
         try {
-            writer = new FileWriter("src" + File.separator + "main" + File.separator +
-                    "resources" + File.separator + "testFioLoginAndPassword.txt");
+            if (!isAdvisor) {
+                writer = new FileWriter("src" + File.separator + "main" + File.separator +
+                        "resources" + File.separator + "testStudentFioLoginAndPassword.txt");
+            } else {
+                writer = new FileWriter("src" + File.separator + "main" + File.separator +
+                        "resources" + File.separator + "testAdvisorFioLoginAndPassword.txt");
+            }
+
             for (int i = 0; i < students.size(); i++) {
                 writer.write(i + 1 + ")"
                         + " " + students.get(i).getSurname()

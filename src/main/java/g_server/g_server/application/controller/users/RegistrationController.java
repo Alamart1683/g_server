@@ -2,7 +2,7 @@ package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.forms.AdminForm;
-import g_server.g_server.application.entity.forms.AutomaticStudentForm;
+import g_server.g_server.application.entity.forms.AutomaticRegistrationForm;
 import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
 import g_server.g_server.application.entity.forms.StudentForm;
 import g_server.g_server.application.entity.users.Users;
@@ -250,7 +250,13 @@ public class RegistrationController {
 
     @PostMapping("/admin/registration/students/automatic")
     public String AutomaticStudentsRegistration (@ModelAttribute("automaticStudentForm")
-            @Validated AutomaticStudentForm automaticStudentForm) throws IOException {
+            @Validated AutomaticRegistrationForm automaticStudentForm) throws IOException {
         return usersService.studentAutomaticRegistration(automaticStudentForm);
+    }
+
+    @PostMapping("/admin/registration/advisors/automatic")
+    public String AutomaticAdvisorsRegistration(@ModelAttribute("automaticAdvisorForm")
+            @Validated AutomaticRegistrationForm automaticAdvisorForm) throws IOException {
+        return usersService.advisorAutomaticRegistration(automaticAdvisorForm);
     }
 }

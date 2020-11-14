@@ -1,11 +1,10 @@
 package g_server.g_server.application.controller.users;
 
-import g_server.g_server.application.entity.forms.AutomaticStudentForm;
+import g_server.g_server.application.entity.forms.AutomaticRegistrationForm;
 import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
@@ -189,8 +188,8 @@ public class AssociatedUsersController {
     // Назначить студентам научных руководителей из файла
     @PostMapping("admin/association/student/automatic")
     public String studentAutomaticAssociation(@ModelAttribute("automaticStudentForm")
-            @Validated AutomaticStudentForm automaticStudentForm) throws IOException {
-        return associatedStudentsService.studentAutomaticAssociation(automaticStudentForm);
+            @Validated AutomaticRegistrationForm automaticRegistrationForm) throws IOException {
+        return associatedStudentsService.studentAutomaticAssociation(automaticRegistrationForm);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

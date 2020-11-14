@@ -2,14 +2,14 @@ package g_server.g_server.application.entity.forms;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public class AutomaticStudentForm {
+public class AutomaticRegistrationForm {
     private String cathedra;
     private String type;
     private MultipartFile studentData;
 
-    public AutomaticStudentForm() { }
+    public AutomaticRegistrationForm() { }
 
-    public AutomaticStudentForm(String cathedra, String type, MultipartFile studentData) {
+    public AutomaticRegistrationForm(String cathedra, String type, MultipartFile studentData) {
         this.cathedra = cathedra;
         this.type = type;
         this.studentData = studentData;

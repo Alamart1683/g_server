@@ -3,7 +3,7 @@ package g_server.g_server.application.service.users;
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.OrderProperties;
-import g_server.g_server.application.entity.forms.AutomaticStudentForm;
+import g_server.g_server.application.entity.forms.AutomaticRegistrationForm;
 import g_server.g_server.application.entity.project.OccupiedStudents;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
@@ -24,7 +24,6 @@ import g_server.g_server.application.service.documents.DocumentManagementService
 import g_server.g_server.application.service.documents.DocumentProcessorService;
 import g_server.g_server.application.service.documents.DocumentUploadService;
 import g_server.g_server.application.service.mail.MailService;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -788,9 +787,9 @@ public class AssociatedStudentsService {
         }
     }
 
-    public String studentAutomaticAssociation(AutomaticStudentForm automaticStudentForm) {
+    public String studentAutomaticAssociation(AutomaticRegistrationForm automaticRegistrationForm) {
         documentUploadService.createDocumentRootDirIfIsNotExist();
-        MultipartFile multipartFile = automaticStudentForm.getStudentData();
+        MultipartFile multipartFile = automaticRegistrationForm.getStudentData();
         String tempPath = storageLocation + File.separator + "temp";
         File temp = new File(tempPath);
         if (!temp.exists()) {
@@ -806,7 +805,13 @@ public class AssociatedStudentsService {
             XSSFWorkbook excelStudentData = new XSSFWorkbook(
                     new FileInputStream(new File(tempPath + File.separator + "studentAssocData.xlsx")));
             File deleteFile = new File(tempPath + File.separator + "studentAssocData.xlsx");
-            XSSFSheet studentSheet = excelStudentData.getSheetAt(1);
+            XSSFSheet studentSheet;
+            try {
+                studentSheet = excelStudentData.getSheetAt(1);
+            } catch (IllegalArgumentException illegalArgumentException) {
+                return "Некорректный формат для файла с сопоставлением научных руководителей с студентами";
+            }
+
             excelStudentData.close();
             List<Users> usersList = usersRepository.findAll();
             // Теперь последовательно зарегестрируем студентов
@@ -891,6 +896,7 @@ public class AssociatedStudentsService {
     private Users findStudentByFioAndGroup(String fio, String group, List<Users> usersList) {
         String[] names = fio.split(" ");
         Users student;
+        System.out.println("Данные для поиска: " + names[0] + " " + names[1] + " " + names[2] + " " + group);
         for (Users user: usersList) {
             UsersRoles userRole;
             try {
@@ -902,14 +908,21 @@ public class AssociatedStudentsService {
                     String currentSecondName = user.getSecond_name();
                     if (currentGroup.equals(group) && currentSurname.equals(names[0]) &&
                             currentName.equals(names[1]) && currentSecondName.equals(names[2])) {
+                        System.out.println("Данные в таблице: " + currentSurname + " " + currentName + " " + currentSecondName + " " + currentGroup);
+                        System.out.println("Совпадение найдено!");
+                        System.out.println();
                         student = user;
                         return student;
                     }
                 }
             } catch (Exception e) {
+                System.out.println("Совпадение не найдено!");
+                System.out.println();
                 return null;
             }
         }
+        System.out.println("Совпадение не найдено!");
+        System.out.println();
         return null;
     }
 

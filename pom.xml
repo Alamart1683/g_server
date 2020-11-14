@@ -10,7 +10,7 @@
     </parent>
     <groupId>g_server.g_server</groupId>
     <artifactId>application</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-aplpha</version>
     <name>application</name>
     <description>graguates web site</description>
 
