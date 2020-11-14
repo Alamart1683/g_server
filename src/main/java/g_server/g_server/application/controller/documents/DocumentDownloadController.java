@@ -1,7 +1,11 @@
 package g_server.g_server.application.controller.documents;
 
+import g_server.g_server.application.entity.documents.Document;
+import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.entity.view.TaskDataView;
+import g_server.g_server.application.repository.documents.DocumentRepository;
+import g_server.g_server.application.repository.documents.DocumentVersionRepository;
 import g_server.g_server.application.service.documents.DocumentDownloadService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,15 @@ import static org.springframework.util.StringUtils.hasText;
 public class DocumentDownloadController {
     @Autowired
     private DocumentDownloadService documentDownloadService;
+
+    @Autowired
+    private DocumentProcessorService documentProcessorService;
+
+    @Autowired
+    private DocumentVersionRepository documentVersionRepository;
+
+    @Autowired
+    private DocumentRepository documentRepository;
 
     public static final String AUTHORIZATION = "Authorization";
 
@@ -52,8 +65,13 @@ public class DocumentDownloadController {
     public void documentVersionDownload(
             @RequestParam Integer versionID,
             HttpServletResponse httpServletResponse
-    ) {
-        File file = documentDownloadService.findDownloadDocumentVersion(versionID);
+    ) throws Exception {
+        File file;
+        if (checkIsTaskVersion(versionID)) {
+            file = documentProcessorService.getThreePages(versionID);
+        } else {
+            file = documentDownloadService.findDownloadDocumentVersion(versionID);
+        }
         if (file != null) {
             String contentType = documentDownloadService.getContentType(file.getName());
             String mainName = "Версия документа.docx";
@@ -65,6 +83,9 @@ public class DocumentDownloadController {
                 httpServletResponse.getOutputStream().flush();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
+            }
+            if (file.getName().contains("temp")) {
+                file.delete();
             }
         }
     }
@@ -118,6 +139,21 @@ public class DocumentDownloadController {
                 ioException.printStackTrace();
             }
         }
+    }
+
+    private boolean checkIsTaskVersion(Integer versionID) {
+        DocumentVersion documentVersion;
+        if (documentVersionRepository.findById(versionID).isPresent()) {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            Document document;
+            if (documentRepository.findById(documentVersion.getDocument()).isPresent()) {
+                document = documentRepository.findById(documentVersion.getDocument()).get();
+                if (document.getKind() == 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

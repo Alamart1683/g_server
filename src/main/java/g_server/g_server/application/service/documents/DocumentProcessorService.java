@@ -22,13 +22,12 @@ import g_server.g_server.application.repository.system_data.SpecialityRepository
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
+import g_server.g_server.application.service.documents.text_processor.Splitter;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.xmlbeans.XmlOptions;
 import org.docx4j.dml.CTBlip;
-import org.docx4j.model.styles.StyleTree;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.Part;
@@ -40,7 +39,6 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.util.List;
@@ -526,6 +524,36 @@ public class DocumentProcessorService {
         String addPart = appendString.substring(appendString.indexOf(">") + 1, appendString.lastIndexOf("<"));
         CTBody makeBody = CTBody.Factory.parse(prefix+mainPart+addPart+sufix);
         src.set(makeBody);
+    }
+
+    // Выделить только текст задания
+    public File getThreePages(Integer versionID) throws Exception {
+        DocumentVersion documentVersion;
+        File downloadTask = null;
+        if (documentVersionRepository.findById(versionID).isPresent()) {
+            Document document;
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            if (documentRepository.findById(documentVersion.getDocument()).isPresent()) {
+                document = documentRepository.findById(documentVersion.getDocument()).get();
+                com.aspose.words.Document task = new com.aspose.words.Document(documentVersion.getThis_version_document_path());
+                com.aspose.words.LayoutCollector layoutCollector = new com.aspose.words.LayoutCollector(task);
+                Splitter splitter = new Splitter(layoutCollector);
+                int page = 1;
+                while (!splitter.getDocText(splitter.getDocumentOfPage(page)).contains("ИНДИВИДУАЛЬНОЕ ЗАДАНИЕ НА ПРОИЗВОДСТВЕННУЮ ПРАКТИКУ")) {
+                   page += 1;
+                }
+                com.aspose.words.Document cutTask = splitter.getDocumentOfPage(page);
+                page += 1;
+                while (!splitter.getDocText(splitter.getDocumentOfPage(page)).contains("по производственной практике")) {
+                    cutTask.appendDocument(splitter.getDocumentOfPage(page), com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                    page += 1;
+                }
+                String tempCutTaskPath = document.getDocument_path() + File.separator + "temp_task_download.docx";
+                cutTask.save(tempCutTaskPath);
+                downloadTask = new File(tempCutTaskPath);
+            }
+        }
+        return downloadTask;
     }
 
     // Преобразование даты вида ДД.ММ.ГГГГ к виду «XX» месяца YYYY
