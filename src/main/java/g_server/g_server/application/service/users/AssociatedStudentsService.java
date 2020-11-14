@@ -780,12 +780,29 @@ public class AssociatedStudentsService {
             Users student;
             if (usersRepository.findById(studentId).isPresent()) {
                 student = usersRepository.findById(studentId).get();
-                student.setConfirmed(true);
+                student.setConfirmed(false);
             } else {
                 return "Студент не найден";
             }
             usersRepository.save(student);
             return "Научный руководитель успешно изменен";
+        } catch (Exception e) {
+            return "Переданы некорректные параметры";
+        }
+    }
+
+    // Одобрить студенту научного руководителя
+    public String confirmStudentsAdvisor(Integer studentId) {
+        try {
+            Users student;
+            if (usersRepository.findById(studentId).isPresent()) {
+                student = usersRepository.findById(studentId).get();
+                student.setConfirmed(true);
+            } else {
+                return "Студент не найден";
+            }
+            usersRepository.save(student);
+            return "Назанчение успешно одобрено";
         } catch (Exception e) {
             return "Переданы некорректные параметры";
         }
@@ -857,7 +874,7 @@ public class AssociatedStudentsService {
                                         currentAdvisor.getId(), currentStudent.getId(), true);
                                 associatedStudentsRepository.save(associatedStudent);
                             }
-                            currentStudent.setConfirmed(true);
+                            currentStudent.setConfirmed(false);
                             usersRepository.save(currentStudent);
                         }
                     }

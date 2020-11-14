@@ -185,6 +185,14 @@ public class AssociatedUsersController {
         return associatedStudentsService.changeStudentsAdvisor(studentID, advisorID);
     }
 
+    // Одобрить назначение студента
+    @PostMapping("/head_of_cathedra/only/confirm/student")
+    public String confirmStudent(
+            @RequestParam Integer studentID
+    ) {
+        return associatedStudentsService.confirmStudentsAdvisor(studentID);
+    }
+
     // Назначить студентам научных руководителей из файла
     @PostMapping("admin/association/student/automatic")
     public String studentAutomaticAssociation(@ModelAttribute("automaticStudentForm")
