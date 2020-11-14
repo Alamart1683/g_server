@@ -16,6 +16,7 @@ import g_server.g_server.application.repository.project.OccupiedStudentsReposito
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
+import g_server.g_server.application.repository.system_data.StudentGroupRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.StudentDataRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
@@ -98,6 +99,9 @@ public class AssociatedStudentsService {
 
     @Autowired
     private DocumentUploadService documentUploadService;
+
+    @Autowired
+    private StudentGroupRepository studentGroupRepository;
 
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
@@ -814,7 +818,6 @@ public class AssociatedStudentsService {
 
             excelStudentData.close();
             List<Users> usersList = usersRepository.findAll();
-            // Теперь последовательно зарегестрируем студентов
             try {
                 Users currentAdvisor = null;
                 Users currentStudent = null;
@@ -895,6 +898,7 @@ public class AssociatedStudentsService {
     // Поиск студента в системе по фио и группе
     private Users findStudentByFioAndGroup(String fio, String group, List<Users> usersList) {
         String[] names = fio.split(" ");
+        group = group.trim();
         Users student;
         System.out.println("Данные для поиска: " + names[0] + " " + names[1] + " " + names[2] + " " + group);
         for (Users user: usersList) {
@@ -902,7 +906,8 @@ public class AssociatedStudentsService {
             try {
                 userRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
                 if (userRole.getRoleId() == 1) {
-                    String currentGroup = user.getStudentData().getStudentGroup().getStudentGroup();
+                    StudentData studentData = studentDataRepository.findById(user.getId()).get();
+                    String currentGroup = studentGroupRepository.findById(studentData.getStudent_group()).get().getStudentGroup();
                     String currentSurname = user.getSurname();
                     String currentName = user.getName();
                     String currentSecondName = user.getSecond_name();

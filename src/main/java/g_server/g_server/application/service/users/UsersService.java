@@ -484,6 +484,8 @@ public class UsersService implements UserDetailsService {
                             if (!phone.equals("")) {
                                 student.setPhone(getNormalPhone(phone));
                             }
+                        } else {
+                            student.setPhone("Не указан");
                         }
 
                         // Определим почту студента
