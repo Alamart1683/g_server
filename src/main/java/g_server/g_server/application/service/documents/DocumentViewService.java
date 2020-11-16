@@ -574,21 +574,21 @@ public class DocumentViewService {
             if (documentList.size() == 1) {
                 List<DocumentVersion> reportVersions =
                         documentVersionRepository.findByDocument(documentList.get(0).getId());
-                for (DocumentVersion taskVersion: reportVersions) {
+                for (DocumentVersion reportVersion: reportVersions) {
                     if (intTaskType == 1) {
-                        if (taskVersion.getEditor() == studentID) {
+                        if (reportVersion.getEditor() == studentID) {
                             reportVersionView.add(
                                     new ReportVersionDocumentView(
-                                            taskVersion,
-                                            nirReportRepository.findByVersionID(taskVersion.getId())
+                                            reportVersion,
+                                            nirReportRepository.findByVersionID(reportVersion.getId())
                                     )
                             );
-                        } else if (taskVersion.getEditor() == advisorID &&
-                                !taskVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                        } else if (reportVersion.getEditor() == advisorID &&
+                                !reportVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
                             reportVersionView.add(
                                     new ReportVersionDocumentView(
-                                            taskVersion,
-                                            nirReportRepository.findByVersionID(taskVersion.getId())
+                                            reportVersion,
+                                            nirReportRepository.findByVersionID(reportVersion.getId())
                                     )
                             );
                         }
@@ -611,7 +611,7 @@ public class DocumentViewService {
         }
     }
 
-    // Сформировать список версий загруженного задания студента для научного руководителя
+    // Сформировать список версий загруженного отчета студента для научного руководителя
     public List<ReportVersionDocumentView> getAdvisorStudentReportVersions(String token, String taskType, Integer studentID) {
         Integer advisorID = associatedStudentsService.getUserId(token);
         if (studentID != null && advisorID != null) {
