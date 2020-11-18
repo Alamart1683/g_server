@@ -79,6 +79,18 @@ public class DocumentViewService {
     @Autowired
     private ViewRightsProjectRepository viewRightsProjectRepository;
 
+    @Autowired
+    private PpppuiopdTaskRepository ppppuiopdTaskRepository;
+
+    @Autowired
+    private PpppuiopdReportRepository ppppuiopdReportRepository;
+
+    @Autowired
+    private PdTaskRepository pdTaskRepository;
+
+    @Autowired
+    private PdReportRepository pdReportRepository;
+
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
@@ -317,6 +329,7 @@ public class DocumentViewService {
                                 associatedStudents = associatedStudentsRepository.
                                         findByScientificAdvisorAndStudent(advisorID, userID);
                                 if (associatedStudents != null) {
+                                    // НИР
                                     if (currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Задание")) {
                                         Document currentNirTaskDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
@@ -349,7 +362,73 @@ public class DocumentViewService {
                                             }
                                         }
                                         studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirReportDocument, null, currentReportVersionsView));
+                                    // ППППУиОПД
+                                    } else if (currentView.getDocumentType().equals("Практика по получению знаний и умений") && currentView.getDocumentKind().equals("Задание")) {
+                                        Document currentPpppuiopdTaskDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentPpppuiopdTaskVersions = documentVersionRepository.findByDocument(currentPpppuiopdTaskDocument.getId());
+                                        List<TaskDocumentVersionView> currentTaskVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentPpppuiopdTaskVersion: currentPpppuiopdTaskVersions) {
+                                            PpppuiopdTask currentPpppuiopdTask = ppppuiopdTaskRepository.findByVersionID(currentPpppuiopdTaskVersion.getId());
+                                            if (currentPpppuiopdTask.getDocumentStatus().getStatus().equals("Не отправлено") &&
+                                                    currentPpppuiopdTaskVersion.getEditor() == advisor.getId()) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentPpppuiopdTaskVersion, currentPpppuiopdTask));
+                                            }
+                                            if (!currentPpppuiopdTask.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentPpppuiopdTaskVersion, currentPpppuiopdTask));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdTaskDocument, currentTaskVersionsView, null));
+                                    } else if ((currentView.getDocumentType().equals("Практика по получению знаний и умений") && currentView.getDocumentKind().equals("Отчёт"))) {
+                                        Document currentPpppuiopdReportDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentPpppuiopdReportVersions = documentVersionRepository.findByDocument(currentPpppuiopdReportDocument.getId());
+                                        List<ReportVersionDocumentView> currentReportVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentPpppuiopdReportVersion: currentPpppuiopdReportVersions) {
+                                            PpppuiopdReport currentPpppuiopdReport = ppppuiopdReportRepository.findByVersionID(currentPpppuiopdReportVersion.getId());
+                                            if (currentPpppuiopdReport.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                    && currentPpppuiopdReportVersion.getEditor() == advisor.getId()) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentPpppuiopdReportVersion, currentPpppuiopdReport));
+                                            }
+                                            else if (!currentPpppuiopdReport.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentPpppuiopdReportVersion, currentPpppuiopdReport));
+                                            }
+                                        }
                                     }
+                                    // ПП
+                                    else if (currentView.getDocumentType().equals("Преддипломная практика") && currentView.getDocumentKind().equals("Задание")) {
+                                        Document currenPdTaskDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentPdTaskVersions = documentVersionRepository.findByDocument(currenPdTaskDocument.getId());
+                                        List<TaskDocumentVersionView> currentTaskVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentPdTaskVersion: currentPdTaskVersions) {
+                                            PdTask currentPdTask = pdTaskRepository.findByVersionID(currentPdTaskVersion.getId());
+                                            if (currentPdTask.getDocumentStatus().getStatus().equals("Не отправлено") &&
+                                                    currentPdTaskVersion.getEditor() == advisor.getId()) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentPdTaskVersion, currentPdTask));
+                                            }
+                                            if (!currentPdTask.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentPdTaskVersion, currentPdTask));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currenPdTaskDocument, currentTaskVersionsView, null));
+                                    } else if ((currentView.getDocumentType().equals("Преддипломная практика") && currentView.getDocumentKind().equals("Отчёт"))) {
+                                        Document currentPdReportDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentPdReportVersions = documentVersionRepository.findByDocument(currentPdReportDocument.getId());
+                                        List<ReportVersionDocumentView> currentReportVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentPdReportVersion: currentPdReportVersions) {
+                                            PdReport currentPdReport = pdReportRepository.findByVersionID(currentPdReportVersion.getId());
+                                            if (currentPdReport.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                    && currentPdReportVersion.getEditor() == advisor.getId()) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentPdReportVersion, currentPdReport));
+                                            }
+                                            else if (!currentPdReport.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentPdReportVersion, currentPdReport));
+                                            }
+                                        }
+                                    }
+                                    // TODO ВКР
                                 }
                             }
                         } catch (NullPointerException nullPointerException) {
@@ -490,9 +569,39 @@ public class DocumentViewService {
                             );
                         }
                     } else if (intTaskType == 2) {
-                        // TODO Задел под практику по получению знаний и умений
+                        if (taskVersion.getEditor() == studentID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            ppppuiopdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == advisorID &&
+                                !taskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            ppppuiopdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
                     } else if (intTaskType == 3) {
-                        // TODO Задел под преддипломную практику
+                        if (taskVersion.getEditor() == studentID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            pdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == advisorID &&
+                                !taskVersion.getPdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            pdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
                     } else if (intTaskType == 4) {
                        // TODO Задел под вкр
                     } else {
@@ -541,9 +650,39 @@ public class DocumentViewService {
                             );
                         }
                     } else if (intTaskType == 2) {
-                        // TODO Задел под практику по получению знаний и умений
+                        if (taskVersion.getEditor() == advisorID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            ppppuiopdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == studentID &&
+                                !taskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            ppppuiopdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
                     } else if (intTaskType == 3) {
-                        // TODO Задел под преддипломную практику
+                        if (taskVersion.getEditor() == advisorID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            pdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == studentID &&
+                                !taskVersion.getPdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            pdTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
                     } else if (intTaskType == 4) {
                         // TODO Задел под вкр
                     } else {
@@ -593,9 +732,39 @@ public class DocumentViewService {
                             );
                         }
                     } else if (intTaskType == 2) {
-                        // TODO Задел под практику по получению знаний и умений
+                        if (reportVersion.getEditor() == studentID) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            ppppuiopdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        } else if (reportVersion.getEditor() == advisorID &&
+                                !reportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            ppppuiopdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        }
                     } else if (intTaskType == 3) {
-                        // TODO Задел под преддипломную практику
+                        if (reportVersion.getEditor() == studentID) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            pdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        } else if (reportVersion.getEditor() == advisorID &&
+                                !reportVersion.getPdReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            pdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        }
                     } else if (intTaskType == 4) {
                         // TODO Задел под вкр
                     } else {
@@ -626,6 +795,7 @@ public class DocumentViewService {
                 List<DocumentVersion> reportVersions =
                         documentVersionRepository.findByDocument(documentList.get(0).getId());
                 for (DocumentVersion reportVersion: reportVersions) {
+                    // НИР
                     if (intTaskType == 1) {
                         if (reportVersion.getEditor() == advisorID) {
                             reportVersionView.add(
@@ -643,10 +813,42 @@ public class DocumentViewService {
                                     )
                             );
                         }
+                    // ППППУиОПД
                     } else if (intTaskType == 2) {
-                        // TODO Задел под практику по получению знаний и умений
+                        if (reportVersion.getEditor() == advisorID) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            ppppuiopdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        } else if (reportVersion.getEditor() == studentID &&
+                                !reportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            ppppuiopdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        }
+                    // ПП
                     } else if (intTaskType == 3) {
-                        // TODO Задел под преддипломную практику
+                        if (reportVersion.getEditor() == advisorID) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            pdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        } else if (reportVersion.getEditor() == studentID &&
+                                !reportVersion.getPdReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            pdReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        }
                     } else if (intTaskType == 4) {
                         // TODO Задел под вкр
                     } else {

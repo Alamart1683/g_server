@@ -4,20 +4,14 @@ import com.github.aleksandy.petrovich.Case;
 import com.github.aleksandy.petrovich.Gender;
 import com.github.aleksandy.petrovich.Petrovich;
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.documents.Document;
-import g_server.g_server.application.entity.documents.DocumentVersion;
-import g_server.g_server.application.entity.documents.NirTask;
-import g_server.g_server.application.entity.documents.OrderProperties;
+import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.view.AdvisorShortTaskDataView;
 import g_server.g_server.application.entity.view.ShortTaskDataView;
 import g_server.g_server.application.entity.view.TaskDataView;
-import g_server.g_server.application.repository.documents.DocumentRepository;
-import g_server.g_server.application.repository.documents.DocumentVersionRepository;
-import g_server.g_server.application.repository.documents.NirTaskRepository;
-import g_server.g_server.application.repository.documents.OrderPropertiesRepository;
+import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
@@ -81,6 +75,12 @@ public class DocumentProcessorService {
 
     @Autowired
     private DocumentUploadService documentUploadService;
+
+    @Autowired
+    private PpppuiopdTaskRepository ppppuiopdTaskRepository;
+
+    @Autowired
+    private PdTaskRepository pdTaskRepository;
 
     // Сгенерировать шаблон задания или создать его версию для студента
     public String studentTaskGeneration(String token, ShortTaskDataView shortTaskDataView) throws Exception {
@@ -155,7 +155,7 @@ public class DocumentProcessorService {
                         taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
                         String documentVersionPath = taskDirPath + File.separator + "version_" +
                                 documentUploadService.getCurrentDate() + ".docx";
-                        String response = saveNirTaskAsDocument(fileName, student, advisor, taskDirPath,
+                        String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
                                 taskDataView, documentVersionPath, false);
                         if (!response.equals("Попытка создать версию чужого документа")) {
                             WordReplaceService wordReplaceService = new WordReplaceService(template);
@@ -238,7 +238,7 @@ public class DocumentProcessorService {
                         taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
                         String documentVersionPath = taskDirPath + File.separator + "version_" +
                                 documentUploadService.getCurrentDate() + ".docx";
-                        String response = saveNirTaskAsDocument(fileName, student, advisor, taskDirPath,
+                        String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
                                 taskDataView, documentVersionPath, true);
                         if (!response.equals("Попытка создать версию чужого документа")) {
                             WordReplaceService wordReplaceService = new WordReplaceService(template);
@@ -406,8 +406,8 @@ public class DocumentProcessorService {
     }
 
     // Сохранить задание на НИР как документ
-    public String saveNirTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
-                                        TaskDataView taskDataView, String documentVersionPath, boolean flag) {
+    public String saveTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
+                                     TaskDataView taskDataView, String documentVersionPath, boolean flag) {
         Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
         if (document == null && !flag) {
             Integer kind = 2;
@@ -434,13 +434,31 @@ public class DocumentProcessorService {
                     documentVersionPath
             );
             documentVersionRepository.save(documentVersion);
-            NirTask nirTask = new NirTask(
-                    documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
-                    taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
-            );
-            nirTaskRepository.save(nirTask);
+            if (type == 1) {
+                NirTask nirTask = new NirTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                nirTaskRepository.save(nirTask);
+            } else if (type == 2) {
+                PpppuiopdTask ppppuiopdTask = new PpppuiopdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                ppppuiopdTaskRepository.save(ppppuiopdTask);
+            } else if (type == 3) {
+                PdTask pdTask = new PdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                pdTaskRepository.save(pdTask);
+            }
+            else if (type == 4) {
+                // TODO ВКР
+            }
             return "Задание по " + taskDataView.getTaskType() + " успешно сгенерировано!";
         } else if (document != null && !flag) {
+            Integer type = determineType(taskDataView.getTaskType());
             if (document.getCreator() == student.getId()) {
                 DocumentVersion documentVersion = new DocumentVersion(
                         student.getId(),
@@ -450,16 +468,31 @@ public class DocumentProcessorService {
                         documentVersionPath
                 );
                 documentVersionRepository.save(documentVersion);
-                NirTask nirTask = new NirTask(
-                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
-                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
-                );
-                nirTaskRepository.save(nirTask);
+                if (type == 1) {
+                    NirTask nirTask = new NirTask(
+                            documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                            taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                    );
+                    nirTaskRepository.save(nirTask);
+                } else if (type == 2) {
+                    PpppuiopdTask ppppuiopdTask = new PpppuiopdTask(
+                            documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                            taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                    );
+                    ppppuiopdTaskRepository.save(ppppuiopdTask);
+                } else if (type == 3) {
+                    PdTask pdTask = new PdTask(
+                            documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                            taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                    );
+                    pdTaskRepository.save(pdTask);
+                }
                 return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
             } else {
                 return "Попытка создать версию чужого документа";
             }
         } else if (document != null && flag) {
+            Integer type = determineType(taskDataView.getTaskType());
             DocumentVersion documentVersion = new DocumentVersion(
                     advisor.getId(),
                     document.getId(),
@@ -469,11 +502,28 @@ public class DocumentProcessorService {
                     documentVersionPath
             );
             documentVersionRepository.save(documentVersion);
-            NirTask nirTask = new NirTask(
-                    documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
-                    taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
-            );
-            nirTaskRepository.save(nirTask);
+            if (type == 1) {
+                NirTask nirTask = new NirTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                nirTaskRepository.save(nirTask);
+            } else if (type == 2) {
+                PpppuiopdTask ppppuiopdTask = new PpppuiopdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                ppppuiopdTaskRepository.save(ppppuiopdTask);
+            } else if (type == 3) {
+                PdTask pdTask = new PdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                pdTaskRepository.save(pdTask);
+            }
+            else if (type == 4) {
+                // TODO ВКР
+            }
             return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
         }
         return "Извините, что-то пошло не так";

@@ -2,6 +2,8 @@ package g_server.g_server.application.entity.view;
 
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.entity.documents.NirReport;
+import g_server.g_server.application.entity.documents.PdReport;
+import g_server.g_server.application.entity.documents.PpppuiopdReport;
 
 public class ReportVersionDocumentView extends DocumentVersionView {
     private int systemVersionID;
@@ -15,6 +17,22 @@ public class ReportVersionDocumentView extends DocumentVersionView {
         this.status = nirReport.getDocumentStatus().getStatus();
         this.detailedContent = nirReport.getDetailedContent();
         this.advisorConclusion = nirReport.getAdvisorConclusion();
+    }
+
+    public ReportVersionDocumentView(DocumentVersion documentVersion, PpppuiopdReport ppppuiopdReport) {
+        super(documentVersion);
+        this.systemVersionID = ppppuiopdReport.getVersionID();
+        this.status = ppppuiopdReport.getDocumentStatus().getStatus();
+        this.detailedContent = ppppuiopdReport.getDetailedContent();
+        this.advisorConclusion = ppppuiopdReport.getAdvisorConclusion();
+    }
+
+    public ReportVersionDocumentView(DocumentVersion documentVersion, PdReport pdReport) {
+        super(documentVersion);
+        this.systemVersionID = pdReport.getVersionID();
+        this.status = pdReport.getDocumentStatus().getStatus();
+        this.detailedContent = pdReport.getDetailedContent();
+        this.advisorConclusion = pdReport.getAdvisorConclusion();
     }
 
     public int getSystemVersionID() {

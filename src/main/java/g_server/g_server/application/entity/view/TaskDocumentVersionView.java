@@ -2,6 +2,8 @@ package g_server.g_server.application.entity.view;
 
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.entity.documents.NirTask;
+import g_server.g_server.application.entity.documents.PdTask;
+import g_server.g_server.application.entity.documents.PpppuiopdTask;
 
 public class TaskDocumentVersionView extends DocumentVersionView {
     private Integer systemVersionID;
@@ -21,6 +23,28 @@ public class TaskDocumentVersionView extends DocumentVersionView {
         this.toFamiliarize = nirTask.getToFamiliarize();
         this.additionalTask = nirTask.getAdditionalTask();
         this.status = nirTask.getDocumentStatus().getStatus();
+    }
+
+    public TaskDocumentVersionView(DocumentVersion documentVersion, PpppuiopdTask ppppuiopdTask) {
+        super(documentVersion);
+        this.systemVersionID = documentVersion.getId();
+        this.theme = ppppuiopdTask.getTheme();
+        this.toExplore = ppppuiopdTask.getToExplore();
+        this.toCreate = ppppuiopdTask.getToCreate();
+        this.toFamiliarize = ppppuiopdTask.getToFamiliarize();
+        this.additionalTask = ppppuiopdTask.getAdditionalTask();
+        this.status = ppppuiopdTask.getDocumentStatus().getStatus();
+    }
+
+    public TaskDocumentVersionView(DocumentVersion documentVersion, PdTask pdTask) {
+        super(documentVersion);
+        this.systemVersionID = documentVersion.getId();
+        this.theme = pdTask.getTheme();
+        this.toExplore = pdTask.getToExplore();
+        this.toCreate = pdTask.getToCreate();
+        this.toFamiliarize = pdTask.getToFamiliarize();
+        this.additionalTask = pdTask.getAdditionalTask();
+        this.status = pdTask.getDocumentStatus().getStatus();
     }
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, String status) {

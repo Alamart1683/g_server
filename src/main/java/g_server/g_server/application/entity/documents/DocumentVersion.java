@@ -176,4 +176,12 @@ public class DocumentVersion {
     public void setPdTask(PdTask pdTask) {
         this.pdTask = pdTask;
     }
+
+    public PdReport getPdReport() {
+        return pdReport;
+    }
+
+    public void setPdReport(PdReport pdReport) {
+        this.pdReport = pdReport;
+    }
 }
