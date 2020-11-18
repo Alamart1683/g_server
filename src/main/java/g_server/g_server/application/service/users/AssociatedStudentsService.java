@@ -808,6 +808,7 @@ public class AssociatedStudentsService {
         }
     }
 
+    // Метод автоматической привязки студента к научруку
     public String studentAutomaticAssociation(AutomaticRegistrationForm automaticRegistrationForm) {
         documentUploadService.createDocumentRootDirIfIsNotExist();
         MultipartFile multipartFile = automaticRegistrationForm.getStudentData();
