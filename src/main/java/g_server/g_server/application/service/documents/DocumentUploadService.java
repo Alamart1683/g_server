@@ -189,7 +189,7 @@ public class DocumentUploadService {
                 messagesList.add("Файл с таким именем уже существует");
             TemplateProperties template = templatePropertiesRepository.
                     findByType(documentProcessorService.determineType(documentForm.getDocumentFormType()));
-            if (template != null) {
+            if (template != null && documentForm.getDocumentFormKind().equals("Шаблон")) {
                 messagesList.add("Шаблон для данного этапа уже загружен");
             }
             // Сохраним файл на сервере, создав необходимую директорию
