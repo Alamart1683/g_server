@@ -697,15 +697,15 @@ public class DocumentManagementService {
                     int type = document.getType();
                     switch (type) {
                         case 1:
-                            documentVersion.getNirTask().setStatus(4);
+                            documentVersion.getNirReport().setNirReportStatus(4);
                             nirReportRepository.save(documentVersion.getNirReport());
                             break;
                         case 2:
-                            documentVersion.getPpppuiopdTask().setStatus(4);
+                            documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(4);
                             ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
                             break;
                         case 3:
-                            documentVersion.getPdTask().setStatus(4);
+                            documentVersion.getPdReport().setPdReportStatus(4);
                             pdReportRepository.save(documentVersion.getPdReport());
                             break;
                         default:

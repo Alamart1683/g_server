@@ -203,8 +203,20 @@ public class DocumentProcessorService {
                 Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
                         .getStudentGroup().getStudentGroup().substring(0, 4));
                 OrderProperties orderProperty;
+                Document documentOrder = null;
                 try {
-                    orderProperty = orderPropertiesRepository.findBySpeciality(speciality.getId());
+                    List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortTaskDataView.getTaskType()), 1);
+                    for (Document order: orderList) {
+                        if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
+                            documentOrder = order;
+                            break;
+                        }
+                    }
+                    if (documentOrder != null) {
+                        orderProperty = documentOrder.getOrderProperties();
+                    } else {
+                        orderProperty = null;
+                    }
                 } catch (NullPointerException nullPointerException) {
                     orderProperty = null;
                 }
