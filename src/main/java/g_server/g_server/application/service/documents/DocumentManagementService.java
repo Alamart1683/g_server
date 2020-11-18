@@ -64,6 +64,18 @@ public class DocumentManagementService {
     @Autowired
     private OrderPropertiesRepository orderPropertiesRepository;
 
+    @Autowired
+    private PpppuiopdReportRepository ppppuiopdReportRepository;
+
+    @Autowired
+    private PdReportRepository pdReportRepository;
+
+    @Autowired
+    private PpppuiopdTaskRepository ppppuiopdTaskRepository;
+
+    @Autowired
+    private PdTaskRepository pdTaskRepository;
+
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
@@ -682,8 +694,13 @@ public class DocumentManagementService {
                 0, 0, 0, 0);
         Document nirTask;
         Document nirReport;
+        Document ppppuiopdTask;
+        Document ppppuiopdReport;
+        Document pdTask;
+        Document pdReport;
         // TODO Сделать обработку остальных документов когда они появятся
         try {
+            // НИР
             if (documentRepository.findByTypeAndKindAndCreator(1, 2, studentID).size() == 1) {
                 nirTask = documentRepository.findByTypeAndKindAndCreator(1, 2, studentID).get(0);
                 List<DocumentVersion> nirTaskVersions = documentVersionRepository.findByDocument(nirTask.getId());
@@ -701,6 +718,48 @@ public class DocumentManagementService {
                 for (DocumentVersion nirReportVersion: nirReportVersions) {
                     if (nirReportVersion.getNirReport().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setNirReportStatus(1);
+                    }
+                }
+            }
+            // ППППУиОПД
+            if (documentRepository.findByTypeAndKindAndCreator(2, 2, studentID).size() == 1) {
+                ppppuiopdTask = documentRepository.findByTypeAndKindAndCreator(2, 2, studentID).get(0);
+                List<DocumentVersion> ppppuiopdTaskVersions = documentVersionRepository.findByDocument(ppppuiopdTask.getId());
+                // Пройдем по версиям задания студента
+                for (DocumentVersion ppppuiopdTaskVersion : ppppuiopdTaskVersions) {
+                    if (ppppuiopdTaskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setPpppuipdTaskStatus(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(2, 3, studentID).size() == 1) {
+                ppppuiopdReport = documentRepository.findByTypeAndKindAndCreator(2, 3, studentID).get(0);
+                List<DocumentVersion> ppppuiopdReportVersions = documentVersionRepository.findByDocument(ppppuiopdReport.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion ppppuiopdReportVersion: ppppuiopdReportVersions) {
+                    if (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setPpppuipdReportStatus(1);
+                    }
+                }
+            }
+            // ПП
+            if (documentRepository.findByTypeAndKindAndCreator(3, 2, studentID).size() == 1) {
+                pdTask = documentRepository.findByTypeAndKindAndCreator(3, 2, studentID).get(0);
+                List<DocumentVersion> pdTaskVersions = documentVersionRepository.findByDocument(pdTask.getId());
+                // Пройдем по версиям задания студента
+                for (DocumentVersion pdTaskVersion : pdTaskVersions) {
+                    if (pdTaskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setPpTaskStatus(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(3, 3, studentID).size() == 1) {
+                pdReport = documentRepository.findByTypeAndKindAndCreator(3, 3, studentID).get(0);
+                List<DocumentVersion> ppppuiopdReportVersions = documentVersionRepository.findByDocument(pdReport.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion ppppuiopdReportVersion: ppppuiopdReportVersions) {
+                    if (ppppuiopdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setPpReportStatus(1);
                     }
                 }
             }
