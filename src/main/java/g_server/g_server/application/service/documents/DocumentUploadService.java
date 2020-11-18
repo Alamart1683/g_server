@@ -187,6 +187,11 @@ public class DocumentUploadService {
                 documentDirectory.mkdir();
             else
                 messagesList.add("Файл с таким именем уже существует");
+            TemplateProperties template = templatePropertiesRepository.
+                    findByType(documentProcessorService.determineType(documentForm.getDocumentFormType()));
+            if (template != null) {
+                messagesList.add("Шаблон для данного этапа уже загружен");
+            }
             // Сохраним файл на сервере, создав необходимую директорию
             if (messagesList.size() == 0) {
                 String currentDate = getCurrentDate();

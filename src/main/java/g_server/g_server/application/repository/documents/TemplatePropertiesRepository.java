@@ -19,4 +19,6 @@ public interface TemplatePropertiesRepository extends JpaRepository<TemplateProp
 
     @Override
     void deleteById(Integer integer);
+
+    TemplateProperties findByType(Integer type);
 }
