@@ -46,6 +46,9 @@ public class UsersService implements UserDetailsService {
     @Value("${storage.location}")
     private String storageLocation;
 
+    @Value("${storage.location}")
+    private String userTestStorage;
+
     @Autowired
     private UsersRepository usersRepository;
 
@@ -119,6 +122,7 @@ public class UsersService implements UserDetailsService {
             return false;
         }
         else {
+            String password = user.getPassword();
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setRoles(Collections.singleton(new Roles(1, "ROLE_STUDENT")));
             usersRepository.save(user);
@@ -129,6 +133,9 @@ public class UsersService implements UserDetailsService {
                     studentTypeRepository.getByStudentType(student_type).getId()
             );
             studentDataRepository.save(studentData);
+            // Отправка письма студенту
+            mailService.sendLoginEmailAndPassword(user.getEmail(), password, "студента");
+            testUserToFile(password, user);
             return true;
         }
     }
@@ -149,6 +156,7 @@ public class UsersService implements UserDetailsService {
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             // Отправка письма науч. руководителю
             mailService.sendLoginEmailAndPassword(user.getEmail(), password, "научного руководителя");
+            testUserToFile(password, user);
             return true;
         }
     }
@@ -170,6 +178,7 @@ public class UsersService implements UserDetailsService {
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             // Отправка письма зав. кафедры
             mailService.sendLoginEmailAndPassword(user.getEmail(), password, "заведующего кафедрой");
+            testUserToFile(password, user);
             return true;
         }
     }
@@ -671,19 +680,23 @@ public class UsersService implements UserDetailsService {
 
     // Тестовый метод для сохранения логинов и паролей студентов перед включением почтовой рассылки
     public void testListToFile(List<String> passwords, List<Users> students, boolean isAdvisor) {
-        File file = new File("src" + File.separator + "main" + File.separator +
-                "resources" + File.separator + "testFioLoginAndPassword.txt");
+        File testUserDir = new File(userTestStorage);
+        if (!testUserDir.exists()) {
+            testUserDir.mkdir();
+        }
+        File file = new File(userTestStorage + File.separator + "testFioLoginAndPassword_" +
+                documentUploadService.getCurrentDate() + ".txt");
         if (file.exists()) {
             file.delete();
         }
         Writer writer = null;
         try {
             if (!isAdvisor) {
-                writer = new FileWriter("src" + File.separator + "main" + File.separator +
-                        "resources" + File.separator + "testStudentFioLoginAndPassword.txt");
+                writer = new FileWriter(userTestStorage +  File.separator + "testStudentFioLoginAndPassword_" +
+                        documentUploadService.getCurrentDate() + ".txt");
             } else {
-                writer = new FileWriter("src" + File.separator + "main" + File.separator +
-                        "resources" + File.separator + "testAdvisorFioLoginAndPassword.txt");
+                writer = new FileWriter(userTestStorage +  File.separator +  "testAdvisorFioLoginAndPassword_" +
+                        documentUploadService.getCurrentDate() + ".txt");
             }
 
             for (int i = 0; i < students.size(); i++) {
@@ -697,7 +710,42 @@ public class UsersService implements UserDetailsService {
             }
             writer.flush();
         } catch (Exception e) {
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
+    }
 
+    // Тестовый метод для сохранения данных авторизации конкретного пользователя
+    public void testUserToFile(String password, Users user) {
+        File testUserDir = new File(userTestStorage);
+        if (!testUserDir.exists()) {
+            testUserDir.mkdir();
+        }
+        File file = new File(userTestStorage + File.separator + "auth for " +
+                user.getSurname() + " " + user.getName() + " " + user.getSecond_name() + user.getEmail() + ".txt");
+        if (file.exists()) {
+            file.delete();
+        }
+        Writer writer = null;
+        try {
+                writer = new FileWriter(userTestStorage +  File.separator + "testStudentFioLoginAndPassword_" +
+                        documentUploadService.getCurrentDate() + ".txt");
+                UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
+                Roles role = rolesService.findById(usersRole.getRoleId()).get();
+                writer.write(
+                        " " + role
+                        + " " + user.getName()
+                        + " " + user.getSecond_name()
+                        + " email: " + user.getEmail()
+                        + " password: " + password);
+                writer.write(System.getProperty("line.separator"));
+            writer.flush();
+        } catch (Exception e) {
         } finally {
             if (writer != null) {
                 try {
