@@ -30,8 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // То, что можно студенту
                 .antMatchers(
-                        "/student/**",
-                        "/student_group/{id}").hasRole("STUDENT")
+                        "/student/**").hasRole("STUDENT")
 
                 // То, что можно научному руководителю
                 .antMatchers(

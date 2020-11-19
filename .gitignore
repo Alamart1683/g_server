@@ -34,3 +34,4 @@ build/
 
 .users_documents/**
 users_documents/**
+g_server.log
