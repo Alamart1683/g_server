@@ -931,21 +931,14 @@ public class AssociatedStudentsService {
                     String currentSecondName = user.getSecond_name();
                     if (currentGroup.equals(group) && currentSurname.equals(names[0]) &&
                             currentName.equals(names[1]) && currentSecondName.equals(names[2])) {
-                        System.out.println("Данные в таблице: " + currentSurname + " " + currentName + " " + currentSecondName + " " + currentGroup);
-                        System.out.println("Совпадение найдено!");
-                        System.out.println();
                         student = user;
                         return student;
                     }
                 }
             } catch (Exception e) {
-                System.out.println("Совпадение не найдено!");
-                System.out.println();
                 return null;
             }
         }
-        System.out.println("Совпадение не найдено!");
-        System.out.println();
         return null;
     }
 

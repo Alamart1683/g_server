@@ -46,7 +46,7 @@ public class UsersService implements UserDetailsService {
     @Value("${storage.location}")
     private String storageLocation;
 
-    @Value("${storage.location}")
+    @Value("${test.auth}")
     private String userTestStorage;
 
     @Autowired
@@ -196,6 +196,7 @@ public class UsersService implements UserDetailsService {
             usersRepository.save(user);
             // Отправка письма администратору
             mailService.sendLoginEmailAndPassword(user.getEmail(), password, "администратора");
+            testUserToFile(password, user);
             return true;
         }
     }
@@ -432,6 +433,7 @@ public class UsersService implements UserDetailsService {
         try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
                 "studentData.xls"))) {
             os.write(multipartFile.getBytes());
+            os.close();
             HSSFWorkbook excelStudentData = new HSSFWorkbook(
                     new FileInputStream(new File(tempPath + File.separator + "studentData.xls")));
             File deleteFile = new File(tempPath + File.separator + "studentData.xls");
@@ -570,6 +572,7 @@ public class UsersService implements UserDetailsService {
         try (OutputStream os = Files.newOutputStream(Paths.get(tempPath + File.separator +
                 "advisorData.xlsx"))) {
             os.write(multipartFile.getBytes());
+            os.close();
             XSSFWorkbook excelStudentData = new XSSFWorkbook(
                     new FileInputStream(new File(tempPath + File.separator + "advisorData.xlsx")));
             File deleteFile = new File(tempPath + File.separator + "advisorData.xlsx");
@@ -650,9 +653,11 @@ public class UsersService implements UserDetailsService {
                     }
                 }
                 testListToFile(decodePasswords, advisorList, true);
+                excelStudentData.close();
                 deleteFile.delete();
                 return "Научные руководители были успешно зарегистрированы!";
             } catch (NullPointerException e) {
+                excelStudentData.close();
                 deleteFile.delete();
                 return "Произошла ошибка чтения файла";
             }
@@ -727,18 +732,19 @@ public class UsersService implements UserDetailsService {
             testUserDir.mkdir();
         }
         File file = new File(userTestStorage + File.separator + "auth for " +
-                user.getSurname() + " " + user.getName() + " " + user.getSecond_name() + user.getEmail() + ".txt");
+                user.getSurname() + " " + user.getName() + " " + user.getSecond_name() + " " + user.getEmail() + ".txt");
         if (file.exists()) {
             file.delete();
         }
         Writer writer = null;
         try {
-                writer = new FileWriter(userTestStorage +  File.separator + "testStudentFioLoginAndPassword_" +
-                        documentUploadService.getCurrentDate() + ".txt");
+                writer = new FileWriter(userTestStorage + File.separator + "auth for " +
+                        user.getSurname() + " " + user.getName() + " " + user.getSecond_name() + " " + user.getEmail()
+                        + ".txt");
                 UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
                 Roles role = rolesService.findById(usersRole.getRoleId()).get();
                 writer.write(
-                        " " + role
+                        " " + role.getRole()
                         + " " + user.getName()
                         + " " + user.getSecond_name()
                         + " email: " + user.getEmail()
