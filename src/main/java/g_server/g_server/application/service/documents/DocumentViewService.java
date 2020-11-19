@@ -394,6 +394,7 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentPpppuiopdReportVersion, currentPpppuiopdReport));
                                             }
                                         }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdReportDocument, null, currentReportVersionsView));
                                     }
                                     // ПП
                                     else if (currentView.getDocumentType().equals("Преддипломная практика") && currentView.getDocumentKind().equals("Задание")) {
@@ -427,6 +428,7 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentPdReportVersion, currentPdReport));
                                             }
                                         }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdReportDocument, null, currentReportVersionsView));
                                     }
                                     // TODO ВКР
                                 }
