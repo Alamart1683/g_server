@@ -918,7 +918,6 @@ public class AssociatedStudentsService {
         String[] names = fio.split(" ");
         group = group.trim();
         Users student;
-        System.out.println("Данные для поиска: " + names[0] + " " + names[1] + " " + names[2] + " " + group);
         for (Users user: usersList) {
             UsersRoles userRole;
             try {
