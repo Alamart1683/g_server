@@ -642,7 +642,15 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
-                            } else {
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия документа успешно удалена";
+                            }
+                            else {
                                 return "Вы можете удалить только свою неотправленную версию задания своего студента";
                             }
                         case 2:
@@ -653,7 +661,15 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
-                            } else {
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия документа успешно удалена";
+                            }
+                            else {
                                 return "Вы можете удалить только свою неотправленную версию задания своего студента";
                             }
                         case 3:
@@ -664,7 +680,15 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
-                            } else {
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия документа успешно удалена";
+                            }
+                            else {
                                 return "Вы можете удалить только свою неотправленную версию задания своего студента";
                             }
                         default:
@@ -840,7 +864,8 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
-                            } else {
+                            }
+                            else {
                                 return "Запрещено удалять версии отчета после его отправки";
                             }
                         case 2:
@@ -850,7 +875,8 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
-                            } else {
+                            }
+                            else {
                                 return "Запрещено удалять версии отчета после его отправки";
                             }
                         case 3:
@@ -860,7 +886,8 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
-                            } else {
+                            }
+                            else {
                                 return "Запрещено удалять версии отчета после его отправки";
                             }
                         default:
@@ -898,7 +925,15 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
-                            } else {
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия отчета успешно удалена";
+                            }
+                            else {
                                 return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
                             }
                         case 2:
@@ -909,7 +944,15 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
-                            } else {
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия отчета успешно удалена";
+                            }
+                            else {
                                 return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
                             }
                         case 3:
@@ -920,7 +963,15 @@ public class DocumentManagementService {
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
-                            } else {
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия отчета успешно удалена";
+                            }
+                            else {
                                 return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
                             }
                         default:
