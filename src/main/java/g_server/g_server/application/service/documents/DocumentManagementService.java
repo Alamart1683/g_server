@@ -998,17 +998,17 @@ public class DocumentManagementService {
                 List<DocumentVersion> pdTaskVersions = documentVersionRepository.findByDocument(pdTask.getId());
                 // Пройдем по версиям задания студента
                 for (DocumentVersion pdTaskVersion : pdTaskVersions) {
-                    if (pdTaskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                    if (pdTaskVersion.getPdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setPpTaskStatus(1);
                     }
                 }
             }
             if (documentRepository.findByTypeAndKindAndCreator(3, 3, studentID).size() == 1) {
                 pdReport = documentRepository.findByTypeAndKindAndCreator(3, 3, studentID).get(0);
-                List<DocumentVersion> ppppuiopdReportVersions = documentVersionRepository.findByDocument(pdReport.getId());
+                List<DocumentVersion> pdReportVersions = documentVersionRepository.findByDocument(pdReport.getId());
                 // Пройдем по версиям отчёта студента
-                for (DocumentVersion ppppuiopdReportVersion: ppppuiopdReportVersions) {
-                    if (ppppuiopdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Одобрено")) {
+                for (DocumentVersion pdReportVersion: pdReportVersions) {
+                    if (pdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setPpReportStatus(1);
                     }
                 }
