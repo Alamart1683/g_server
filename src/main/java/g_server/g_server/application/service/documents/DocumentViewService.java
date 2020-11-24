@@ -895,7 +895,7 @@ public class DocumentViewService {
                             ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
                             Project project = projectRepository.findById(viewRightsProject.getProject()).get();
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
-                                    project.getId(), project.getName()));
+                                    project.getId(), project.getName(), true));
                         } catch (NullPointerException nullPointerException) {
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
                                     0, "Не назначен", true));
