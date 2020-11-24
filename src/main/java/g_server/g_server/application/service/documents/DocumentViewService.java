@@ -894,8 +894,13 @@ public class DocumentViewService {
                         try {
                             ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
                             Project project = projectRepository.findById(viewRightsProject.getProject()).get();
-                            advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
-                                    project.getId(), project.getName(), true));
+                            ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
+                            ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
+                            AdvisorsTemplateView currentView = new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
+                                    project.getId(), project.getName(), true);
+                            currentView.setSystemAreaID(projectArea.getId());
+                            currentView.setArea(projectArea.getArea());
+                            advisorsTemplates.add(currentView);
                         } catch (NullPointerException nullPointerException) {
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
                                     0, "Проект не назначен", true));
