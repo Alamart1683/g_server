@@ -91,6 +91,9 @@ public class DocumentViewService {
     @Autowired
     private PdReportRepository pdReportRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
@@ -889,13 +892,16 @@ public class DocumentViewService {
                     }
                     else if (document.getView_rights() == 8) {
                         try {
-                            ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
-                            ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
+                            ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                            Project project = projectRepository.findById(viewRightsProject.getProject()).get();
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
-                                    projectArea.getId(), projectArea.getArea()));
+                                    project.getId(), project.getName()));
                         } catch (NullPointerException nullPointerException) {
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
-                                    0, "Не назначена"));
+                                    0, "Не назначен", true));
+                        } catch (NoSuchElementException noSuchElementException) {
+                            advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
+                                    0, "Не назначен", true));
                         }
                     }
                 }
