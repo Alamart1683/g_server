@@ -895,7 +895,7 @@ public class DocumentViewService {
                             ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
                             Project project = projectRepository.findById(viewRightsProject.getProject()).get();
                             ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
-                            ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
+                            ProjectArea projectArea = projectAreaRepository.findById(project.getProjectArea().getId()).get();
                             AdvisorsTemplateView currentView = new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
                                     project.getId(), project.getName(), true);
                             currentView.setSystemAreaID(projectArea.getId());
