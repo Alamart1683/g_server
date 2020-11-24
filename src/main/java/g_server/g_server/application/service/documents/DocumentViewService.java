@@ -887,7 +887,7 @@ public class DocumentViewService {
                                     projectArea.getId(), projectArea.getArea()));
                         } catch (NullPointerException nullPointerException) {
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
-                                    0, "Не назначена"));
+                                    0, "Программа проектов не назначена"));
                         }
                     }
                     else if (document.getView_rights() == 8) {
@@ -898,11 +898,15 @@ public class DocumentViewService {
                                     project.getId(), project.getName(), true));
                         } catch (NullPointerException nullPointerException) {
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
-                                    0, "Не назначен", true));
+                                    0, "Проект не назначен", true));
                         } catch (NoSuchElementException noSuchElementException) {
                             advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
-                                    0, "Не назначен", true));
+                                    0, "Проект не назначен", true));
                         }
+                    }
+                    else {
+                        advisorsTemplates.add(new AdvisorsTemplateView(document, documentView.getDocumentVersions(),
+                                0, "Программа проектов не назначена"));
                     }
                 }
             }
