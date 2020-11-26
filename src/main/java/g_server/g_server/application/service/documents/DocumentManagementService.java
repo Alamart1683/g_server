@@ -406,6 +406,17 @@ public class DocumentManagementService {
                     }
                     // Изменение зоны видимости без затрагивания проекта или программы проектов
                     else {
+                        ViewRightsProject oldViewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                        ViewRightsArea oldViewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
+                        // Удалим старую ассоциацию с проектом или программой проектов, если она есть
+                        if (oldViewRightsArea != null) {
+                            viewRightsAreaRepository.delete(oldViewRightsArea);
+                            messagesList.add("Удалены предыдущие права доступа для программы проектов");
+                        }
+                        if (oldViewRightsProject != null) {
+                            viewRightsProjectRepository.delete(oldViewRightsProject);
+                            messagesList.add("Удалены предыдущие права доступа для проекта");
+                        }
                         document.setView_rights(newViewRights);
                         documentService.save(document);
                         messagesList.add("Зона видимости документа успешно изменена");
