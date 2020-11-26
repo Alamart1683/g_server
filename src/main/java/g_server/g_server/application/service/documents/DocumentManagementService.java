@@ -76,6 +76,9 @@ public class DocumentManagementService {
     @Autowired
     private PdTaskRepository pdTaskRepository;
 
+    @Autowired
+    private ViewRightsProjectRepository viewRightsProjectRepository;
+
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
@@ -326,7 +329,8 @@ public class DocumentManagementService {
     }
 
     // Метод изменения прав видимости документа
-    public List<String> editViewRights(String documentName, String newViewRightsString, String projectAreaName, String token) {
+    public List<String> editViewRights(String documentName, String newViewRightsString, String projectName,
+                                       String projectAreaName, String token) {
         List<String> messagesList = new ArrayList<String>();
         if (token == null)
             messagesList.add("Ошибка аутентификации: токен равен null");
@@ -342,74 +346,61 @@ public class DocumentManagementService {
             if (newViewRights!= null) {
                 Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
                 if (document != null) {
-                    // Если зона видимости не затрагивала проект и стала затрагивать
-                    if (document.getView_rights() != 6 && newViewRights == 6) {
-                        ProjectArea projectArea;
-                        try {
-                            projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
-                        } catch (NullPointerException nullPointerException) {
-                            projectArea = null;
+                    // Если новая видимость - программа проектов
+                    if (newViewRights == 6 && projectAreaName != null && projectName == null) {
+                        ViewRightsProject oldViewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                        ViewRightsArea oldViewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
+                        // Удалим старую ассоциацию с проектом или программой проектов, если она есть
+                        if (oldViewRightsArea != null) {
+                            viewRightsAreaRepository.delete(oldViewRightsArea);
+                            messagesList.add("Удалены предыдущие права доступа для программы проектов");
                         }
-                        if (projectArea == null) {
-                            messagesList.add("Ошибка изменения зоны видимости: проектная видимость не найдена");
+                        if (oldViewRightsProject != null) {
+                            viewRightsProjectRepository.delete(oldViewRightsProject);
+                            messagesList.add("Удалены предыдущие права доступа для проекта");
+                        }
+                        // Найдем новую программу проектов
+                        ProjectArea projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
+                        if (projectArea != null) {
+                            ViewRightsArea newViewRightsArea = new ViewRightsArea();
+                            newViewRightsArea.setDocument(document.getId());
+                            newViewRightsArea.setArea(projectArea.getId());
+                            viewRightsAreaRepository.save(newViewRightsArea);
+                            messagesList.add("Права доступа успешно изменены");
                         } else {
-                            document.setView_rights(newViewRights);
+                            document.setView_rights(1);
                             documentService.save(document);
-                            ViewRightsArea viewRightsArea = new ViewRightsArea(document.getId(), projectArea.getId());
-                            viewRightsAreaRepository.save(viewRightsArea);
-                            messagesList.add("Зона видимости документа успешно изменена");
+                            messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
                     }
-                    // Если зона видимости затрагивала проектную область и стала затрагивать другую
-                    else if (document.getView_rights() == 6 && newViewRights == 6) {
-                        Project project;
-                        try {
-                            project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectAreaName);
-                        } catch (NullPointerException nullPointerException) {
-                            project = null;
+                    // Если новая видимость - проект
+                    else if (newViewRights == 8 && projectAreaName == null && projectName != null) {
+                        ViewRightsProject oldViewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                        ViewRightsArea oldViewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
+                        // Удалим старую ассоциацию с проектом или программой проектов, если она есть
+                        if (oldViewRightsArea != null) {
+                            viewRightsAreaRepository.delete(oldViewRightsArea);
+                            messagesList.add("Удалены предыдущие права доступа для программы проектов");
                         }
-                        if (project == null) {
-                            messagesList.add("Ошибка изменения зоны видимости: проектная облаасть не найдена");
+                        if (oldViewRightsProject != null) {
+                            viewRightsProjectRepository.delete(oldViewRightsProject);
+                            messagesList.add("Удалены предыдущие права доступа для проекта");
+                        }
+                        // Найдем новый проект
+                        Project project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
+                        if (project != null) {
+                            ViewRightsProject newViewRightsProject = new ViewRightsProject();
+                            newViewRightsProject.setDocument(document.getId());
+                            newViewRightsProject.setProject(project.getId());
+                            viewRightsProjectRepository.save(newViewRightsProject);
+                            messagesList.add("Права доступа успешно изменены");
                         } else {
-                            ViewRightsArea old;
-                            try {
-                                old = viewRightsAreaRepository.findByDocumentAndArea(document.getId(), project.getArea());
-                            } catch (NullPointerException nullPointerException) {
-                                old = null;
-                            }
-                            if (old == null) {
-                                messagesList.add("Предыдущая проектная принадлежность документа не обнаружена");
-                            }
-                            else {
-                                document.setView_rights(newViewRights);
-                                ProjectArea projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
-                                documentService.save(document);
-                                viewRightsAreaRepository.delete(old);
-                                ViewRightsArea viewRightsArea = new ViewRightsArea(document.getId(), projectArea.getId());
-                                viewRightsAreaRepository.save(viewRightsArea);
-                                messagesList.add("Зона видимости документа успешно изменена");
-                            }
-                        }
-                    }
-                    // Если зона видимости затрагивала проект и перестала его затрагивать
-                    else if (document.getView_rights() == 6 && newViewRights != 6) {
-                        ViewRightsArea old;
-                        try {
-                            old = viewRightsAreaRepository.findByDocument(document.getId());
-                        } catch (NullPointerException nullPointerException) {
-                            old = null;
-                        }
-                        if (old == null) {
-                            messagesList.add("Предыдущая проектная принадлежность документа не обнаружена");
-                        }
-                        else {
-                            viewRightsAreaRepository.delete(old);
-                            document.setView_rights(newViewRights);
+                            document.setView_rights(1);
                             documentService.save(document);
-                            messagesList.add("Зона видимости документа успешно изменена");
+                            messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
                     }
-                    // Изменение зоны видимости без затрагивания проекта
+                    // Изменение зоны видимости без затрагивания проекта или программы проектов
                     else {
                         document.setView_rights(newViewRights);
                         documentService.save(document);

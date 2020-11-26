@@ -88,6 +88,7 @@ public class DocumentManagementController {
                 newRightViewForm.getDocumentName(),
                 newRightViewForm.getNewViewRights(),
                 newRightViewForm.getProjectName(),
+                newRightViewForm.getProjectArea(),
                 getTokenFromRequest(httpServletRequest)
         );
     }
@@ -157,6 +158,7 @@ public class DocumentManagementController {
                 newRightViewForm.getDocumentName(),
                 newRightViewForm.getNewViewRights(),
                 newRightViewForm.getProjectName(),
+                newRightViewForm.getProjectArea(),
                 getTokenFromRequest(httpServletRequest)
         );
     }

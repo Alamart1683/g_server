@@ -4,13 +4,15 @@ public class NewRightViewForm {
     private String documentName;
     private String newViewRights;
     private String projectName;
+    private String projectArea;
 
     public NewRightViewForm() { }
 
-    public NewRightViewForm(String documentName, String newViewRights, String projectName) {
+    public NewRightViewForm(String documentName, String newViewRights, String projectName, String projectArea) {
         this.documentName = documentName;
         this.newViewRights = newViewRights;
         this.projectName = projectName;
+        this.projectArea = projectArea;
     }
 
     public String getDocumentName() {
@@ -35,5 +37,13 @@ public class NewRightViewForm {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public String getProjectArea() {
+        return projectArea;
+    }
+
+    public void setProjectArea(String projectArea) {
+        this.projectArea = projectArea;
     }
 }
