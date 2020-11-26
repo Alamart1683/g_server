@@ -175,7 +175,7 @@ public class MailService {
             message.setSubject("Код смены пароля учетной записи на сайте выпускников кафедры МОСИТ");
             String htmlMessage = time + ", " + user.getName() + " " + user.getSecond_name() +
                     ". Для смены пароля на сайте вам необходимо указать код подтвержения."
-                    + "<br>Код подтверждения регистрации:<p style=\"font-size: 34px\";><b> " + code + "</b></p>" +
+                    + "<br>Код подтверждения смены пароля:<p style=\"font-size: 34px\";><b> " + code + "</b></p>" +
                     "<br><br><br>Это письмо было сгенерировано автоматически, пожалуйста, " +
                     "не отвечайте на него.";
             message.setText(htmlMessage, true);
