@@ -8,6 +8,7 @@ import g_server.g_server.application.entity.forms.StudentForm;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.*;
 import g_server.g_server.application.entity.users.passwords.PasswordGenerator;
+import g_server.g_server.application.entity.view.PersonalAdvisorView;
 import g_server.g_server.application.entity.view.PersonalStudentView;
 import g_server.g_server.application.entity.view.StagesDatesView;
 import g_server.g_server.application.entity.view.StudentAdvisorView;
@@ -411,11 +412,37 @@ public class UsersService implements UserDetailsService {
         return  day + "." + month + "." + year + " " + "00:00:00";
     }
 
-    // TODO Сформировать личный кабинет научного руководителя или заведующего кафедрой
+    // Сформировать личный кабинет научного руководителя или заведующего кафедрой
+    public PersonalAdvisorView getPersonalAdvisorView(String token) {
+        Integer advisorID = getUserId(token);
+        if (advisorID == null) {
+            return null;
+        }
+        else {
+            Users advisor;
+            try {
+                advisorID = associatedStudentsRepository.findByStudent(advisorID).getScientificAdvisor();
+            } catch (NullPointerException nullPointerException) {
+                advisorID = null;
+            }
+            if (advisorID != null) {
+                try {
+                    advisor = usersRepository.findById(advisorID).get();
+                    UsersRoles usersRoles = usersRolesRepository.findUsersRolesByUserId(advisor.getId());
+                    if (usersRoles.getRoleId() == 2) {
+                        return new PersonalAdvisorView(advisor, "Научный руководитель");
+                    } else if (usersRoles.getRoleId() == 3) {
+                        return new PersonalAdvisorView(advisor, "Заведующий кафедрой");
+                    }
+                } catch (NoSuchElementException noSuchElementException) {
+                    advisor = null;
+                }
+            }
+            return null;
+        }
+    }
 
     // TODO Сформировать личный кабинет администратора/рута
-
-    // TODO Сделать функционал для восстановления пароля
 
     // Зарегистрировать студентов автоматически на базе *.xls файла
     public String studentAutomaticRegistration(AutomaticRegistrationForm automaticRegistrationForm) throws IOException {

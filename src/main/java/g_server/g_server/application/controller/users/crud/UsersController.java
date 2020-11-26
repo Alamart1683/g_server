@@ -1,6 +1,7 @@
 package g_server.g_server.application.controller.users.crud;
 
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.entity.view.PersonalAdvisorView;
 import g_server.g_server.application.entity.view.PersonalStudentView;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.documents.DocumentUploadService;
@@ -85,6 +86,11 @@ public class UsersController {
     @GetMapping("/student/personal")
     public PersonalStudentView getStudentPersonalView(HttpServletRequest httpServletRequest) {
         return usersService.getPersonalStudentView(getTokenFromRequest(httpServletRequest));
+    }
+
+    @GetMapping("/scientific_advisor/personal")
+    public PersonalAdvisorView getAdvisorPersonalView(HttpServletRequest httpServletRequest) {
+        return usersService.getPersonalAdvisorView(getTokenFromRequest(httpServletRequest));
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

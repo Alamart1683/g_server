@@ -15,6 +15,9 @@ public class PersonalStudentView {
     private String studentCathedra;
     private String studentAdvisor;
     private String studentProject;
+    private String studentPhone;
+    private String studentEmail;
+    private String studentRole;
 
     public PersonalStudentView(Users student, String advisorName, String projectName) {
         this.systemID = student.getId();
@@ -27,6 +30,9 @@ public class PersonalStudentView {
         this.studentCathedra = student.getStudentData().getCathedras().getCathedraName();
         this.studentAdvisor = advisorName;
         this.studentProject = projectName;
+        this.studentPhone = student.getPhone();
+        this.studentEmail = student.getEmail();
+        this.studentRole = "Студент";
     }
 
     public int getSystemID() {
@@ -107,5 +113,29 @@ public class PersonalStudentView {
 
     public void setStudentProject(String studentProject) {
         this.studentProject = studentProject;
+    }
+
+    public String getStudentPhone() {
+        return studentPhone;
+    }
+
+    public void setStudentPhone(String studentPhone) {
+        this.studentPhone = studentPhone;
+    }
+
+    public String getStudentEmail() {
+        return studentEmail;
+    }
+
+    public void setStudentEmail(String studentEmail) {
+        this.studentEmail = studentEmail;
+    }
+
+    public String getStudentRole() {
+        return studentRole;
+    }
+
+    public void setStudentRole(String studentRole) {
+        this.studentRole = studentRole;
     }
 }
