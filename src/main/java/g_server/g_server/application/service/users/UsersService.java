@@ -97,6 +97,8 @@ public class UsersService implements UserDetailsService {
     @Autowired
     private MailService mailService;
 
+    private static Integer passwordChangeCode;
+
     @Override
     // Загрузить пользователя по email
     public UserDetails loadUserByUsername(String email) {
@@ -115,7 +117,7 @@ public class UsersService implements UserDetailsService {
         return null;
     }
 
-    // Сохарнить студента
+    // Сохранить студента
     public boolean saveStudent(Users user, String student_type, String student_group, String cathedra_name) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
@@ -776,6 +778,48 @@ public class UsersService implements UserDetailsService {
             }
         }
         return studentAdvisorView;
+    }
+
+    // Метод получения кода смены пароля пользователем
+    public String getChangeUserPasswordCode(String token) {
+        Random random = new Random();
+        // Сгенерируем код подтверждения
+        passwordChangeCode = random.nextInt(900000) + 100000;
+        Integer userID = getUserId(token);
+        Users user;
+        if (usersRepository.findById(userID).isPresent()) {
+            user = usersRepository.findById(userID).get();
+            mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
+            return "Код для подтверждения смены пароля успешно сгенерирован и отправлен";
+        } else {
+            return "Ошибка: пользователь не найден";
+        }
+    }
+
+    // Проверить верный ли код подтверждения
+    public boolean isCodeEquals(Integer code) {
+        if (code.equals(projectRepository)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Сменить пароль
+    public String changeUserPassword(String token, Integer code, String newPassword) {
+        Integer userID = getUserId(token);
+        Users user;
+        if (usersRepository.findById(userID).isPresent()) {
+            user = usersRepository.findById(userID).get();
+            mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
+            user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+            usersRepository.save(user);
+            mailService.sendMailAboutPasswordChanging(user);
+            passwordChangeCode = null;
+            return "Пароль успешно изменен";
+        } else {
+            return "Ошибка: пользователь не найден";
+        }
     }
 
     public StagesDatesView getStagesDates() {

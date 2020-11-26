@@ -165,6 +165,49 @@ public class MailService {
         return "Email sent!";
     }
 
+    // Послать код для смены пароля
+    public String sendMailWithPasswordChangeCode(Users user, Integer code) {
+        String time = mailTimeDetector();
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "utf-8");
+        try {
+            message.setTo(user.getEmail());
+            message.setSubject("Код смены пароля учетной записи на сайте выпускников кафедры МОСИТ");
+            String htmlMessage = time + ", " + user.getName() + " " + user.getSecond_name() +
+                    ". Для смены пароля на сайте вам необходимо указать код подтвержения."
+                    + "<br>Код подтверждения регистрации:<p style=\"font-size: 34px\";><b> " + code + "</b></p>" +
+                    "<br><br><br>Это письмо было сгенерировано автоматически, пожалуйста, " +
+                    "не отвечайте на него.";
+            message.setText(htmlMessage, true);
+            this.mailSender.send(mimeMessage);
+        }
+        catch (MessagingException messagingException) {
+            return "MessagingException";
+        }
+        return "Email sent!";
+    }
+
+    // Уведомить о смене пароля
+    public String sendMailAboutPasswordChanging(Users user) {
+        String time = mailTimeDetector();
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "utf-8");
+        try {
+            message.setTo(user.getEmail());
+            message.setSubject("Смена пароля учетной записи на сайте выпускников кафедры МОСИТ");
+            String htmlMessage = time + ", " + user.getName() + " " + user.getSecond_name() +
+                    ". Пароль вашей учетной записи был успешно изменен." +
+                    "<br><br><br>Это письмо было сгенерировано автоматически, пожалуйста, " +
+                    "не отвечайте на него.";
+            message.setText(htmlMessage, true);
+            this.mailSender.send(mimeMessage);
+        }
+        catch (MessagingException messagingException) {
+            return "MessagingException";
+        }
+        return "Email sent!";
+    }
+
     // Определить время письма
     String mailTimeDetector() {
         ZonedDateTime dateTime = ZonedDateTime.now();

@@ -10,9 +10,8 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.NoSuchElementException;
 import static org.springframework.util.StringUtils.hasText;
@@ -121,6 +120,30 @@ public class AuthorizationController {
         else {
             return new AuthorizationResponseForm("Неверная комбинация логина и пароля, необходима авторизация");
         }
+    }
+
+    @GetMapping("/authorization/get/password/code")
+    public String getPasswordChangeCode(
+            HttpServletRequest httpServletRequest
+    ) {
+        return usersService.getChangeUserPasswordCode(getTokenFromRequest(httpServletRequest));
+    }
+
+    @PostMapping("/authorization/check/password/code")
+    public Boolean checkPasswordCode(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer code
+    ) {
+        return usersService.isCodeEquals(code);
+    }
+
+    @PostMapping("/authorization/change/password")
+    public String changePassword(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer code,
+            @RequestParam String newPassword
+    ) {
+        return usersService.changeUserPassword(getTokenFromRequest(httpServletRequest), code, newPassword);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
