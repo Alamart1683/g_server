@@ -18,6 +18,7 @@ public class PersonalStudentView {
     private String studentPhone;
     private String studentEmail;
     private String studentRole;
+    private String studentSpeciality;
 
     public PersonalStudentView(Users student, String advisorName, String projectName) {
         this.systemID = student.getId();
@@ -33,6 +34,7 @@ public class PersonalStudentView {
         this.studentPhone = student.getPhone();
         this.studentEmail = student.getEmail();
         this.studentRole = "Студент";
+        this.studentSpeciality = getSpecialityByGroup();
     }
 
     public int getSystemID() {
@@ -137,5 +139,22 @@ public class PersonalStudentView {
 
     public void setStudentRole(String studentRole) {
         this.studentRole = studentRole;
+    }
+
+    public String getStudentSpeciality() {
+        return studentSpeciality;
+    }
+
+    public void setStudentSpeciality(String studentSpeciality) {
+        this.studentSpeciality = studentSpeciality;
+    }
+
+    public String getSpecialityByGroup() {
+        if (this.studentGroup.contains("ИКБО")) {
+            return "09.03.04";
+        } else if (this.studentGroup.contains("ИВБО")) {
+            return "09.03.01";
+        }
+        return "Не определена";
     }
 }
