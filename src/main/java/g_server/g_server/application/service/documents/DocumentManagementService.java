@@ -366,9 +366,11 @@ public class DocumentManagementService {
                             newViewRightsArea.setDocument(document.getId());
                             newViewRightsArea.setArea(projectArea.getId());
                             viewRightsAreaRepository.save(newViewRightsArea);
+                            document.setView_rights(6);
+                            documentService.save(document);
                             messagesList.add("Права доступа успешно изменены");
                         } else {
-                            document.setView_rights(1);
+                            document.setView_rights(3);
                             documentService.save(document);
                             messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
@@ -393,9 +395,11 @@ public class DocumentManagementService {
                             newViewRightsProject.setDocument(document.getId());
                             newViewRightsProject.setProject(project.getId());
                             viewRightsProjectRepository.save(newViewRightsProject);
+                            document.setView_rights(8);
+                            documentService.save(document);
                             messagesList.add("Права доступа успешно изменены");
                         } else {
-                            document.setView_rights(1);
+                            document.setView_rights(3);
                             documentService.save(document);
                             messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
