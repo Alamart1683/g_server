@@ -420,11 +420,6 @@ public class UsersService implements UserDetailsService {
         }
         else {
             Users advisor;
-            try {
-                advisorID = associatedStudentsRepository.findByStudent(advisorID).getScientificAdvisor();
-            } catch (NullPointerException nullPointerException) {
-                advisorID = null;
-            }
             if (advisorID != null) {
                 try {
                     advisor = usersRepository.findById(advisorID).get();

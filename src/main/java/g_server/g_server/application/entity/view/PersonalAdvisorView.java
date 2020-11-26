@@ -17,7 +17,7 @@ public class PersonalAdvisorView {
         this.advisorName = advisor.getName();
         this.advisorSurname = advisor.getSurname();
         this.advisorSecondName = advisor.getSecond_name();
-        this.advisorCathedra = advisor.getStudentData().getCathedras().getCathedraName();
+        this.advisorCathedra = advisor.getScientificAdvisorData().getCathedras().getCathedraName();
         this.advisorPhone = advisor.getPhone();
         this.advisorEmail = advisor.getEmail();
         this.advisorRole = advisorRole;
