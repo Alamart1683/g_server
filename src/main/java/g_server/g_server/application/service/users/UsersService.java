@@ -809,7 +809,7 @@ public class UsersService implements UserDetailsService {
     public String changeUserPassword(String token, Integer code, String newPassword) {
         Integer userID = getUserId(token);
         Users user;
-        if (usersRepository.findById(userID).isPresent()) {
+        if (usersRepository.findById(userID).isPresent() && passwordChangeCode.equals(code)) {
             user = usersRepository.findById(userID).get();
             mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
             user.setPassword(bCryptPasswordEncoder.encode(newPassword));
