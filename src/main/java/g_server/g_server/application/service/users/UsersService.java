@@ -796,9 +796,22 @@ public class UsersService implements UserDetailsService {
         }
     }
 
+    public String getChangeUserPasswordCodeByEmail(String email) {
+        Random random = new Random();
+        // Сгенерируем код подтверждения
+        passwordChangeCode = random.nextInt(900000) + 100000;
+        Users user = usersRepository.findByEmail(email);
+        if (user != null) {
+            mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
+            return "Код для подтверждения смены пароля успешно сгенерирован и отправлен";
+        } else {
+            return "Ошибка: пользователь не найден";
+        }
+    }
+
     // Проверить верный ли код подтверждения
     public boolean isCodeEquals(Integer code) {
-        if (code.equals(projectRepository)) {
+        if (code.equals(passwordChangeCode)) {
             return true;
         } else {
             return false;
@@ -811,6 +824,20 @@ public class UsersService implements UserDetailsService {
         Users user;
         if (usersRepository.findById(userID).isPresent() && passwordChangeCode.equals(code)) {
             user = usersRepository.findById(userID).get();
+            mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
+            user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+            usersRepository.save(user);
+            mailService.sendMailAboutPasswordChanging(user);
+            passwordChangeCode = null;
+            return "Пароль успешно изменен";
+        } else {
+            return "Ошибка: пользователь не найден";
+        }
+    }
+
+    public String changeUserPasswordByEmail(String email, Integer code, String newPassword) {
+        Users user = usersRepository.findByEmail(email);
+        if (user != null && passwordChangeCode.equals(code)) {
             mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
             user.setPassword(bCryptPasswordEncoder.encode(newPassword));
             usersRepository.save(user);

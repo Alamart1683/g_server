@@ -129,21 +129,36 @@ public class AuthorizationController {
         return usersService.getChangeUserPasswordCode(getTokenFromRequest(httpServletRequest));
     }
 
-    @PostMapping("/authorization/check/password/code")
+    @PostMapping("/authorization/check/password/code/")
     public Boolean checkPasswordCode(
-            HttpServletRequest httpServletRequest,
             @RequestParam Integer code
     ) {
         return usersService.isCodeEquals(code);
     }
 
-    @PostMapping("/authorization/change/password")
+    @PostMapping("/authorization/change/password/")
     public String changePassword(
             HttpServletRequest httpServletRequest,
             @RequestParam Integer code,
             @RequestParam String newPassword
     ) {
         return usersService.changeUserPassword(getTokenFromRequest(httpServletRequest), code, newPassword);
+    }
+
+    @GetMapping("/authorization/get/password/code/byemail")
+    public String getPasswordChangeCodeByEmail(
+            @RequestParam String email
+    ) {
+        return usersService.getChangeUserPasswordCodeByEmail(email);
+    }
+
+    @PostMapping("/authorization/change/password/byemail")
+    public String changePasswordByEmail(
+            @RequestParam Integer code,
+            @RequestParam String newPassword,
+            @RequestParam String email
+    ) {
+        return usersService.changeUserPasswordByEmail(email, code, newPassword);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
