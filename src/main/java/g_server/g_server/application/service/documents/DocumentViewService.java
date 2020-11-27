@@ -348,7 +348,7 @@ public class DocumentViewService {
                                                 currentTaskVersionsView.add(new TaskDocumentVersionView(currentNirTaskVersion, currentNirTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirTaskDocument, currentTaskVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirTaskDocument, currentTaskVersionsView, null, null));
                                     } else if ((currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Отчёт"))) {
                                         Document currentNirReportDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
@@ -364,7 +364,7 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentNirReportVersion, currentNirReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirReportDocument, null, currentReportVersionsView));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirReportDocument, null, currentReportVersionsView, null));
                                     // ППППУиОПД
                                     } else if (currentView.getDocumentType().equals("Практика по получению знаний и умений") && currentView.getDocumentKind().equals("Задание")) {
                                         Document currentPpppuiopdTaskDocument = documentRepository.findByCreatorAndName(
@@ -381,7 +381,7 @@ public class DocumentViewService {
                                                 currentTaskVersionsView.add(new TaskDocumentVersionView(currentPpppuiopdTaskVersion, currentPpppuiopdTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdTaskDocument, currentTaskVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdTaskDocument, currentTaskVersionsView, null, null));
                                     } else if ((currentView.getDocumentType().equals("Практика по получению знаний и умений") && currentView.getDocumentKind().equals("Отчёт"))) {
                                         Document currentPpppuiopdReportDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
@@ -397,13 +397,13 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentPpppuiopdReportVersion, currentPpppuiopdReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdReportDocument, null, currentReportVersionsView));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdReportDocument, null, currentReportVersionsView, null));
                                     }
                                     // ПП
                                     else if (currentView.getDocumentType().equals("Преддипломная практика") && currentView.getDocumentKind().equals("Задание")) {
-                                        Document currenPdTaskDocument = documentRepository.findByCreatorAndName(
+                                        Document currentPdTaskDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
-                                        List<DocumentVersion> currentPdTaskVersions = documentVersionRepository.findByDocument(currenPdTaskDocument.getId());
+                                        List<DocumentVersion> currentPdTaskVersions = documentVersionRepository.findByDocument(currentPdTaskDocument.getId());
                                         List<TaskDocumentVersionView> currentTaskVersionsView = new ArrayList<>();
                                         for (DocumentVersion currentPdTaskVersion: currentPdTaskVersions) {
                                             PdTask currentPdTask = pdTaskRepository.findByVersionID(currentPdTaskVersion.getId());
@@ -415,7 +415,7 @@ public class DocumentViewService {
                                                 currentTaskVersionsView.add(new TaskDocumentVersionView(currentPdTaskVersion, currentPdTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currenPdTaskDocument, currentTaskVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdTaskDocument, currentTaskVersionsView, null, null));
                                     } else if ((currentView.getDocumentType().equals("Преддипломная практика") && currentView.getDocumentKind().equals("Отчёт"))) {
                                         Document currentPdReportDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
@@ -431,9 +431,45 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentPdReportVersion, currentPdReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdReportDocument, null, currentReportVersionsView));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdReportDocument, null, currentReportVersionsView, null));
                                     }
                                     // TODO ВКР
+                                    else if ((currentView.getDocumentType().equals("ВКР")) && // Задание на ВКР
+                                            currentView.getDocumentKind().equals("Задание")) {
+                                        // TODO Обработать задание
+                                    }
+                                    else if ((currentView.getDocumentType().equals("ВКР")) && // РПЗ по ВКР
+                                            currentView.getDocumentKind().equals("Отчёт")) {
+                                        // Обработать отчёт
+                                    }
+                                    else if ((currentView.getDocumentType().equals("ВКР")) && // Допуск по ВКР
+                                            currentView.getDocumentKind().equals("Допуск")) {
+                                        Document currentAllowanceDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> allowanceVersions = documentVersionRepository.findByDocument(currentAllowanceDocument.getId());
+                                        List<DocumentVersionView> allowanceVersionsViews = new ArrayList<>();
+                                    }
+                                    else if ((currentView.getDocumentType().equals("ВКР")) && // Отзыв на ВКР
+                                            currentView.getDocumentKind().equals("Отзыв")) {
+                                        Document currentConclusionDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> conclusionVersions = documentVersionRepository.findByDocument(currentConclusionDocument.getId());
+                                        List<DocumentVersionView> documentVersionViews = new ArrayList<>();
+                                    }
+                                    else if ((currentView.getDocumentType().equals("ВКР")) && // Антиплагиат на ВКР
+                                            currentView.getDocumentKind().equals("Антиплагиат")) {
+                                        Document currentAntiplagiatDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> antiplagiatVersions = documentVersionRepository.findByDocument(currentAntiplagiatDocument.getId());
+                                        List<DocumentVersionView> antiplagiatVersionViews = new ArrayList<>();
+                                    }
+                                    else if ((currentView.getDocumentType().equals("ВКР")) && //
+                                            currentView.getDocumentKind().equals("Презентация")) {
+                                        Document currentPresentationDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> presentationVersions = documentVersionRepository.findByDocument(currentPresentationDocument.getId());
+                                        List<DocumentVersionView> presentationVersionViews = new ArrayList<>();
+                                    }
                                 }
                             }
                         } catch (NullPointerException nullPointerException) {
