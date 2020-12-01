@@ -15,7 +15,8 @@ create table users (
     phone varchar(50) default 'Не указан',
     is_accepted_mail_sending bool not null,
     is_confirmed bool not null,
-    registration_date timestamp not null default current_timestamp
+    registration_date timestamp not null default current_timestamp,
+    password_change_code int default null
 );
 
 create table roles (

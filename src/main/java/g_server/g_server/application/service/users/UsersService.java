@@ -98,8 +98,6 @@ public class UsersService implements UserDetailsService {
     @Autowired
     private MailService mailService;
 
-    private static Integer passwordChangeCode;
-
     @Override
     // Загрузить пользователя по email
     public UserDetails loadUserByUsername(String email) {
@@ -806,11 +804,13 @@ public class UsersService implements UserDetailsService {
     public String getChangeUserPasswordCode(String token) {
         Random random = new Random();
         // Сгенерируем код подтверждения
-        passwordChangeCode = random.nextInt(900000) + 100000;
+        int passwordChangeCode = random.nextInt(900000) + 100000;
         Integer userID = getUserId(token);
         Users user;
         if (usersRepository.findById(userID).isPresent()) {
             user = usersRepository.findById(userID).get();
+            user.setPasswordChangeCode(passwordChangeCode);
+            usersRepository.save(user);
             mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
             return "Код для подтверждения смены пароля успешно сгенерирован и отправлен";
         } else {
@@ -821,9 +821,11 @@ public class UsersService implements UserDetailsService {
     public String getChangeUserPasswordCodeByEmail(String email) {
         Random random = new Random();
         // Сгенерируем код подтверждения
-        passwordChangeCode = random.nextInt(900000) + 100000;
+        int passwordChangeCode = random.nextInt(900000) + 100000;
         Users user = usersRepository.findByEmail(email);
         if (user != null) {
+            user.setPasswordChangeCode(passwordChangeCode);
+            usersRepository.save(user);
             mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
             return "Код для подтверждения смены пароля успешно сгенерирован и отправлен";
         } else {
@@ -833,7 +835,8 @@ public class UsersService implements UserDetailsService {
 
     // Проверить верный ли код подтверждения
     public boolean isCodeEquals(Integer code) {
-        if (code.equals(passwordChangeCode)) {
+        List<Users> users = usersRepository.findByPasswordChangeCode(code);
+        if (users.size() > 0) {
             return true;
         } else {
             return false;
@@ -844,31 +847,36 @@ public class UsersService implements UserDetailsService {
     public String changeUserPassword(String token, Integer code, String newPassword) {
         Integer userID = getUserId(token);
         Users user;
-        if (usersRepository.findById(userID).isPresent() && passwordChangeCode.equals(code)) {
+        if (usersRepository.findById(userID).isPresent()) {
             user = usersRepository.findById(userID).get();
-            mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
-            user.setPassword(bCryptPasswordEncoder.encode(newPassword));
-            usersRepository.save(user);
-            mailService.sendMailAboutPasswordChanging(user);
-            passwordChangeCode = null;
-            return "Пароль успешно изменен";
-        } else {
-            return "Ошибка: пользователь не найден";
+            if (user.getPasswordChangeCode().equals(code)) {
+                user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+                user.setPasswordChangeCode(null);
+                usersRepository.save(user);
+                mailService.sendMailAboutPasswordChanging(user);
+                return "Пароль успешно изменен";
+            } else {
+                return "Ошибка: код подтверждения неверный";
+            }
         }
+        return "Ошибка: пользователь не найден";
     }
 
     public String changeUserPasswordByEmail(String email, Integer code, String newPassword) {
         Users user = usersRepository.findByEmail(email);
-        if (user != null && passwordChangeCode.equals(code)) {
-            mailService.sendMailWithPasswordChangeCode(user, passwordChangeCode);
-            user.setPassword(bCryptPasswordEncoder.encode(newPassword));
-            usersRepository.save(user);
-            mailService.sendMailAboutPasswordChanging(user);
-            passwordChangeCode = null;
-            return "Пароль успешно изменен";
-        } else {
-            return "Ошибка: пользователь не найден";
+        if (user != null) {
+            if (user.getPasswordChangeCode().equals(code)) {
+                user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+                user.setPasswordChangeCode(null);
+                usersRepository.save(user);
+                mailService.sendMailAboutPasswordChanging(user);
+                return "Пароль успешно изменен";
+            }
+            else {
+                return "Ошибка: код подтверждения неверный";
+            }
         }
+        return "Ошибка: пользователь не найден";
     }
 
     public StagesDatesView getStagesDates() {

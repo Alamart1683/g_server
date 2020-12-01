@@ -10,8 +10,8 @@
     </parent>
     <groupId>g_server.g_server</groupId>
     <artifactId>application</artifactId>
-    <version>1.0.0-aplpha</version>
-    <name>application</name>
+    <version>1.0.1-aplpha</version>
+    <name>graduates server</name>
     <description>graguates web site</description>
 
     <properties>

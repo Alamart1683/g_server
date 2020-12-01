@@ -38,6 +38,9 @@ public class Users implements UserDetails {
     @Column(name = "is_confirmed")
     private boolean isConfirmed;
 
+    @Column(name = "password_change_code")
+    private Integer passwordChangeCode;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
@@ -173,6 +176,14 @@ public class Users implements UserDetails {
 
     public void setSendMailAccepted(boolean sendMailAccepted) {
         this.sendMailAccepted = sendMailAccepted;
+    }
+
+    public Integer getPasswordChangeCode() {
+        return passwordChangeCode;
+    }
+
+    public void setPasswordChangeCode(Integer passwordChangeCode) {
+        this.passwordChangeCode = passwordChangeCode;
     }
 
     @Override

@@ -8,6 +8,7 @@ import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
 import g_server.g_server.application.service.documents.DocumentDownloadService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
+import g_server.g_server.application.service.documents.DocumentViewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +61,30 @@ public class DocumentDownloadController {
             }
         }
     }
+
+    /*
+    @GetMapping("/view/document/outer/")
+    public void documentExternalView(
+        @RequestParam Integer creator_id,
+        @RequestParam String documentName,
+        HttpServletResponse httpServletResponse
+    ) {
+        File file = documentDownloadService.findDownloadDocument(creator_id, documentName);
+        if (file != null) {
+            String contentType = documentDownloadService.getContentType(file.getName());
+            String mainName = documentDownloadService.getMainFileName(creator_id, documentName);
+            Path path = Paths.get(file.getPath());
+            httpServletResponse.setContentType(contentType);
+            httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
+            try {
+                Files.copy(path, httpServletResponse.getOutputStream());
+                httpServletResponse.getOutputStream().flush();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
+     */
 
     @GetMapping("/document/download/version")
     public void documentVersionDownload(
