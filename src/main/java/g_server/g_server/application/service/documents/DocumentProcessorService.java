@@ -677,8 +677,8 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(vkrTaskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(vkrTaskDataView.getHeadFio()));
         wordReplaceService.replaceWordsInText("ГОД", vkrTaskDataView.getOrderStartDate().substring(6, 10));
-        wordReplaceService.replaceWordsInText("Цель", vkrTaskDataView.getTaskAim());
-        wordReplaceService.replaceWordsInText("Задачи", vkrTaskDataView.getTaskTasks());
+        wordReplaceService.replaceWordsInText("ЦЕЛЬВКР", vkrTaskDataView.getTaskAim());
+        wordReplaceService.replaceWordsInText("ЗАДАЧИ", vkrTaskDataView.getTaskTasks());
         wordReplaceService.replaceWordsInText("Документы", vkrTaskDataView.getTaskDocs());
 
         // Заменим слова в таблицах документа
@@ -695,8 +695,8 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ФИО НРП", vkrTaskDataView.getAdvisorFio());
         wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(vkrTaskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(vkrTaskDataView.getHeadFio()));
-        wordReplaceService.replaceWordsInTables("Цель", vkrTaskDataView.getTaskAim());
-        wordReplaceService.replaceWordsInTables("Задачи", vkrTaskDataView.getTaskTasks());
+        wordReplaceService.replaceWordsInTables("ЦЕЛЬВКР", vkrTaskDataView.getTaskAim());
+        wordReplaceService.replaceWordsInTables("ЗАДАЧИ", vkrTaskDataView.getTaskTasks());
         wordReplaceService.replaceWordsInTables("Документы", vkrTaskDataView.getTaskDocs());
     }
 

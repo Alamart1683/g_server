@@ -119,4 +119,36 @@ public class TaskDocumentVersionView extends DocumentVersionView {
     public void setSystemVersionID(Integer systemVersionID) {
         this.systemVersionID = systemVersionID;
     }
+
+    public boolean isVkr() {
+        return isVkr;
+    }
+
+    public void setVkr(boolean vkr) {
+        isVkr = vkr;
+    }
+
+    public String getVkrAim() {
+        return vkrAim;
+    }
+
+    public void setVkrAim(String vkrAim) {
+        this.vkrAim = vkrAim;
+    }
+
+    public String getVkrTasks() {
+        return vkrTasks;
+    }
+
+    public void setVkrTasks(String vkrTasks) {
+        this.vkrTasks = vkrTasks;
+    }
+
+    public String getVkrDocs() {
+        return vkrDocs;
+    }
+
+    public void setVkrDocs(String vkrDocs) {
+        this.vkrDocs = vkrDocs;
+    }
 }
