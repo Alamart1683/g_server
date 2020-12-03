@@ -1,9 +1,6 @@
 package g_server.g_server.application.entity.documents;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "vkr_antiplagiat")
@@ -14,6 +11,10 @@ public class VkrAntiplagiat {
 
     @Column(name = "vkr_aniplagiat_status")
     private Integer antiplagiatStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "vkr_aniplagiat_status", referencedColumnName = "id", insertable = false, updatable = false)
+    private DocumentStatus documentStatus;
 
     public VkrAntiplagiat() { }
 
@@ -36,5 +37,13 @@ public class VkrAntiplagiat {
 
     public void setAntiplagiatStatus(Integer antiplagiatStatus) {
         this.antiplagiatStatus = antiplagiatStatus;
+    }
+
+    public DocumentStatus getDocumentStatus() {
+        return documentStatus;
+    }
+
+    public void setDocumentStatus(DocumentStatus documentStatus) {
+        this.documentStatus = documentStatus;
     }
 }

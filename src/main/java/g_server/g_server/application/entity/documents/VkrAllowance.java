@@ -1,9 +1,6 @@
 package g_server.g_server.application.entity.documents;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "vkr_allowance")
@@ -14,6 +11,10 @@ public class VkrAllowance {
 
     @Column(name = "vkr_allowance_status")
     private Integer allowanceStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "vkr_allowance_status", referencedColumnName = "id", insertable = false, updatable = false)
+    private DocumentStatus documentStatus;
 
     public VkrAllowance() { }
 
@@ -36,5 +37,13 @@ public class VkrAllowance {
 
     public void setAllowanceStatus(Integer allowanceStatus) {
         this.allowanceStatus = allowanceStatus;
+    }
+
+    public DocumentStatus getDocumentStatus() {
+        return documentStatus;
+    }
+
+    public void setDocumentStatus(DocumentStatus documentStatus) {
+        this.documentStatus = documentStatus;
     }
 }

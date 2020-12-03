@@ -375,7 +375,7 @@ public class DocumentUploadService {
                                     document.getKind() == 9) {
                                 uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
-                            messagesList.add("Версия файла " + documentVersionForm.getDocumentName() + " была успешно загружена");
+                            messagesList.add("Версия файла " + document.getName() + " была успешно загружена");
                         }
                         else {
                             messagesList.add("Произошла непредвиденная ошибка загрузки версии файла");

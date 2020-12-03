@@ -1,9 +1,6 @@
 package g_server.g_server.application.entity.documents;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "vkr_presentation")
@@ -14,6 +11,10 @@ public class VkrPresentation {
 
     @Column(name = "vkr_presentation_status")
     private Integer presentationStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "vkr_presentation_status", referencedColumnName = "id", insertable = false, updatable = false)
+    private DocumentStatus documentStatus;
 
     public VkrPresentation() { }
 
@@ -28,5 +29,21 @@ public class VkrPresentation {
 
     public Integer getPresentationStatus() {
         return presentationStatus;
+    }
+
+    public void setVersionID(Integer versionID) {
+        this.versionID = versionID;
+    }
+
+    public void setPresentationStatus(Integer presentationStatus) {
+        this.presentationStatus = presentationStatus;
+    }
+
+    public DocumentStatus getDocumentStatus() {
+        return documentStatus;
+    }
+
+    public void setDocumentStatus(DocumentStatus documentStatus) {
+        this.documentStatus = documentStatus;
     }
 }

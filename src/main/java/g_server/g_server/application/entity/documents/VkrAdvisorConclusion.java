@@ -1,9 +1,6 @@
 package g_server.g_server.application.entity.documents;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "vkr_advisor_conlusion")
@@ -14,6 +11,10 @@ public class VkrAdvisorConclusion {
 
     @Column(name = "vkr_advisor_conclusion_status")
     private Integer conclusionStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "vkr_advisor_conclusion_status", referencedColumnName = "id", insertable = false, updatable = false)
+    private DocumentStatus documentStatus;
 
     public VkrAdvisorConclusion() { }
 
@@ -36,5 +37,13 @@ public class VkrAdvisorConclusion {
 
     public void setConclusionStatus(Integer conclusionStatus) {
         this.conclusionStatus = conclusionStatus;
+    }
+
+    public DocumentStatus getDocumentStatus() {
+        return documentStatus;
+    }
+
+    public void setDocumentStatus(DocumentStatus documentStatus) {
+        this.documentStatus = documentStatus;
     }
 }

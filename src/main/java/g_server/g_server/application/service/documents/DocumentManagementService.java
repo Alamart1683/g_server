@@ -85,6 +85,18 @@ public class DocumentManagementService {
     @Autowired
     private VkrReportRepository vkrReportRepository;
 
+    @Autowired
+    private VkrAntiplagiatRepository vkrAntiplagiatRepository;
+
+    @Autowired
+    private VkrPresentationRepository vkrPresentationRepository;
+
+    @Autowired
+    private VkrConclusionRepository vkrConclusionRepository;
+
+    @Autowired
+    private VkrAllowanceRepository vkrAllowanceRepository;
+
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
@@ -1125,6 +1137,10 @@ public class DocumentManagementService {
         Document pdReport;
         Document vkrTask;
         Document vkrReport;
+        Document vkrPresentation;
+        Document vkrAllowance;
+        Document vkrAntiplagiat;
+        Document vkrAdvisorConclusion;
         // TODO Сделать обработку остальных документов когда они появятся
         try {
             // НИР
@@ -1208,6 +1224,46 @@ public class DocumentManagementService {
                 for (DocumentVersion vkrReportVersion: vkrReportVersions) {
                     if (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setVkrRPZ(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(4, 6, studentID).size() == 1) {
+                vkrAllowance = documentRepository.findByTypeAndKindAndCreator(4, 6, studentID).get(0);
+                List<DocumentVersion> vkrAllowanceVersions = documentVersionRepository.findByDocument(vkrAllowance.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion vkrAllowanceVersion: vkrAllowanceVersions) {
+                    if (vkrAllowanceVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setVkrAllowance(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(4, 7, studentID).size() == 1) {
+                vkrAdvisorConclusion = documentRepository.findByTypeAndKindAndCreator(4, 7, studentID).get(0);
+                List<DocumentVersion> vkrConclusionVersions = documentVersionRepository.findByDocument(vkrAdvisorConclusion.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion vkrConclusionVersion: vkrConclusionVersions) {
+                    if (vkrConclusionVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setVkrAdvisorFeedback(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(4, 8, studentID).size() == 1) {
+                vkrAntiplagiat = documentRepository.findByTypeAndKindAndCreator(4, 8, studentID).get(0);
+                List<DocumentVersion> vkrAntiplagiatVersions = documentVersionRepository.findByDocument(vkrAntiplagiat.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion vkrAntiplagiatVersion: vkrAntiplagiatVersions) {
+                    if (vkrAntiplagiatVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setVkrAntiplagiat(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(4, 9, studentID).size() == 1) {
+                vkrPresentation = documentRepository.findByTypeAndKindAndCreator(4, 9, studentID).get(0);
+                List<DocumentVersion> vkrPresentationVersions = documentVersionRepository.findByDocument(vkrPresentation.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion vkrPresentationVersion: vkrPresentationVersions) {
+                    if (vkrPresentationVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setVkrPresentation(1);
                     }
                 }
             }
