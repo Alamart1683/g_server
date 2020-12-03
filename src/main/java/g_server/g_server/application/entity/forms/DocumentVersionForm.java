@@ -3,26 +3,26 @@ package g_server.g_server.application.entity.forms;
 import org.springframework.web.multipart.MultipartFile;
 
 public class DocumentVersionForm {
-    String documentName;
+    Integer documentID;
     String editionDescription;
     String token;
     MultipartFile versionFile;
 
     public DocumentVersionForm() { }
 
-    public DocumentVersionForm(String documentName, String editionDescription, String token, MultipartFile versionFile) {
-        this.documentName = documentName;
+    public DocumentVersionForm(Integer documentID, String editionDescription, String token, MultipartFile versionFile) {
+        this.documentID = documentID;
         this.editionDescription = editionDescription;
         this.token = token;
         this.versionFile = versionFile;
     }
 
-    public String getDocumentName() {
-        return documentName;
+    public Integer getDocumentID() {
+        return documentID;
     }
 
-    public void setDocumentName(String documentName) {
-        this.documentName = documentName;
+    public void setDocumentID(Integer documentID) {
+        this.documentID = documentID;
     }
 
     public String getEditionDescription() {

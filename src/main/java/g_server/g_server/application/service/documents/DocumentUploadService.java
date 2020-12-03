@@ -342,7 +342,12 @@ public class DocumentUploadService {
         if (fileExtension.equals(""))
             messagesList.add("Вы загружаете версию файла с недопустимым расширением");
         if (messagesList.size() == 0) {
-            Document document = documentRepository.findByCreatorAndName(editor_id, documentVersionForm.getDocumentName());
+            Document document;
+            if (documentRepository.findById(documentVersionForm.getDocumentID()).isPresent()) {
+                 document = documentRepository.findById(documentVersionForm.getDocumentID()).get();
+            } else {
+                document = null;
+            }
             String currentDate = getCurrentDate();
             String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
             if (document != null) {
