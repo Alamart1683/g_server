@@ -496,6 +496,12 @@ public class UsersService implements UserDetailsService {
                             return "Ошибка чтения ФИО";
                         }
 
+                        // Определим его шифр
+                        String studentCode = hssfRow.getCell(3).getRichStringCellValue().getString();
+                        if (!studentCode.equals("")) {
+                            studentData.setStudentCode(studentCode);
+                        }
+
                         // Определим его группу и прочие данные
                         String group = hssfRow.getCell(6).getRichStringCellValue().getString();
                         if (group.equals("")) {

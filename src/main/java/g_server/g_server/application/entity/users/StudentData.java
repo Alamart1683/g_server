@@ -31,6 +31,9 @@ public class StudentData {
     @Column(name = "is_vkr_theme_editable")
     private boolean isVkrThemeEditable;
 
+    @Column(name = "student_code")
+    private String studentCode;
+
     @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Roles roles;
@@ -146,5 +149,13 @@ public class StudentData {
 
     public void setVkrThemeEditable(boolean vkrThemeEditable) {
         isVkrThemeEditable = vkrThemeEditable;
+    }
+
+    public String getStudentCode() {
+        return studentCode;
+    }
+
+    public void setStudentCode(String studentCode) {
+        this.studentCode = studentCode;
     }
 }
