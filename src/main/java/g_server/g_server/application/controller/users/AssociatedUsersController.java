@@ -216,7 +216,7 @@ public class AssociatedUsersController {
     }
 
     // Научный преподаватель меняет тему вкр студенту
-    @PostMapping("/advisor/edit/student/vkr_theme")
+    @PostMapping("/scientific_advisor/edit/student/vkr_theme")
     public String advisorEditStudentVkrTheme(
             HttpServletRequest httpServletRequest,
             @RequestParam String newTheme,
@@ -226,7 +226,7 @@ public class AssociatedUsersController {
     }
 
     // Научный преподаватель утверждает тему вкр студенту
-    @PostMapping("/advisor/approve/student/vkr_theme")
+    @PostMapping("/scientific_advisor/approve/student/vkr_theme")
     public String advisorApproveStudentVkrTheme(
         HttpServletRequest httpServletRequest,
         @RequestParam Integer studentID,
