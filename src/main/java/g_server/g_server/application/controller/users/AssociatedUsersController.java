@@ -215,6 +215,26 @@ public class AssociatedUsersController {
         return associatedStudentsService.studentEditingVkrTheme(getTokenFromRequest(httpServletRequest), newTheme);
     }
 
+    // Научный преподаватель меняет тему вкр студенту
+    @PostMapping("/advisor/edit/student/vkr_theme")
+    public String advisorEditStudentVkrTheme(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String newTheme,
+            @RequestParam Integer studentID
+    ) {
+        return associatedStudentsService.advisorEditingStudentTheme(getTokenFromRequest(httpServletRequest), newTheme, studentID);
+    }
+
+    // Научный преподаватель утверждает тему вкр студенту
+    @PostMapping("/advisor/approve/student/vkr_theme")
+    public String advisorApproveStudentVkrTheme(
+        HttpServletRequest httpServletRequest,
+        @RequestParam Integer studentID,
+        @RequestParam boolean approve
+    ) {
+        return associatedStudentsService.advisorApprovedStudentTheme(getTokenFromRequest(httpServletRequest), studentID, approve);
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

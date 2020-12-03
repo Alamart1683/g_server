@@ -923,8 +923,47 @@ public class AssociatedStudentsService {
         return "Пользователь не найден";
     }
 
-    // Научный руководитель получает тему студента
+    // Научный руководитель редактирует тему студента
+    public String advisorEditingStudentTheme(String token, String newTheme, Integer studentID) {
+        Integer advisorID = getUserId(token);
+        AssociatedStudents associatedStudents = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
+        if (associatedStudents != null) {
+            UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(studentID);
+            if (usersRole.getRoleId() == 1) {
+                Users student = usersRepository.findById(studentID).get();
+                if (student.getStudentData().isVkrThemeEditable()) {
+                    student.getStudentData().setVkrTheme(newTheme);
+                    studentDataRepository.save(student.getStudentData());
+                    return "Всё в порядке";
+                } else {
+                    return "Тема уже утверждена. Редактирование невозможно";
+                }
+            } else {
+                return "Ваш студент не студент";
+            }
+        } else {
+            return "Вы не можете редактировать тему не вашего студента";
+        }
+    }
 
+    // Научный руководитель утверждает или разутверждает тему вкр
+    public String advisorApprovedStudentTheme(String token, Integer studentID, boolean approve) {
+        Integer advisorID = getUserId(token);
+        AssociatedStudents associatedStudents = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
+        if (associatedStudents != null) {
+            UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(studentID);
+            if (usersRole.getRoleId() == 1) {
+                Users student = usersRepository.findById(studentID).get();
+                student.getStudentData().setVkrThemeEditable(approve);
+                studentDataRepository.save(student.getStudentData());
+                return "Всё в порядке";
+            } else {
+                return "Ваш студент не студент";
+            }
+        } else {
+            return "Вы не можете утвердить тему не вашего студента";
+        }
+    }
 
     // Поиск научного руководителя в системе по укороченному имени
     private Users findAdvisorByShortFio(String shortFio, List<Users> usersList) {
