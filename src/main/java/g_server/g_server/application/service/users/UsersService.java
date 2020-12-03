@@ -133,6 +133,8 @@ public class UsersService implements UserDetailsService {
                     cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(),
                     studentTypeRepository.getByStudentType(student_type).getId()
             );
+            studentData.setVkrTheme("Тема не указана");
+            studentData.setVkrThemeEditable(true);
             studentDataRepository.save(studentData);
             // Отправка письма студенту
             mailService.sendLoginEmailAndPassword(user.getEmail(), password, "студента");
@@ -512,6 +514,8 @@ public class UsersService implements UserDetailsService {
                         studentData.setStudent_group(groupId);
                         studentData.setCathedra(cathedrasRepository.getCathedrasByCathedraName(cathedra).getId());
                         studentData.setType(studentTypeRepository.getByStudentType(type).getId());
+                        studentData.setVkrTheme("Тема не указана");
+                        studentData.setVkrThemeEditable(true);
                         studentDataList.add(studentData);
 
                         // Определим телефон студента
