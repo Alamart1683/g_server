@@ -111,6 +111,18 @@ public class DocumentUploadService {
     @Autowired
     private VkrReportRepository vkrReportRepository;
 
+    @Autowired
+    private VkrAllowanceRepository vkrAllowanceRepository;
+
+    @Autowired
+    private VkrPresentationRepository vkrPresentationRepository;
+
+    @Autowired
+    private VkrAntiplagiatRepository vkrAntiplagiatRepository;
+
+    @Autowired
+    private VkrConclusionRepository vkrConclusionRepository;
+
     public void createDocumentRootDirIfIsNotExist() {
         String rootDocDirPath = storageLocation;
         File rootDocDir = new File(rootDocDirPath);
@@ -274,6 +286,10 @@ public class DocumentUploadService {
                                 templateProperties.setId(document.getId());
                                 templateProperties.setType(document.getType());
                                 templatePropertiesRepository.save(templateProperties);
+                            }
+                            if (document.getKind() == 6 || document.getKind() == 7 || document.getKind() == 8 ||
+                                    document.getKind() == 9) {
+                                uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
                             messagesList.add("Документ был успешно загружен");
                         }
@@ -1434,6 +1450,25 @@ public class DocumentUploadService {
             return messagesList;
         }
         return messagesList;
+    }
+
+    public void uploadVkrStuff(Integer stuff, Integer versionID) {
+        switch (stuff) {
+            case 6:
+                VkrAllowance vkrAllowance = new VkrAllowance(versionID, 1);
+                vkrAllowanceRepository.save(vkrAllowance);
+            case 7:
+                VkrAdvisorConclusion vkrAdvisorConclusion = new VkrAdvisorConclusion(versionID, 1);
+                vkrConclusionRepository.save(vkrAdvisorConclusion);
+            case 8:
+                VkrAntiplagiat vkrAntiplagiat = new VkrAntiplagiat(versionID, 1);
+                vkrAntiplagiatRepository.save(vkrAntiplagiat);
+            case 9:
+                VkrPresentation vkrPresentation = new VkrPresentation(versionID, 1);
+                vkrPresentationRepository.save(vkrPresentation);
+            default:
+                return;
+        }
     }
 
     // TODO Сделать возможность студентам загружать документ в его проект
