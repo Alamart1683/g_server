@@ -274,6 +274,24 @@ create table pd_report(
     foreign key (pd_report_status) references  document_status (id)
 );
 
+create table vkr_task(
+    versionID int not null unique,
+    theme varchar(1024) not null,
+    aim varchar(1024) not null,
+    tasks varchar(1024) not null,
+    docs varchar(1024) not null,
+    vkr_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
+    foreign key (vkr_status) references document_status (id)
+);
+
+create table vkr_report(
+    versionID int not null unique,
+    vkr_report_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (vkr_report_status) references  document_status (id)
+);
+
 insert into document_status (status) values
     ('Не отправлено'),
     ('Одобрено'),

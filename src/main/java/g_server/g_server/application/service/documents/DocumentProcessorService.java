@@ -279,7 +279,7 @@ public class DocumentProcessorService {
             Speciality speciality
     ) {
         if (shortTaskDataView.getStudentTheme().length() < 1) {
-            shortTaskDataView.setStudentTheme("Введите тему НИР");
+            shortTaskDataView.setStudentTheme("Введите тему практики");
         }
         if (shortTaskDataView.getToCreate().length() < 1) {
             shortTaskDataView.setToCreate("Создать");

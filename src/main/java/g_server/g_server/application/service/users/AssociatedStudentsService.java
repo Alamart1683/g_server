@@ -268,7 +268,7 @@ public class AssociatedStudentsService {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
                 Integer studentID = associatedStudent.getStudent();
                 String projectName = "Проект не назначен";
-                String projectArea = "Нет проектной области";
+                String projectArea = "Нет комплексного проекта";
                 OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
                 Project project = null;
                 if (occupiedStudent != null) {
@@ -290,6 +290,29 @@ public class AssociatedStudentsService {
             return activeStudents;
         }
         return null;
+    }
+
+    // Студент получает информацию о себе и своих документах
+    public AssociatedStudentView getInfoAboutStudent(String token) {
+        Integer studentID = getUserId(token);
+        AssociatedStudents associatedStudent = associatedStudentsRepository.findByStudent(studentID);
+        Users student = usersRepository.findById(studentID).get();
+        OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
+        String projectName = "Проект не назначен";
+        String projectArea = "Нет комплексного проекта";
+        Project project = null;
+        if (occupiedStudent != null) {
+            try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
+            catch (NoSuchElementException noSuchElementException) { }
+        }
+        if (project != null) {
+            projectName = project.getName();
+            projectArea = project.getProjectArea().getArea();
+        }
+        return new AssociatedStudentView(student, associatedStudent.getId(), projectName, projectArea,
+                associatedStudent.getStudentUser().getPhone(), associatedStudent.getStudentUser().getEmail(),
+                documentManagementService.getStudentsDocumentStatus(studentID)
+        );
     }
 
     // Показать список студентов данного научного руководителя, которые не участвуют в проектах

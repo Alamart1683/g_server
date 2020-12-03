@@ -120,6 +120,12 @@ public class AssociatedUsersController {
         return associatedStudentsService.revokeRequestByStudent(getTokenFromRequest(httpServletRequest));
     }
 
+    // Получить студенту инфу о себе
+    @GetMapping("/student/get/about/me")
+    public AssociatedStudentView getInfoAboutStudent(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.getInfoAboutStudent(getTokenFromRequest(httpServletRequest));
+    }
+
     // Отказаться от научного руководства студента от лица научного руководителя
     @DeleteMapping("/scientific_advisor/dismiss/student")
     public List<String> dismissStudentByAdvisor(@RequestParam Integer systemID, HttpServletRequest httpServletRequest) {
