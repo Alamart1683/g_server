@@ -79,6 +79,12 @@ public class DocumentManagementService {
     @Autowired
     private ViewRightsProjectRepository viewRightsProjectRepository;
 
+    @Autowired
+    private VkrTaskRepository vkrTaskRepository;
+
+    @Autowired
+    private VkrReportRepository vkrReportRepository;
+
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
@@ -460,6 +466,10 @@ public class DocumentManagementService {
                             documentVersion.getPdTask().setStatus(4);
                             pdTaskRepository.save(documentVersion.getPdTask());
                             break;
+                        case 4:
+                            documentVersion.getVkrTask().setVkr_status(4);
+                            vkrTaskRepository.save(documentVersion.getVkrTask());
+                            break;
                         default:
                             return "Некорректно указан этап";
                     }
@@ -557,6 +567,28 @@ public class DocumentManagementService {
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
+                        case 4:
+                            if (newStatus.equals("Одобрено") &&
+                                    documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
+                                documentVersion.getPdTask().setStatus(2);
+                                vkrTaskRepository.save(documentVersion.getVkrTask());
+                                return "Версия документа успешно прорецензирована";
+                            } else if (newStatus.equals("Замечания") &&
+                                    documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
+                                documentVersion.getVkrTask().setVkr_status(3);
+                                vkrTaskRepository.save(documentVersion.getVkrTask());
+                                return "Версия документа успешно прорецензирована";
+                            } else if (documentVersion.getEditor() == advisorID) {
+                                if (newStatus.equals("Одобрено")) {
+                                    documentVersion.getPdTask().setStatus(2);
+                                    vkrTaskRepository.save(documentVersion.getVkrTask());
+                                    return "Вы отправили студенту свою версию задания с статусом одобрено";
+                                } else if (newStatus.equals("Замечания")) {
+                                    documentVersion.getVkrTask().setVkr_status(3);
+                                    vkrTaskRepository.save(documentVersion.getVkrTask());
+                                    return "Вы отправили студенту свою версию задания с статусом замечания";
+                                }
+                            }
                         default:
                             break;
                     }
@@ -606,6 +638,16 @@ public class DocumentManagementService {
                         case 3:
                             if (documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Не отправлено")
                                     || documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия документа успешно удалена";
+                            } else {
+                                return "Запрещено удалять версии документа после его отправки";
+                            }
+                        case 4:
+                            if (documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")
+                                    || documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Замечания")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
@@ -697,6 +739,25 @@ public class DocumentManagementService {
                             else {
                                 return "Вы можете удалить только свою неотправленную версию задания своего студента";
                             }
+                        case 4:
+                            if (documentVersion.getEditor() == advisorID &&
+                                    documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")
+                                    || documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия документа успешно удалена";
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия документа успешно удалена";
+                            }
+                            else {
+                                return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                            }
                         default:
                             return "Непредвиденная ошибка при удалении версии задания научным руководителем";
                     }
@@ -737,6 +798,10 @@ public class DocumentManagementService {
                         case 3:
                             documentVersion.getPdReport().setPdReportStatus(4);
                             pdReportRepository.save(documentVersion.getPdReport());
+                            break;
+                        case 4:
+                            documentVersion.getVkrReport().setVkrReportStatus(4);
+                            vkrReportRepository.save(documentVersion.getVkrReport());
                             break;
                         default:
                             return "Некорректно указан этап";
@@ -837,6 +902,29 @@ public class DocumentManagementService {
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
+                        case 4:
+                            if (newStatus.equals("Одобрено") &&
+                                    documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
+                                documentVersion.getVkrReport().setVkrReportStatus(2);
+                                vkrReportRepository.save(documentVersion.getVkrReport());
+                                return "Версия документа успешно прорецензирована";
+                            } else if (newStatus.equals("Замечания") &&
+                                    documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
+                                documentVersion.getVkrReport().setVkrReportStatus(3);
+                                vkrReportRepository.save(documentVersion.getVkrReport());
+                                return "Версия документа успешно прорецензирована";
+                            }
+                            else if (documentVersion.getEditor() == advisorID) {
+                                if (newStatus.equals("Одобрено")) {
+                                    documentVersion.getVkrReport().setVkrReportStatus(2);
+                                    vkrReportRepository.save(documentVersion.getVkrReport());
+                                    return "Вы отправили студенту свою версию задания с статусом одобрено";
+                                } else if (newStatus.equals("Замечания")) {
+                                    documentVersion.getVkrReport().setVkrReportStatus(3);
+                                    vkrReportRepository.save(documentVersion.getVkrReport());
+                                    return "Вы отправили студенту свою версию задания с статусом замечания";
+                                }
+                            }
                         default:
                             break;
                     }
@@ -888,6 +976,17 @@ public class DocumentManagementService {
                         case 3:
                             if (documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Не отправлено")
                                     || documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия отчета успешно удалена";
+                            }
+                            else {
+                                return "Запрещено удалять версии отчета после его отправки";
+                            }
+                        case 4:
+                            if (documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Не отправлено")
+                                    || documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Замечания")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
@@ -980,6 +1079,25 @@ public class DocumentManagementService {
                             else {
                                 return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
                             }
+                        case 4:
+                            if (documentVersion.getEditor() == advisorID &&
+                                    (documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Не отправлено")
+                                            || documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Замечания"))) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия отчета успешно удалена";
+                            }
+                            else if (documentVersion.getEditor() == studentID &&
+                                    documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                File deleteFile = new File(documentVersion.getThis_version_document_path());
+                                deleteFile.delete();
+                                documentVersionRepository.delete(documentVersion);
+                                return "Версия отчета успешно удалена";
+                            }
+                            else {
+                                return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
+                            }
                         default:
                             return "Непредвиденная ошибка при удалении версии отчета научным руководителем";
                     }
@@ -1005,6 +1123,8 @@ public class DocumentManagementService {
         Document ppppuiopdReport;
         Document pdTask;
         Document pdReport;
+        Document vkrTask;
+        Document vkrReport;
         // TODO Сделать обработку остальных документов когда они появятся
         try {
             // НИР
@@ -1067,6 +1187,27 @@ public class DocumentManagementService {
                 for (DocumentVersion pdReportVersion: pdReportVersions) {
                     if (pdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setPpReportStatus(1);
+                    }
+                }
+            }
+            // ВКР
+            if (documentRepository.findByTypeAndKindAndCreator(4, 2, studentID).size() == 1) {
+                vkrTask = documentRepository.findByTypeAndKindAndCreator(4, 2, studentID).get(0);
+                List<DocumentVersion> vkrTaskVersions = documentVersionRepository.findByDocument(vkrTask.getId());
+                // Пройдем по версиям задания студента
+                for (DocumentVersion vkrTaskVersion : vkrTaskVersions) {
+                    if (vkrTaskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setVkrTask(1);
+                    }
+                }
+            }
+            if (documentRepository.findByTypeAndKindAndCreator(4, 3, studentID).size() == 1) {
+                vkrReport = documentRepository.findByTypeAndKindAndCreator(4, 3, studentID).get(0);
+                List<DocumentVersion> vkrReportVersions = documentVersionRepository.findByDocument(vkrReport.getId());
+                // Пройдем по версиям отчёта студента
+                for (DocumentVersion vkrReportVersion: vkrReportVersions) {
+                    if (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Одобрено")) {
+                        statusView.setVkrRPZ(1);
                     }
                 }
             }

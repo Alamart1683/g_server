@@ -105,6 +105,12 @@ public class DocumentUploadService {
     @Autowired
     private PdReportRepository pdReportRepository;
 
+    @Autowired
+    private VkrTaskRepository vkrTaskRepository;
+
+    @Autowired
+    private VkrReportRepository vkrReportRepository;
+
     public void createDocumentRootDirIfIsNotExist() {
         String rootDocDirPath = storageLocation;
         File rootDocDir = new File(rootDocDirPath);
@@ -905,7 +911,110 @@ public class DocumentUploadService {
                     }
                     // Если тип отчёта - ВКР
                     else if (reportType == 4) {
-                        // TODO сделать загрузку отчёта
+                        Document task;
+                        List<DocumentVersion> taskVersions;
+                        try {
+                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, creator_id).get(0);
+                            taskVersions = documentVersionRepository.findByDocument(task.getId());
+                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                            for (DocumentVersion taskVersion: taskVersions) {
+                                if (taskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                    approvedTaskVersions.add(taskVersion);
+                                }
+                            }
+                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                        } catch (NoSuchElementException noSuchElementException) {
+                            messagesList.add("Не найдено одобренное задание");
+                        } catch (Exception e) {
+                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                        }
+                        // Если найдено задание последней версии, то присоединим к нему файл с содержанием отчёта и запишем как отчёт
+                        if (documentRepository.findByCreatorAndName(creator_id, fileName) == null && messagesList.size() == 0) {
+                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                                // После этого занесем загруженный файл в таблицу документов
+                                Document document = documentForm.DocumentFormToDocument(creator_id, documentPath, sqlDateTime,
+                                        type_id, kind_id, viewRights
+                                );
+                                document.setName(fileName);
+                                documentService.save(document);
+                                // Далее создадим запись о первой версии документа в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка отчёта по " + documentForm.getDocumentFormType() + " на сайт", versionPath);
+                                documentVersionService.save(documentVersion);
+                                VkrReport vkrReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    vkrReport = new VkrReport(
+                                            documentVersion.getId(),
+                                            1
+                                    );
+                                } else {
+                                    vkrReport = new VkrReport(documentVersion.getId(), 1);
+                                }
+                                vkrReportRepository.save(vkrReport);
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
+                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                destination.save(finalReportVersion.getPath());
+                                uploadedTempReportVersion.delete();
+                                messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
+                            } else {
+                                messagesList.add("Непредвиденная ошибка загрузки файла");
+                                if (documentDirectory != null) {
+                                    if (documentDirectory.listFiles().length == 0) {
+                                        documentDirectory.delete();
+                                    }
+                                }
+                            }
+                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                        } else if (documentRepository.findByCreatorAndName(creator_id, fileName) != null) {
+                            if (multipartFileToFileWrite(documentForm.getFile(),
+                                    Paths.get(tempVersionPath))) {
+                                // Далее создадим запись о новой версии отчёта в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка версии отчёта по " +
+                                        documentForm.getDocumentFormType() + " на сайт",
+                                        versionPath);
+                                documentVersionService.save(documentVersion);
+                                messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                VkrReport vkrReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    vkrReport = new VkrReport(
+                                            documentVersion.getId(),
+                                            1
+                                    );
+                                } else {
+                                    vkrReport = new VkrReport(documentVersion.getId(), 1);
+                                }
+                                vkrReportRepository.save(vkrReport);
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
+                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                destination.save(finalReportVersion.getPath());
+                                uploadedTempReportVersion.delete();
+                                messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
+                            } else {
+                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
+                                if (documentDirectory != null) {
+                                    if (documentDirectory.listFiles().length == 0) {
+                                        documentDirectory.delete();
+                                    }
+                                }
+                            }
+                        } else {
+                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
                     } else {
                         messagesList.add("Некорректный тип отчёта!");
                     }
@@ -1184,7 +1293,7 @@ public class DocumentUploadService {
                         if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
                             messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
                             return messagesList;
-                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                        // Если отчет уже был загружен в прошлый раз, добавим его новую версию
                         } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
                             if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
                                 AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
@@ -1239,7 +1348,75 @@ public class DocumentUploadService {
                     }
                     // Если тип отчёта - ВКР
                     else if (reportType == 4) {
-                        // TODO сделать загрузку отчёта
+                        Document task;
+                        List<DocumentVersion> taskVersions;
+                        try {
+                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
+                            taskVersions = documentVersionRepository.findByDocument(task.getId());
+                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                            for (DocumentVersion taskVersion: taskVersions) {
+                                if (taskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                    approvedTaskVersions.add(taskVersion);
+                                }
+                            }
+                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                        } catch (NoSuchElementException noSuchElementException) {
+                            messagesList.add("Не найдено одобренное задание");
+                        } catch (Exception e) {
+                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                        }
+                        if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
+                            messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
+                            return messagesList;
+                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                        } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
+                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                                AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
+                                if (associatedStudent != null) {
+                                    // Далее создадим запись о новой версии отчёта в таблице версий
+                                    int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
+                                    DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
+                                            sqlDateTime, "Загрузка версии отчёта по " +
+                                            documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
+                                    documentVersionService.save(documentVersion);
+                                    messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                    VkrReport vkrReport;
+                                    if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                        vkrReport = new VkrReport(
+                                                documentVersion.getId(),
+                                                1
+                                        );
+                                    } else {
+                                        vkrReport = new VkrReport(documentVersion.getId(), 1);
+                                    }
+                                    vkrReportRepository.save(vkrReport);
+                                    File uploadedTempReportVersion = new File(tempVersionPath);
+                                    File finalReportVersion = new File(versionPath);
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    uploadedTempReportVersion.delete();
+                                    messagesList.add("Отчёт по " + documentForm.getDocumentFormType() + " был успешно загружен");
+                                } else {
+                                    messagesList.add("Разрешено загружать версии отчетов только своим студентам");
+                                }
+                            } else {
+                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
+                                if (documentDirectory != null) {
+                                    if (documentDirectory.listFiles().length == 0) {
+                                        documentDirectory.delete();
+                                    }
+                                }
+                            }
+                        } else {
+                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
                     } else {
                         messagesList.add("Некорректный тип отчёта!");
                     }

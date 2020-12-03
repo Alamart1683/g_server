@@ -18,10 +18,9 @@ public class VkrReport {
 
     public VkrReport() { }
 
-    public VkrReport(Integer versionID, Integer vkrReportStatus, DocumentStatus documentStatus) {
+    public VkrReport(Integer versionID, Integer vkrReportStatus) {
         this.versionID = versionID;
         this.vkrReportStatus = vkrReportStatus;
-        this.documentStatus = documentStatus;
     }
 
     public Integer getVersionID() {

@@ -2,7 +2,9 @@ package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.forms.NewRightViewForm;
 import g_server.g_server.application.entity.view.AdvisorShortTaskDataView;
+import g_server.g_server.application.entity.view.AdvisorShortVkrTaskDataView;
 import g_server.g_server.application.entity.view.ShortTaskDataView;
+import g_server.g_server.application.entity.view.ShortVkrTaskDataView;
 import g_server.g_server.application.service.documents.DocumentManagementService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,7 +174,7 @@ public class DocumentManagementController {
     }
 
     @PostMapping("/student/document/management/task/nir/create")
-    public String nirTaskCreateOrCangeByStudent(
+    public String taskCreateOrCangeByStudent(
             @ModelAttribute("shortTaskDataView") @Validated ShortTaskDataView shortTaskDataView,
             HttpServletRequest httpServletRequest
     ) throws Exception {
@@ -182,12 +184,32 @@ public class DocumentManagementController {
     }
 
     @PostMapping("/scientific_advisor/document/management/task/nir/update")
-    public String nirTaskChangeByAdvisor(
+    public String taskChangeByAdvisor(
             @ModelAttribute("advisorShortTaskDataView") @Validated AdvisorShortTaskDataView advisorShortTaskDataView,
             HttpServletRequest httpServletRequest
             ) throws Exception {
         String response = documentProcessorService.advisorTaskVersionAdd(
                 getTokenFromRequest(httpServletRequest), advisorShortTaskDataView);
+        return response;
+    }
+
+    @PostMapping("/student/document/management/task/vkr/create")
+    public String vkrTaskCreateOrCangeByStudent(
+            @ModelAttribute("shortVkrTaskDataView") @Validated ShortVkrTaskDataView shortVkrTaskDataView,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        String response = documentProcessorService.studentVkrTaskGeneration(
+                getTokenFromRequest(httpServletRequest), shortVkrTaskDataView);
+        return response;
+    }
+
+    @PostMapping("/scientific_advisor/document/management/task/vkr/update")
+    public String vkrTaskChangeByAdvisor(
+            @ModelAttribute("advisorShortVkrTaskDataView") @Validated AdvisorShortVkrTaskDataView advisorShortVkrTaskDataView,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        String response = documentProcessorService.advisorVkrTaskVersionAdd(
+                getTokenFromRequest(httpServletRequest), advisorShortVkrTaskDataView);
         return response;
     }
 

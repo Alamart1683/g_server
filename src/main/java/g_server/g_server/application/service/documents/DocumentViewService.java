@@ -94,6 +94,12 @@ public class DocumentViewService {
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private VkrTaskRepository vkrTaskRepository;
+
+    @Autowired
+    private VkrReportRepository vkrReportRepository;
+
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
@@ -311,7 +317,7 @@ public class DocumentViewService {
         return documentViewList;
     }
 
-    // Сформировать список документов студентов научного рукводителя
+    // Сформировать список документов студентов научного руководителя
     public List<AdvisorsStudentDocumentView> getAdvisorStudentsDocuments(String token) {
         Integer advisorID = associatedStudentsService.getUserId(token);
         Users advisor;
@@ -436,11 +442,39 @@ public class DocumentViewService {
                                     // TODO ВКР
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // Задание на ВКР
                                             currentView.getDocumentKind().equals("Задание")) {
-                                        // TODO Обработать задание
+                                        Document currentVkrTaskDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentVkrTaskVersions = documentVersionRepository.findByDocument(currentVkrTaskDocument.getId());
+                                        List<TaskDocumentVersionView> currentTaskVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentVkrTaskVersion: currentVkrTaskVersions) {
+                                            VkrTask currentVkrTask = vkrTaskRepository.findByVersionID(currentVkrTaskVersion.getId());
+                                            if (currentVkrTask.getDocumentStatus().getStatus().equals("Не отправлено") &&
+                                                    currentVkrTaskVersion.getEditor() == advisor.getId()) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentVkrTaskVersion, currentVkrTask));
+                                            }
+                                            if (!currentVkrTask.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentTaskVersionsView.add(new TaskDocumentVersionView(currentVkrTaskVersion, currentVkrTask));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentVkrTaskDocument, currentTaskVersionsView, null, null));
                                     }
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // РПЗ по ВКР
                                             currentView.getDocumentKind().equals("Отчёт")) {
-                                        // Обработать отчёт
+                                        Document currentVkrReportDocument = documentRepository.findByCreatorAndName(
+                                                currentView.getSystemCreatorID(), currentView.getDocumentName());
+                                        List<DocumentVersion> currentVkrReportVersions = documentVersionRepository.findByDocument(currentVkrReportDocument.getId());
+                                        List<ReportVersionDocumentView> currentReportVersionsView = new ArrayList<>();
+                                        for (DocumentVersion currentVkrReportVersion: currentVkrReportVersions) {
+                                            VkrReport currentVkrReport = vkrReportRepository.findByVersionID(currentVkrReportVersion.getId());
+                                            if (currentVkrReport.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                    && currentVkrReportVersion.getEditor() == advisor.getId()) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentVkrReportVersion, currentVkrReport));
+                                            }
+                                            else if (!currentVkrReport.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                currentReportVersionsView.add(new ReportVersionDocumentView(currentVkrReportVersion, currentVkrReport));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentVkrReportDocument, null, currentReportVersionsView, null));
                                     }
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // Допуск по ВКР
                                             currentView.getDocumentKind().equals("Допуск")) {
@@ -644,9 +678,22 @@ public class DocumentViewService {
                             );
                         }
                     } else if (intTaskType == 4) {
-                       // TODO Задел под вкр
-                    } else {
-
+                        if (taskVersion.getEditor() == studentID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            vkrTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == advisorID &&
+                                !taskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            vkrTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
                     }
                 }
                 return taskVersionView;
@@ -725,9 +772,22 @@ public class DocumentViewService {
                             );
                         }
                     } else if (intTaskType == 4) {
-                        // TODO Задел под вкр
-                    } else {
-
+                        if (taskVersion.getEditor() == advisorID) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            vkrTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        } else if (taskVersion.getEditor() == studentID &&
+                                !taskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            taskVersionView.add(
+                                    new TaskDocumentVersionView(
+                                            taskVersion,
+                                            vkrTaskRepository.findByVersionID(taskVersion.getId())
+                                    )
+                            );
+                        }
                     }
                 }
                 return taskVersionView;
@@ -807,9 +867,22 @@ public class DocumentViewService {
                             );
                         }
                     } else if (intTaskType == 4) {
-                        // TODO Задел под вкр
-                    } else {
-
+                        if (reportVersion.getEditor() == studentID) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            vkrReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        } else if (reportVersion.getEditor() == advisorID &&
+                                !reportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            vkrReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        }
                     }
                 }
                 return reportVersionView;
@@ -891,9 +964,22 @@ public class DocumentViewService {
                             );
                         }
                     } else if (intTaskType == 4) {
-                        // TODO Задел под вкр
-                    } else {
-
+                        if (reportVersion.getEditor() == advisorID) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            vkrReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        } else if (reportVersion.getEditor() == studentID &&
+                                !reportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            reportVersionView.add(
+                                    new ReportVersionDocumentView(
+                                            reportVersion,
+                                            vkrReportRepository.findByVersionID(reportVersion.getId())
+                                    )
+                            );
+                        }
                     }
                 }
                 return reportVersionView;

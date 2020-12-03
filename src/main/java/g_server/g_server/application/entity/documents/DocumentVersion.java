@@ -54,6 +54,14 @@ public class DocumentVersion {
     @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
     private PdReport pdReport;
 
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private VkrTask vkrTask;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private VkrReport vkrReport;
+
     // Привязка айди редактора версии документа напрямую из версии к пользователю в будущем даст
     // реализации возможности выдачи прав на чтение и запись для созданных пользователем документов,
     // тогда как если привязать его к айди создателя документа, это поставит крест на этой возможости, ибо
@@ -183,5 +191,21 @@ public class DocumentVersion {
 
     public void setPdReport(PdReport pdReport) {
         this.pdReport = pdReport;
+    }
+
+    public VkrTask getVkrTask() {
+        return vkrTask;
+    }
+
+    public void setVkrTask(VkrTask vkrTask) {
+        this.vkrTask = vkrTask;
+    }
+
+    public VkrReport getVkrReport() {
+        return vkrReport;
+    }
+
+    public void setVkrReport(VkrReport vkrReport) {
+        this.vkrReport = vkrReport;
     }
 }

@@ -1,9 +1,6 @@
 package g_server.g_server.application.entity.view;
 
-import g_server.g_server.application.entity.documents.DocumentVersion;
-import g_server.g_server.application.entity.documents.NirTask;
-import g_server.g_server.application.entity.documents.PdTask;
-import g_server.g_server.application.entity.documents.PpppuiopdTask;
+import g_server.g_server.application.entity.documents.*;
 
 public class TaskDocumentVersionView extends DocumentVersionView {
     private Integer systemVersionID;
@@ -12,6 +9,10 @@ public class TaskDocumentVersionView extends DocumentVersionView {
     private String toCreate;
     private String toFamiliarize;
     private String additionalTask;
+    private boolean isVkr = false;
+    private String vkrAim;
+    private String vkrTasks;
+    private String vkrDocs;
     private String status;
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, NirTask nirTask) {
@@ -45,6 +46,17 @@ public class TaskDocumentVersionView extends DocumentVersionView {
         this.toFamiliarize = pdTask.getToFamiliarize();
         this.additionalTask = pdTask.getAdditionalTask();
         this.status = pdTask.getDocumentStatus().getStatus();
+    }
+
+    public TaskDocumentVersionView(DocumentVersion documentVersion, VkrTask vkrTask) {
+        super(documentVersion);
+        this.isVkr = true;
+        this.systemVersionID = documentVersion.getId();
+        this.theme = vkrTask.getVkrTheme();
+        this.vkrAim = vkrTask.getVkrAim();
+        this.vkrTasks = vkrTask.getVkrTask();
+        this.vkrDocs = vkrTask.getVkrDocs();
+        this.status = vkrTask.getDocumentStatus().getStatus();
     }
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, String status) {

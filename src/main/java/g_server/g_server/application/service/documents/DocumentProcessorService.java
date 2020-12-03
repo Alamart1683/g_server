@@ -8,9 +8,7 @@ import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
-import g_server.g_server.application.entity.view.AdvisorShortTaskDataView;
-import g_server.g_server.application.entity.view.ShortTaskDataView;
-import g_server.g_server.application.entity.view.TaskDataView;
+import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
@@ -81,6 +79,9 @@ public class DocumentProcessorService {
 
     @Autowired
     private PdTaskRepository pdTaskRepository;
+
+    @Autowired
+    private VkrTaskRepository vkrTaskRepository;
 
     // Сгенерировать шаблон задания или создать его версию для студента
     public String studentTaskGeneration(String token, ShortTaskDataView shortTaskDataView) throws Exception {
@@ -170,6 +171,203 @@ public class DocumentProcessorService {
                 }
             } else {
                 return "Вы еще не были назначены вашему Научному Руководителю";
+            }
+        } else {
+            return "Студент не найден";
+        }
+    }
+
+    // Сгененрировать или создать версию задания по вкр для студента
+    public String studentVkrTaskGeneration(String token, ShortVkrTaskDataView shortVkrTaskDataView) throws Exception {
+        Integer userID;
+        try {
+            userID = getUserId(token);
+        } catch (Exception e) {
+            return "ID студента не найден";
+        }
+        Users student;
+        try {
+            student = usersRepository.findById(userID).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Пользователь не найден";
+        }
+        if (student != null) {
+            AssociatedStudents associatedStudents;
+            try {
+                associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+            } catch (NullPointerException nullPointerException) {
+                associatedStudents = null;
+            }
+            if (associatedStudents != null) {
+                Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
+                        .getStudentGroup().getStudentGroup().substring(0, 4));
+                OrderProperties orderProperty;
+                Document documentOrder = null;
+                try {
+                    List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortVkrTaskDataView.getTaskType()), 1);
+                    for (Document order: orderList) {
+                        if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
+                            documentOrder = order;
+                            break;
+                        }
+                    }
+                    if (documentOrder != null) {
+                        orderProperty = documentOrder.getOrderProperties();
+                    } else {
+                        orderProperty = null;
+                    }
+                } catch (NullPointerException nullPointerException) {
+                    orderProperty = null;
+                }
+                if (orderProperty != null) {
+                    Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
+                    Users headOfCathedra = usersRepository.findById(
+                            usersRolesRepository.findByRoleId(3).getUserId()).get();
+                    Integer type = determineType(shortVkrTaskDataView.getTaskType());
+                    Integer kind = 5;
+                    List<Document> taskList = documentRepository.findByTypeAndKind(
+                            type, kind);
+                    if (taskList.size() > 0 && taskList.get(0).getTemplateProperties().isApproved()
+                            && orderProperty.isApproved()) {
+                        if (type == 4) {
+                            VkrTaskDataView vkrTaskDataView = fillingVkrTaskDataView(shortVkrTaskDataView, student,
+                                    advisor, headOfCathedra, documentOrder, orderProperty, speciality);
+                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                            File studentDir = new File(studentDocumentsPath);
+                            if (!studentDir.exists()) {
+                                studentDir.mkdir();
+                            }
+                            String fileName = getShortFio(vkrTaskDataView.getStudentFio()) + " " +
+                                    vkrTaskDataView.getStudentGroup() + " задание по " + vkrTaskDataView.getTaskType() + ".docx";
+                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                            File taskDir = new File(taskDirPath);
+                            if (!taskDir.exists()) {
+                                taskDir.mkdir();
+                            }
+                            Document currentTask = taskList.get(taskList.size() - 1);
+                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                            vkrTaskProcessing(template, vkrTaskDataView, speciality.getSpeciality(), student);
+                            String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                    documentUploadService.getCurrentDate() + ".docx";
+                            String response = saveVkrTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                    vkrTaskDataView, documentVersionPath, false);
+                            if (!response.equals("Попытка создать версию чужого документа")) {
+                                WordReplaceService wordReplaceService = new WordReplaceService(template);
+                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                            }
+                            return response;
+                        } else {
+                            return "Указан несоответствующий ВКР тип задания";
+                        }
+                    } else {
+                        return "Шаблон задания еще не был загружен";
+                    }
+                } else {
+                    return "Приказ еще не был загружен";
+                }
+            } else {
+                return "Вы еще не были назначены вашему Научному Руководителю";
+            }
+        } else {
+            return "Студент не найден";
+        }
+    }
+
+    // Создать версию задания по вкр студента от его НР
+    public String advisorVkrTaskVersionAdd(String token, AdvisorShortVkrTaskDataView shortVkrTaskDataView) throws Exception {
+        Integer userID;
+        try {
+            userID = getUserId(token);
+        } catch (Exception e) {
+            return "ID научного руководителя не найден";
+        }
+        Users student;
+        Users advisor;
+        try {
+            student = usersRepository.findById(shortVkrTaskDataView.getStudentID()).get();
+            advisor = usersRepository.findById(userID).get();
+        } catch (NoSuchElementException noSuchElementException) {
+            return "Пользователь не найден";
+        }
+        if (student != null && advisor != null) {
+            AssociatedStudents associatedStudents;
+            try {
+                associatedStudents = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisor.getId(), student.getId());
+            } catch (NullPointerException nullPointerException) {
+                associatedStudents = null;
+            }
+            if (associatedStudents != null) {
+                Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
+                        .getStudentGroup().getStudentGroup().substring(0, 4));
+                OrderProperties orderProperty;
+                Document documentOrder = null;
+                try {
+                    List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortVkrTaskDataView.getTaskType()), 1);
+                    for (Document order: orderList) {
+                        if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
+                            documentOrder = order;
+                            break;
+                        }
+                    }
+                    if (documentOrder != null) {
+                        orderProperty = documentOrder.getOrderProperties();
+                    } else {
+                        orderProperty = null;
+                    }
+                } catch (NullPointerException nullPointerException) {
+                    orderProperty = null;
+                }
+                if (orderProperty != null) {
+                    Document order = documentRepository.findById(orderProperty.getId()).get();
+                    Users headOfCathedra = usersRepository.findById(
+                            usersRolesRepository.findByRoleId(3).getUserId()).get();
+                    Integer type = determineType(shortVkrTaskDataView.getTaskType());
+                    Integer kind = 5;
+                    List<Document> taskList = documentRepository.findByTypeAndKind(
+                            type, kind);
+                    if (taskList.size() > 0) {
+                        if (type == 4) {
+                            VkrTaskDataView vkrTaskDataView = fillingVkrTaskDataView(shortVkrTaskDataView, student,
+                                    advisor, headOfCathedra, order, orderProperty, speciality);
+                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                            File studentDir = new File(studentDocumentsPath);
+                            if (!studentDir.exists()) {
+                                return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
+                            }
+                            String fileName = getShortFio(vkrTaskDataView.getStudentFio()) + " " +
+                                    vkrTaskDataView.getStudentGroup() + " задание по " + vkrTaskDataView.getTaskType() + ".docx";
+                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                            File taskDir = new File(taskDirPath);
+                            if (!taskDir.exists()) {
+                                return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
+                            }
+                            Document currentTask = taskList.get(taskList.size() - 1);
+                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                            vkrTaskProcessing(template, vkrTaskDataView, speciality.getSpeciality(), student);
+                            String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                    documentUploadService.getCurrentDate() + ".docx";
+                            String response = saveVkrTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                    vkrTaskDataView, documentVersionPath, true);
+                            if (!response.equals("Попытка создать версию чужого документа")) {
+                                WordReplaceService wordReplaceService = new WordReplaceService(template);
+                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                            }
+                            return response;
+                        } else {
+                            return "Указан несоответствующий ВКР тип задания";
+                        }
+                    } else {
+                        return "Шаблон задания еще не был загружен";
+                    }
+                } else {
+                    return "Приказ еще не был загружен";
+                }
+            } else {
+                return "Запрещено вносить изменения в задания не ваших студентов";
             }
         } else {
             return "Студент не найден";
@@ -316,6 +514,48 @@ public class DocumentProcessorService {
         return taskDataView;
     }
 
+    // Заполнить VkrTaskDataView
+    public VkrTaskDataView fillingVkrTaskDataView(ShortVkrTaskDataView shortVkrTaskDataView,
+            Users student, Users advisor, Users headOfCathedra,
+            Document document, OrderProperties orderProperty,
+            Speciality speciality) {
+        if (shortVkrTaskDataView.getStudentTheme().length() < 1) {
+            shortVkrTaskDataView.setStudentTheme("Введите тему вкр");
+        }
+        if (shortVkrTaskDataView.getVkrAim().length() < 1) {
+            shortVkrTaskDataView.setVkrAim("Цель");
+        }
+        if (shortVkrTaskDataView.getVkrTasks().length() < 1) {
+            shortVkrTaskDataView.setVkrTasks("Задачи");
+        }
+        if (shortVkrTaskDataView.getVkrDocs().length() < 1) {
+            shortVkrTaskDataView.setVkrDocs("Документы и графические материалы");
+        }
+        VkrTaskDataView vkrTaskDataView = new VkrTaskDataView();
+        vkrTaskDataView.setTaskType(document.getDocumentType().getType());
+        vkrTaskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
+                " " + student.getSecond_name());
+        vkrTaskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
+        vkrTaskDataView.setStudentTheme(shortVkrTaskDataView.getStudentTheme());
+        vkrTaskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
+                " " + advisor.getSecond_name());
+        vkrTaskDataView.setEconomyConsultantFio(advisor.getSurname() + " " + advisor.getName() +
+                " " + advisor.getSecond_name());
+        vkrTaskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
+                " " + headOfCathedra.getSecond_name());
+        vkrTaskDataView.setStudentCode(student.getStudentData().getStudentCode());
+        vkrTaskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
+        vkrTaskDataView.setOrderNumber(orderProperty.getNumber());
+        vkrTaskDataView.setOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+        vkrTaskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+        vkrTaskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+        vkrTaskDataView.setOrderSpeciality(speciality.getCode());
+        vkrTaskDataView.setTaskAim(shortVkrTaskDataView.getVkrAim());
+        vkrTaskDataView.setTaskTasks(shortVkrTaskDataView.getVkrTasks());
+        vkrTaskDataView.setTaskDocs(shortVkrTaskDataView.getVkrDocs());
+        return vkrTaskDataView;
+    }
+
     // Обработать шаблон
     public void taskProcessing(XWPFDocument template, TaskDataView taskDataView, String speciality, Users student)
             throws Exception {
@@ -419,6 +659,47 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
     }
 
+    // Обработать шаблон задания на ВКР
+    public void vkrTaskProcessing(XWPFDocument template, VkrTaskDataView vkrTaskDataView, String speciality, Users student) {
+        WordReplaceService wordReplaceService = new WordReplaceService(template);
+        String studentTheme = vkrTaskDataView.getStudentTheme();
+        // Заменим слова в тексте документа
+        wordReplaceService.replaceWordsInText("Дата выдачи задания", getFirstDateType(vkrTaskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInText("Согласованное название темы", studentTheme);
+        wordReplaceService.replaceWordsInText("КАФЕДРА", vkrTaskDataView.getCathedra());
+        wordReplaceService.replaceWordsInText("ГРУППА", vkrTaskDataView.getStudentGroup());
+        wordReplaceService.replaceWordsInText("ШИФР", vkrTaskDataView.getStudentCode());
+        wordReplaceService.replaceWordsInText("Код специальности", vkrTaskDataView.getOrderSpeciality());
+        wordReplaceService.replaceWordsInText("Название специальности", speciality);
+        wordReplaceService.replaceWordsInTables("ФИО СИП", vkrTaskDataView.getStudentFio());
+        wordReplaceService.replaceWordsInText("ФИО С", getShortFio(vkrTaskDataView.getStudentFio()));
+        wordReplaceService.replaceWordsInText("ФИО НРП", vkrTaskDataView.getAdvisorFio());
+        wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(vkrTaskDataView.getAdvisorFio()));
+        wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(vkrTaskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInText("ГОД", vkrTaskDataView.getOrderStartDate().substring(6, 10));
+        wordReplaceService.replaceWordsInText("Цель", vkrTaskDataView.getTaskAim());
+        wordReplaceService.replaceWordsInText("Задачи", vkrTaskDataView.getTaskTasks());
+        wordReplaceService.replaceWordsInText("Документы", vkrTaskDataView.getTaskDocs());
+
+        // Заменим слова в таблицах документа
+        wordReplaceService.replaceWordsInTables("Дата выдачи задания", getFirstDateType(vkrTaskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInTables("Согласованное название темы", studentTheme);
+        wordReplaceService.replaceWordsInTables("Номер приказа", vkrTaskDataView.getOrderNumber());
+        wordReplaceService.replaceWordsInTables("КАФЕДРА", vkrTaskDataView.getCathedra());
+        wordReplaceService.replaceWordsInTables("ГРУППА", vkrTaskDataView.getStudentGroup());
+        wordReplaceService.replaceWordsInTables("ШИФР", vkrTaskDataView.getStudentCode());
+        wordReplaceService.replaceWordsInTables("Код специальности", vkrTaskDataView.getOrderSpeciality());
+        wordReplaceService.replaceWordsInTables("Название специальности", speciality);
+        wordReplaceService.replaceWordsInTables("ФИО СИП", vkrTaskDataView.getStudentFio());
+        wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(vkrTaskDataView.getStudentFio()));
+        wordReplaceService.replaceWordsInTables("ФИО НРП", vkrTaskDataView.getAdvisorFio());
+        wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(vkrTaskDataView.getAdvisorFio()));
+        wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(vkrTaskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInTables("Цель", vkrTaskDataView.getTaskAim());
+        wordReplaceService.replaceWordsInTables("Задачи", vkrTaskDataView.getTaskTasks());
+        wordReplaceService.replaceWordsInTables("Документы", vkrTaskDataView.getTaskDocs());
+    }
+
     public void reportProcessing(File templateFile, String detailedContent, String advisorsConclusion) throws Exception {
         InputStream inputStream = new FileInputStream(templateFile);
         XWPFDocument template = new XWPFDocument(inputStream);
@@ -429,7 +710,7 @@ public class DocumentProcessorService {
         wordReplaceService.saveAndGetModdedFile(templateFile);
     }
 
-    // Сохранить задание на НИР как документ
+    // Сохранить задание как документ
     public String saveTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
                                      TaskDataView taskDataView, String documentVersionPath, boolean flag) {
         Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
@@ -476,9 +757,6 @@ public class DocumentProcessorService {
                         taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
                 );
                 pdTaskRepository.save(pdTask);
-            }
-            else if (type == 4) {
-                // TODO ВКР
             }
             return "Задание по " + taskDataView.getTaskType() + " успешно сгенерировано!";
         } else if (document != null && !flag) {
@@ -545,10 +823,89 @@ public class DocumentProcessorService {
                 );
                 pdTaskRepository.save(pdTask);
             }
-            else if (type == 4) {
-                // TODO ВКР
-            }
             return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
+        }
+        return "Извините, что-то пошло не так";
+    }
+
+    // Сохранить задание на ВКР как документ
+    public String saveVkrTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
+            VkrTaskDataView vkrTaskDataView, String documentVersionPath, boolean flag) {
+        Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
+        if (document == null && !flag) {
+            Integer kind = 2;
+            Integer type = determineType(vkrTaskDataView.getTaskType());
+            Document newDocument = new Document(
+                    student.getId(),
+                    filename,
+                    studentDocumentsPath,
+                    documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
+                    type,
+                    kind,
+                    "Задание по " + vkrTaskDataView.getTaskType() + " " + getShortFio(
+                            student.getSurname() + " " + student.getName() + " " + student.getSecond_name()) + " " +
+                            student.getStudentData().getStudentGroup().getStudentGroup()
+                    ,
+                    7
+            );
+            documentRepository.save(newDocument);
+            DocumentVersion documentVersion = new DocumentVersion(
+                    student.getId(),
+                    newDocument.getId(),
+                    documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                    "Генерация задания по " + vkrTaskDataView.getTaskType() + " на сайте",
+                    documentVersionPath
+            );
+            documentVersionRepository.save(documentVersion);
+            if (type == 4) {
+                VkrTask vkrTask = new VkrTask(
+                        documentVersion.getId(), vkrTaskDataView.getStudentTheme(), vkrTaskDataView.getTaskAim(),
+                        vkrTaskDataView.getTaskTasks(), vkrTaskDataView.getTaskDocs() , 1
+                );
+                vkrTaskRepository.save(vkrTask);
+            }
+            return "Задание по " + vkrTaskDataView.getTaskType() + " успешно сгенерировано!";
+        } else if (document != null && !flag) {
+            Integer type = determineType(vkrTaskDataView.getTaskType());
+            if (document.getCreator() == student.getId()) {
+                DocumentVersion documentVersion = new DocumentVersion(
+                        student.getId(),
+                        document.getId(),
+                        documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                        "Добавление новой версии задания по " + vkrTaskDataView.getTaskType(),
+                        documentVersionPath
+                );
+                documentVersionRepository.save(documentVersion);
+                if (type == 4) {
+                    VkrTask vkrTask = new VkrTask(
+                            documentVersion.getId(), vkrTaskDataView.getStudentTheme(), vkrTaskDataView.getTaskAim(),
+                            vkrTaskDataView.getTaskTasks(), vkrTaskDataView.getTaskDocs() , 1
+                    );
+                    vkrTaskRepository.save(vkrTask);
+                }
+                return "Версия задания по " + vkrTaskDataView.getTaskType() + " успешно добавлена!";
+            } else {
+                return "Попытка создать версию чужого документа";
+            }
+        } else if (document != null && flag) {
+            Integer type = determineType(vkrTaskDataView.getTaskType());
+            DocumentVersion documentVersion = new DocumentVersion(
+                    advisor.getId(),
+                    document.getId(),
+                    documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                    "Добавление новой версии задания по " + vkrTaskDataView.getTaskType() + " научным руководителем "
+                            + getShortFio(advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name()),
+                    documentVersionPath
+            );
+            documentVersionRepository.save(documentVersion);
+            if (type == 4) {
+                VkrTask vkrTask = new VkrTask(
+                        documentVersion.getId(), vkrTaskDataView.getStudentTheme(), vkrTaskDataView.getTaskAim(),
+                        vkrTaskDataView.getTaskTasks(), vkrTaskDataView.getTaskDocs() , 1
+                );
+                vkrTaskRepository.save(vkrTask);
+                return "Версия задания по " + vkrTaskDataView.getTaskType() + " успешно добавлена!";
+            }
         }
         return "Извините, что-то пошло не так";
     }
