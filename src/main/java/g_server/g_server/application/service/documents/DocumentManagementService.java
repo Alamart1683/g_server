@@ -580,7 +580,7 @@ public class DocumentManagementService {
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
-                                    documentVersion.getPdTask().setStatus(2);
+                                    documentVersion.getVkrTask().setVkr_status(2);
                                     vkrTaskRepository.save(documentVersion.getVkrTask());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
                                 } else if (newStatus.equals("Замечания")) {
