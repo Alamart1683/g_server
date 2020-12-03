@@ -366,6 +366,10 @@ public class DocumentUploadService {
                                     documentVersionForm.getEditionDescription(), versionUploadPath
                             );
                             documentVersionService.save(documentVersion);
+                            if (document.getKind() == 6 || document.getKind() == 7 || document.getKind() == 8 ||
+                                    document.getKind() == 9) {
+                                uploadVkrStuff(document.getKind(), documentVersion.getId());
+                            }
                             messagesList.add("Версия файла " + documentVersionForm.getDocumentName() + " была успешно загружена");
                         }
                         else {
