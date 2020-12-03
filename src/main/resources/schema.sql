@@ -292,6 +292,34 @@ create table vkr_report(
     foreign key (vkr_report_status) references  document_status (id)
 );
 
+create table vkr_presentation(
+    versionID int not null unique,
+    vkr_presentation_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (vkr_presentation_status) references  document_status (id)
+);
+
+create table vkr_antiplagiat(
+    versionID int not null unique,
+    vkr_aniplagiat_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (vkr_aniplagiat_status) references  document_status (id)
+);
+
+create table vkr_allowance(
+    versionID int not null unique,
+    vkr_allowance_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (vkr_allowance_status) references  document_status (id)
+);
+
+create table vkr_advisor_conlusion(
+    versionID int not null unique,
+    vkr_advisor_conclusion_status int not null,
+    foreign key (versionID) references document_version (id) on delete cascade on update cascade,
+    foreign key (vkr_advisor_conclusion_status) references  document_status (id)
+);
+
 insert into document_status (status) values
     ('Не отправлено'),
     ('Одобрено'),

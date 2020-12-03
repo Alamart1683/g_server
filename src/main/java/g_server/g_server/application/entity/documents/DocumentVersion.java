@@ -62,6 +62,22 @@ public class DocumentVersion {
     @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
     private VkrReport vkrReport;
 
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private VkrAntiplagiat vkrAntiplagiat;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private VkrPresentation vkrPresentation;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private VkrAdvisorConclusion advisorConclusion;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "versionID", insertable = false, updatable = false)
+    private VkrAllowance vkrAllowance;
+
     // Привязка айди редактора версии документа напрямую из версии к пользователю в будущем даст
     // реализации возможности выдачи прав на чтение и запись для созданных пользователем документов,
     // тогда как если привязать его к айди создателя документа, это поставит крест на этой возможости, ибо
@@ -207,5 +223,37 @@ public class DocumentVersion {
 
     public void setVkrReport(VkrReport vkrReport) {
         this.vkrReport = vkrReport;
+    }
+
+    public VkrAntiplagiat getVkrAntiplagiat() {
+        return vkrAntiplagiat;
+    }
+
+    public void setVkrAntiplagiat(VkrAntiplagiat vkrAntiplagiat) {
+        this.vkrAntiplagiat = vkrAntiplagiat;
+    }
+
+    public VkrPresentation getVkrPresentation() {
+        return vkrPresentation;
+    }
+
+    public void setVkrPresentation(VkrPresentation vkrPresentation) {
+        this.vkrPresentation = vkrPresentation;
+    }
+
+    public VkrAdvisorConclusion getAdvisorConclusion() {
+        return advisorConclusion;
+    }
+
+    public void setAdvisorConclusion(VkrAdvisorConclusion advisorConclusion) {
+        this.advisorConclusion = advisorConclusion;
+    }
+
+    public VkrAllowance getVkrAllowance() {
+        return vkrAllowance;
+    }
+
+    public void setVkrAllowance(VkrAllowance vkrAllowance) {
+        this.vkrAllowance = vkrAllowance;
     }
 }
