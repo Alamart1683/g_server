@@ -915,6 +915,7 @@ public class AssociatedStudentsService {
             if (student.getStudentData().isVkrThemeEditable()) {
                 student.getStudentData().setVkrTheme(newTheme);
                 studentDataRepository.save(student.getStudentData());
+                return "Всё в порядке";
             } else {
                 return "Тема уже утверждена. Редактирование невозможно";
             }
