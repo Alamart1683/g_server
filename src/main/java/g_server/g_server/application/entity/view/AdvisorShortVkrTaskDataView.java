@@ -3,6 +3,10 @@ package g_server.g_server.application.entity.view;
 public class AdvisorShortVkrTaskDataView extends ShortVkrTaskDataView {
     private Integer studentID;
 
+    public AdvisorShortVkrTaskDataView() {
+
+    }
+
     public AdvisorShortVkrTaskDataView(Integer studentID) {
         this.studentID = studentID;
     }
