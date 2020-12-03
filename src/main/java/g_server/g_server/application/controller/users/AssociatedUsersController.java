@@ -194,10 +194,25 @@ public class AssociatedUsersController {
     }
 
     // Назначить студентам научных руководителей из файла
-    @PostMapping("admin/association/student/automatic")
+    @PostMapping("/admin/association/student/automatic")
     public String studentAutomaticAssociation(@ModelAttribute("automaticStudentForm")
             @Validated AutomaticRegistrationForm automaticRegistrationForm) throws IOException {
         return associatedStudentsService.studentAutomaticAssociation(automaticRegistrationForm);
+    }
+
+    // Студент получает тему вкр
+    @GetMapping("/student/get/vkr_theme")
+    public VkrThemeView studentGetVkrTheme(HttpServletRequest httpServletRequest) {
+        return associatedStudentsService.studentGetVkrTheme(getTokenFromRequest(httpServletRequest));
+    }
+
+    // Студент меняет тему вкр
+    @PostMapping("/student/set/vkr_theme")
+    public String studentSetVkrTheme(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String newTheme
+    ) {
+        return associatedStudentsService.studentEditingVkrTheme(getTokenFromRequest(httpServletRequest), newTheme);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

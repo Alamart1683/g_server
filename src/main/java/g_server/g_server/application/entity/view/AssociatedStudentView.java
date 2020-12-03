@@ -10,6 +10,8 @@ public class AssociatedStudentView extends AssociatedRequestView {
     private String phone;
     private String email;
     private StudentDocumentsStatusView studentDocumentsStatusView;
+    private String studentVkrTheme;
+    private boolean isStudentVkrThemeEditable;
 
     public AssociatedStudentView(Users user, int systemID, String projectName, String projectArea,
                                  String phone, String email, StudentDocumentsStatusView statusView) {
@@ -24,6 +26,8 @@ public class AssociatedStudentView extends AssociatedRequestView {
         this.phone = phone;
         this.email = email;
         this.studentDocumentsStatusView = statusView;
+        this.studentVkrTheme = user.getStudentData().getVkrTheme();
+        this.isStudentVkrThemeEditable = user.getStudentData().isVkrThemeEditable();
     }
 
     public String getProjectName() {
@@ -72,5 +76,21 @@ public class AssociatedStudentView extends AssociatedRequestView {
 
     public void setSystemStudentID(int systemStudentID) {
         this.systemStudentID = systemStudentID;
+    }
+
+    public String getStudentVkrTheme() {
+        return studentVkrTheme;
+    }
+
+    public void setStudentVkrTheme(String studentVkrTheme) {
+        this.studentVkrTheme = studentVkrTheme;
+    }
+
+    public boolean isStudentVkrThemeEditable() {
+        return isStudentVkrThemeEditable;
+    }
+
+    public void setStudentVkrThemeEditable(boolean studentVkrThemeEditable) {
+        isStudentVkrThemeEditable = studentVkrThemeEditable;
     }
 }

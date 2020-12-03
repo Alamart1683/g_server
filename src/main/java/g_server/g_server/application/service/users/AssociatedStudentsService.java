@@ -891,6 +891,40 @@ public class AssociatedStudentsService {
         }
     }
 
+    // Студент получает информацию о своей теме вкр
+    public VkrThemeView studentGetVkrTheme(String token) {
+        Integer studentID = getUserId(token);
+        UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(studentID);
+        if (usersRole.getRoleId() == 1) {
+            Users student = usersRepository.findById(studentID).get();
+            VkrThemeView vkrThemeView = new VkrThemeView(
+                    student.getStudentData().getVkrTheme(),
+                    student.getStudentData().isVkrThemeEditable()
+            );
+            return vkrThemeView;
+        }
+        return null;
+    }
+
+    // Студент редактирует свою тему вкр
+    public String studentEditingVkrTheme(String token, String newTheme) {
+        Integer studentID = getUserId(token);
+        UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(studentID);
+        if (usersRole.getRoleId() == 1) {
+            Users student = usersRepository.findById(studentID).get();
+            if (student.getStudentData().isVkrThemeEditable()) {
+                student.getStudentData().setVkrTheme(newTheme);
+                studentDataRepository.save(student.getStudentData());
+            } else {
+                return "Тема уже утверждена. Редактирование невозможно";
+            }
+        }
+        return "Пользователь не найден";
+    }
+
+    // Научный руководитель получает тему студента
+
+
     // Поиск научного руководителя в системе по укороченному имени
     private Users findAdvisorByShortFio(String shortFio, List<Users> usersList) {
         Users advisor;

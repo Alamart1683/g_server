@@ -25,6 +25,12 @@ public class StudentData {
     @Column(name = "type")
     private int type;
 
+    @Column(name = "vkr_theme")
+    private String vkrTheme;
+
+    @Column(name = "is_vkr_theme_editable")
+    private boolean isVkrThemeEditable;
+
     @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Roles roles;
@@ -124,5 +130,21 @@ public class StudentData {
 
     public void setOccupiedStudents(OccupiedStudents occupiedStudents) {
         this.occupiedStudents = occupiedStudents;
+    }
+
+    public String getVkrTheme() {
+        return vkrTheme;
+    }
+
+    public void setVkrTheme(String vkrTheme) {
+        this.vkrTheme = vkrTheme;
+    }
+
+    public boolean isVkrThemeEditable() {
+        return isVkrThemeEditable;
+    }
+
+    public void setVkrThemeEditable(boolean vkrThemeEditable) {
+        isVkrThemeEditable = vkrThemeEditable;
     }
 }

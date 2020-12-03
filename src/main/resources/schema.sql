@@ -60,6 +60,8 @@ create table student_data (
     student_group int not null,
     cathedra int not null,
     type int not null,
+    vkr_theme varchar(2048) default 'Тема не указана',
+    is_vkr_theme_editable boolean default true,
     foreign key (id) references users (id) on delete cascade on update cascade,
     foreign key (cathedra) references cathedras (id),
     foreign key (type) references student_type (id),
