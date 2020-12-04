@@ -1466,15 +1466,19 @@ public class DocumentUploadService {
             case 6:
                 VkrAllowance vkrAllowance = new VkrAllowance(versionID, 1);
                 vkrAllowanceRepository.save(vkrAllowance);
+                break;
             case 7:
                 VkrAdvisorConclusion vkrAdvisorConclusion = new VkrAdvisorConclusion(versionID, 1);
                 vkrConclusionRepository.save(vkrAdvisorConclusion);
+                break;
             case 8:
                 VkrAntiplagiat vkrAntiplagiat = new VkrAntiplagiat(versionID, 1);
                 vkrAntiplagiatRepository.save(vkrAntiplagiat);
+                break;
             case 9:
                 VkrPresentation vkrPresentation = new VkrPresentation(versionID, 1);
                 vkrPresentationRepository.save(vkrPresentation);
+                break;
             default:
                 return;
         }

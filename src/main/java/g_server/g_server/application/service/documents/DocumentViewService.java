@@ -1160,11 +1160,11 @@ public class DocumentViewService {
     }
 
     // Сформировать список версий загруженного вкрного стаффа студента для научного руководителя
-    public List<VkrStuffVersionView> getAdvisorStudentVkrStuffVersions(String token, String taskType, Integer studentID) {
+    public List<VkrStuffVersionView> getAdvisorStudentVkrStuffVersions(String token, String taskKind, Integer studentID) {
         Integer advisorID = associatedStudentsService.getUserId(token);
         if (studentID != null && advisorID != null) {
             List<VkrStuffVersionView> vkrStuffVersionView = new ArrayList<>();
-            Integer stuffKind = documentProcessorService.determineType(taskType);
+            Integer stuffKind = documentProcessorService.determineKind(taskKind);
             List<Document> documentList = documentRepository.findByTypeAndKindAndCreator(
                     4,
                     stuffKind,
