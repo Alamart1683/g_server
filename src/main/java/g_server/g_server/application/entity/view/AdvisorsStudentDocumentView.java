@@ -15,9 +15,11 @@ public class AdvisorsStudentDocumentView {
     private List<TaskDocumentVersionView> taskVersions;
     private List<ReportVersionDocumentView> reportVersions;
     private List<DocumentVersionView> documentVersionViews;
+    private List<VkrStuffVersionView> vkrStuffVersionViews;
 
     public AdvisorsStudentDocumentView(Document document, List<TaskDocumentVersionView> taskVersions,
-             List<ReportVersionDocumentView> reportVersions, List<DocumentVersionView> documentVersionViews) {
+             List<ReportVersionDocumentView> reportVersions, List<DocumentVersionView> documentVersionViews,
+             List<VkrStuffVersionView> vkrStuffVersionViews) {
         this.systemCreatorID = document.getCreator();
         this.documentName = document.getName();
         this.documentDownloader = document.getUser().getSurname() + " " + document.getUser().getName() + " " +
@@ -29,6 +31,7 @@ public class AdvisorsStudentDocumentView {
         this.taskVersions = taskVersions;
         this.reportVersions = reportVersions;
         this.documentVersionViews = documentVersionViews;
+        this.vkrStuffVersionViews = vkrStuffVersionViews;
     }
 
     public String getRussianDate(String date) {

@@ -100,6 +100,19 @@ public class DocumentViewService {
     @Autowired
     private VkrReportRepository vkrReportRepository;
 
+    @Autowired
+    private VkrAntiplagiatRepository vkrAntiplagiatRepository;
+
+    @Autowired
+    private VkrPresentationRepository vkrPresentationRepository;
+
+    @Autowired
+    private VkrConclusionRepository vkrConclusionRepository;
+
+    @Autowired
+    private VkrAllowanceRepository vkrAllowanceRepository;
+
+
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
@@ -354,7 +367,8 @@ public class DocumentViewService {
                                                 currentTaskVersionsView.add(new TaskDocumentVersionView(currentNirTaskVersion, currentNirTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirTaskDocument, currentTaskVersionsView, null, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirTaskDocument, currentTaskVersionsView,
+                                                null, null, null));
                                     } else if ((currentView.getDocumentType().equals("Научно-исследовательская работа") && currentView.getDocumentKind().equals("Отчёт"))) {
                                         Document currentNirReportDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
@@ -370,7 +384,8 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentNirReportVersion, currentNirReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirReportDocument, null, currentReportVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentNirReportDocument, null,
+                                                currentReportVersionsView, null, null));
                                     // ППППУиОПД
                                     } else if (currentView.getDocumentType().equals("Практика по получению знаний и умений") && currentView.getDocumentKind().equals("Задание")) {
                                         Document currentPpppuiopdTaskDocument = documentRepository.findByCreatorAndName(
@@ -387,7 +402,8 @@ public class DocumentViewService {
                                                 currentTaskVersionsView.add(new TaskDocumentVersionView(currentPpppuiopdTaskVersion, currentPpppuiopdTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdTaskDocument, currentTaskVersionsView, null, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdTaskDocument,
+                                                currentTaskVersionsView, null, null, null));
                                     } else if ((currentView.getDocumentType().equals("Практика по получению знаний и умений") && currentView.getDocumentKind().equals("Отчёт"))) {
                                         Document currentPpppuiopdReportDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
@@ -403,7 +419,8 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentPpppuiopdReportVersion, currentPpppuiopdReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdReportDocument, null, currentReportVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPpppuiopdReportDocument,
+                                                null, currentReportVersionsView, null, null));
                                     }
                                     // ПП
                                     else if (currentView.getDocumentType().equals("Преддипломная практика") && currentView.getDocumentKind().equals("Задание")) {
@@ -421,7 +438,8 @@ public class DocumentViewService {
                                                 currentTaskVersionsView.add(new TaskDocumentVersionView(currentPdTaskVersion, currentPdTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdTaskDocument, currentTaskVersionsView, null, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdTaskDocument,
+                                                currentTaskVersionsView, null, null, null));
                                     } else if ((currentView.getDocumentType().equals("Преддипломная практика") && currentView.getDocumentKind().equals("Отчёт"))) {
                                         Document currentPdReportDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
@@ -437,7 +455,8 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentPdReportVersion, currentPdReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdReportDocument, null, currentReportVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPdReportDocument,
+                                                null, currentReportVersionsView, null, null));
                                     }
                                     // TODO ВКР
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // Задание на ВКР
@@ -456,7 +475,8 @@ public class DocumentViewService {
                                                 currentTaskVersionsView.add(new TaskDocumentVersionView(currentVkrTaskVersion, currentVkrTask));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentVkrTaskDocument, currentTaskVersionsView, null, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentVkrTaskDocument,
+                                                currentTaskVersionsView, null, null, null));
                                     }
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // РПЗ по ВКР
                                             currentView.getDocumentKind().equals("Отчёт")) {
@@ -474,35 +494,88 @@ public class DocumentViewService {
                                                 currentReportVersionsView.add(new ReportVersionDocumentView(currentVkrReportVersion, currentVkrReport));
                                             }
                                         }
-                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentVkrReportDocument, null, currentReportVersionsView, null));
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentVkrReportDocument,
+                                                null, currentReportVersionsView, null, null));
                                     }
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // Допуск по ВКР
                                             currentView.getDocumentKind().equals("Допуск")) {
                                         Document currentAllowanceDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
                                         List<DocumentVersion> allowanceVersions = documentVersionRepository.findByDocument(currentAllowanceDocument.getId());
-                                        List<DocumentVersionView> allowanceVersionsViews = new ArrayList<>();
+                                        List<VkrStuffVersionView> allowanceVersionsViews = new ArrayList<>();
+                                        for (DocumentVersion documentVersion: allowanceVersions) {
+                                            VkrAllowance currentAllowance = vkrAllowanceRepository.findByVersionID(documentVersion.getId());
+                                            if (currentAllowance.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                && documentVersion.getEditor() == advisor.getId()) {
+                                                allowanceVersionsViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentAllowance.getDocumentStatus().getStatus()));
+                                            } else if (!currentAllowance.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                allowanceVersionsViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentAllowance.getDocumentStatus().getStatus()));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentAllowanceDocument,
+                                                null, null, null, allowanceVersionsViews));
                                     }
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // Отзыв на ВКР
                                             currentView.getDocumentKind().equals("Отзыв")) {
                                         Document currentConclusionDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
                                         List<DocumentVersion> conclusionVersions = documentVersionRepository.findByDocument(currentConclusionDocument.getId());
-                                        List<DocumentVersionView> documentVersionViews = new ArrayList<>();
+                                        List<VkrStuffVersionView> documentVersionViews = new ArrayList<>();
+                                        for (DocumentVersion documentVersion: conclusionVersions) {
+                                            VkrAdvisorConclusion currentConclusion = vkrConclusionRepository.findByVersionID(documentVersion.getId());
+                                            if (currentConclusion.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                    && documentVersion.getEditor() == advisor.getId()) {
+                                                documentVersionViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentConclusion.getDocumentStatus().getStatus()));
+                                            } else if (!currentConclusion.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                documentVersionViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentConclusion.getDocumentStatus().getStatus()));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentConclusionDocument,
+                                                null, null, null, documentVersionViews));
                                     }
                                     else if ((currentView.getDocumentType().equals("ВКР")) && // Антиплагиат на ВКР
                                             currentView.getDocumentKind().equals("Антиплагиат")) {
                                         Document currentAntiplagiatDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
                                         List<DocumentVersion> antiplagiatVersions = documentVersionRepository.findByDocument(currentAntiplagiatDocument.getId());
-                                        List<DocumentVersionView> antiplagiatVersionViews = new ArrayList<>();
+                                        List<VkrStuffVersionView> antiplagiatVersionViews = new ArrayList<>();
+                                        for (DocumentVersion documentVersion: antiplagiatVersions) {
+                                            VkrAntiplagiat currentAntiplagiat = vkrAntiplagiatRepository.findByVersionID(documentVersion.getId());
+                                            if (currentAntiplagiat.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                    && documentVersion.getEditor() == advisor.getId()) {
+                                                antiplagiatVersionViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentAntiplagiat.getDocumentStatus().getStatus()));
+                                            } else if (!currentAntiplagiat.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                antiplagiatVersionViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentAntiplagiat.getDocumentStatus().getStatus()));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentAntiplagiatDocument,
+                                                null, null, null, antiplagiatVersionViews));
                                     }
-                                    else if ((currentView.getDocumentType().equals("ВКР")) && //
+                                    else if ((currentView.getDocumentType().equals("ВКР")) && // Презентация на ВКР
                                             currentView.getDocumentKind().equals("Презентация")) {
                                         Document currentPresentationDocument = documentRepository.findByCreatorAndName(
                                                 currentView.getSystemCreatorID(), currentView.getDocumentName());
                                         List<DocumentVersion> presentationVersions = documentVersionRepository.findByDocument(currentPresentationDocument.getId());
-                                        List<DocumentVersionView> presentationVersionViews = new ArrayList<>();
+                                        List<VkrStuffVersionView> presentationVersionViews = new ArrayList<>();
+                                        for (DocumentVersion documentVersion: presentationVersions) {
+                                            VkrPresentation currentPresentation = vkrPresentationRepository.findByVersionID(documentVersion.getId());
+                                            if (currentPresentation.getDocumentStatus().getStatus().equals("Не отправлено")
+                                                    && documentVersion.getEditor() == advisor.getId()) {
+                                                presentationVersionViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentPresentation.getDocumentStatus().getStatus()));
+                                            } else if (!currentPresentation.getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                                presentationVersionViews.add(new VkrStuffVersionView(documentVersion,
+                                                        currentPresentation.getDocumentStatus().getStatus()));
+                                            }
+                                        }
+                                        studentsDocumentsList.add(new AdvisorsStudentDocumentView(currentPresentationDocument,
+                                                null, null, null, presentationVersionViews));
                                     }
                                 }
                             }

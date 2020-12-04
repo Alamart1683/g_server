@@ -233,6 +233,16 @@ public class DocumentManagementController {
                 getTokenFromRequest(httpServletRequest), newStatus, versionID);
     }
 
+    @PostMapping("/student/document/management/vkr/stuff/send")
+    public String sentVkrStuffToAdvisorByStudent(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String newStatus,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.studentSendingVkrStuff(
+                getTokenFromRequest(httpServletRequest), newStatus, versionID);
+    }
+
     @PostMapping("/scientific_advisor/document/management/task/nir/check")
     public String checkTaskByAdvisor(
             HttpServletRequest httpServletRequest,
@@ -240,6 +250,16 @@ public class DocumentManagementController {
             @RequestParam Integer versionID
     ) {
         return documentManagementService.advisorCheckTask(
+                getTokenFromRequest(httpServletRequest), newStatus, versionID);
+    }
+
+    @PostMapping("/scientific_advisor/document/management/vkr/stuff/check")
+    public String checkVkrStuffByAdvisor(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String newStatus,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.advisorCheckVkrStuff(
                 getTokenFromRequest(httpServletRequest), newStatus, versionID);
     }
 
@@ -260,6 +280,25 @@ public class DocumentManagementController {
     ) {
         return documentManagementService.studentDeleteTaskVersion(
                 getTokenFromRequest(httpServletRequest), versionID);
+    }
+
+    @DeleteMapping("/student/document/vkr/stuff/version/delete")
+    public String deleteVkrStuffVersionByStudent(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer versionID
+    ) {
+        return documentManagementService.studentDeleteVkrStuffVersion(
+                getTokenFromRequest(httpServletRequest), versionID);
+    }
+
+    @DeleteMapping("/scientific_advisor/document/vkr/stuff/version/delete")
+    public String deleteVkrStuffVersionByAdvisor(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer versionID,
+            @RequestParam Integer studentID
+    ) {
+        return documentManagementService.advisorDeleteVkrStuffVersion(
+                getTokenFromRequest(httpServletRequest), versionID, studentID);
     }
 
     @DeleteMapping("/scientific_advisor/document/task/version/delete")
