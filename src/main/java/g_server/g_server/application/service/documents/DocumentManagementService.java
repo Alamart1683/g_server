@@ -97,6 +97,9 @@ public class DocumentManagementService {
     @Autowired
     private VkrAllowanceRepository vkrAllowanceRepository;
 
+    @Autowired
+    private DocumentProcessorService documentProcessorService;
+
     // Метод удаления документа вместе со всеми версиями
     public List<String> deleteDocument(String documentName, String token) {
         List<String> messagesList = new ArrayList<String>();
@@ -111,6 +114,44 @@ public class DocumentManagementService {
             messagesList.add("Пользователь, загрузивший документ, не найден - удаление документа невозможно");
         if (messagesList.size() == 0) {
             Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
+            // Если директория удаляемого документа существует, удалим его версии и саму директорию
+            if (document != null) {
+                File fileDirectory = new File(document.getDocument_path());
+                if (fileDirectory.exists()) {
+                    for (File file: fileDirectory.listFiles()) {
+                        file.delete();
+                    }
+                    fileDirectory.delete();
+                    documentRepository.deleteById(document.getId());
+                    messagesList.add("Документ удален успешно вместе со всеми версиями");
+                }
+                else {
+                    messagesList.add("Директория удаляемого документа не найдена или вы пытаетесь удалить чужой документ" +
+                            " - удаление документа невозможно");
+                }
+            }
+            else {
+                messagesList.add("Удаляемый документ не найден - удаление документа невозможно");
+            }
+        }
+        return messagesList;
+    }
+
+    // Метод удаления документа вместе со всеми версиями по типу
+    public List<String> deleteDocumentVkrStuffByKind(String documentKind, String token) {
+        List<String> messagesList = new ArrayList<String>();
+        if (token == null)
+            messagesList.add("Ошибка аутентификации: токен равен null");
+        if (token.equals("Ошибка аутентификации: токен пуст"))
+            messagesList.add("");
+        Integer creator_id = null;
+        Integer kind = documentProcessorService.determineKind(documentKind);
+        if (messagesList.size() == 0)
+            creator_id = documentUploadService.getCreatorId(token);
+        if (creator_id == null)
+            messagesList.add("Пользователь, загрузивший документ, не найден - удаление документа невозможно");
+        if (messagesList.size() == 0) {
+            Document document = documentRepository.findByTypeAndKindAndCreator(4, kind, creator_id).get(0);
             // Если директория удаляемого документа существует, удалим его версии и саму директорию
             if (document != null) {
                 File fileDirectory = new File(document.getDocument_path());

@@ -33,6 +33,14 @@ public class DocumentManagementController {
         return documentManagementService.deleteDocument(documentName, getTokenFromRequest(httpServletRequest));
     }
 
+    @DeleteMapping("/document/delete/")
+    public List<String> deleteDocumentByKind(
+            @RequestParam String documentKind,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentManagementService.deleteDocumentVkrStuffByKind(documentKind, getTokenFromRequest(httpServletRequest));
+    }
+
     @DeleteMapping("/scientific_advisor/document/delete/version/")
     public List<String> deleteDocumentVersion(
             @RequestParam String documentName,
