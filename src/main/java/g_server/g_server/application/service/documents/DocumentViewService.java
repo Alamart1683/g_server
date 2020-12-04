@@ -1089,7 +1089,7 @@ public class DocumentViewService {
                                     )
                             );
                         } else if (stuffVersion.getEditor() == advisorID &&
-                                !stuffVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                !stuffVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Не отправлено")) {
                             vkrStuffVersionView.add(
                                     new VkrStuffVersionView(
                                             stuffVersion,
@@ -1106,7 +1106,7 @@ public class DocumentViewService {
                                     )
                             );
                         } else if (stuffVersion.getEditor() == advisorID &&
-                                !stuffVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                !stuffVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Не отправлено")) {
                             vkrStuffVersionView.add(
                                     new VkrStuffVersionView(
                                             stuffVersion,
@@ -1123,7 +1123,7 @@ public class DocumentViewService {
                                     )
                             );
                         } else if (stuffVersion.getEditor() == advisorID &&
-                                !stuffVersion.getPdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                !stuffVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Не отправлено")) {
                             vkrStuffVersionView.add(
                                     new VkrStuffVersionView(
                                             stuffVersion,
@@ -1140,7 +1140,7 @@ public class DocumentViewService {
                                     )
                             );
                         } else if (stuffVersion.getEditor() == advisorID &&
-                                !stuffVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                                !stuffVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Не отправлено")) {
                             vkrStuffVersionView.add(
                                     new VkrStuffVersionView(
                                             stuffVersion,
