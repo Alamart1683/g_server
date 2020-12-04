@@ -41,6 +41,14 @@ public class AdvisorsStudentDocumentView {
         return day + "." + month + "." + year;
     }
 
+    public List<VkrStuffVersionView> getVkrStuffVersionViews() {
+        return vkrStuffVersionViews;
+    }
+
+    public void setVkrStuffVersionViews(List<VkrStuffVersionView> vkrStuffVersionViews) {
+        this.vkrStuffVersionViews = vkrStuffVersionViews;
+    }
+
     public int getSystemCreatorID() {
         return systemCreatorID;
     }

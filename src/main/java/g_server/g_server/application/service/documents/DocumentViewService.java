@@ -336,12 +336,17 @@ public class DocumentViewService {
         Users advisor;
         try {
             advisor = usersService.findById(advisorID).get();
-            List<DocumentView> allDocumentViewList = getAdminDocumentView(advisor);
+            //List<DocumentView> allDocumentViewList = getAdminDocumentView(advisor);
+            List<DocumentView> allDocumentViewList = getAdvisorDocumentView(advisor);
             List<AdvisorsStudentDocumentView> studentsDocumentsList = new ArrayList<>();
             if (allDocumentViewList != null) {
                 for (DocumentView currentView: allDocumentViewList) {
                     if (currentView.getDocumentKind().equals("Задание") ||
-                    currentView.getDocumentKind().equals("Отчёт")) {
+                    currentView.getDocumentKind().equals("Отчёт") ||
+                    currentView.getDocumentKind().equals("Отзыв") ||
+                    currentView.getDocumentKind().equals("Допуск") ||
+                    currentView.getDocumentKind().equals("Антиплагиат") ||
+                    currentView.getDocumentKind().equals("Презентация")) {
                         Integer userID = currentView.getSystemCreatorID();
                         UsersRoles usersRole;
                         AssociatedStudents associatedStudents;
