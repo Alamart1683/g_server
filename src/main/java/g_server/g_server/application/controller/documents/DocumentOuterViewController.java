@@ -19,7 +19,7 @@ public class DocumentOuterViewController {
     @Autowired
     private DocumentOuterViewService documentOuterViewService;
 
-    @PostMapping("/document/create/outer/view")
+    @PostMapping("/document/create/outer/view/")
     public String createDocumentUrlSource(
             @RequestParam Integer versionID
     ) throws MalformedURLException {
