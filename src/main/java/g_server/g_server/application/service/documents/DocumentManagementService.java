@@ -669,7 +669,7 @@ public class DocumentManagementService {
                         case 4:
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getPdTask().setStatus(2);
+                                documentVersion.getVkrTask().setVkr_status(2);
                                 vkrTaskRepository.save(documentVersion.getVkrTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
