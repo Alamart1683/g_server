@@ -55,6 +55,24 @@ public class DocumentViewController {
         return documentViewService.getStudentTaskVersions(getTokenFromRequest(httpServletRequest), taskType);
     }
 
+    @GetMapping("/student/document/vkr/stuff/view")
+    private List<VkrStuffVersionView> getStudentVkrStuffVersions(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String stuffKind
+    ) {
+        return documentViewService.getStudentVkrStuffVersions(getTokenFromRequest(httpServletRequest), stuffKind);
+    }
+
+    @GetMapping("/scientific_advisor/document/vkr/stuff/view")
+    private List<VkrStuffVersionView> getAdvisorStudentVkrStuffVersions(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String stuffKind,
+            @RequestParam Integer studentID
+    ) {
+        return documentViewService.getAdvisorStudentVkrStuffVersions(
+                getTokenFromRequest(httpServletRequest), stuffKind, studentID);
+    }
+
     @GetMapping("/scientific_advisor/document/task/view")
     private List<TaskDocumentVersionView> getAdvisorStudentTaskVersions(
             HttpServletRequest httpServletRequest,

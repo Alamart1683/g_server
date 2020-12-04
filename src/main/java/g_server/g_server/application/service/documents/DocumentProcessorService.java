@@ -1147,6 +1147,27 @@ public class DocumentProcessorService {
         return type;
     }
 
+    public Integer determineKind(String stringKind) {
+        Integer type;
+        switch (stringKind) {
+            case "Допуск":
+                type = 6;
+                break;
+            case "Отзыв":
+                type = 7;
+                break;
+            case "Антиплагиат":
+                type = 8;
+                break;
+            case "Презентация":
+                type = 9;
+                break;
+            default:
+                type = 0;
+        }
+        return type;
+    }
+
     public Integer getUserId(String token) {
         String email = jwtProvider.getEmailFromToken(token);
         Users user = usersRepository.findByEmail(email);

@@ -1064,6 +1064,198 @@ public class DocumentViewService {
         }
     }
 
+    // Сформировать список версий загруженного вкрного стаффа для студента
+    public List<VkrStuffVersionView> getStudentVkrStuffVersions(String token, String stuffKind) {
+        Integer studentID = associatedStudentsService.getUserId(token);
+        Integer advisorID = associatedStudentsRepository.findByStudent(studentID).getScientificAdvisor();
+        if (studentID != null && advisorID != null) {
+            List<VkrStuffVersionView> vkrStuffVersionView = new ArrayList<>();
+            Integer kind = documentProcessorService.determineKind(stuffKind);
+            List<Document> documentList = documentRepository.findByTypeAndKindAndCreator(
+                    4,
+                    kind,
+                    studentID
+            );
+            if (documentList.size() == 1) {
+                List<DocumentVersion> stuffVersions =
+                        documentVersionRepository.findByDocument(documentList.get(0).getId());
+                for (DocumentVersion stuffVersion: stuffVersions) {
+                    if (kind == 6) {
+                        if (stuffVersion.getEditor() == studentID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrAllowanceRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (stuffVersion.getEditor() == advisorID &&
+                                !stuffVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrAllowanceRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                    } else if (kind == 7) {
+                        if (stuffVersion.getEditor() == studentID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrConclusionRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (stuffVersion.getEditor() == advisorID &&
+                                !stuffVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrConclusionRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                    } else if (kind == 8) {
+                        if (stuffVersion.getEditor() == studentID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrAntiplagiatRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (stuffVersion.getEditor() == advisorID &&
+                                !stuffVersion.getPdTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrAntiplagiatRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                    } else if (kind == 9) {
+                        if (stuffVersion.getEditor() == studentID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrPresentationRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (stuffVersion.getEditor() == advisorID &&
+                                !stuffVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            stuffVersion,
+                                            vkrPresentationRepository.findByVersionID(stuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                    }
+                }
+                return vkrStuffVersionView;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    // Сформировать список версий загруженного вкрного стаффа студента для научного руководителя
+    public List<VkrStuffVersionView> getAdvisorStudentVkrStuffVersions(String token, String taskType, Integer studentID) {
+        Integer advisorID = associatedStudentsService.getUserId(token);
+        if (studentID != null && advisorID != null) {
+            List<VkrStuffVersionView> vkrStuffVersionView = new ArrayList<>();
+            Integer stuffKind = documentProcessorService.determineType(taskType);
+            List<Document> documentList = documentRepository.findByTypeAndKindAndCreator(
+                    4,
+                    stuffKind,
+                    studentID
+            );
+            if (documentList.size() == 1) {
+                List<DocumentVersion> vkrStuffVersions =
+                        documentVersionRepository.findByDocument(documentList.get(0).getId());
+                for (DocumentVersion vkrStuffVersion: vkrStuffVersions) {
+                    // НИР
+                    if (stuffKind == 6) {
+                        if (vkrStuffVersion.getEditor() == advisorID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrAllowanceRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (vkrStuffVersion.getEditor() == studentID &&
+                                !vkrStuffVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrAllowanceRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                        // ППППУиОПД
+                    } else if (stuffKind == 7) {
+                        if (vkrStuffVersion.getEditor() == advisorID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrConclusionRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (vkrStuffVersion.getEditor() == studentID &&
+                                !vkrStuffVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrConclusionRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                        // ПП
+                    } else if (stuffKind == 8) {
+                        if (vkrStuffVersion.getEditor() == advisorID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrAntiplagiatRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (vkrStuffVersion.getEditor() == studentID &&
+                                !vkrStuffVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrAntiplagiatRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                    } else if (stuffKind == 9) {
+                        if (vkrStuffVersion.getEditor() == advisorID) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrPresentationRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        } else if (vkrStuffVersion.getEditor() == studentID &&
+                                !vkrStuffVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Не отправлено")) {
+                            vkrStuffVersionView.add(
+                                    new VkrStuffVersionView(
+                                            vkrStuffVersion,
+                                            vkrPresentationRepository.findByVersionID(vkrStuffVersion.getId()).getDocumentStatus().getStatus()
+                                    )
+                            );
+                        }
+                    }
+                }
+                return vkrStuffVersionView;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     // Сформировать список представлений загруженных примеров работ научного руководителя
     public List<AdvisorsTemplateView> getAdvisorsLoadedTaskAndReportsTemplates(String token) {
         List<DocumentView> documentViews = getUserDocumentView(token);
