@@ -9,6 +9,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,7 +17,7 @@ public class DocumentOuterViewService {
     @Value("${api.url}")
     private String apiUrl;
 
-    public static List<UrlResource> urlResourcesList;
+    public static List<UrlResource> urlResourcesList = new ArrayList<>();
 
     @Autowired
     private DocumentRepository documentRepository;
