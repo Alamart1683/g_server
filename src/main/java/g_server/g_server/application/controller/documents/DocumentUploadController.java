@@ -20,7 +20,7 @@ public class DocumentUploadController {
 
     public static final String AUTHORIZATION = "Authorization";
 
-    @PostMapping("/scientific_advisor/document/upload")
+    @PostMapping("/document/upload")
     public List<String> UploadDocument(
             @ModelAttribute("documentForm") @Validated DocumentForm documentForm,
             HttpServletRequest httpServletRequest ) {
@@ -28,7 +28,7 @@ public class DocumentUploadController {
         return documentUploadService.uploadDocument(documentForm);
     }
 
-    @PostMapping("/scientific_advisor/document/upload/version")
+    @PostMapping("/document/upload/version")
     public List<String> UploadDocumentVersion(
             @ModelAttribute("documentVersionForm") @Validated DocumentVersionForm documentVersionForm,
             HttpServletRequest httpServletRequest) {
