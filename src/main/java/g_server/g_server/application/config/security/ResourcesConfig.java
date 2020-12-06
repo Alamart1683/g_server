@@ -7,6 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.File;
 
+/*
 @Configuration
 public class ResourcesConfig implements WebMvcConfigurer {
     @Value("${storage.location}")
@@ -16,6 +17,7 @@ public class ResourcesConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/document/outer/view/**").addResourceLocations(file.getAbsolutePath() + File.separator);
+        registry.addResourceHandler("/document/outer/view/**").addResourceLocations(storageLocation + File.separator);
     }
 }
+ */
