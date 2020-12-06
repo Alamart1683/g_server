@@ -6,22 +6,19 @@ public class StudentForm extends Users {
     private String student_group;
     private String cathedra;
     private String student_type;
-    private String passwordConfirm;
     private String mailSendingAccepted;
 
     public StudentForm() { }
 
     public StudentForm(String student_group, String cathedra, String student_type,
                        String email, String name, String surname, String second_name,
-                       String password, String confirm_password, String phone,
+                       String password, String phone,
                        String mailSendingAccepted) {
         this.cathedra = cathedra;
         this.student_group = student_group;
         this.student_type = student_type;
         this.setEmail(email);
         this.setPassword(password);
-        this.passwordConfirm = confirm_password;
-        this.setPasswordConfirm(confirm_password);
         this.setName(name);
         this.setSurname(surname);
         this.setSecond_name(second_name);
@@ -59,14 +56,6 @@ public class StudentForm extends Users {
 
     public void setStudent_type(String student_type) {
         this.student_type = student_type;
-    }
-
-    public String getPasswordConfirm() {
-        return passwordConfirm;
-    }
-
-    public void setPasswordConfirm(String passwordConfirm) {
-        this.passwordConfirm = passwordConfirm;
     }
 
     public String getMailSendingAccepted() {

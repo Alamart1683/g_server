@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/registration/student/mail",
                         "/registration/mail/check/**",
                         "/mail/request/handle/"
-                        /*"/view/document/outer/"*/).permitAll()
+                ).permitAll()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
