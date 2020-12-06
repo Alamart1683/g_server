@@ -195,6 +195,7 @@ public class RegistrationController {
             messageList.add("Указан несуществуюший тип");
         }
         if (messageList.size() == 0) {
+            studentForm.setPassword(usersService.generatePassword());
             String password = studentForm.getPassword();
             if (!usersService.saveStudent(studentForm.StudentFormToUsers(), studentForm.getStudent_type(),
                     studentForm.getStudent_group(), studentForm.getCathedra())) {

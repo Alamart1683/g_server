@@ -12,13 +12,11 @@ public class StudentForm extends Users {
 
     public StudentForm(String student_group, String cathedra, String student_type,
                        String email, String name, String surname, String second_name,
-                       String password, String phone,
-                       String mailSendingAccepted) {
+                       String phone, String mailSendingAccepted) {
         this.cathedra = cathedra;
         this.student_group = student_group;
         this.student_type = student_type;
         this.setEmail(email);
-        this.setPassword(password);
         this.setName(name);
         this.setSurname(surname);
         this.setSecond_name(second_name);
