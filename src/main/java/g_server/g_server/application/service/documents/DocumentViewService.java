@@ -20,7 +20,10 @@ import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,6 +34,9 @@ import java.util.NoSuchElementException;
 // TODO Обработать новую, седьмую область видимости
 // TODO Доработать видимость проекта если это необходимо
 public class DocumentViewService {
+    @Value("${external.api.url}")
+    private String externalApiUrl;
+
     @Autowired
     private UsersService usersService;
 
@@ -1340,5 +1346,36 @@ public class DocumentViewService {
             }
         }
         return advisorsTemplatesForStudent;
+    }
+
+    // Получить внешнюю ссылку на документ
+    public String generateOuterLinkForFile(String token, Integer versionID) {
+        DocumentVersion documentVersion;
+        Document document;
+        if (documentVersionRepository.findById(versionID).isPresent()) {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            document = documentRepository.findById(documentVersion.getDocument()).get();
+            String documentString = document.getCreator() + File.separator + document.getName();
+            boolean isEnabled = false;
+            List<DocumentView> enabledDocuments = getUserDocumentView(token);
+            for (DocumentView documentView: enabledDocuments) {
+                String viewString = documentView.getSystemCreatorID() + File.separator + documentView.getDocumentName();
+                if (documentString.equals(viewString)) {
+                    isEnabled = true;
+                    break;
+                }
+            }
+            if (isEnabled) {
+                String documentVersionName = documentVersion.getThis_version_document_path()
+                        .substring(documentVersion.getThis_version_document_path().lastIndexOf(File.separator) + 1);
+                String outerAccessString = externalApiUrl + document.getCreator() + "/" + document.getName()
+                        + "/" + documentVersionName;
+                return outerAccessString;
+            } else {
+                return "Данный документ вам не доступен";
+            }
+        } else {
+            return "Ошибка: не удается найти документ";
+        }
     }
 }
