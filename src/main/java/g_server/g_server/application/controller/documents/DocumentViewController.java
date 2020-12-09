@@ -109,6 +109,16 @@ public class DocumentViewController {
         return documentViewService.generateOuterLinkForFile(getTokenFromRequest(httpServletRequest), versionID);
     }
 
+    @GetMapping("/document/get/outer/link/single")
+    private String getOuterDocumentLinkWithOneVersion(
+            @RequestParam Integer creatorID,
+            @RequestParam String documentName,
+            HttpServletRequest httpServletRequest
+    ) {
+        return documentViewService.generateOuterLinkForFileWithOneVersion(
+                getTokenFromRequest(httpServletRequest), creatorID, documentName);
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

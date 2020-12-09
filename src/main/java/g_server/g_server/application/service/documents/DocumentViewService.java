@@ -1378,4 +1378,33 @@ public class DocumentViewService {
             return "Ошибка: не удается найти документ";
         }
     }
+
+    // Получить внешнюю ссылку на документ у которого только одна версия
+    public String generateOuterLinkForFileWithOneVersion(String token, Integer creatorID, String documentName) {
+        Document document = documentRepository.findByCreatorAndName(creatorID, documentName);
+        if (document != null) {
+            String documentString = document.getCreator() + File.separator + document.getName();
+            boolean isEnabled = false;
+            List<DocumentView> enabledDocuments = getUserDocumentView(token);
+            for (DocumentView documentView: enabledDocuments) {
+                String viewString = documentView.getSystemCreatorID() + File.separator + documentView.getDocumentName();
+                if (documentString.equals(viewString)) {
+                    isEnabled = true;
+                    break;
+                }
+            }
+            if (isEnabled) {
+                DocumentVersion documentVersion = documentVersionRepository.findByDocument(document.getId()).get(0);
+                String documentVersionName = documentVersion.getThis_version_document_path()
+                        .substring(documentVersion.getThis_version_document_path().lastIndexOf(File.separator) + 1);
+                String outerAccessString = externalApiUrl + document.getCreator() + "/" + document.getName()
+                        + "/" + documentVersionName;
+                return outerAccessString;
+            } else {
+                return "Данный документ вам не доступен";
+            }
+        } else {
+            return "Ошибка: не удается найти документ";
+        }
+    }
 }
