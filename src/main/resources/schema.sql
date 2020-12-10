@@ -220,6 +220,7 @@ create table nir_report (
     detailed_content varchar(2048) not null,
     advisor_conclusion varchar(2048) not null,
     nir_report_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on update cascade,
     foreign key (nir_report_status) references  document_status (id)
 );
@@ -249,6 +250,7 @@ create table ppppuiopd_report(
     detailed_content varchar(2048) not null,
     advisor_conclusion varchar(2048) not null,
     ppppuiopd_report_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on update cascade,
     foreign key (ppppuiopd_report_status) references  document_status (id)
 );
@@ -270,6 +272,7 @@ create table pd_report(
     detailed_content varchar(2048) not null,
     advisor_conclusion varchar(2048) not null,
     pd_report_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on update cascade,
     foreign key (pd_report_status) references  document_status (id)
 );
@@ -288,6 +291,7 @@ create table vkr_task(
 create table vkr_report(
     versionID int not null unique,
     vkr_report_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on update cascade,
     foreign key (vkr_report_status) references  document_status (id)
 );
@@ -324,7 +328,11 @@ insert into document_status (status) values
     ('Не отправлено'),
     ('Одобрено'),
     ('Замечания'),
-    ('Рассматривается');
+    ('Рассматривается'),
+    ('Неудовлетворительно'),
+    ('Удовлетворительно'),
+    ('Хорошо'),
+    ('Отлично');
 
 insert into roles (role) values
     ('ROLE_STUDENT'),
@@ -353,15 +361,15 @@ insert into student_group (student_group) values
     ('ИВБО-05-17');
 
 insert into users values
-    (1, 'Alamart1683@gmail.com', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$hHGIOI8bYFvC7GdN1tc3tOjnNlswdVIRq.5foa5/v0YG9DVNDqNOy', '+79160571756', '1', '1', '2020-09-08 21:05:16'),
-    (2, 'vkgrig490@mail.ru', 'Виктор', 'Григорьев', 'Карлович', '$2a$10$lFlTSE0v19WaLKktY1X0b.xDRVTf/5msJCrIR6SSXoDOx2GRvEG16', '+79652812343', '1', '1', '2020-09-09 13:57:00'),
-    (3, 'kakoyetomylo@mirea.ru', 'Иван', 'Иванов', 'Иванович', '$2a$10$YwXR/8QNQ9tO.cfcmA5MMur0yYRdxSS1dznFmrwVYUfCKMBCnClJu', '+79991488228', '1', '1', '2020-09-09 13:57:00'),
-    (4, 'korrafox@gmail.com', 'Немарина', 'Некарева', 'Неандреевна', '$2a$10$ok3ph7j8SjxHI1YbCshtDeu9PE2vZOn6s6puMt46dqgIFXKdnsv22', '+79991488228', '1', '1', '2020-09-09 13:57:00'),
-    (5, 's_golovin256@mirea.ru', 'Сергей', 'Головин', 'Анатольевич', '$2a$10$YRMcPsGnMz2QMMa7dEHisueWbvU14VmQMAN9WU3JBR6QiUOFtRviK', '+74954349743', '1', '1', '2020-09-09 13:57:00'),
-    (6, 'korra-m@yandex.ru', 'Марина', 'Карева', 'Андреевна', '$2a$10$edTSIRTfoeT23qbuAUvjs.bVL4xRA4ib2WONBubjhSbEf7DUDPd2a', '+79855727332', '1', '1', '2020-09-09 13:57:00'),
-    (7, 'Alamart1683@yandex.ru', 'Ганнибал', 'Барка', 'Гамилькарович', '$2a$10$2qq.z.VNoFt8T6Mqkekw/u4QlpKmt4SaLhMv1c6Ql9dkbZzmyIGA2', '+78889992212', '1', '1', '2020-09-09 13:57:00'),
-    (8, 'andrey.lis2012@yandex.ru', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$bhcj/eTrEjVHNYtCkmTL5uMSskaXjwGCHWf9U8EzT2vpk9MEsenN6', '+79160571756', '1', '1', '2020-09-09 13:57:00'),
-    (9, 'Delamart1683@yandex.ru', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$lAABmHuK6vsqV187OVUIquNm3fwAcjCGo7J0.rISuXis89boU/Oga', '+79160571756', '1', '1', '2020-09-09 13:57:00');
+    (1, 'Alamart1683@gmail.com', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$hHGIOI8bYFvC7GdN1tc3tOjnNlswdVIRq.5foa5/v0YG9DVNDqNOy', '+79160571756', '1', '1', '2020-09-08 21:05:16', null),
+    (2, 'vkgrig490@mail.ru', 'Виктор', 'Григорьев', 'Карлович', '$2a$10$lFlTSE0v19WaLKktY1X0b.xDRVTf/5msJCrIR6SSXoDOx2GRvEG16', '+79652812343', '1', '1', '2020-09-09 13:57:00', null),
+    (3, 'kakoyetomylo@mirea.ru', 'Иван', 'Иванов', 'Иванович', '$2a$10$YwXR/8QNQ9tO.cfcmA5MMur0yYRdxSS1dznFmrwVYUfCKMBCnClJu', '+79991488228', '1', '1', '2020-09-09 13:57:00', null),
+    (4, 'korrafox@gmail.com', 'Немарина', 'Некарева', 'Неандреевна', '$2a$10$ok3ph7j8SjxHI1YbCshtDeu9PE2vZOn6s6puMt46dqgIFXKdnsv22', '+79991488228', '1', '1', '2020-09-09 13:57:00', null),
+    (5, 's_golovin256@mirea.ru', 'Сергей', 'Головин', 'Анатольевич', '$2a$10$YRMcPsGnMz2QMMa7dEHisueWbvU14VmQMAN9WU3JBR6QiUOFtRviK', '+74954349743', '1', '1', '2020-09-09 13:57:00', null),
+    (6, 'korra-m@yandex.ru', 'Марина', 'Карева', 'Андреевна', '$2a$10$edTSIRTfoeT23qbuAUvjs.bVL4xRA4ib2WONBubjhSbEf7DUDPd2a', '+79855727332', '1', '1', '2020-09-09 13:57:00', null),
+    (7, 'Alamart1683@yandex.ru', 'Ганнибал', 'Барка', 'Гамилькарович', '$2a$10$2qq.z.VNoFt8T6Mqkekw/u4QlpKmt4SaLhMv1c6Ql9dkbZzmyIGA2', '+78889992212', '1', '1', '2020-09-09 13:57:00', null),
+    (8, 'andrey.lis2012@yandex.ru', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$bhcj/eTrEjVHNYtCkmTL5uMSskaXjwGCHWf9U8EzT2vpk9MEsenN6', '+79160571756', '1', '1', '2020-09-09 13:57:00', null),
+    (9, 'Delamart1683@yandex.ru', 'Андрей', 'Лисовой', 'Анатольевич', '$2a$10$lAABmHuK6vsqV187OVUIquNm3fwAcjCGo7J0.rISuXis89boU/Oga', '+79160571756', '1', '1', '2020-09-09 13:57:00', null);
 
 insert into users_roles values
     (1, 1, 5),
@@ -375,9 +383,9 @@ insert into users_roles values
     (9, 9, 1);
 
 insert into student_data values
-    ('6', '1', '1', '1'),
-    ('7', '1', '1', '1'),
-    ('9', '4', '1', '1');
+    ('6', '1', '1', '1', 'Тема не указана', 1, 'Шифр не указан'),
+    ('7', '1', '1', '1', 'Тема не указана', 1, 'Шифр не указан'),
+    ('9', '4', '1', '1', 'Тема не указана', 1, 'Шифр не указан');
 
 insert into scientific_advisor_data values
     ('2', '1', '8'),

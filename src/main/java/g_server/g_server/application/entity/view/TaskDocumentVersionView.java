@@ -1,6 +1,10 @@
 package g_server.g_server.application.entity.view;
 
 import g_server.g_server.application.entity.documents.*;
+import g_server.g_server.application.entity.documents.tasks.NirTask;
+import g_server.g_server.application.entity.documents.tasks.PdTask;
+import g_server.g_server.application.entity.documents.tasks.PpppuiopdTask;
+import g_server.g_server.application.entity.documents.tasks.VkrTask;
 
 public class TaskDocumentVersionView extends DocumentVersionView {
     private Integer systemVersionID;

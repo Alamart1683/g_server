@@ -1,4 +1,6 @@
-package g_server.g_server.application.entity.documents;
+package g_server.g_server.application.entity.documents.tasks;
+
+import g_server.g_server.application.entity.documents.DocumentStatus;
 
 import javax.persistence.*;
 

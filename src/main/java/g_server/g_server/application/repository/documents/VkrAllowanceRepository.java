@@ -1,6 +1,6 @@
 package g_server.g_server.application.repository.documents;
 
-import g_server.g_server.application.entity.documents.VkrAllowance;
+import g_server.g_server.application.entity.documents.vkr_other.VkrAllowance;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

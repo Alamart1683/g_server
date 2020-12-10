@@ -1,10 +1,12 @@
-package g_server.g_server.application.entity.documents;
+package g_server.g_server.application.entity.documents.tasks;
+
+import g_server.g_server.application.entity.documents.DocumentStatus;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "ppppuiopd_task")
-public class PpppuiopdTask {
+@Table(name = "nir_task")
+public class NirTask {
     @Id
     @Column(name = "versionID")
     private int versionID;
@@ -24,16 +26,16 @@ public class PpppuiopdTask {
     @Column(name = "additional_task")
     private String additionalTask;
 
-    @Column(name = "ppppuiopd_status")
+    @Column(name = "nir_status")
     private int status;
 
     @ManyToOne
-    @JoinColumn(name = "ppppuiopd_status", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "nir_status", referencedColumnName = "id", insertable = false, updatable = false)
     private DocumentStatus documentStatus;
 
-    public PpppuiopdTask() { }
+    public NirTask() { }
 
-    public PpppuiopdTask(int studentID, String theme, String toExplore, String toCreate,
+    public NirTask(int studentID, String theme, String toExplore, String toCreate,
                    String toFamiliarize, String additionalTask, int status) {
         this.versionID = studentID;
         this.theme = theme;

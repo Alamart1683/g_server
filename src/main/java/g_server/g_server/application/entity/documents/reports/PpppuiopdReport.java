@@ -1,4 +1,6 @@
-package g_server.g_server.application.entity.documents;
+package g_server.g_server.application.entity.documents.reports;
+
+import g_server.g_server.application.entity.documents.DocumentStatus;
 
 import javax.persistence.*;
 
@@ -17,6 +19,9 @@ public class PpppuiopdReport {
 
     @Column(name = "ppppuiopd_report_status")
     private int ppppuiopdReportStatus;
+
+    @Column(name = "is_hoc_rate")
+    private boolean isHocRate;
 
     @ManyToOne
     @JoinColumn(name = "ppppuiopd_report_status", referencedColumnName = "id", insertable = false, updatable = false)
@@ -77,5 +82,13 @@ public class PpppuiopdReport {
 
     public void setPpppuiopdReportStatus(int ppppuiopdReportStatus) {
         this.ppppuiopdReportStatus = ppppuiopdReportStatus;
+    }
+
+    public boolean isHocRate() {
+        return isHocRate;
+    }
+
+    public void setHocRate(boolean hocRate) {
+        isHocRate = hocRate;
     }
 }

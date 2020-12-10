@@ -1,5 +1,17 @@
 package g_server.g_server.application.entity.documents;
 
+import g_server.g_server.application.entity.documents.reports.NirReport;
+import g_server.g_server.application.entity.documents.reports.PdReport;
+import g_server.g_server.application.entity.documents.reports.PpppuiopdReport;
+import g_server.g_server.application.entity.documents.reports.VkrReport;
+import g_server.g_server.application.entity.documents.tasks.NirTask;
+import g_server.g_server.application.entity.documents.tasks.PdTask;
+import g_server.g_server.application.entity.documents.tasks.PpppuiopdTask;
+import g_server.g_server.application.entity.documents.tasks.VkrTask;
+import g_server.g_server.application.entity.documents.vkr_other.VkrAdvisorConclusion;
+import g_server.g_server.application.entity.documents.vkr_other.VkrAllowance;
+import g_server.g_server.application.entity.documents.vkr_other.VkrAntiplagiat;
+import g_server.g_server.application.entity.documents.vkr_other.VkrPresentation;
 import g_server.g_server.application.entity.users.Users;
 
 import javax.persistence.*;

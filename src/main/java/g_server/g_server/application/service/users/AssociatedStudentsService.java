@@ -803,7 +803,7 @@ public class AssociatedStudentsService {
             Users student;
             if (usersRepository.findById(studentId).isPresent()) {
                 student = usersRepository.findById(studentId).get();
-                student.setConfirmed(false);
+                student.setConfirmed(true);
             } else {
                 return "Студент не найден";
             }
@@ -898,7 +898,7 @@ public class AssociatedStudentsService {
                                         currentAdvisor.getId(), currentStudent.getId(), true);
                                 associatedStudentsRepository.save(associatedStudent);
                             }
-                            currentStudent.setConfirmed(false);
+                            currentStudent.setConfirmed(true);
                             usersRepository.save(currentStudent);
                         }
                     }

@@ -1,4 +1,6 @@
-package g_server.g_server.application.entity.documents;
+package g_server.g_server.application.entity.documents.reports;
+
+import g_server.g_server.application.entity.documents.DocumentStatus;
 
 import javax.persistence.*;
 
@@ -11,6 +13,9 @@ public class VkrReport {
 
     @Column(name = "vkr_report_status")
     private Integer vkrReportStatus;
+
+    @Column(name = "is_hoc_rate")
+    private boolean isHocRate;
 
     @ManyToOne
     @JoinColumn(name = "vkr_report_status", referencedColumnName = "id", insertable = false, updatable = false)
@@ -45,5 +50,13 @@ public class VkrReport {
 
     public void setDocumentStatus(DocumentStatus documentStatus) {
         this.documentStatus = documentStatus;
+    }
+
+    public boolean isHocRate() {
+        return isHocRate;
+    }
+
+    public void setHocRate(boolean hocRate) {
+        isHocRate = hocRate;
     }
 }

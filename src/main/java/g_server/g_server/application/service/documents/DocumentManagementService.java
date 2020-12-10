@@ -1205,7 +1205,8 @@ public class DocumentManagementService {
 
     // Научный руководитель одобряет или замечает отчет
     public String advisorCheckReport(String token, String newStatus, Integer versionID) {
-        if (newStatus.equals("Одобрено") || newStatus.equals("Замечания")) {
+        if (newStatus.equals("Неудовлетворительно") || newStatus.equals("Удовлетворительно") ||
+                newStatus.equals("Хорошо") || newStatus.equals("Отлично")) {
             Integer advisorID = documentUploadService.getCreatorId(token);
             if (advisorID != null && versionID != null) {
                 DocumentVersion documentVersion;
@@ -1219,95 +1220,59 @@ public class DocumentManagementService {
                     int type = document.getType();
                     switch (type) {
                         case 1:
-                            if (newStatus.equals("Одобрено") &&
+                            if (determineMark(newStatus) != 0 &&
                                     documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getNirReport().setNirReportStatus(2);
-                                nirReportRepository.save(documentVersion.getNirReport());
-                                return "Версия документа успешно прорецензирована";
-                            } else if (newStatus.equals("Замечания") &&
-                                    documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getNirReport().setNirReportStatus(3);
+                                documentVersion.getNirReport().setNirReportStatus(determineMark(newStatus));
                                 nirReportRepository.save(documentVersion.getNirReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
-                                if (newStatus.equals("Одобрено")) {
-                                    documentVersion.getNirReport().setNirReportStatus(2);
+                                if (determineMark(newStatus) != 0) {
+                                    documentVersion.getNirReport().setNirReportStatus(determineMark(newStatus));
                                     nirReportRepository.save(documentVersion.getNirReport());
-                                    return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
-                                    documentVersion.getNirReport().setNirReportStatus(3);
-                                    nirReportRepository.save(documentVersion.getNirReport());
-                                    return "Вы отправили студенту свою версию задания с статусом замечания";
+                                    return "Вы отправили студенту свою версию отчёта";
                                 }
                             }
                         case 2:
-                            if (newStatus.equals("Одобрено") &&
+                            if (determineMark(newStatus) != 0 &&
                                     documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(2);
-                                ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
-                                return "Версия документа успешно прорецензирована";
-                            } else if (newStatus.equals("Замечания") &&
-                                    documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(3);
+                                documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(determineMark(newStatus));
                                 ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
-                                if (newStatus.equals("Одобрено")) {
-                                    documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(2);
+                                if (determineMark(newStatus) != 0) {
+                                    documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(determineMark(newStatus));
                                     ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
-                                    documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(3);
-                                    ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
-                                    return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
                         case 3:
-                            if (newStatus.equals("Одобрено") &&
+                            if (determineMark(newStatus) != 0 &&
                                     documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getPdReport().setPdReportStatus(2);
-                                pdReportRepository.save(documentVersion.getPdReport());
-                                return "Версия документа успешно прорецензирована";
-                            } else if (newStatus.equals("Замечания") &&
-                                    documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getPdReport().setPdReportStatus(3);
+                                documentVersion.getPdReport().setPdReportStatus(determineMark(newStatus));
                                 pdReportRepository.save(documentVersion.getPdReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
-                                if (newStatus.equals("Одобрено")) {
-                                    documentVersion.getPdReport().setPdReportStatus(2);
+                                if (determineMark(newStatus) != 0) {
+                                    documentVersion.getPdReport().setPdReportStatus(determineMark(newStatus));
                                     pdReportRepository.save(documentVersion.getPdReport());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
-                                    documentVersion.getPdReport().setPdReportStatus(3);
-                                    pdReportRepository.save(documentVersion.getPdReport());
-                                    return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
                         case 4:
-                            if (newStatus.equals("Одобрено") &&
+                            if (determineMark(newStatus) != 0 &&
                                     documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getVkrReport().setVkrReportStatus(2);
-                                vkrReportRepository.save(documentVersion.getVkrReport());
-                                return "Версия документа успешно прорецензирована";
-                            } else if (newStatus.equals("Замечания") &&
-                                    documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
-                                documentVersion.getVkrReport().setVkrReportStatus(3);
+                                documentVersion.getVkrReport().setVkrReportStatus(determineMark(newStatus));
                                 vkrReportRepository.save(documentVersion.getVkrReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
-                                if (newStatus.equals("Одобрено")) {
-                                    documentVersion.getVkrReport().setVkrReportStatus(2);
+                                if (determineMark(newStatus) != 0) {
+                                    documentVersion.getVkrReport().setVkrReportStatus(determineMark(newStatus));
                                     vkrReportRepository.save(documentVersion.getVkrReport());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
-                                    documentVersion.getVkrReport().setVkrReportStatus(3);
-                                    vkrReportRepository.save(documentVersion.getVkrReport());
-                                    return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
                         default:
@@ -1692,5 +1657,20 @@ public class DocumentManagementService {
             return "Приказ не найден";
         }
         return "Что-то пошло не так";
+    }
+
+    public Integer determineMark(String newStatus) {
+        switch (newStatus) {
+            case "Неудовлетворительно":
+                return 5;
+            case "Удовлетворительно":
+                return 6;
+            case "Хорошо":
+                return 7;
+            case "Отлично":
+                return 8;
+            default:
+                return 0;
+        }
     }
 }

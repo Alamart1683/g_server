@@ -1,10 +1,12 @@
-package g_server.g_server.application.entity.documents;
+package g_server.g_server.application.entity.documents.reports;
+
+import g_server.g_server.application.entity.documents.DocumentStatus;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "pd_report")
-public class PdReport {
+@Table(name = "nir_report")
+public class NirReport {
     @Id
     @Column(name = "versionID")
     private int versionID;
@@ -15,28 +17,39 @@ public class PdReport {
     @Column(name = "advisor_conclusion")
     private String advisorConclusion;
 
-    @Column(name = "pd_report_status")
-    private int pdReportStatus;
+    @Column(name = "nir_report_status")
+    private int nirReportStatus;
+
+    @Column(name = "is_hoc_rate")
+    private boolean isHocRate;
 
     @ManyToOne
-    @JoinColumn(name = "pd_report_status", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "nir_report_status", referencedColumnName = "id", insertable = false, updatable = false)
     private DocumentStatus documentStatus;
 
-    public PdReport() { }
+    public NirReport() { }
 
-    public PdReport(int versionID, int ppppuiopdReportStatus) {
+    public NirReport(int versionID, int nirReportStatus) {
         this.versionID = versionID;
         this.detailedContent = "Подробное содержание проделанной работы";
         this.advisorConclusion = "Заключение научного руководителя о выполненной работе";
-        this.pdReportStatus = ppppuiopdReportStatus;
+        this.nirReportStatus = nirReportStatus;
     }
 
-    public PdReport(int versionID, String detailedContent, String advisorConclusion,
-                           int nirReportStatus) {
+    public NirReport(int versionID, String detailedContent, String advisorConclusion,
+                     int nirReportStatus) {
         this.versionID = versionID;
         this.detailedContent = detailedContent;
         this.advisorConclusion = advisorConclusion;
-        this.pdReportStatus = nirReportStatus;
+        this.nirReportStatus = nirReportStatus;
+    }
+
+    public int getNirReportStatus() {
+        return nirReportStatus;
+    }
+
+    public void setNirReportStatus(int nirReportStatus) {
+        this.nirReportStatus = nirReportStatus;
     }
 
     public int getVersionID() {
@@ -71,11 +84,11 @@ public class PdReport {
         this.advisorConclusion = advisorConclusion;
     }
 
-    public int getPdReportStatus() {
-        return pdReportStatus;
+    public boolean isHocRate() {
+        return isHocRate;
     }
 
-    public void setPdReportStatus(int pdReportStatus) {
-        this.pdReportStatus = pdReportStatus;
+    public void setHocRate(boolean hocRate) {
+        isHocRate = hocRate;
     }
 }

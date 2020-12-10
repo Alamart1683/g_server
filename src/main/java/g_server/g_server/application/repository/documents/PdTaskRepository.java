@@ -1,6 +1,6 @@
 package g_server.g_server.application.repository.documents;
 
-import g_server.g_server.application.entity.documents.PdTask;
+import g_server.g_server.application.entity.documents.tasks.PdTask;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

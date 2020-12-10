@@ -1,6 +1,6 @@
 package g_server.g_server.application.repository.documents;
 
-import g_server.g_server.application.entity.documents.VkrPresentation;
+import g_server.g_server.application.entity.documents.vkr_other.VkrPresentation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
