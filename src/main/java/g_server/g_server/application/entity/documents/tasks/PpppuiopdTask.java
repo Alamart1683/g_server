@@ -29,6 +29,9 @@ public class PpppuiopdTask {
     @Column(name = "ppppuiopd_status")
     private int status;
 
+    @Column(name = "is_hoc_rate")
+    private boolean isHocRate;
+
     @ManyToOne
     @JoinColumn(name = "ppppuiopd_status", referencedColumnName = "id", insertable = false, updatable = false)
     private DocumentStatus documentStatus;
@@ -108,5 +111,13 @@ public class PpppuiopdTask {
 
     public void setDocumentStatus(DocumentStatus documentStatus) {
         this.documentStatus = documentStatus;
+    }
+
+    public boolean isHocRate() {
+        return isHocRate;
+    }
+
+    public void setHocRate(boolean hocRate) {
+        isHocRate = hocRate;
     }
 }

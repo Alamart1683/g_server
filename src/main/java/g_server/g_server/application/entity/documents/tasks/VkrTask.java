@@ -26,6 +26,9 @@ public class VkrTask {
     @Column(name = "vkr_status")
     private Integer vkr_status;
 
+    @Column(name = "is_hoc_rate")
+    private boolean isHocRate;
+
     @ManyToOne
     @JoinColumn(name = "vkr_status", referencedColumnName = "id", insertable = false, updatable = false)
     private DocumentStatus documentStatus;
@@ -95,5 +98,13 @@ public class VkrTask {
 
     public void setDocumentStatus(DocumentStatus documentStatus) {
         this.documentStatus = documentStatus;
+    }
+
+    public boolean isHocRate() {
+        return isHocRate;
+    }
+
+    public void setHocRate(boolean hocRate) {
+        isHocRate = hocRate;
     }
 }

@@ -211,6 +211,7 @@ create table nir_task (
     to_familiarize varchar(2048) not null,
     additional_task varchar(2048) not null,
     nir_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
     foreign key (nir_status) references document_status (id)
 );
@@ -241,6 +242,7 @@ create table ppppuiopd_task(
     to_familiarize varchar(2048) not null,
     additional_task varchar(2048) not null,
     ppppuiopd_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
     foreign key (ppppuiopd_status) references document_status (id)
 );
@@ -263,6 +265,7 @@ create table pd_task(
     to_familiarize varchar(2048) not null,
     additional_task varchar(2048) not null,
     pd_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
     foreign key (pd_status) references document_status (id)
 );
@@ -284,6 +287,7 @@ create table vkr_task(
     tasks varchar(1024) not null,
     docs varchar(1024) not null,
     vkr_status int not null,
+    is_hoc_rate boolean default false,
     foreign key (versionID) references document_version (id) on delete cascade on UPDATE cascade,
     foreign key (vkr_status) references document_status (id)
 );
