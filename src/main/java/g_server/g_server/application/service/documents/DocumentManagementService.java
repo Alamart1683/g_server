@@ -1466,7 +1466,9 @@ public class DocumentManagementService {
     public StudentDocumentsStatusView getStudentsDocumentStatus(Integer studentID) {
         StudentDocumentsStatusView statusView = new StudentDocumentsStatusView(0, 0,
                 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0);
+                0, 0, 0, 0, false, false,
+                false, false, false, false,
+                false, false);
         Document nirTask;
         Document nirReport;
         Document ppppuiopdTask;
@@ -1490,6 +1492,9 @@ public class DocumentManagementService {
                     if (nirTaskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setNirTaskStatus(1);
                     }
+                    if (nirTaskVersion.getNirTask().isHocRate()) {
+                        statusView.setNirTaskHocRate(true);
+                    }
                 }
             }
             if (documentRepository.findByTypeAndKindAndCreator(1, 3, studentID).size() == 1) {
@@ -1506,6 +1511,9 @@ public class DocumentManagementService {
                     } else if (nirReportVersion.getNirReport().getDocumentStatus().getStatus().equals("Отлично")) {
                         statusView.setNirReportStatus(5);
                     }
+                    if (nirReportVersion.getNirReport().isHocRate()) {
+                        statusView.setNirReportHocRate(true);
+                    }
                 }
             }
             // ППППУиОПД
@@ -1516,6 +1524,9 @@ public class DocumentManagementService {
                 for (DocumentVersion ppppuiopdTaskVersion : ppppuiopdTaskVersions) {
                     if (ppppuiopdTaskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setPpppuipdTaskStatus(1);
+                    }
+                    if (ppppuiopdTaskVersion.getPpppuiopdTask().isHocRate()) {
+                        statusView.setPpppuipdTaskHocRate(true);
                     }
                 }
             }
@@ -1533,6 +1544,9 @@ public class DocumentManagementService {
                     } else if (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Отлично")) {
                         statusView.setPpppuipdReportStatus(5);
                     }
+                    if (ppppuiopdReportVersion.getPpppuiopdReport().isHocRate()) {
+                        statusView.setPpppuipdReportHocRate(true);
+                    }
                 }
             }
             // ПП
@@ -1543,6 +1557,9 @@ public class DocumentManagementService {
                 for (DocumentVersion pdTaskVersion : pdTaskVersions) {
                     if (pdTaskVersion.getPdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setPpTaskStatus(1);
+                    }
+                    if (pdTaskVersion.getPdTask().isHocRate()) {
+                        statusView.setPpTaskHocRate(true);
                     }
                 }
             }
@@ -1560,6 +1577,9 @@ public class DocumentManagementService {
                     } else if (pdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Отлично")) {
                         statusView.setPpReportStatus(5);
                     }
+                    if (pdReportVersion.getPdReport().isHocRate()) {
+                        statusView.setPpReportHocRate(true);
+                    }
                 }
             }
             // ВКР
@@ -1570,6 +1590,9 @@ public class DocumentManagementService {
                 for (DocumentVersion vkrTaskVersion : vkrTaskVersions) {
                     if (vkrTaskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Одобрено")) {
                         statusView.setVkrTask(1);
+                    }
+                    if (vkrTaskVersion.getVkrTask().isHocRate()) {
+                        statusView.setVkrTaskHocRate(true);
                     }
                 }
             }
@@ -1586,6 +1609,9 @@ public class DocumentManagementService {
                         statusView.setVkrRPZ(4);
                     } else if (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Отлично")) {
                         statusView.setVkrRPZ(5);
+                    }
+                    if (vkrReportVersion.getVkrReport().isHocRate()) {
+                        statusView.setVkrRPZHocRate(true);
                     }
                 }
             }
@@ -1633,7 +1659,9 @@ public class DocumentManagementService {
         } catch (NullPointerException nullPointerException) {
             return new StudentDocumentsStatusView(-1, -1, -1,
                     -1, -1, -1, -1, -1, -1,
-                    -1, -1, -1);
+                    -1, -1, -1, false, false,
+                    false, false, false, false,
+                    false, false);
         }
     }
 
