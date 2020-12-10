@@ -18,6 +18,7 @@ public class TaskDocumentVersionView extends DocumentVersionView {
     private String vkrTasks;
     private String vkrDocs;
     private String status;
+    private boolean isHocRate;
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, NirTask nirTask) {
         super(documentVersion);
@@ -28,6 +29,7 @@ public class TaskDocumentVersionView extends DocumentVersionView {
         this.toFamiliarize = nirTask.getToFamiliarize();
         this.additionalTask = nirTask.getAdditionalTask();
         this.status = nirTask.getDocumentStatus().getStatus();
+        this.isHocRate = nirTask.isHocRate();
     }
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, PpppuiopdTask ppppuiopdTask) {
@@ -39,6 +41,7 @@ public class TaskDocumentVersionView extends DocumentVersionView {
         this.toFamiliarize = ppppuiopdTask.getToFamiliarize();
         this.additionalTask = ppppuiopdTask.getAdditionalTask();
         this.status = ppppuiopdTask.getDocumentStatus().getStatus();
+        this.isHocRate = ppppuiopdTask.isHocRate();
     }
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, PdTask pdTask) {
@@ -50,6 +53,7 @@ public class TaskDocumentVersionView extends DocumentVersionView {
         this.toFamiliarize = pdTask.getToFamiliarize();
         this.additionalTask = pdTask.getAdditionalTask();
         this.status = pdTask.getDocumentStatus().getStatus();
+        this.isHocRate = pdTask.isHocRate();
     }
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, VkrTask vkrTask) {
@@ -61,6 +65,7 @@ public class TaskDocumentVersionView extends DocumentVersionView {
         this.vkrTasks = vkrTask.getVkrTask();
         this.vkrDocs = vkrTask.getVkrDocs();
         this.status = vkrTask.getDocumentStatus().getStatus();
+        this.isHocRate = vkrTask.isHocRate();
     }
 
     public TaskDocumentVersionView(DocumentVersion documentVersion, String status) {
@@ -154,5 +159,13 @@ public class TaskDocumentVersionView extends DocumentVersionView {
 
     public void setVkrDocs(String vkrDocs) {
         this.vkrDocs = vkrDocs;
+    }
+
+    public boolean isHocRate() {
+        return isHocRate;
+    }
+
+    public void setHocRate(boolean hocRate) {
+        isHocRate = hocRate;
     }
 }
