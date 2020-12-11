@@ -354,7 +354,6 @@ public class DocumentViewService {
         Users advisor;
         try {
             advisor = usersService.findById(advisorID).get();
-            //List<DocumentView> allDocumentViewList = getAdminDocumentView(advisor);
             List<DocumentView> allDocumentViewList = getAdvisorDocumentView(advisor);
             List<AdvisorsStudentDocumentView> studentsDocumentsList = new ArrayList<>();
             if (allDocumentViewList != null) {
