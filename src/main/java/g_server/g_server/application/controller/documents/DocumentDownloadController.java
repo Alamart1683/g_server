@@ -142,7 +142,7 @@ public class DocumentDownloadController {
         }
     }
 
-    @GetMapping("/head_of_cathedra/document/download/cathedta_report")
+    @GetMapping("/head_of_cathedra/document/download/cathedta_report/")
     public void documentDownload(
             HttpServletResponse httpServletResponse,
             @RequestParam String key
