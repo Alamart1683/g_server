@@ -11,6 +11,7 @@ public class AssociatedStudentView extends AssociatedRequestView {
     private String email;
     private StudentDocumentsStatusView studentDocumentsStatusView;
     private String studentVkrTheme;
+    private String advisorFIO;
     private boolean isStudentVkrThemeEditable;
 
     public AssociatedStudentView(Users user, int systemID, String projectName, String projectArea,
@@ -92,5 +93,13 @@ public class AssociatedStudentView extends AssociatedRequestView {
 
     public void setStudentVkrThemeEditable(boolean studentVkrThemeEditable) {
         isStudentVkrThemeEditable = studentVkrThemeEditable;
+    }
+
+    public String getAdvisorFIO() {
+        return advisorFIO;
+    }
+
+    public void setAdvisorFIO(String advisorFIO) {
+        this.advisorFIO = advisorFIO;
     }
 }
