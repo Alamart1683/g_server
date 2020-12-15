@@ -9,8 +9,8 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>g_server.g_server</groupId>
-    <artifactId>application</artifactId>
-    <version>1.0.1-aplpha</version>
+    <artifactId>g_server</artifactId>
+    <version>1.0.2-alpha</version>
     <name>graduates server</name>
     <description>graguates web site</description>
 

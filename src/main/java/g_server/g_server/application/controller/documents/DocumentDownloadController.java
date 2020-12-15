@@ -62,30 +62,6 @@ public class DocumentDownloadController {
         }
     }
 
-    /*
-    @GetMapping("/view/document/outer/")
-    public void documentExternalView(
-        @RequestParam Integer creator_id,
-        @RequestParam String documentName,
-        HttpServletResponse httpServletResponse
-    ) {
-        File file = documentDownloadService.findDownloadDocument(creator_id, documentName);
-        if (file != null) {
-            String contentType = documentDownloadService.getContentType(file.getName());
-            String mainName = documentDownloadService.getMainFileName(creator_id, documentName);
-            Path path = Paths.get(file.getPath());
-            httpServletResponse.setContentType(contentType);
-            httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
-            try {
-                Files.copy(path, httpServletResponse.getOutputStream());
-                httpServletResponse.getOutputStream().flush();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
-    }
-     */
-
     @GetMapping("/document/download/version")
     public void documentVersionDownload(
             @RequestParam Integer versionID,

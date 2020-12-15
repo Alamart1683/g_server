@@ -107,6 +107,14 @@ public class AssociatedUsersController {
         return associatedStudentsService.getActiveStudents(getTokenFromRequest(httpServletRequest));
     }
 
+    // Получить список всех активных студентов или по группам
+    @GetMapping("/scientific_advisor/student/active/for/")
+    public List<AssociatedStudentView> getActiveStudentsByKey(
+            @RequestParam String key
+    ) {
+        return associatedStudentsService.getAllActiveStudents(key);
+    }
+
     // Получить список активных студентов без проекта
     @GetMapping("/scientific_advisor/student/active/without_project")
     public List<AssociatedStudentViewWithoutProject> getActiveStudentsWithoutProject(

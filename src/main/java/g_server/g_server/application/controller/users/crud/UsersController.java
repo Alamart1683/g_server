@@ -4,13 +4,10 @@ import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.view.PersonalAdvisorView;
 import g_server.g_server.application.entity.view.PersonalStudentView;
 import g_server.g_server.application.repository.users.UsersRepository;
-import g_server.g_server.application.service.documents.DocumentUploadService;
 import g_server.g_server.application.service.users.ScientificAdvisorDataService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
@@ -32,9 +29,6 @@ public class UsersController {
     private UsersRepository usersRepository;
 
     @Autowired
-    private DocumentUploadService documentUploadService;
-
-    @Autowired
     private ScientificAdvisorDataService scientificAdvisorDataService;
 
     @GetMapping("/admin/users/all")
@@ -52,7 +46,7 @@ public class UsersController {
             @PathVariable int id,
             HttpServletRequest httpServletRequest) {
         String token = getTokenFromRequest(httpServletRequest);
-        Integer adminId = documentUploadService.getCreatorId(token);
+        Integer adminId = usersService.getUserId(token);
         if (usersService.checkUsersRoles(adminId, id)) {
             usersRepository.deleteById(id);
             return "Пользователь удален успешно";

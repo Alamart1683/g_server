@@ -292,6 +292,78 @@ public class AssociatedStudentsService {
         return null;
     }
 
+    // Показать весь список студентов с их отчётностью для кафедры
+    public List<AssociatedStudentView> getAllActiveStudents(String key) {
+        List<AssociatedStudentView> activeStudents = new ArrayList<>();
+        List<AssociatedStudents> associatedStudents = new ArrayList<>();
+        List<AssociatedStudents> associatedStudentsRaw = associatedStudentsRepository.findAll();
+        if (key.equals("all")) {
+            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+                if (associatedStudentRaw.isAccepted()) {
+                    associatedStudents.add(associatedStudentRaw);
+                }
+            }
+            for (AssociatedStudents associatedStudent: associatedStudents) {
+                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+                Integer studentID = associatedStudent.getStudent();
+                String projectName = "Проект не назначен";
+                String projectArea = "Нет комплексного проекта";
+                OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
+                Project project = null;
+                if (occupiedStudent != null) {
+                    try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
+                    catch (NoSuchElementException noSuchElementException) { }
+                }
+                if (project != null) {
+                    projectName = project.getName();
+                    projectArea = project.getProjectArea().getArea();
+                }
+                AssociatedStudentView activeStudentForm = new AssociatedStudentView(currentStudent,
+                        associatedStudent.getId(), projectName, projectArea,
+                        associatedStudent.getStudentUser().getPhone(),
+                        associatedStudent.getStudentUser().getEmail(),
+                        documentManagementService.getStudentsDocumentStatus(studentID)
+                );
+                activeStudents.add(activeStudentForm);
+            }
+            return activeStudents;
+        } else if (studentGroupRepository.getByStudentGroup(key) != null) {
+            String group = studentGroupRepository.getByStudentGroup(key).getStudentGroup();
+            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+                if (associatedStudentRaw.isAccepted() &&
+                        usersRepository.findById(associatedStudentRaw.getStudent()).get()
+                                .getStudentData().getStudentGroup().getStudentGroup().equals(group)) {
+                    associatedStudents.add(associatedStudentRaw);
+                }
+            }
+            for (AssociatedStudents associatedStudent: associatedStudents) {
+                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+                Integer studentID = associatedStudent.getStudent();
+                String projectName = "Проект не назначен";
+                String projectArea = "Нет комплексного проекта";
+                OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
+                Project project = null;
+                if (occupiedStudent != null) {
+                    try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
+                    catch (NoSuchElementException noSuchElementException) { }
+                }
+                if (project != null) {
+                    projectName = project.getName();
+                    projectArea = project.getProjectArea().getArea();
+                }
+                AssociatedStudentView activeStudentForm = new AssociatedStudentView(currentStudent,
+                        associatedStudent.getId(), projectName, projectArea,
+                        associatedStudent.getStudentUser().getPhone(),
+                        associatedStudent.getStudentUser().getEmail(),
+                        documentManagementService.getStudentsDocumentStatus(studentID)
+                );
+                activeStudents.add(activeStudentForm);
+            }
+            return activeStudents;
+        }
+        return null;
+    }
+
     // Студент получает информацию о себе и своих документах
     public AssociatedStudentView getInfoAboutStudent(String token) {
         Integer studentID = getUserId(token);
