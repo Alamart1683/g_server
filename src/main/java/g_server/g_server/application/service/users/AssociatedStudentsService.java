@@ -328,6 +328,9 @@ public class AssociatedStudentsService {
                 activeStudentForm.setAdvisorFIO(documentProcessorService.getShortFio(
                         advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name()
                 ));
+                String specialityCode =
+                        specialityRepository.findByPrefix(activeStudentForm.getGroup().substring(0, 4)).getCode();
+                activeStudentForm.setSpecialityCode(specialityCode);
                 activeStudents.add(activeStudentForm);
             }
             return activeStudents;
@@ -365,6 +368,9 @@ public class AssociatedStudentsService {
                 activeStudentForm.setAdvisorFIO(documentProcessorService.getShortFio(
                         advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name()
                 ));
+                String specialityCode =
+                        specialityRepository.findByPrefix(activeStudentForm.getGroup().substring(0, 4)).getCode();
+                activeStudentForm.setSpecialityCode(specialityCode);
                 activeStudents.add(activeStudentForm);
             }
             return activeStudents;

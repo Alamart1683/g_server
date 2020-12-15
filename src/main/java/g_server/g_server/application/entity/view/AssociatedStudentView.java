@@ -12,6 +12,7 @@ public class AssociatedStudentView extends AssociatedRequestView {
     private StudentDocumentsStatusView studentDocumentsStatusView;
     private String studentVkrTheme;
     private String advisorFIO;
+    private String specialityCode;
     private boolean isStudentVkrThemeEditable;
 
     public AssociatedStudentView(Users user, int systemID, String projectName, String projectArea,
@@ -101,5 +102,13 @@ public class AssociatedStudentView extends AssociatedRequestView {
 
     public void setAdvisorFIO(String advisorFIO) {
         this.advisorFIO = advisorFIO;
+    }
+
+    public String getSpecialityCode() {
+        return specialityCode;
+    }
+
+    public void setSpecialityCode(String specialityCode) {
+        this.specialityCode = specialityCode;
     }
 }
