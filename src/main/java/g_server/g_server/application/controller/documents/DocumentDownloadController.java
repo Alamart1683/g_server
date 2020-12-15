@@ -142,6 +142,28 @@ public class DocumentDownloadController {
         }
     }
 
+    @GetMapping("/head_of_cathedra/document/download/cathedta_report")
+    public void documentDownload(
+            HttpServletResponse httpServletResponse,
+            @RequestParam String key
+    ) throws Exception {
+        File file = documentProcessorService.generateReportAboutAllActiveStudents(key);
+        if (file != null) {
+            String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            String mainName = "Отчёт об успеваемости студентов";
+            Path path = Paths.get(file.getPath());
+            httpServletResponse.setContentType(contentType);
+            httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
+            try {
+                Files.copy(path, httpServletResponse.getOutputStream());
+                httpServletResponse.getOutputStream().flush();
+                file.delete();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
+
     private boolean checkIsTaskVersion(Integer versionID) {
         DocumentVersion documentVersion;
         if (documentVersionRepository.findById(versionID).isPresent()) {
