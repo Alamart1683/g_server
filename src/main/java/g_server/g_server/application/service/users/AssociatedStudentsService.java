@@ -342,6 +342,7 @@ public class AssociatedStudentsService {
             }
             for (AssociatedStudents associatedStudent: associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+                Users advisor = associatedStudent.getAdvisorUser();
                 Integer studentID = associatedStudent.getStudent();
                 String projectName = "Проект не назначен";
                 String projectArea = "Нет комплексного проекта";
@@ -361,6 +362,9 @@ public class AssociatedStudentsService {
                         associatedStudent.getStudentUser().getEmail(),
                         documentManagementService.getStudentsDocumentStatus(studentID)
                 );
+                activeStudentForm.setAdvisorFIO(documentProcessorService.getShortFio(
+                        advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name()
+                ));
                 activeStudents.add(activeStudentForm);
             }
             return activeStudents;
