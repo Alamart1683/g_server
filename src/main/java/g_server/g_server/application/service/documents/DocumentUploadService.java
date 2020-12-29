@@ -293,6 +293,7 @@ public class DocumentUploadService {
                                 TemplateProperties templateProperties = new TemplateProperties();
                                 templateProperties.setId(document.getId());
                                 templateProperties.setType(document.getType());
+                                templateProperties.setApproved(true);
                                 templatePropertiesRepository.save(templateProperties);
                             }
                             if (document.getKind() == 6 || document.getKind() == 7 || document.getKind() == 8 ||
@@ -488,6 +489,7 @@ public class DocumentUploadService {
                                     convertRussianDateToSqlDate(documentOrderForm.getEndDate()),
                                     speciality.getId()
                             );
+                            orderProperties.setApproved(true);
                             orderPropertiesRepository.save(orderProperties);
                             // Далее создадим запись о первой версии документа в таблице версий
                             int uploadingDocumentId = documentRepository.findByCreatorAndName(creator_id, fileName).getId();
