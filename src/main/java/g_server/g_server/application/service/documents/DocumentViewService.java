@@ -1399,12 +1399,12 @@ public class DocumentViewService {
                         long fileModified = file.lastModified();
                         ZonedDateTime zonedDateTime = ZonedDateTime.now();
                         long currentTime = zonedDateTime.toInstant().toEpochMilli();
-                        if (currentTime - fileModified > 86400000) {
+                        if (currentTime - fileModified > 120000) {
                             file.delete();
                         }
                     }
                     File viewTask = getThreeViewPages(versionID);
-                    String outerAccessString = externalApiUrl + viewTask.getPath();
+                    String outerAccessString = externalApiUrl + viewTask.getName();
                     return outerAccessString;
                 }
             } else {
@@ -1464,12 +1464,8 @@ public class DocumentViewService {
                     page += 1;
                 }
                 String timeName = ZonedDateTime.now().toString();
-                timeName = timeName.replaceAll("-", "");
-                timeName = timeName.replaceAll("\\.", "");
-                timeName = timeName.replaceAll(":", "");
-                timeName = timeName.replaceAll("Z", "");
-                timeName = timeName.replaceAll("T", "");
-                String tempCutTaskPath = ".\\view_tasks" + File.separator + timeName + ".docx";
+                timeName = timeName.replaceAll("\\D", "");
+                String tempCutTaskPath = ".\\view_tasks" + File.separator + timeName + documentVersion.getEditor() + ".docx";
                 cutTask.save(tempCutTaskPath);
                 viewTask = new File(tempCutTaskPath);
             }
