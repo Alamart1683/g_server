@@ -1036,6 +1036,22 @@ public class DocumentProcessorService {
         if (stagesKey == 0) {
             XSSFWorkbook report = new XSSFWorkbook();
             XSSFSheet reportSheet = report.createSheet("Успеваемость студентов");
+            // Настройка ширины колонок
+            reportSheet.setColumnWidth(0, 200);
+            reportSheet.setColumnWidth(1, 200);
+            reportSheet.setColumnWidth(2, 200);
+            reportSheet.setColumnWidth(3, 200);
+            reportSheet.setColumnWidth(4, 200);
+            reportSheet.setColumnWidth(5, 200);
+            reportSheet.setColumnWidth(6, 200);
+            reportSheet.setColumnWidth(7, 200);
+            reportSheet.setColumnWidth(8, 200);
+            reportSheet.setColumnWidth(9, 200);
+            reportSheet.setColumnWidth(10, 200);
+            reportSheet.setColumnWidth(11, 200);
+            reportSheet.setColumnWidth(12, 200);
+            reportSheet.setColumnWidth(13, 200);
+            reportSheet.setColumnWidth(14, 200);
             // Создание заголовка таблицы
             XSSFRow reportRow = reportSheet.createRow(0);
             // ФИО студента
@@ -1274,6 +1290,12 @@ public class DocumentProcessorService {
         int rowIndex = 1;
         FileOutputStream fileOutputStream;
         XSSFSheet reportSheet = report.createSheet("Успеваемость студентов");
+        // Настройка ширины колонок
+        reportSheet.setColumnWidth(0, 200);
+        reportSheet.setColumnWidth(1, 200);
+        reportSheet.setColumnWidth(2, 200);
+        reportSheet.setColumnWidth(3, 200);
+        reportSheet.setColumnWidth(4, 200);
         // Создание заголовка таблицы
         XSSFRow reportRow = reportSheet.createRow(0);
         // ФИО студента
@@ -1484,6 +1506,10 @@ public class DocumentProcessorService {
                 report.write(fileOutputStream);
                 return file;
             case 4:
+                reportSheet.setColumnWidth(5, 200);
+                reportSheet.setColumnWidth(6, 200);
+                reportSheet.setColumnWidth(7, 200);
+                reportSheet.setColumnWidth(8, 200);
                 // Презентация по ВКР
                 XSSFCell PresentationGroupCell = reportRow.createCell(3);
                 PresentationGroupCell.setCellType(CellType.STRING);
