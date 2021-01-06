@@ -1411,6 +1411,7 @@ public class DocumentProcessorService {
                     } else {
                         currentPpppuiopdReportGroupCell.setCellValue("");
                     }
+                    rowIndex++;
                 }
                 file = new File(storageLocation + File.separator
                         + "temp" + File.separator + "temp_report_" + Instant.now().toString()
