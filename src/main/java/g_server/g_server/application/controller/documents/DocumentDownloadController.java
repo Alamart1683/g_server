@@ -2,17 +2,12 @@ package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
-import g_server.g_server.application.entity.view.ShortTaskDataView;
-import g_server.g_server.application.entity.view.TaskDataView;
 import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
 import g_server.g_server.application.service.documents.DocumentDownloadService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
-import g_server.g_server.application.service.documents.DocumentViewService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
@@ -145,9 +140,12 @@ public class DocumentDownloadController {
     @GetMapping("/head_of_cathedra/document/download/cathedta_report/")
     public void documentDownload(
             HttpServletResponse httpServletResponse,
-            @RequestParam String key
+            HttpServletRequest httpServletRequest,
+            @RequestParam String studentKey,
+            @RequestParam Integer stageKey
     ) throws Exception {
-        File file = documentProcessorService.generateReportAboutAllActiveStudents(key);
+        File file = documentProcessorService.generateReportAboutAllActiveStudents(
+                studentKey, getTokenFromRequest(httpServletRequest), stageKey);
         if (file != null) {
             String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             String mainName = "Отчёт об успеваемости студентов";

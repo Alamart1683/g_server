@@ -298,12 +298,12 @@ public class AssociatedStudentsService {
         List<AssociatedStudents> associatedStudents = new ArrayList<>();
         List<AssociatedStudents> associatedStudentsRaw = associatedStudentsRepository.findAll();
         if (key.equals("all")) {
-            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+            for (AssociatedStudents associatedStudentRaw : associatedStudentsRaw) {
                 if (associatedStudentRaw.isAccepted()) {
                     associatedStudents.add(associatedStudentRaw);
                 }
             }
-            for (AssociatedStudents associatedStudent: associatedStudents) {
+            for (AssociatedStudents associatedStudent : associatedStudents) {
                 Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
                 Users advisor = associatedStudent.getAdvisorUser();
                 Integer studentID = associatedStudent.getStudent();
@@ -312,8 +312,10 @@ public class AssociatedStudentsService {
                 OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
                 Project project = null;
                 if (occupiedStudent != null) {
-                    try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
-                    catch (NoSuchElementException noSuchElementException) { }
+                    try {
+                        project = projectRepository.findById(occupiedStudent.getProjectID()).get();
+                    } catch (NoSuchElementException noSuchElementException) {
+                    }
                 }
                 if (project != null) {
                     projectName = project.getName();

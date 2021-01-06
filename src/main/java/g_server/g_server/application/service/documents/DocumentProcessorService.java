@@ -1026,9 +1026,253 @@ public class DocumentProcessorService {
     }
 
     // Сгенерировать отчёт по успеваемости всех студентов
-    public File generateReportAboutAllActiveStudents(String key) throws Exception {
-        List<AssociatedStudentView> allActiveStudents = associatedStudentsService.getAllActiveStudents(key);
+    public File generateReportAboutAllActiveStudents(String studentKey, String token, Integer stagesKey) throws Exception {
+        List<AssociatedStudentView> allActiveStudents;
+        if (studentKey.equals("for my students")) {
+            allActiveStudents = associatedStudentsService.getActiveStudents(token);
+        } else {
+            allActiveStudents = associatedStudentsService.getAllActiveStudents(studentKey);
+        }
+        if (stagesKey == 0) {
+            XSSFWorkbook report = new XSSFWorkbook();
+            XSSFSheet reportSheet = report.createSheet("Успеваемость студентов");
+            // Создание заголовка таблицы
+            XSSFRow reportRow = reportSheet.createRow(0);
+            // ФИО студента
+            XSSFCell studentFioCell = reportRow.createCell(0);
+            studentFioCell.setCellType(CellType.STRING);
+            studentFioCell.setCellValue("Студент");
+            // Группа
+            XSSFCell studentGroupCell = reportRow.createCell(1);
+            studentGroupCell.setCellType(CellType.STRING);
+            studentGroupCell.setCellValue("Группа");
+            // Научный руководитель
+            XSSFCell advisorGroupCell = reportRow.createCell(2);
+            advisorGroupCell.setCellType(CellType.STRING);
+            advisorGroupCell.setCellValue("Научный руководитель");
+            // Задание на НИР
+            XSSFCell NirTaskGroupCell = reportRow.createCell(3);
+            NirTaskGroupCell.setCellType(CellType.STRING);
+            NirTaskGroupCell.setCellValue("Задание на НИР");
+            // Отчёт по НИР
+            XSSFCell NirReportGroupCell = reportRow.createCell(4);
+            NirReportGroupCell.setCellType(CellType.STRING);
+            NirReportGroupCell.setCellValue("Отчёт по НИР");
+            // Задание на ПпППУиОПД
+            XSSFCell PpppuiopdTaskGroupCell = reportRow.createCell(5);
+            PpppuiopdTaskGroupCell.setCellType(CellType.STRING);
+            PpppuiopdTaskGroupCell.setCellValue("Задание на ПпППУиОПД");
+            // Отчёт по ПпППУиОПД
+            XSSFCell PpppuiopdReportGroupCell = reportRow.createCell(6);
+            PpppuiopdReportGroupCell.setCellType(CellType.STRING);
+            PpppuiopdReportGroupCell.setCellValue("Отчёт по ПпППУиОПД");
+            // Задание на ПП
+            XSSFCell PpTaskGroupCell = reportRow.createCell(7);
+            PpTaskGroupCell.setCellType(CellType.STRING);
+            PpTaskGroupCell.setCellValue("Задание на ПП");
+            // Отчёт по ПП
+            XSSFCell PpReportGroupCell = reportRow.createCell(8);
+            PpReportGroupCell.setCellType(CellType.STRING);
+            PpReportGroupCell.setCellValue("Отчёт по ПП");
+            // Презентация по ВКР
+            XSSFCell PresentationGroupCell = reportRow.createCell(9);
+            PresentationGroupCell.setCellType(CellType.STRING);
+            PresentationGroupCell.setCellValue("Презентация по ВКР");
+            // Допуск по ВКР
+            XSSFCell AllowanceGroupCell = reportRow.createCell(10);
+            AllowanceGroupCell.setCellType(CellType.STRING);
+            AllowanceGroupCell.setCellValue("Допуск на защиту ВКР");
+            // Отзыв руководителя
+            XSSFCell FeedbackGroupCell = reportRow.createCell(11);
+            FeedbackGroupCell.setCellType(CellType.STRING);
+            FeedbackGroupCell.setCellValue("Отзыв руководителя на ВКР");
+            // Антиплагиат
+            XSSFCell antiplagiatGroupCell = reportRow.createCell(12);
+            antiplagiatGroupCell.setCellType(CellType.STRING);
+            antiplagiatGroupCell.setCellValue("Антиплагиат на ВКР");
+            // Задание на ВКР
+            XSSFCell VkrTaskGroupCell = reportRow.createCell(13);
+            VkrTaskGroupCell.setCellType(CellType.STRING);
+            VkrTaskGroupCell.setCellValue("Задание на ВКР");
+            // РПЗ по ВКР
+            XSSFCell VkrReportGroupCell = reportRow.createCell(14);
+            VkrReportGroupCell.setCellType(CellType.STRING);
+            VkrReportGroupCell.setCellValue("РПЗ по ВКР");
+
+            int rowIndex = 1;
+            // Заполнение данных в цикле
+            for (AssociatedStudentView activeStudent: allActiveStudents) {
+                // Создание текущей строки таблицы
+                XSSFRow currentReportRow = reportSheet.createRow(rowIndex);
+
+                // ФИО студента
+                XSSFCell currentStudentFioCell = currentReportRow.createCell(0);
+                currentStudentFioCell.setCellType(CellType.STRING);
+                currentStudentFioCell.setCellValue(getShortFio(activeStudent.getFIO()));
+
+                // Группа
+                XSSFCell currentStudentGroupCell = currentReportRow.createCell(1);
+                currentStudentGroupCell.setCellType(CellType.STRING);
+                currentStudentGroupCell.setCellValue(activeStudent.getGroup());
+
+                // Научный руководитель
+                XSSFCell currentAdvisorGroupCell = currentReportRow.createCell(2);
+                currentAdvisorGroupCell.setCellType(CellType.STRING);
+                AssociatedStudents associatedStudent =
+                        associatedStudentsRepository.findByStudent(activeStudent.getSystemStudentID());
+                Users advisor = associatedStudent.getAdvisorUser();
+                currentAdvisorGroupCell.setCellValue(getShortFio(advisor.getSurname() + " " + advisor.getName() +
+                        " " + advisor.getSecond_name()));
+
+                // Задание на НИР
+                XSSFCell currentNirTaskGroupCell = currentReportRow.createCell(3);
+                currentNirTaskGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getNirTaskStatus() == 1) {
+                    currentNirTaskGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentNirTaskGroupCell.setCellValue("");
+                }
+
+                // Отчёт по НИР
+                XSSFCell currentNirReportGroupCell = currentReportRow.createCell(4);
+                currentNirReportGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 2) {
+                    currentNirReportGroupCell.setCellValue("Неудовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 3) {
+                    currentNirReportGroupCell.setCellValue("Удовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 4) {
+                    currentNirReportGroupCell.setCellValue("Хорошо");
+                } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 5) {
+                    currentNirReportGroupCell.setCellValue("Отлично");
+                } else {
+                    currentNirReportGroupCell.setCellValue("");
+                }
+
+                // Задание на ПпППУиОПД
+                XSSFCell currentPpppuiopdTaskGroupCell = currentReportRow.createCell(5);
+                currentPpppuiopdTaskGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getPpppuipdTaskStatus() == 1) {
+                    currentPpppuiopdTaskGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentPpppuiopdTaskGroupCell.setCellValue("");
+                }
+
+                // Отчёт по ПпППУиОПД
+                XSSFCell currentPpppuiopdReportGroupCell = currentReportRow.createCell(6);
+                currentPpppuiopdReportGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 2) {
+                    currentPpppuiopdReportGroupCell.setCellValue("Неудовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 3) {
+                    currentPpppuiopdReportGroupCell.setCellValue("Удовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 4) {
+                    currentPpppuiopdReportGroupCell.setCellValue("Хорошо");
+                } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 5) {
+                    currentPpppuiopdReportGroupCell.setCellValue("Отлично");
+                } else {
+                    currentPpppuiopdReportGroupCell.setCellValue("");
+                }
+
+                // Задание на ПП
+                XSSFCell currentPpTaskGroupCell = currentReportRow.createCell(7);
+                currentPpTaskGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getPpTaskStatus() == 1) {
+                    currentPpTaskGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentPpTaskGroupCell.setCellValue("");
+                }
+
+                // Отчёт по ПП
+                XSSFCell currentPpReportGroupCell = currentReportRow.createCell(8);
+                currentPpReportGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 2) {
+                    currentPpReportGroupCell.setCellValue("Неудовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 3) {
+                    currentPpReportGroupCell.setCellValue("Удовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 4) {
+                    currentPpReportGroupCell.setCellValue("Хорошо");
+                } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 5) {
+                    currentPpReportGroupCell.setCellValue("Отлично");
+                } else {
+                    currentPpReportGroupCell.setCellValue("");
+                }
+
+                // Презентация по ВКР
+                XSSFCell currentPresentationGroupCell = currentReportRow.createCell(9);
+                currentPresentationGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getVkrPresentation() == 1) {
+                    currentPresentationGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentPresentationGroupCell.setCellValue("");
+                }
+
+                // Допуск по ВКР
+                XSSFCell currentAllowanceGroupCell = currentReportRow.createCell(10);
+                currentAllowanceGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getVkrAllowance() == 1) {
+                    currentAllowanceGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentAllowanceGroupCell.setCellValue("");
+                }
+
+                // Отзыв руководителя
+                XSSFCell currentFeedbackGroupCell = currentReportRow.createCell(11);
+                currentFeedbackGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getVkrAdvisorFeedback() == 1) {
+                    currentFeedbackGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentFeedbackGroupCell.setCellValue("");
+                }
+
+                // Антиплагиат
+                XSSFCell currentAntiplagiatGroupCell = currentReportRow.createCell(12);
+                currentAntiplagiatGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getVkrAntiplagiat() == 1) {
+                    currentAntiplagiatGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentAntiplagiatGroupCell.setCellValue("");
+                }
+
+                // Задание на ВКР
+                XSSFCell currentVkrTaskGroupCell = currentReportRow.createCell(13);
+                currentVkrTaskGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getVkrTask() == 1) {
+                    currentVkrTaskGroupCell.setCellValue("Одобрено");
+                } else {
+                    currentVkrTaskGroupCell.setCellValue("");
+                }
+
+                // РПЗ по ВКР
+                XSSFCell currentVkrReportGroupCell = currentReportRow.createCell(14);
+                currentVkrReportGroupCell.setCellType(CellType.STRING);
+                if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 2) {
+                    currentVkrReportGroupCell.setCellValue("Неудовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 3) {
+                    currentVkrReportGroupCell.setCellValue("Удовлетворительно");
+                } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 4) {
+                    currentVkrReportGroupCell.setCellValue("Хорошо");
+                } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 5) {
+                    currentVkrReportGroupCell.setCellValue("Отлично");
+                } else {
+                    currentVkrReportGroupCell.setCellValue("");
+                }
+                rowIndex++;
+            }
+            File file = new File(storageLocation + File.separator
+                    + "temp" + File.separator + "temp_report_" + Instant.now().toString()
+                    .replace(':', ' ').replace('.', ' ') + ".xlsx");
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            report.write(fileOutputStream);
+            return file;
+        } else {
+            return generateReportByStage(allActiveStudents, stagesKey);
+        }
+    }
+
+    public File generateReportByStage(List<AssociatedStudentView> allActiveStudents, Integer stagesKey) throws IOException {
         XSSFWorkbook report = new XSSFWorkbook();
+        File file;
+        int rowIndex = 1;
+        FileOutputStream fileOutputStream;
         XSSFSheet reportSheet = report.createSheet("Успеваемость студентов");
         // Создание заголовка таблицы
         XSSFRow reportRow = reportSheet.createRow(0);
@@ -1044,219 +1288,321 @@ public class DocumentProcessorService {
         XSSFCell advisorGroupCell = reportRow.createCell(2);
         advisorGroupCell.setCellType(CellType.STRING);
         advisorGroupCell.setCellValue("Научный руководитель");
-        // Задание на НИР
-        XSSFCell NirTaskGroupCell = reportRow.createCell(3);
-        NirTaskGroupCell.setCellType(CellType.STRING);
-        NirTaskGroupCell.setCellValue("Задание на НИР");
-        // Отчёт по НИР
-        XSSFCell NirReportGroupCell = reportRow.createCell(4);
-        NirReportGroupCell.setCellType(CellType.STRING);
-        NirReportGroupCell.setCellValue("Отчёт по НИР");
-        // Задание на ПпППУиОПД
-        XSSFCell PpppuiopdTaskGroupCell = reportRow.createCell(5);
-        PpppuiopdTaskGroupCell.setCellType(CellType.STRING);
-        PpppuiopdTaskGroupCell.setCellValue("Задание на ПпППУиОПД");
-        // Отчёт по ПпППУиОПД
-        XSSFCell PpppuiopdReportGroupCell = reportRow.createCell(6);
-        PpppuiopdReportGroupCell.setCellType(CellType.STRING);
-        PpppuiopdReportGroupCell.setCellValue("Отчёт по ПпППУиОПД");
-        // Задание на ПП
-        XSSFCell PpTaskGroupCell = reportRow.createCell(7);
-        PpTaskGroupCell.setCellType(CellType.STRING);
-        PpTaskGroupCell.setCellValue("Задание на ПП");
-        // Отчёт по ПП
-        XSSFCell PpReportGroupCell = reportRow.createCell(8);
-        PpReportGroupCell.setCellType(CellType.STRING);
-        PpReportGroupCell.setCellValue("Отчёт по ПП");
-        // Презентация по ВКР
-        XSSFCell PresentationGroupCell = reportRow.createCell(9);
-        PresentationGroupCell.setCellType(CellType.STRING);
-        PresentationGroupCell.setCellValue("Презентация по ВКР");
-        // Допуск по ВКР
-        XSSFCell AllowanceGroupCell = reportRow.createCell(10);
-        AllowanceGroupCell.setCellType(CellType.STRING);
-        AllowanceGroupCell.setCellValue("Допуск на защиту ВКР");
-        // Отзыв руководителя
-        XSSFCell FeedbackGroupCell = reportRow.createCell(11);
-        FeedbackGroupCell.setCellType(CellType.STRING);
-        FeedbackGroupCell.setCellValue("Отзыв руководителя на ВКР");
-        // Антиплагиат
-        XSSFCell antiplagiatGroupCell = reportRow.createCell(12);
-        antiplagiatGroupCell.setCellType(CellType.STRING);
-        antiplagiatGroupCell.setCellValue("Антиплагиат на ВКР");
-        // Задание на ВКР
-        XSSFCell VkrTaskGroupCell = reportRow.createCell(13);
-        VkrTaskGroupCell.setCellType(CellType.STRING);
-        VkrTaskGroupCell.setCellValue("Задание на ВКР");
-        // РПЗ по ВКР
-        XSSFCell VkrReportGroupCell = reportRow.createCell(14);
-        VkrReportGroupCell.setCellType(CellType.STRING);
-        VkrReportGroupCell.setCellValue("РПЗ по ВКР");
+        switch (stagesKey) {
+            case 1:
+                // Задание на НИР
+                XSSFCell NirTaskGroupCell = reportRow.createCell(3);
+                NirTaskGroupCell.setCellType(CellType.STRING);
+                NirTaskGroupCell.setCellValue("Задание на НИР");
+                // Отчёт по НИР
+                XSSFCell NirReportGroupCell = reportRow.createCell(4);
+                NirReportGroupCell.setCellType(CellType.STRING);
+                NirReportGroupCell.setCellValue("Отчёт по НИР");
+                rowIndex = 1;
+                // Заполнение данных в цикле
+                for (AssociatedStudentView activeStudent: allActiveStudents) {
+                    // Создание текущей строки таблицы
+                    XSSFRow currentReportRow = reportSheet.createRow(rowIndex);
 
-        int rowIndex = 1;
-        // Заполнение данных в цикле
-        for (AssociatedStudentView activeStudent: allActiveStudents) {
-            // Создание текущей строки таблицы
-            XSSFRow currentReportRow = reportSheet.createRow(rowIndex);
+                    // ФИО студента
+                    XSSFCell currentStudentFioCell = currentReportRow.createCell(0);
+                    currentStudentFioCell.setCellType(CellType.STRING);
+                    currentStudentFioCell.setCellValue(getShortFio(activeStudent.getFIO()));
 
-            // ФИО студента
-            XSSFCell currentStudentFioCell = currentReportRow.createCell(0);
-            currentStudentFioCell.setCellType(CellType.STRING);
-            currentStudentFioCell.setCellValue(getShortFio(activeStudent.getFIO()));
+                    // Группа
+                    XSSFCell currentStudentGroupCell = currentReportRow.createCell(1);
+                    currentStudentGroupCell.setCellType(CellType.STRING);
+                    currentStudentGroupCell.setCellValue(activeStudent.getGroup());
 
-            // Группа
-            XSSFCell currentStudentGroupCell = currentReportRow.createCell(1);
-            currentStudentGroupCell.setCellType(CellType.STRING);
-            currentStudentGroupCell.setCellValue(activeStudent.getGroup());
+                    // Научный руководитель
+                    XSSFCell currentAdvisorGroupCell = currentReportRow.createCell(2);
+                    currentAdvisorGroupCell.setCellType(CellType.STRING);
+                    AssociatedStudents associatedStudent =
+                            associatedStudentsRepository.findByStudent(activeStudent.getSystemStudentID());
+                    Users advisor = associatedStudent.getAdvisorUser();
+                    currentAdvisorGroupCell.setCellValue(getShortFio(advisor.getSurname() + " " + advisor.getName() +
+                            " " + advisor.getSecond_name()));
 
-            // Научный руководитель
-            XSSFCell currentAdvisorGroupCell = currentReportRow.createCell(2);
-            currentAdvisorGroupCell.setCellType(CellType.STRING);
-            AssociatedStudents associatedStudent =
-                    associatedStudentsRepository.findByStudent(activeStudent.getSystemStudentID());
-            Users advisor = associatedStudent.getAdvisorUser();
-            currentAdvisorGroupCell.setCellValue(getShortFio(advisor.getSurname() + " " + advisor.getName() +
-                    " " + advisor.getSecond_name()));
+                    // Задание на НИР
+                    XSSFCell currentNirTaskGroupCell = currentReportRow.createCell(3);
+                    currentNirTaskGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getNirTaskStatus() == 1) {
+                        currentNirTaskGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentNirTaskGroupCell.setCellValue("");
+                    }
 
-            // Задание на НИР
-            XSSFCell currentNirTaskGroupCell = currentReportRow.createCell(3);
-            currentNirTaskGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getNirTaskStatus() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // Отчёт по НИР
+                    XSSFCell currentNirReportGroupCell = currentReportRow.createCell(4);
+                    currentNirReportGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 2) {
+                        currentNirReportGroupCell.setCellValue("Неудовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 3) {
+                        currentNirReportGroupCell.setCellValue("Удовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 4) {
+                        currentNirReportGroupCell.setCellValue("Хорошо");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 5) {
+                        currentNirReportGroupCell.setCellValue("Отлично");
+                    } else {
+                        currentNirReportGroupCell.setCellValue("");
+                    }
+                    rowIndex++;
+                }
+                file = new File(storageLocation + File.separator
+                        + "temp" + File.separator + "temp_report_" + Instant.now().toString()
+                        .replace(':', ' ').replace('.', ' ') + ".xlsx");
+                fileOutputStream = new FileOutputStream(file);
+                report.write(fileOutputStream);
+                return file;
+            case 2:
+                // Задание на ПпППУиОПД
+                XSSFCell PpppuiopdTaskGroupCell = reportRow.createCell(3);
+                PpppuiopdTaskGroupCell.setCellType(CellType.STRING);
+                PpppuiopdTaskGroupCell.setCellValue("Задание на ПпППУиОПД");
+                // Отчёт по ПпППУиОПД
+                XSSFCell PpppuiopdReportGroupCell = reportRow.createCell(4);
+                PpppuiopdReportGroupCell.setCellType(CellType.STRING);
+                PpppuiopdReportGroupCell.setCellValue("Отчёт по ПпППУиОПД");
+                rowIndex = 1;
+                // Заполнение данных в цикле
+                for (AssociatedStudentView activeStudent: allActiveStudents) {
+                    // Создание текущей строки таблицы
+                    XSSFRow currentReportRow = reportSheet.createRow(rowIndex);
 
-            // Отчёт по НИР
-            XSSFCell currentNirReportGroupCell = currentReportRow.createCell(4);
-            currentNirReportGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 2) {
-                currentNirReportGroupCell.setCellValue("Неудовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 3) {
-                currentNirReportGroupCell.setCellValue("Удовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 4) {
-                currentNirReportGroupCell.setCellValue("Хорошо");
-            } else if (activeStudent.getStudentDocumentsStatusView().getNirReportStatus() == 5) {
-                currentNirReportGroupCell.setCellValue("Отлично");
-            } else {
-                currentNirReportGroupCell.setCellValue("");
-            }
+                    // ФИО студента
+                    XSSFCell currentStudentFioCell = currentReportRow.createCell(0);
+                    currentStudentFioCell.setCellType(CellType.STRING);
+                    currentStudentFioCell.setCellValue(getShortFio(activeStudent.getFIO()));
 
-            // Задание на ПпППУиОПД
-            XSSFCell currentPpppuiopdTaskGroupCell = currentReportRow.createCell(5);
-            currentPpppuiopdTaskGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getPpppuipdTaskStatus() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // Группа
+                    XSSFCell currentStudentGroupCell = currentReportRow.createCell(1);
+                    currentStudentGroupCell.setCellType(CellType.STRING);
+                    currentStudentGroupCell.setCellValue(activeStudent.getGroup());
 
-            // Отчёт по ПпППУиОПД
-            XSSFCell currentPpppuiopdReportGroupCell = currentReportRow.createCell(6);
-            currentPpppuiopdReportGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 2) {
-                currentNirReportGroupCell.setCellValue("Неудовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 3) {
-                currentNirReportGroupCell.setCellValue("Удовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 4) {
-                currentNirReportGroupCell.setCellValue("Хорошо");
-            } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 5) {
-                currentNirReportGroupCell.setCellValue("Отлично");
-            } else {
-                currentNirReportGroupCell.setCellValue("");
-            }
+                    // Научный руководитель
+                    XSSFCell currentAdvisorGroupCell = currentReportRow.createCell(2);
+                    currentAdvisorGroupCell.setCellType(CellType.STRING);
+                    AssociatedStudents associatedStudent =
+                            associatedStudentsRepository.findByStudent(activeStudent.getSystemStudentID());
+                    Users advisor = associatedStudent.getAdvisorUser();
+                    currentAdvisorGroupCell.setCellValue(getShortFio(advisor.getSurname() + " " + advisor.getName() +
+                            " " + advisor.getSecond_name()));
 
-            // Задание на ПП
-            XSSFCell currentPpTaskGroupCell = currentReportRow.createCell(7);
-            currentPpTaskGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getPpTaskStatus() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // Задание на ПпППУиОПД
+                    XSSFCell currentPpppuiopdTaskGroupCell = currentReportRow.createCell(3);
+                    currentPpppuiopdTaskGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getPpppuipdTaskStatus() == 1) {
+                        currentPpppuiopdTaskGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentPpppuiopdTaskGroupCell.setCellValue("");
+                    }
 
-            // Отчёт по ПП
-            XSSFCell currentPpReportGroupCell = currentReportRow.createCell(8);
-            currentPpReportGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 2) {
-                currentNirReportGroupCell.setCellValue("Неудовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 3) {
-                currentNirReportGroupCell.setCellValue("Удовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 4) {
-                currentNirReportGroupCell.setCellValue("Хорошо");
-            } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 5) {
-                currentNirReportGroupCell.setCellValue("Отлично");
-            } else {
-                currentNirReportGroupCell.setCellValue("");
-            }
+                    // Отчёт по ПпППУиОПД
+                    XSSFCell currentPpppuiopdReportGroupCell = currentReportRow.createCell(4);
+                    currentPpppuiopdReportGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 2) {
+                        currentPpppuiopdReportGroupCell.setCellValue("Неудовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 3) {
+                        currentPpppuiopdReportGroupCell.setCellValue("Удовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 4) {
+                        currentPpppuiopdReportGroupCell.setCellValue("Хорошо");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getPpppuipdReportStatus() == 5) {
+                        currentPpppuiopdReportGroupCell.setCellValue("Отлично");
+                    } else {
+                        currentPpppuiopdReportGroupCell.setCellValue("");
+                    }
+                }
+                file = new File(storageLocation + File.separator
+                        + "temp" + File.separator + "temp_report_" + Instant.now().toString()
+                        .replace(':', ' ').replace('.', ' ') + ".xlsx");
+                fileOutputStream = new FileOutputStream(file);
+                report.write(fileOutputStream);
+                return file;
+            case 3:
+                // Задание на ПП
+                XSSFCell PpTaskGroupCell = reportRow.createCell(3);
+                PpTaskGroupCell.setCellType(CellType.STRING);
+                PpTaskGroupCell.setCellValue("Задание на ПП");
+                // Отчёт по ПП
+                XSSFCell PpReportGroupCell = reportRow.createCell(4);
+                PpReportGroupCell.setCellType(CellType.STRING);
+                PpReportGroupCell.setCellValue("Отчёт по ПП");
+                rowIndex = 1;
+                // Заполнение данных в цикле
+                for (AssociatedStudentView activeStudent: allActiveStudents) {
+                    // Создание текущей строки таблицы
+                    XSSFRow currentReportRow = reportSheet.createRow(rowIndex);
 
-            // Презентация по ВКР
-            XSSFCell currentPresentationGroupCell = currentReportRow.createCell(9);
-            currentPresentationGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getVkrPresentation() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // ФИО студента
+                    XSSFCell currentStudentFioCell = currentReportRow.createCell(0);
+                    currentStudentFioCell.setCellType(CellType.STRING);
+                    currentStudentFioCell.setCellValue(getShortFio(activeStudent.getFIO()));
 
-            // Допуск по ВКР
-            XSSFCell currentAllowanceGroupCell = currentReportRow.createCell(10);
-            currentAllowanceGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getVkrAllowance() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // Группа
+                    XSSFCell currentStudentGroupCell = currentReportRow.createCell(1);
+                    currentStudentGroupCell.setCellType(CellType.STRING);
+                    currentStudentGroupCell.setCellValue(activeStudent.getGroup());
 
-            // Отзыв руководителя
-            XSSFCell currentFeedbackGroupCell = currentReportRow.createCell(11);
-            currentFeedbackGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getVkrAdvisorFeedback() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // Научный руководитель
+                    XSSFCell currentAdvisorGroupCell = currentReportRow.createCell(2);
+                    currentAdvisorGroupCell.setCellType(CellType.STRING);
+                    AssociatedStudents associatedStudent =
+                            associatedStudentsRepository.findByStudent(activeStudent.getSystemStudentID());
+                    Users advisor = associatedStudent.getAdvisorUser();
+                    currentAdvisorGroupCell.setCellValue(getShortFio(advisor.getSurname() + " " + advisor.getName() +
+                            " " + advisor.getSecond_name()));
 
-            // Антиплагиат
-            XSSFCell currentAntiplagiatGroupCell = currentReportRow.createCell(12);
-            currentAntiplagiatGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getVkrAntiplagiat() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // Задание на ПП
+                    XSSFCell currentPpTaskGroupCell = currentReportRow.createCell(3);
+                    currentPpTaskGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getPpTaskStatus() == 1) {
+                        currentPpTaskGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentPpTaskGroupCell.setCellValue("");
+                    }
 
-            // Задание на ВКР
-            XSSFCell currentVkrTaskGroupCell = currentReportRow.createCell(13);
-            currentVkrTaskGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getVkrTask() == 1) {
-                currentNirTaskGroupCell.setCellValue("Одобрено");
-            } else {
-                currentNirTaskGroupCell.setCellValue("");
-            }
+                    // Отчёт по ПП
+                    XSSFCell currentPpReportGroupCell = currentReportRow.createCell(4);
+                    currentPpReportGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 2) {
+                        currentPpReportGroupCell.setCellValue("Неудовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 3) {
+                        currentPpReportGroupCell.setCellValue("Удовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 4) {
+                        currentPpReportGroupCell.setCellValue("Хорошо");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getPpReportStatus() == 5) {
+                        currentPpReportGroupCell.setCellValue("Отлично");
+                    } else {
+                        currentPpReportGroupCell.setCellValue("");
+                    }
+                    rowIndex++;
+                }
+                file = new File(storageLocation + File.separator
+                        + "temp" + File.separator + "temp_report_" + Instant.now().toString()
+                        .replace(':', ' ').replace('.', ' ') + ".xlsx");
+                fileOutputStream = new FileOutputStream(file);
+                report.write(fileOutputStream);
+                return file;
+            case 4:
+                // Презентация по ВКР
+                XSSFCell PresentationGroupCell = reportRow.createCell(3);
+                PresentationGroupCell.setCellType(CellType.STRING);
+                PresentationGroupCell.setCellValue("Презентация по ВКР");
+                // Допуск по ВКР
+                XSSFCell AllowanceGroupCell = reportRow.createCell(4);
+                AllowanceGroupCell.setCellType(CellType.STRING);
+                AllowanceGroupCell.setCellValue("Допуск на защиту ВКР");
+                // Отзыв руководителя
+                XSSFCell FeedbackGroupCell = reportRow.createCell(5);
+                FeedbackGroupCell.setCellType(CellType.STRING);
+                FeedbackGroupCell.setCellValue("Отзыв руководителя на ВКР");
+                // Антиплагиат
+                XSSFCell antiplagiatGroupCell = reportRow.createCell(6);
+                antiplagiatGroupCell.setCellType(CellType.STRING);
+                antiplagiatGroupCell.setCellValue("Антиплагиат на ВКР");
+                // Задание на ВКР
+                XSSFCell VkrTaskGroupCell = reportRow.createCell(7);
+                VkrTaskGroupCell.setCellType(CellType.STRING);
+                VkrTaskGroupCell.setCellValue("Задание на ВКР");
+                // РПЗ по ВКР
+                XSSFCell VkrReportGroupCell = reportRow.createCell(8);
+                VkrReportGroupCell.setCellType(CellType.STRING);
+                VkrReportGroupCell.setCellValue("РПЗ по ВКР");
+                rowIndex = 1;
+                // Заполнение данных в цикле
+                for (AssociatedStudentView activeStudent: allActiveStudents) {
+                    // Создание текущей строки таблицы
+                    XSSFRow currentReportRow = reportSheet.createRow(rowIndex);
 
-            // РПЗ по ВКР
-            XSSFCell currentVkrReportGroupCell = currentReportRow.createCell(14);
-            currentVkrReportGroupCell.setCellType(CellType.STRING);
-            if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 2) {
-                currentNirReportGroupCell.setCellValue("Неудовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 3) {
-                currentNirReportGroupCell.setCellValue("Удовлетворительно");
-            } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 4) {
-                currentNirReportGroupCell.setCellValue("Хорошо");
-            } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 5) {
-                currentNirReportGroupCell.setCellValue("Отлично");
-            } else {
-                currentNirReportGroupCell.setCellValue("");
-            }
-            rowIndex++;
+                    // ФИО студента
+                    XSSFCell currentStudentFioCell = currentReportRow.createCell(0);
+                    currentStudentFioCell.setCellType(CellType.STRING);
+                    currentStudentFioCell.setCellValue(getShortFio(activeStudent.getFIO()));
+
+                    // Группа
+                    XSSFCell currentStudentGroupCell = currentReportRow.createCell(1);
+                    currentStudentGroupCell.setCellType(CellType.STRING);
+                    currentStudentGroupCell.setCellValue(activeStudent.getGroup());
+
+                    // Научный руководитель
+                    XSSFCell currentAdvisorGroupCell = currentReportRow.createCell(2);
+                    currentAdvisorGroupCell.setCellType(CellType.STRING);
+                    AssociatedStudents associatedStudent =
+                            associatedStudentsRepository.findByStudent(activeStudent.getSystemStudentID());
+                    Users advisor = associatedStudent.getAdvisorUser();
+                    currentAdvisorGroupCell.setCellValue(getShortFio(advisor.getSurname() + " " + advisor.getName() +
+                            " " + advisor.getSecond_name()));
+
+                    // Презентация по ВКР
+                    XSSFCell currentPresentationGroupCell = currentReportRow.createCell(3);
+                    currentPresentationGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getVkrPresentation() == 1) {
+                        currentPresentationGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentPresentationGroupCell.setCellValue("");
+                    }
+
+                    // Допуск по ВКР
+                    XSSFCell currentAllowanceGroupCell = currentReportRow.createCell(4);
+                    currentAllowanceGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getVkrAllowance() == 1) {
+                        currentAllowanceGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentAllowanceGroupCell.setCellValue("");
+                    }
+
+                    // Отзыв руководителя
+                    XSSFCell currentFeedbackGroupCell = currentReportRow.createCell(5);
+                    currentFeedbackGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getVkrAdvisorFeedback() == 1) {
+                        currentFeedbackGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentFeedbackGroupCell.setCellValue("");
+                    }
+
+                    // Антиплагиат
+                    XSSFCell currentAntiplagiatGroupCell = currentReportRow.createCell(6);
+                    currentAntiplagiatGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getVkrAntiplagiat() == 1) {
+                        currentAntiplagiatGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentAntiplagiatGroupCell.setCellValue("");
+                    }
+
+                    // Задание на ВКР
+                    XSSFCell currentVkrTaskGroupCell = currentReportRow.createCell(7);
+                    currentVkrTaskGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getVkrTask() == 1) {
+                        currentVkrTaskGroupCell.setCellValue("Одобрено");
+                    } else {
+                        currentVkrTaskGroupCell.setCellValue("");
+                    }
+
+                    // РПЗ по ВКР
+                    XSSFCell currentVkrReportGroupCell = currentReportRow.createCell(8);
+                    currentVkrReportGroupCell.setCellType(CellType.STRING);
+                    if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 2) {
+                        currentVkrReportGroupCell.setCellValue("Неудовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 3) {
+                        currentVkrReportGroupCell.setCellValue("Удовлетворительно");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 4) {
+                        currentVkrReportGroupCell.setCellValue("Хорошо");
+                    } else if (activeStudent.getStudentDocumentsStatusView().getVkrRPZ() == 5) {
+                        currentVkrReportGroupCell.setCellValue("Отлично");
+                    } else {
+                        currentVkrReportGroupCell.setCellValue("");
+                    }
+                    rowIndex++;
+                }
+                file = new File(storageLocation + File.separator
+                        + "temp" + File.separator + "temp_report_" + Instant.now().toString()
+                        .replace(':', ' ').replace('.', ' ') + ".xlsx");
+                fileOutputStream = new FileOutputStream(file);
+                report.write(fileOutputStream);
+                return file;
+            default:
+                return null;
         }
-        File file = new File(storageLocation + File.separator
-                + "temp" + File.separator + "temp_report_" + Instant.now().toString()
-                .replace(':', ' ').replace('.', ' ') + ".xlsx");
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        report.write(fileOutputStream);
-        return file;
     }
 
     // Преобразование даты вида ДД.ММ.ГГГГ к виду «XX» месяца YYYY
