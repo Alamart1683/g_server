@@ -105,7 +105,7 @@ public class DocumentViewController {
     private String getOuterDocumentLink(
             @RequestParam Integer versionID,
             HttpServletRequest httpServletRequest
-    ) {
+    ) throws Exception {
         return documentViewService.generateOuterLinkForFile(getTokenFromRequest(httpServletRequest), versionID);
     }
 

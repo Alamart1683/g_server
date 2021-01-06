@@ -29,6 +29,7 @@ import g_server.g_server.application.repository.system_data.SpecialityRepository
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
+import g_server.g_server.application.service.documents.text_processor.Splitter;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -1360,7 +1366,7 @@ public class DocumentViewService {
     }
 
     // Получить внешнюю ссылку на документ
-    public String generateOuterLinkForFile(String token, Integer versionID) {
+    public String generateOuterLinkForFile(String token, Integer versionID) throws Exception {
         DocumentVersion documentVersion;
         Document document;
         if (documentVersionRepository.findById(versionID).isPresent()) {
@@ -1369,7 +1375,7 @@ public class DocumentViewService {
             String documentString = document.getCreator() + File.separator + document.getName();
             boolean isEnabled = false;
             List<DocumentView> enabledDocuments = getUserDocumentView(token);
-            for (DocumentView documentView: enabledDocuments) {
+            for (DocumentView documentView : enabledDocuments) {
                 String viewString = documentView.getSystemCreatorID() + File.separator + documentView.getDocumentName();
                 if (documentString.equals(viewString)) {
                     isEnabled = true;
@@ -1377,17 +1383,35 @@ public class DocumentViewService {
                 }
             }
             if (isEnabled) {
-                String documentVersionName = documentVersion.getThis_version_document_path()
-                        .substring(documentVersion.getThis_version_document_path().lastIndexOf(File.separator) + 1);
-                String outerAccessString = externalApiUrl + document.getCreator() + "/" + document.getName()
-                        + "/" + documentVersionName;
-                return outerAccessString;
+                if (document.getKind() != 2) {
+                    String documentVersionName = documentVersion.getThis_version_document_path()
+                            .substring(documentVersion.getThis_version_document_path().lastIndexOf(File.separator) + 1);
+                    String outerAccessString = externalApiUrl + document.getCreator() + "/" + document.getName()
+                            + "/" + documentVersionName;
+                    return outerAccessString;
+                } else if (document.getKind() == 2 && document.getType() != 4) {
+                    File viewTaskDirectory = new File(".\\view_tasks");
+                    if (!viewTaskDirectory.exists()) {
+                        viewTaskDirectory.mkdir();
+                    }
+                    List<File> viewTaskList = Arrays.asList(viewTaskDirectory.listFiles());
+                    for (File file: viewTaskList) {
+                        long fileModified = file.lastModified();
+                        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+                        long currentTime = zonedDateTime.toInstant().toEpochMilli();
+                        if (currentTime - fileModified > 86400000) {
+                            file.delete();
+                        }
+                    }
+                    File viewTask = getThreeViewPages(versionID);
+                    String outerAccessString = externalApiUrl + viewTask.getPath();
+                    return outerAccessString;
+                }
             } else {
                 return "Данный документ вам не доступен";
             }
-        } else {
-            return "Ошибка: не удается найти документ";
         }
+        return "Ошибка: не удается найти документ";
     }
 
     // Получить внешнюю ссылку на документ у которого только одна версия
@@ -1418,4 +1442,39 @@ public class DocumentViewService {
             return "Ошибка: не удается найти документ";
         }
     }
+
+    // Выделить только текст задания
+    public File getThreeViewPages(Integer versionID) throws Exception {
+        DocumentVersion documentVersion;
+        File viewTask = null;
+        if (documentVersionRepository.findById(versionID).isPresent()) {
+            documentVersion = documentVersionRepository.findById(versionID).get();
+            if (documentRepository.findById(documentVersion.getDocument()).isPresent()) {
+                com.aspose.words.Document task = new com.aspose.words.Document(documentVersion.getThis_version_document_path());
+                com.aspose.words.LayoutCollector layoutCollector = new com.aspose.words.LayoutCollector(task);
+                Splitter splitter = new Splitter(layoutCollector);
+                int page = 1;
+                while (!splitter.getDocText(splitter.getDocumentOfPage(page)).contains("ИНДИВИДУАЛЬНОЕ ЗАДАНИЕ НА ПРОИЗВОДСТВЕННУЮ ПРАКТИКУ")) {
+                    page += 1;
+                }
+                com.aspose.words.Document cutTask = splitter.getDocumentOfPage(page);
+                page += 1;
+                while (!splitter.getDocText(splitter.getDocumentOfPage(page)).contains("по производственной практике")) {
+                    cutTask.appendDocument(splitter.getDocumentOfPage(page), com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                    page += 1;
+                }
+                String timeName = ZonedDateTime.now().toString();
+                timeName = timeName.replaceAll("-", "");
+                timeName = timeName.replaceAll("\\.", "");
+                timeName = timeName.replaceAll(":", "");
+                timeName = timeName.replaceAll("Z", "");
+                timeName = timeName.replaceAll("T", "");
+                String tempCutTaskPath = ".\\view_tasks" + File.separator + timeName + ".docx";
+                cutTask.save(tempCutTaskPath);
+                viewTask = new File(tempCutTaskPath);
+            }
+        }
+        return viewTask;
+    }
 }
+
