@@ -1037,21 +1037,21 @@ public class DocumentProcessorService {
             XSSFWorkbook report = new XSSFWorkbook();
             XSSFSheet reportSheet = report.createSheet("Успеваемость студентов");
             // Настройка ширины колонок
-            reportSheet.setColumnWidth(0, 200);
-            reportSheet.setColumnWidth(1, 200);
-            reportSheet.setColumnWidth(2, 200);
-            reportSheet.setColumnWidth(3, 200);
-            reportSheet.setColumnWidth(4, 200);
-            reportSheet.setColumnWidth(5, 200);
-            reportSheet.setColumnWidth(6, 200);
-            reportSheet.setColumnWidth(7, 200);
-            reportSheet.setColumnWidth(8, 200);
-            reportSheet.setColumnWidth(9, 200);
-            reportSheet.setColumnWidth(10, 200);
-            reportSheet.setColumnWidth(11, 200);
-            reportSheet.setColumnWidth(12, 200);
-            reportSheet.setColumnWidth(13, 200);
-            reportSheet.setColumnWidth(14, 200);
+            reportSheet.setColumnWidth(0, 5000);
+            reportSheet.setColumnWidth(1, 3000);
+            reportSheet.setColumnWidth(2, 5500);
+            reportSheet.setColumnWidth(3, 5500);
+            reportSheet.setColumnWidth(4, 5500);
+            reportSheet.setColumnWidth(5, 5500);
+            reportSheet.setColumnWidth(6, 5500);
+            reportSheet.setColumnWidth(7, 5500);
+            reportSheet.setColumnWidth(8, 5500);
+            reportSheet.setColumnWidth(9, 5500);
+            reportSheet.setColumnWidth(10, 5500);
+            reportSheet.setColumnWidth(11, 5500);
+            reportSheet.setColumnWidth(12, 5500);
+            reportSheet.setColumnWidth(13, 5500);
+            reportSheet.setColumnWidth(14, 5500);
             // Создание заголовка таблицы
             XSSFRow reportRow = reportSheet.createRow(0);
             // ФИО студента
@@ -1291,11 +1291,11 @@ public class DocumentProcessorService {
         FileOutputStream fileOutputStream;
         XSSFSheet reportSheet = report.createSheet("Успеваемость студентов");
         // Настройка ширины колонок
-        reportSheet.setColumnWidth(0, 200);
-        reportSheet.setColumnWidth(1, 200);
-        reportSheet.setColumnWidth(2, 200);
-        reportSheet.setColumnWidth(3, 200);
-        reportSheet.setColumnWidth(4, 200);
+        reportSheet.setColumnWidth(0, 5000);
+        reportSheet.setColumnWidth(1, 3000);
+        reportSheet.setColumnWidth(2, 5500);
+        reportSheet.setColumnWidth(3, 5500);
+        reportSheet.setColumnWidth(4, 5500);
         // Создание заголовка таблицы
         XSSFRow reportRow = reportSheet.createRow(0);
         // ФИО студента
@@ -1507,10 +1507,10 @@ public class DocumentProcessorService {
                 report.write(fileOutputStream);
                 return file;
             case 4:
-                reportSheet.setColumnWidth(5, 200);
-                reportSheet.setColumnWidth(6, 200);
-                reportSheet.setColumnWidth(7, 200);
-                reportSheet.setColumnWidth(8, 200);
+                reportSheet.setColumnWidth(5, 5500);
+                reportSheet.setColumnWidth(6, 5500);
+                reportSheet.setColumnWidth(7, 5500);
+                reportSheet.setColumnWidth(8, 5500);
                 // Презентация по ВКР
                 XSSFCell PresentationGroupCell = reportRow.createCell(3);
                 PresentationGroupCell.setCellType(CellType.STRING);
