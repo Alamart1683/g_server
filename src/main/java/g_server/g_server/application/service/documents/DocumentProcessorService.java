@@ -1632,6 +1632,60 @@ public class DocumentProcessorService {
         }
     }
 
+    // Сгенерировать отчёт по успеваемости на основе динамической формы
+    public File generateReportFromDynamicForm(AcademicRecordDynamicForm dynamicForm) throws Exception {
+        XSSFWorkbook dynamicReport = new XSSFWorkbook();
+        XSSFSheet reportSheet = dynamicReport.createSheet("Успеваемость студентов");
+        // Создадим столбец заголовка
+        XSSFRow headersRow = reportSheet.createRow(0);
+        // Выставим длину столбцов и установим их заголовки
+        for (int i = 0; i < dynamicForm.getColumnsHeaders().size(); i++) {
+            reportSheet.setColumnWidth(i, 5500);
+            XSSFCell currentCell = headersRow.createCell(i);
+            currentCell.setCellType(CellType.STRING);
+            currentCell.setCellValue(dynamicForm.getColumnsHeaders().get(i));
+        }
+        // Заполним таблицу данными
+        for (int i = 0; i < dynamicForm.getRowsContent().size(); i++) {
+            XSSFRow currentContentRow = reportSheet.createRow(i + 1); // Надо учитывать смещение числа строк на 1 из-за заголовка
+            // Запишем в цикле строку данных
+            for (int j = 0; j < dynamicForm.getRowsContent().get(i).size(); j++) {
+                XSSFCell currentContentCell = currentContentRow.createCell(j);
+                String currentData = dynamicForm.getRowsContent().get(i).get(j);
+                switch (currentData) {
+                    case "0":
+                        currentData = "";
+                        break;
+                    case "1":
+                        currentData = "Одобрено";
+                        break;
+                    case "2":
+                        currentData = "Неудовлетворительно";
+                        break;
+                    case "3":
+                        currentData = "Удовлетворительно";
+                        break;
+                    case "4":
+                        currentData = "Хорошо";
+                        break;
+                    case "5":
+                        currentData = "Отлично";
+                        break;
+                    default:
+                        break;
+                }
+                currentContentCell.setCellType(CellType.STRING);
+                currentContentCell.setCellValue(currentData);
+            }
+        }
+        File file = new File(storageLocation + File.separator
+                + "temp" + File.separator + "temp_dynamic_report_" + Instant.now().toString()
+                .replace(':', ' ').replace('.', ' ') + ".xlsx");
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+        dynamicReport.write(fileOutputStream);
+        return file;
+    }
+
     // Преобразование даты вида ДД.ММ.ГГГГ к виду «XX» месяца YYYY
     public String getFirstDateType(String russianDate) {
         String day = russianDate.substring(0, 2);

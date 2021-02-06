@@ -2,12 +2,15 @@ package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
+import g_server.g_server.application.entity.view.AcademicRecordDynamicForm;
 import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
 import g_server.g_server.application.service.documents.DocumentDownloadService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
@@ -138,7 +141,7 @@ public class DocumentDownloadController {
     }
 
     @GetMapping("/head_of_cathedra/document/download/cathedta_report/")
-    public void documentDownload(
+    public void reportDownload(
             HttpServletResponse httpServletResponse,
             HttpServletRequest httpServletRequest,
             @RequestParam String studentKey,
@@ -159,6 +162,26 @@ public class DocumentDownloadController {
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
+        }
+    }
+
+    @GetMapping("/head_of_cathedra/document/download/dynamic_report/")
+    public void dynamicReportDownload(
+            @ModelAttribute("dynamicForm") @Validated AcademicRecordDynamicForm dynamicForm,
+            HttpServletResponse httpServletResponse
+    ) throws Exception {
+        File file = documentProcessorService.generateReportFromDynamicForm(dynamicForm);
+        String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        String mainName = "Отчёт об успеваемости студентов";
+        Path path = Paths.get(file.getPath());
+        httpServletResponse.setContentType(contentType);
+        httpServletResponse.addHeader("Content-Disposition", "attachment; filename=" + mainName);
+        try {
+            Files.copy(path, httpServletResponse.getOutputStream());
+            httpServletResponse.getOutputStream().flush();
+            file.delete();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
         }
     }
 
