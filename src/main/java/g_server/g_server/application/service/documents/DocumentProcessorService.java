@@ -1026,6 +1026,7 @@ public class DocumentProcessorService {
     }
 
     // Сгенерировать отчёт по успеваемости всех студентов
+    @Deprecated
     public File generateReportAboutAllActiveStudents(String studentKey, String token, Integer stagesKey) throws Exception {
         List<AssociatedStudentView> allActiveStudents;
         if (studentKey.equals("for my students")) {
@@ -1284,6 +1285,7 @@ public class DocumentProcessorService {
         }
     }
 
+    @Deprecated
     public File generateReportByStage(List<AssociatedStudentView> allActiveStudents, Integer stagesKey) throws IOException {
         XSSFWorkbook report = new XSSFWorkbook();
         File file;
