@@ -9,10 +9,7 @@ import g_server.g_server.application.service.documents.DocumentDownloadService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -167,7 +164,8 @@ public class DocumentDownloadController {
 
     @GetMapping("/head_of_cathedra/document/download/dynamic_report/")
     public void dynamicReportDownload(
-            @ModelAttribute("dynamicForm") @Validated AcademicRecordDynamicForm dynamicForm,
+            //@ModelAttribute("dynamicForm") @Validated AcademicRecordDynamicForm dynamicForm,
+            @RequestBody AcademicRecordDynamicForm dynamicForm,
             HttpServletResponse httpServletResponse
     ) throws Exception {
         File file = documentProcessorService.generateReportFromDynamicForm(dynamicForm);
