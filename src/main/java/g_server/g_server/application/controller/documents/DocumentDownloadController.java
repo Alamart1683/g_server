@@ -162,7 +162,7 @@ public class DocumentDownloadController {
         }
     }
 
-    @GetMapping("/head_of_cathedra/document/download/dynamic_report/")
+    @PostMapping("/head_of_cathedra/document/download/dynamic_report/")
     public void dynamicReportDownload(
             //@ModelAttribute("dynamicForm") @Validated AcademicRecordDynamicForm dynamicForm,
             @RequestBody AcademicRecordDynamicForm dynamicForm,
