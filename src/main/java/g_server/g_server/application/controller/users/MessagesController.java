@@ -1,6 +1,5 @@
 package g_server.g_server.application.controller.users;
 
-import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.entity.messanger.components.Message;
 import g_server.g_server.application.entity.messanger.components.MessageSendForm;
 import g_server.g_server.application.service.messager.MessagesService;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
 import static org.springframework.util.StringUtils.hasText;
 
 @RestController
@@ -48,7 +46,6 @@ public class MessagesController {
             HttpServletRequest httpServletRequest) {
         return messagesService.sendMessage(
                 usersService.getUserId(getTokenFromRequest(httpServletRequest)), messageSendForm);
-
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
