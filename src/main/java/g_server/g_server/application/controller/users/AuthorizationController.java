@@ -39,6 +39,7 @@ public class AuthorizationController {
         Users user = usersService.loadUserByEmailAndPassword(authorizationForm.getEmail(), authorizationForm.getPassword());
         if (user != null) {
             if (user.isConfirmed()) {
+                //System.out.println("мда");
                 // Сгенерируем refresh-токен
                 long refreshIssue = java.time.Instant.now().getEpochSecond();
                 long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000; // 60 суток
@@ -108,7 +109,7 @@ public class AuthorizationController {
                         accessToken,
                         accessIssue,
                         accessExpire,
-                        refreshToken.getRefreshToken(),
+                        newRefreshToken,
                         refreshIssue,
                         refreshExpire
                 );

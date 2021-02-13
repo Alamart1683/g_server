@@ -63,7 +63,7 @@ public class JwtProvider {
             refreshToken.setExpire(expire);
             refreshTokenRepository.save(refreshToken);
         }
-        return bCryptPasswordEncoder.encode(refreshToken.getRefreshToken());
+        return refreshToken.getRefreshToken();
     }
 
     public boolean validateRefreshToken(String token) {
@@ -73,7 +73,7 @@ public class JwtProvider {
         } catch (Exception e) {
             refreshToken = null;
         }
-        if (refreshToken != null && (refreshToken.getExpire() - java.time.Instant.now().getEpochSecond() < 0)) {
+        if (refreshToken != null && (refreshToken.getExpire() - java.time.Instant.now().getEpochSecond() > 0)) {
             return true;
         }
         return false;
