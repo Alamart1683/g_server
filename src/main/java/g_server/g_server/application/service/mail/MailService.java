@@ -85,6 +85,7 @@ public class MailService {
         return result;
     }
 
+    @Deprecated
     // Послать научному руководителю письмо о том, что студент хочет получить его научное руководство
     public String sendRequestForScientificAdvisorMail(Users student, Users scientificAdvisor,
                                                     String theme, String acceptURL, String declineURL) {
