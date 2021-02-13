@@ -132,15 +132,25 @@ public class MessagesService {
     public String sendMessage(Integer senderId, MessageSendForm messageSendForm) {
         try {
             Sender sender = getMessageSender(senderId);
-            
+            List<Receiver> receiverList = new ArrayList<>();
+            for (String receiver: messageSendForm.getReceivers().split(",")) {
+                receiverList.add(getMessageReceiver(Integer.parseInt(receiver)));
+            }
             Messages message = new Messages();
             message.setSender(senderId.toString());
             message.setMessageTheme(messageSendForm.getMessageTheme());
             message.setMessageTheme(messageSendForm.getMessageText());
             message.setReceivers(messageSendForm.getReceivers());
             messagesRepository.save(message);
-            // TODO Сделать почтовую рассылку сообщения на основе строки получателей 13.02.2021
-            return "Сообщение успешно отправлено!";
+            mailService.sendMailByMessage(
+                    sender,
+                    messageSendForm.getMessageTheme(),
+                    messageSendForm.getMessageText(),
+                    receiverList
+            );
+            String mailResult = mailService.sendMailByMessage(sender, messageSendForm.getMessageTheme(),
+                    messageSendForm.getMessageText(), receiverList);
+            return "Сообщение успешно отправлено! \n" + mailResult;
         } catch (Exception e) {
             return "Ошибка отправки сообщения!";
         }

@@ -213,9 +213,22 @@ public class MailService {
     }
 
     // Дублировать отправку сообщения на почту
-    public void sendMailByMessage(Sender sender, String messageTheme,
+    public String sendMailByMessage(Sender sender, String messageTheme,
                                   String messageText, List<Receiver> receiverList) {
-
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, "utf-8");
+        try {
+            for (Receiver receiver: receiverList) {
+                messageHelper.setTo(receiver.getEmail());
+                messageHelper.setSubject(messageTheme);
+                messageHelper.setText("Вам пришло сообщение от " + sender.getFio() + " (" + sender.getEmail() + "):\n" + messageText);
+                this.mailSender.send(mimeMessage);
+            }
+        }
+        catch (MessagingException messagingException) {
+            return "MessagingException";
+        }
+        return "All emails successfully sent!";
     }
 
     // Определить время письма

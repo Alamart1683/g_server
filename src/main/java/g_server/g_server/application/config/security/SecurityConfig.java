@@ -54,7 +54,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // То, что можно всем авторизованным
                 .antMatchers("/document/**",
-                        "/date/all").hasAnyRole("STUDENT", "SCIENTIFIC_ADVISOR",
+                        "/date/all",
+                        "/messages/**").hasAnyRole("STUDENT", "SCIENTIFIC_ADVISOR",
                       "HEAD_OF_CATHEDRA", "ADMIN", "ROOT")
 
                 // То, что можно всем
