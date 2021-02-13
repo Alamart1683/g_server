@@ -1,5 +1,7 @@
 package g_server.g_server.application.service.mail;
 
+import g_server.g_server.application.entity.messanger.components.Receiver;
+import g_server.g_server.application.entity.messanger.components.Sender;
 import g_server.g_server.application.entity.users.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,6 +13,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Service
 // TODO Глобально подумать о создании генерируемых на основе токенов ссылок подтверждения каких либо действий
@@ -207,6 +210,12 @@ public class MailService {
             return "MessagingException";
         }
         return "Email sent!";
+    }
+
+    // Дублировать отправку сообщения на почту
+    public void sendMailByMessage(Sender sender, String messageTheme,
+                                  String messageText, List<Receiver> receiverList) {
+
     }
 
     // Определить время письма
