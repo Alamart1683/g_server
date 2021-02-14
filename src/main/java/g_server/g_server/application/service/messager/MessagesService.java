@@ -146,12 +146,6 @@ public class MessagesService {
             message.setMessageText(messageSendForm.getMessageText());
             message.setReceivers(messageSendForm.getReceivers());
             messagesRepository.save(message);
-            mailService.sendMailByMessage(
-                    sender,
-                    messageSendForm.getMessageTheme(),
-                    messageSendForm.getMessageText(),
-                    receiverList
-            );
             String mailResult = mailService.sendMailByMessage(sender, messageSendForm.getMessageTheme(),
                     messageSendForm.getMessageText(), receiverList);
             return "Сообщение успешно отправлено! \n" + mailResult;
