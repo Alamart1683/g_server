@@ -149,9 +149,9 @@ create table document_version (
 create table messages (
     id int primary key auto_increment,
     sender int not null,
-    send_date datetime not null default current_timestamp,
+    send_date datetime default current_timestamp,
     message_theme varchar(100) not null,
-    message_text varchar (512) not null,
+    message_text varchar (2048) not null,
     receivers varchar(100) not null,
     foreign key (sender) references users(id) on delete cascade on update cascade
 );

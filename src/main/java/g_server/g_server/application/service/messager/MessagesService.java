@@ -11,6 +11,8 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,10 +138,12 @@ public class MessagesService {
             for (String receiver: messageSendForm.getReceivers().split(",")) {
                 receiverList.add(getMessageReceiver(Integer.parseInt(receiver)));
             }
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             Messages message = new Messages();
             message.setSender(senderId.toString());
+            message.setSendDate(timestamp.toString());
             message.setMessageTheme(messageSendForm.getMessageTheme());
-            message.setMessageTheme(messageSendForm.getMessageText());
+            message.setMessageText(messageSendForm.getMessageText());
             message.setReceivers(messageSendForm.getReceivers());
             messagesRepository.save(message);
             mailService.sendMailByMessage(
@@ -152,6 +156,7 @@ public class MessagesService {
                     messageSendForm.getMessageText(), receiverList);
             return "Сообщение успешно отправлено! \n" + mailResult;
         } catch (Exception e) {
+            e.printStackTrace();
             return "Ошибка отправки сообщения!";
         }
     }

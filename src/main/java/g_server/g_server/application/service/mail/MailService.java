@@ -3,7 +3,9 @@ package g_server.g_server.application.service.mail;
 import g_server.g_server.application.entity.messanger.components.Receiver;
 import g_server.g_server.application.entity.messanger.components.Sender;
 import g_server.g_server.application.entity.users.Users;
+import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,8 +22,21 @@ import java.util.List;
 // TODO это позволит сильно увеличить удобство пользования сайтом, например прямо из письма подтвердить заявку
 // TODO студента, просто перейдя по ссылке
 public class MailService {
-    @Autowired
     private JavaMailSender mailSender;
+    private DocumentProcessorService documentProcessorService;
+
+    @Autowired
+    public void setMailSender(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    @Autowired
+    public void setDocumentProcessorService(DocumentProcessorService documentProcessorService) {
+        this.documentProcessorService = documentProcessorService;
+    }
+
+    @Value("${client.url}")
+    private String clientUrl;
 
     // Отправить по почте код подтверждения и ссылки завершения регистрации для студента
     public String sendStudentEmail(String recipient, String registrationCode, String registrationLink) {
@@ -213,19 +228,35 @@ public class MailService {
     }
 
     // Дублировать отправку сообщения на почту
-    public String sendMailByMessage(Sender sender, String messageTheme,
-                                  String messageText, List<Receiver> receiverList) {
+    public String sendMailByMessage(Sender sender, String messageTheme, String messageText, List<Receiver> receiverList) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, "utf-8");
         try {
             for (Receiver receiver: receiverList) {
                 messageHelper.setTo(receiver.getEmail());
                 messageHelper.setSubject(messageTheme);
-                messageHelper.setText("Вам пришло сообщение от " + sender.getFio() + " (" + sender.getEmail() + "):\n" + messageText);
+                String[] splitFio = sender.getFio().split(" ");
+                String htmlMessage = "" +
+                        "<html>\n" +
+                        "<head>\n" +
+                        "<meta charset=\"utf-8\">\n" +
+                        "</head>\n" +
+                        "<body style=" +
+                        "\"background-color:white; font-family:'PT Sans', sans-serif; font-size:22pt; color:#3A5985; -moz-hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto\">\n" +
+                        "<div style=\"background-color:#F1F4FB; width:50%; height:100%; border:solid 15px #B2CAEE; position:absolute; border-radius: 7px; left:25%; margin:0; overflow-y:auto\">\n" +
+                        "<p style=\"padding:0px 25px; font-size:26pt\">Вам пришло сообщение от " + documentProcessorService.getRpFio(splitFio[0], splitFio[1], splitFio[2]) + " (" + sender.getEmail() + "):</p>\n" +
+                        "<p style=\"padding:0px 25px\"; text-align:justify>" + messageText + "</p>\n" +
+                        "<center><a href=" + clientUrl + "messages" + " style=\"background-color:#B2CAEE; text-decoration:none; border:solid 0px #B2CAEE; font-family:'PT Sans', sans-serif; font-size:24pt; color:#3A5985; padding:2% 5%; position:relative; left:50%; transform:translate(-50%, 0); border-radius:7px; top:10px\"> Перейти к сообщению </a></center>\n" +
+                        "<p style=\"text-align:center; bottom:0px; position:relative; bottom:-20px; left: 50%; transform: translate(-50%, 0); font-size:20pt\">© Кафедра МОСИТ - выпускникам, 2020-2021</p>\n" +
+                        "</div>\n" +
+                        "</body>\n" +
+                        "</html>";
+                messageHelper.setText(htmlMessage, true);
                 this.mailSender.send(mimeMessage);
             }
         }
-        catch (MessagingException messagingException) {
+        catch (Exception e) {
+            e.printStackTrace();
             return "MessagingException";
         }
         return "All emails successfully sent!";
