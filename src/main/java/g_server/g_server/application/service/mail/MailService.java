@@ -241,19 +241,40 @@ public class MailService {
                         "<meta charset=\"utf-8\">\n" +
                         "</head>\n" +
                         "<body style=\"background-color:white; font-family:'PT Sans', sans-serif; font-size:20pt; color:#3A5985; -moz-hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto\">\n" +
-                        "<div style=\"background-color:#F1F4FB; width:50%; height:100%; border:solid 15px #B2CAEE; position:absolute; border-radius: 7px; left:25%; margin:0; overflow-y:auto\">\n" +
+                        "<div style=\"background-color:#F1F4FB; width:50%; min-width:400px; height:100%; border:solid 15px #B2CAEE; position:absolute; border-radius: 7px; left:25%; margin:0; overflow-y:auto\">\n" +
                         "<p style=\"padding:0px 25px; font-size:24pt\">Вам пришло сообщение от " + documentProcessorService.getRpFio(splitFio[0], splitFio[1], splitFio[2])+ " (" + sender.getEmail() + "):</p>\n" +
                         "<form style=\"text-align:justify; -moz-text-align-last: justify; text-align-last: justify\">\n" +
                         "<p style=\"padding:0px 25px\"; text-align:justify; -moz-text-align-last: justify; text-align-last: justify>" + messageText + "</p>\n" +
                         "</form>\n" +
-                        "<form action=\"ЗАПИХАЙ СЮДА ССЫЛКУ НА СТРАНИЦУ ЧАТА\">\n" +
+                        "<form action=\"action\">\n" +
                         "<center><a href=" + clientUrl + "messages" + " style=\"background-color:#B2CAEE; text-decoration:none; border:solid 0px #B2CAEE; font-family:'PT Sans', sans-serif; font-size:24pt; color:#3A5985; padding:2% 5%; position:relative; left:50%; transform:translate(-50%, 0); border-radius:7px; top:10px\"> Перейти к сообщению </a></center>\n" +
                         "</form>\n" +
                         "<p style=\"text-align:center; bottom:0px; position:relative; bottom:-20px; left: 50%; transform: translate(-50%, 0); font-size:18pt\">© Кафедра МОСИТ - выпускникам, 2020-2021</p>\n" +
                         "</div>\n" +
                         "</body>\n" +
                         "</html>";
-                messageHelper.setText(htmlMessage, true);
+                String gmailHtmlMessage = "<html>\n" +
+                        "<head>\n" +
+                        "<meta charset=\"utf-8\">\n" +
+                        "</head>\n" +
+                        "<body style=\"background-color:white; font-family:'PT Sans', sans-serif; font-size:18pt; color:#3A5985; -moz-hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto\">\n" +
+                        "<div style=\"background-color:#F1F4FB; width:50%; min-width:400px; box-sizing:border-box; height:100%; border:solid 15px #B2CAEE; position:absolute; border-radius: 7px; left:25%; margin:0; overflow-y:auto\">\n" +
+                        "<p style=\"padding:0px 25px; font-size:22pt\">Вам пришло сообщение от " + documentProcessorService.getRpFio(splitFio[0], splitFio[1], splitFio[2])+ " ( " + sender.getEmail() + "):</p>\n" +
+                        "<form style=\"text-align:justify; -moz-text-align-last: justify; text-align-last: justify; bottom:-25px\">\n" +
+                        "<p style=\"padding:0px 25px\">" + messageText + "</p>\n" +
+                        "</form>\n" +
+                        "<form action=\"" + clientUrl + "messages\" style=\"min-width:400px;\">\n" +
+                        "<center><button style=\"background-color:#B2CAEE; border:solid 0px #B2CAEE; width:280px; word-break: break-all; font-family:'PT Sans', sans-serif; font-size:22pt; color:#3A5985; padding:2% 5%; position:relative; left:50%; transform:translate(-50%, 0); border-radius:7px; top:25px\"> Перейти к сообщению </button></center>" +
+                        "</form>\n" +
+                        "<p style=\"text-align:center; bottom:0px; position:relative; bottom:-50px; left: 50%; transform: translate(-50%, 0); font-size:18pt\">© Кафедра МОСИТ - выпускникам, 2020-2021</p>\n" +
+                        "</div>\n" +
+                        "</body>\n" +
+                        "</html>";
+                if (sender.getEmail().contains("@gmail.com")) {
+                    messageHelper.setText(gmailHtmlMessage, true);
+                } else {
+                    messageHelper.setText(htmlMessage, true);
+                }
                 this.mailSender.send(mimeMessage);
             }
         }
