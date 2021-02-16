@@ -11,7 +11,6 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +127,47 @@ public class MessagesService {
             }
         }
         return messagesList;
+    }
+
+    // Метод получения "переписки" (Всех отправленных пользователем другому пользователю сообщений и наоборот
+    public List<Message> getUserToUserMessages(Integer firstUserID, Integer secondUserID) {
+        List<Messages> dbMessagesList = messagesRepository.findAll();
+        List<Message> userToUserMessageList = new ArrayList<>();
+        for (Messages dbMessage: dbMessagesList) {
+            if ((dbMessage.getSender().equals(firstUserID.toString()) &&
+                    isReceiver(secondUserID, dbMessage.getReceivers().split(","))) ||
+                    (dbMessage.getSender().equals(secondUserID.toString()) &&
+                            isReceiver(firstUserID, dbMessage.getReceivers().split(",")))) {
+                userToUserMessageList.add(getMessage(dbMessage));
+            }
+        }
+        return userToUserMessageList;
+    }
+
+    // Метод получения всех отправленных сообщений одним пользователем другому
+    public List<Message> getUserToUserSentMessages(Integer senderUserID, Integer receiverUserID) {
+        List<Messages> dbMessagesList = messagesRepository.findAll();
+        List<Message> userToUserSendMessageList = new ArrayList<>();
+        for (Messages dbMessage: dbMessagesList) {
+            if (dbMessage.getSender().equals(senderUserID.toString()) &&
+                    isReceiver(receiverUserID, dbMessage.getReceivers().split(","))) {
+                userToUserSendMessageList.add(getMessage(dbMessage));
+            }
+        }
+        return userToUserSendMessageList;
+    }
+
+    // Метод получения всех полученных сообщений одним пользователем от другого
+    public List<Message> getUserToUserReceivedMessages(Integer receiverUserID, Integer senderUserID) {
+        List<Messages> dbMessagesList = messagesRepository.findAll();
+        List<Message> userToUserSendMessageList = new ArrayList<>();
+        for (Messages dbMessage: dbMessagesList) {
+            if (dbMessage.getSender().equals(senderUserID.toString()) &&
+                    isReceiver(receiverUserID, dbMessage.getReceivers().split(","))) {
+                userToUserSendMessageList.add(getMessage(dbMessage));
+            }
+        }
+        return userToUserSendMessageList;
     }
 
     // Метод отправки сообщения
