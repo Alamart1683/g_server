@@ -31,14 +31,14 @@ public class MessagesController {
     @GetMapping("/messages/get/received")
     public List<Message> getReceivedMessages(HttpServletRequest httpServletRequest) {
         return messagesService.getUsersReceivedMessages(
-                Integer.parseInt(Objects.requireNonNull(getTokenFromRequest(httpServletRequest)))
+                usersService.getUserId(getTokenFromRequest(httpServletRequest))
         );
     }
 
     @GetMapping("/messages/get/sent")
     public List<Message> getSentMessages(HttpServletRequest httpServletRequest) {
         return messagesService.getUsersSentMessages(
-                Integer.parseInt(Objects.requireNonNull(getTokenFromRequest(httpServletRequest)))
+                usersService.getUserId(getTokenFromRequest(httpServletRequest))
         );
     }
 
@@ -48,7 +48,7 @@ public class MessagesController {
             @RequestParam Integer secondUserID
     ) {
         return messagesService.getUserToUserMessages(
-                Integer.parseInt(Objects.requireNonNull(getTokenFromRequest(httpServletRequest))), secondUserID
+                usersService.getUserId(getTokenFromRequest(httpServletRequest)), secondUserID
         );
     }
 
@@ -58,7 +58,7 @@ public class MessagesController {
             @RequestParam Integer receiverUserID
     ) {
         return messagesService.getUserToUserSentMessages(
-                Integer.parseInt(Objects.requireNonNull(getTokenFromRequest(httpServletRequest))),
+                usersService.getUserId(getTokenFromRequest(httpServletRequest)),
                 receiverUserID
         );
     }
@@ -69,7 +69,7 @@ public class MessagesController {
                @RequestParam Integer senderUserID
     ) {
         return messagesService.getUserToUserReceivedMessages(
-                Integer.parseInt(Objects.requireNonNull(getTokenFromRequest(httpServletRequest))),
+                usersService.getUserId(getTokenFromRequest(httpServletRequest)),
                 senderUserID
         );
     }
