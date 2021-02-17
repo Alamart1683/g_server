@@ -194,4 +194,32 @@ public class MessagesService {
             return "Ошибка отправки сообщения!";
         }
     }
+
+    // Получить всех возможных получателей сообщений для поиска
+    private List<Receiver> getAllExistReceivers() {
+        List<Receiver> receiverList = new ArrayList<>();
+        List<Users> usersList = usersRepository.findAll();
+        for (Users user: usersList) {
+            receiverList.add(new Receiver(
+                    user.getId(),
+                    user.getSurname() + " " + user.getName() + " " + user.getSecond_name(),
+                    user.getEmail()
+                )
+            );
+        }
+        return receiverList;
+    }
+
+    // Метод поиска получателей
+    public List<Receiver> findReceiver(String userInput) {
+        List<Receiver> allReceiversList = getAllExistReceivers();
+        List<Receiver> foundedReceivers = new ArrayList<>();
+        for (Receiver receiver: allReceiversList) {
+            String receiverString = receiver.getFio() + " " + receiver.getEmail();
+            if ((receiverString).contains(userInput)) {
+                foundedReceivers.add(receiver);
+            }
+        }
+        return foundedReceivers;
+    }
 }

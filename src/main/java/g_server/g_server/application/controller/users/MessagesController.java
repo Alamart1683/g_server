@@ -2,6 +2,7 @@ package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.entity.messanger.components.Message;
 import g_server.g_server.application.entity.messanger.components.MessageSendForm;
+import g_server.g_server.application.entity.messanger.components.Receiver;
 import g_server.g_server.application.service.messager.MessagesService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Objects;
 import static org.springframework.util.StringUtils.hasText;
 
 @RestController
@@ -80,6 +80,11 @@ public class MessagesController {
             HttpServletRequest httpServletRequest) {
         return messagesService.sendMessage(
                 usersService.getUserId(getTokenFromRequest(httpServletRequest)), messageSendForm);
+    }
+
+    @GetMapping("/message/find/receivers/")
+    public List<Receiver> findReceivers(@RequestParam String inputString) {
+        return messagesService.findReceiver(inputString);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
