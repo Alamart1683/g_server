@@ -105,13 +105,19 @@ public class AuthorizationController {
                 String accessToken = jwtProvider.generateAccessToken(
                         user.getEmail(), user.getPassword(), accessIssue, accessExpire
                 );
+                String userRole = usersService.getUserRoleByRoleID(user.getId());
+                String fio = user.getSurname() + " " + user.getName() + " " + user.getSecond_name();
                 AuthorizationResponseForm authorizationResponseForm = new AuthorizationResponseForm(
                         accessToken,
                         accessIssue,
                         accessExpire,
                         newRefreshToken,
                         refreshIssue,
-                        refreshExpire
+                        refreshExpire,
+                        userRole,
+                        fio,
+                        "Пролонгация пройдена успешно"
+
                 );
                 return authorizationResponseForm;
             } else {
