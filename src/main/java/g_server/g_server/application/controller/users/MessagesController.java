@@ -82,9 +82,25 @@ public class MessagesController {
                 usersService.getUserId(getTokenFromRequest(httpServletRequest)), messageSendForm);
     }
 
-    @GetMapping("/message/find/receivers/")
+    @GetMapping("/messages/find/receivers/")
     public List<Receiver> findReceivers(@RequestParam String inputString) {
         return messagesService.findReceiver(inputString);
+    }
+
+    @GetMapping("/messages/find/receivers/associated")
+    public List<Receiver> findAssociatedReceivers(HttpServletRequest httpServletRequest) {
+        return messagesService.getAssociatedReceivers(usersService.getUserId(getTokenFromRequest(httpServletRequest)));
+    }
+
+    @GetMapping("/messages/find/recent/contacts/")
+    public List<Object> findRecentContacts(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer limit // Количество недавних контактов
+    ) {
+        return messagesService.getMyRecentContact(
+                usersService.getUserId(getTokenFromRequest(httpServletRequest)),
+                limit
+        );
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

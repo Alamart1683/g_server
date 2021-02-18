@@ -117,7 +117,6 @@ public class AuthorizationController {
                         userRole,
                         fio,
                         "Пролонгация пройдена успешно"
-
                 );
                 return authorizationResponseForm;
             } else {

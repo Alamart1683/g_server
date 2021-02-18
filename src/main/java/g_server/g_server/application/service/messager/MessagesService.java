@@ -5,21 +5,27 @@ import g_server.g_server.application.entity.messanger.components.Message;
 import g_server.g_server.application.entity.messanger.components.MessageSendForm;
 import g_server.g_server.application.entity.messanger.components.Receiver;
 import g_server.g_server.application.entity.messanger.components.Sender;
+import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.messanger.MessagesRepository;
+import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.mail.MailService;
+import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class MessagesService {
     private MessagesRepository messagesRepository;
     private UsersRepository usersRepository;
     private MailService mailService;
+    private UsersService usersService;
+    private AssociatedStudentsRepository associatedStudentsRepository;
 
     @Autowired
     public void setMessagesRepository(MessagesRepository messagesRepository) {
@@ -34,6 +40,14 @@ public class MessagesService {
     @Autowired
     public void setMailService(MailService mailService) {
         this.mailService = mailService;
+    }
+
+    @Autowired
+    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
+
+    @Autowired
+    public void setAssociatedStudentsRepository(AssociatedStudentsRepository associatedStudentsRepository) {
+        this.associatedStudentsRepository = associatedStudentsRepository;
     }
 
     // Вспомогательный метод трансформации даты
@@ -221,5 +235,64 @@ public class MessagesService {
             }
         }
         return foundedReceivers;
+    }
+
+    /*
+    Метод поиска получателей для научного руководителя или студента:
+    Студент получает данные своего научного руководителя и его студентов
+    Научный руководитель получает данные о всех его студентах
+    */
+    public List<Receiver> getAssociatedReceivers(Integer userID) {
+        List<Receiver> myReceiverList = new ArrayList<>();
+        String userRole = usersService.getUserRoleByRoleID(userID).substring(5).toLowerCase();
+        AssociatedStudents associatedStudent;
+        List<AssociatedStudents> associatedStudents;
+        switch (userRole) {
+            case "student":
+                associatedStudent = associatedStudentsRepository.findByStudent(userID);
+                int advisorID = associatedStudent.getScientificAdvisor();
+                associatedStudents = associatedStudentsRepository.findByScientificAdvisor(advisorID);
+                myReceiverList.add(getMessageReceiver(advisorID));
+                for (AssociatedStudents student: associatedStudents) {
+                    if (student.getStudent() != userID) {
+                        myReceiverList.add(getMessageReceiver(student.getId()));
+                    }
+                }
+                break;
+            case "scientific_advisor":
+                associatedStudents = associatedStudentsRepository.findByScientificAdvisor(userID);
+                for (AssociatedStudents student: associatedStudents) {
+                    myReceiverList.add(getMessageReceiver(student.getId()));
+                }
+                break;
+            default:
+                break;
+        }
+        return myReceiverList;
+    }
+
+    // Получить список недавних контактов
+    public List<Object> getMyRecentContact(Integer userID, Integer limit) {
+        List<Messages> messagesList = messagesRepository.findAll();
+        List<Object> myRecentContacts = new ArrayList<>();
+        for(int i = messagesList.size() - 1; i >= 0; i--) {
+            if (messagesList.get(i).getSender().equals(userID.toString())) {
+                String[] receivers = messagesList.get(i).getReceivers().split(",");
+                for (String receiver: receivers) {
+                    if (myRecentContacts.size() < limit) {
+                        myRecentContacts.add(getMessageReceiver(Integer.parseInt(receiver)));
+                    } else {
+                        return myRecentContacts;
+                    }
+                }
+            } else if (isReceiver(userID, messagesList.get(i).getReceivers().split(","))) {
+                if (myRecentContacts.size() < limit) {
+                    myRecentContacts.add(getMessageSender(Integer.parseInt(messagesList.get(i).getSender())));
+                } else {
+                    return myRecentContacts;
+                }
+            }
+        }
+        return myRecentContacts;
     }
 }

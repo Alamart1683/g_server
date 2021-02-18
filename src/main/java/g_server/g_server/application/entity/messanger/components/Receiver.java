@@ -4,13 +4,15 @@ public class Receiver {
     private int receiverId;
     private String fio;
     private String email;
+    private String status;
 
-    public Receiver() { }
+    public Receiver() { this.status = "receiver"; }
 
     public Receiver(int receiverId, String fio, String email) {
         this.receiverId = receiverId;
         this.fio = fio;
         this.email = email;
+        this.status = "receiver";
     }
 
     public int getReceiverId() {
@@ -35,5 +37,9 @@ public class Receiver {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }

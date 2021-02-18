@@ -4,14 +4,15 @@ public class Sender {
     private int senderId;
     private String fio;
     private String email;
+    private String status;
 
-    public Sender() {
-    }
+    public Sender() { this.status = "sender"; }
 
     public Sender(int senderId, String fio, String email) {
         this.senderId = senderId;
         this.fio = fio;
         this.email = email;
+        this.status = "sender";
     }
 
     public int getSenderId() {
@@ -37,4 +38,6 @@ public class Sender {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getStatus() { return status; }
 }
