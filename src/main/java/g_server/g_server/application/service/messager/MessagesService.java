@@ -255,14 +255,14 @@ public class MessagesService {
                 myReceiverList.add(getMessageReceiver(advisorID));
                 for (AssociatedStudents student: associatedStudents) {
                     if (student.getStudent() != userID) {
-                        myReceiverList.add(getMessageReceiver(student.getId()));
+                        myReceiverList.add(getMessageReceiver(student.getStudent()));
                     }
                 }
                 break;
             case "scientific_advisor":
                 associatedStudents = associatedStudentsRepository.findByScientificAdvisor(userID);
                 for (AssociatedStudents student: associatedStudents) {
-                    myReceiverList.add(getMessageReceiver(student.getId()));
+                    myReceiverList.add(getMessageReceiver(student.getStudent()));
                 }
                 break;
             default:
