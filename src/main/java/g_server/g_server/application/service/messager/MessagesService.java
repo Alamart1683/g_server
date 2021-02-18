@@ -279,14 +279,20 @@ public class MessagesService {
             if (messagesList.get(i).getSender().equals(userID.toString())) {
                 String[] receivers = messagesList.get(i).getReceivers().split(",");
                 for (String receiver: receivers) {
-                    if (myRecentContacts.size() < limit) {
+                    if (myRecentContacts.size() < limit &&
+                            !myRecentContacts.contains(getMessageReceiver(Integer.parseInt(receiver))) &&
+                            !myRecentContacts.contains(getMessageSender(Integer.parseInt(receiver)))
+                    ) {
                         myRecentContacts.add(getMessageReceiver(Integer.parseInt(receiver)));
                     } else {
                         return myRecentContacts;
                     }
                 }
             } else if (isReceiver(userID, messagesList.get(i).getReceivers().split(","))) {
-                if (myRecentContacts.size() < limit) {
+                if (myRecentContacts.size() < limit &&
+                        !myRecentContacts.contains(getMessageSender(Integer.parseInt(messagesList.get(i).getSender()))) &&
+                        !myRecentContacts.contains(getMessageReceiver(Integer.parseInt(messagesList.get(i).getSender())))
+                ) {
                     myRecentContacts.add(getMessageSender(Integer.parseInt(messagesList.get(i).getSender())));
                 } else {
                     return myRecentContacts;
