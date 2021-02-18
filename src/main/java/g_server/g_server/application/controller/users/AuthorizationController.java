@@ -105,7 +105,7 @@ public class AuthorizationController {
                 String accessToken = jwtProvider.generateAccessToken(
                         user.getEmail(), user.getPassword(), accessIssue, accessExpire
                 );
-                String userRole = usersService.getUserRoleByRoleID(user.getId());
+                String userRole = usersService.getUserRoleByRoleID(user.getId()).substring(5).toLowerCase();
                 String fio = user.getSurname() + " " + user.getName() + " " + user.getSecond_name();
                 AuthorizationResponseForm authorizationResponseForm = new AuthorizationResponseForm(
                         accessToken,
