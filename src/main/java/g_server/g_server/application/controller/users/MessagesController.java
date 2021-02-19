@@ -117,6 +117,14 @@ public class MessagesController {
         }
     }
 
+    @DeleteMapping("/messages/delete/")
+    public String deleteMessage(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer messageID
+    ) {
+        return messagesService.deleteMessage(usersService.getUserId(getTokenFromRequest(httpServletRequest)), messageID);
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {

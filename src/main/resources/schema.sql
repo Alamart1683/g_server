@@ -153,6 +153,8 @@ create table messages (
     message_theme varchar(100) not null,
     message_text varchar (2048) not null,
     receivers varchar(100) not null,
+    is_receiver_red varchar(100) not null,
+    is_delete varchar(100) not null,
     foreign key (sender) references users(id) on delete cascade on update cascade
 );
 

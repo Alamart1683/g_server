@@ -28,6 +28,9 @@ public class Messages {
     @Column(name = "is_receiver_red")
     private String isRedString;
 
+    @Column(name = "is_delete")
+    private String isDelete;
+
     @ManyToOne
     @JoinColumn(name = "sender", insertable = false, updatable = false, referencedColumnName = "id")
     private Users users;
@@ -96,5 +99,13 @@ public class Messages {
 
     public void setIsRedString(String isRedString) {
         this.isRedString = isRedString;
+    }
+
+    public String getIsDelete() {
+        return isDelete;
+    }
+
+    public void setIsDelete(String isDelete) {
+        this.isDelete = isDelete;
     }
 }

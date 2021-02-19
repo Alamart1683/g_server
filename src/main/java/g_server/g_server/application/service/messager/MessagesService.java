@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class MessagesService {
@@ -129,7 +128,9 @@ public class MessagesService {
         if (usersRepository.findById(userId).isPresent()) {
             List<Messages> dbMessages = messagesRepository.findBySender(userId.toString());
             for (Messages dbMessage: dbMessages) {
-                messages.add(getMessage(dbMessage));
+                if (!isMessageDeleteForUser(userId, dbMessage)) {
+                    messages.add(getMessage(dbMessage));
+                }
             }
             return messages;
         }
@@ -142,9 +143,10 @@ public class MessagesService {
         List<Messages> dbMessagesList = messagesRepository.findAll();
         List<Message> messagesList = new ArrayList<>();
         for (Messages dbMessage: dbMessagesList) {
-            if (dbMessage.getReceivers().equals(userId.toString())) {
+            if (dbMessage.getReceivers().equals(userId.toString()) && !isMessageDeleteForUser(userId, dbMessage)) {
                 messagesList.add(getMessage(dbMessage));
-            } else if (isReceiver(userId, dbMessage.getReceivers().split(","))) {
+            } else if (isReceiver(userId, dbMessage.getReceivers().split(",")) &&
+                    !isMessageDeleteForUser(userId, dbMessage)) {
                 messagesList.add(getMessage(dbMessage));
             }
         }
@@ -159,7 +161,8 @@ public class MessagesService {
             if ((dbMessage.getSender().equals(firstUserID.toString()) &&
                     isReceiver(secondUserID, dbMessage.getReceivers().split(","))) ||
                     (dbMessage.getSender().equals(secondUserID.toString()) &&
-                            isReceiver(firstUserID, dbMessage.getReceivers().split(",")))) {
+                            isReceiver(firstUserID, dbMessage.getReceivers().split(","))) &&
+                            !isMessageDeleteForUser(firstUserID, dbMessage)) {
                 userToUserMessageList.add(getMessage(dbMessage));
             }
         }
@@ -172,7 +175,8 @@ public class MessagesService {
         List<Message> userToUserSendMessageList = new ArrayList<>();
         for (Messages dbMessage: dbMessagesList) {
             if (dbMessage.getSender().equals(senderUserID.toString()) &&
-                    isReceiver(receiverUserID, dbMessage.getReceivers().split(","))) {
+                    isReceiver(receiverUserID, dbMessage.getReceivers().split(",")) &&
+                        !isMessageDeleteForUser(senderUserID, dbMessage)) {
                 userToUserSendMessageList.add(getMessage(dbMessage));
             }
         }
@@ -185,7 +189,8 @@ public class MessagesService {
         List<Message> userToUserSendMessageList = new ArrayList<>();
         for (Messages dbMessage: dbMessagesList) {
             if (dbMessage.getSender().equals(senderUserID.toString()) &&
-                    isReceiver(receiverUserID, dbMessage.getReceivers().split(","))) {
+                    isReceiver(receiverUserID, dbMessage.getReceivers().split(",")) &&
+                            !isMessageDeleteForUser(receiverUserID, dbMessage)) {
                 userToUserSendMessageList.add(getMessage(dbMessage));
             }
         }
@@ -197,15 +202,18 @@ public class MessagesService {
         try {
             Sender sender = getMessageSender(senderId);
             List<Receiver> receiverList = new ArrayList<>();
-            String isRedString = "";
+            StringBuilder isRedString = new StringBuilder();
+            StringBuilder isDeleteString = new StringBuilder();
             for (String receiver: messageSendForm.getReceivers().split(",")) {
                 receiverList.add(getMessageReceiver(Integer.parseInt(receiver)));
             }
             for (int i = 0; i < receiverList.size(); i++) {
                 if (i < receiverList.size() - 1) {
-                    isRedString += "0,";
+                    isRedString.append("0,");
+                    isDeleteString.append("0,");
                 } else {
-                    isRedString += "0";
+                    isRedString.append("0");
+                    isDeleteString.append("0,0");
                 }
             }
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -215,8 +223,8 @@ public class MessagesService {
             message.setMessageTheme(messageSendForm.getMessageTheme());
             message.setMessageText(messageSendForm.getMessageText());
             message.setReceivers(messageSendForm.getReceivers());
-            System.out.println(isRedString);
-            message.setIsRedString(isRedString);
+            message.setIsRedString(isRedString.toString());
+            message.setIsDelete(isDeleteString.toString());
             messagesRepository.save(message);
             String mailResult = mailService.sendMailByMessage(sender, messageSendForm.getMessageTheme(),
                     messageSendForm.getMessageText(), receiverList);
@@ -352,5 +360,70 @@ public class MessagesService {
             }
         }
         return "Сообщение не найдено";
+    }
+
+    // Вспомогательный метод определения удалено ли сообщение пользователем
+    private boolean isMessageDeleteForUser(Integer userID, Messages dbMessage) {
+        String[] deleteArray = dbMessage.getIsDelete().split(",");
+        String[] receiversArray = dbMessage.getReceivers().split(",");
+        if (userID.toString().equals(dbMessage.getSender())) { // Отправитель
+            if (deleteArray[0].equals("1")) {
+                return true;
+            }
+        } else if (isReceiver(userID, receiversArray)) { // Получатель
+            for (int i = 0; i < receiversArray.length; i++) {
+                if (receiversArray[i].equals(userID.toString()) && deleteArray[i + 1].equals("1")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Вспомогательный метод сбора строки удаления письма
+    private String buildDeleteString(String[] isDeleteArray) {
+        StringBuilder isDeleteString = new StringBuilder();
+        for (int i = 0; i < isDeleteArray.length; i++) {
+            if (i < isDeleteArray.length - 1) {
+                isDeleteString.append(isDeleteArray[i] + ",");
+            } else {
+                isDeleteString.append(isDeleteArray[i]);
+            }
+        }
+        return isDeleteString.toString();
+    }
+
+    // Метод удаления сообщения от лица пользователя
+    public String deleteMessage(Integer userID, Integer messageID) {
+        Messages dbMessage;
+        if (messagesRepository.findById(messageID).isPresent()) {
+            dbMessage = messagesRepository.findById(messageID).get();
+            if (!isMessageDeleteForUser(userID, dbMessage)) {
+                String[] isDeleteArray = dbMessage.getIsDelete().split(",");
+                String[] receiversArray = dbMessage.getReceivers().split(",");
+                if (dbMessage.getSender().equals(userID.toString())) {
+                    isDeleteArray[0] = "1";
+                    dbMessage.setIsDelete(buildDeleteString(isDeleteArray));
+                    messagesRepository.save(dbMessage);
+                    return "Отправленное сообщение успешно удалено";
+                } else if (isReceiver(userID, receiversArray)) {
+                    for (int i = 0; i < receiversArray.length; i++) {
+                        if (receiversArray[i].equals(userID.toString())) {
+                            isDeleteArray[i + 1] = "1";
+                            dbMessage.setIsDelete(buildDeleteString(isDeleteArray));
+                            messagesRepository.save(dbMessage);
+                            return "Полученное сообщение успешно удалено";
+                        }
+                    }
+                    return "Попытка удалить сообщение без права на данное действие";
+                } else {
+                    return "Попытка удалить сообщение без права на данное действие";
+                }
+            } else {
+                return "Попытка удалить ранее удаленное сообщение";
+            }
+        } else {
+            return "Сообщение не найдено";
+        }
     }
 }
