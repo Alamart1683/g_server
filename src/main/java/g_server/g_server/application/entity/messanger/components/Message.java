@@ -9,17 +9,19 @@ public class Message {
     private String messageTheme;
     private String messageText;
     private List<Receiver> receivers;
+    private List<Integer> isRedList;
 
     public Message() { }
 
     public Message(int messageId, Sender sender, String messageDate, String messageTheme,
-                   String messageText, List<Receiver> receivers) {
+                   String messageText, List<Receiver> receivers, List<Integer> isRedList) {
         this.messageId = messageId;
         this.sender = sender;
         this.messageDate = messageDate;
         this.messageTheme = messageTheme;
         this.messageText = messageText;
         this.receivers = receivers;
+        this.isRedList = isRedList;
     }
 
     public int getMessageId() {
@@ -68,5 +70,13 @@ public class Message {
 
     public void setReceivers(List<Receiver> receivers) {
         this.receivers = receivers;
+    }
+
+    public List<Integer> getIsRedList() {
+        return isRedList;
+    }
+
+    public void setIsRedList(List<Integer> isRedList) {
+        this.isRedList = isRedList;
     }
 }

@@ -90,9 +90,14 @@ public class MessagesService {
         Sender sender = getMessageSender(Integer.parseInt(dbMessage.getSender()));
         if (sender != null) {
             List<Receiver> receiverList = new ArrayList<>();
+            List<Integer> isRedList = new ArrayList<>();
             String[] receivers = dbMessage.getReceivers().split(",");
+            String[] isRedArray = dbMessage.getIsRedString().split(",");
             for (String receiver : receivers) {
                 receiverList.add(getMessageReceiver(Integer.parseInt(receiver)));
+            }
+            for (String isRed: isRedArray) {
+                isRedList.add(Integer.parseInt(isRed));
             }
             return new Message(
                     dbMessage.getId(),
@@ -100,7 +105,8 @@ public class MessagesService {
                     getRussianDateTime(dbMessage.getSendDate()),
                     dbMessage.getMessageTheme(),
                     dbMessage.getMessageText(),
-                    receiverList
+                    receiverList,
+                    isRedList
             );
         }
         return null;
@@ -191,8 +197,16 @@ public class MessagesService {
         try {
             Sender sender = getMessageSender(senderId);
             List<Receiver> receiverList = new ArrayList<>();
+            String isRedString = "";
             for (String receiver: messageSendForm.getReceivers().split(",")) {
                 receiverList.add(getMessageReceiver(Integer.parseInt(receiver)));
+            }
+            for (int i = 0; i < receiverList.size(); i++) {
+                if (i < receiverList.size() - 1) {
+                    isRedString += "0,";
+                } else {
+                    isRedString += "0";
+                }
             }
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             Messages message = new Messages();
@@ -201,6 +215,8 @@ public class MessagesService {
             message.setMessageTheme(messageSendForm.getMessageTheme());
             message.setMessageText(messageSendForm.getMessageText());
             message.setReceivers(messageSendForm.getReceivers());
+            System.out.println(isRedString);
+            message.setIsRedString(isRedString);
             messagesRepository.save(message);
             String mailResult = mailService.sendMailByMessage(sender, messageSendForm.getMessageTheme(),
                     messageSendForm.getMessageText(), receiverList);
@@ -302,5 +318,39 @@ public class MessagesService {
             }
         }
         return myRecentContacts;
+    }
+
+    // Прочитать сообщение от имени получателя
+    public String readMessage(Integer messageID, Integer receiverID) {
+        Messages message;
+        if (messagesRepository.findById(messageID).isPresent()) {
+            message = messagesRepository.findById(messageID).get();
+            String[] receivers = message.getReceivers().split(",");
+            int receiverIndex = -1;
+            for (int i = 0; i < receivers.length; i++) {
+                if (receivers[i].equals(receiverID.toString())) {
+                    receiverIndex = i;
+                    break;
+                }
+            }
+            String[] isReadStringArray = message.getIsRedString().split(",");
+            if (receiverID > -1) {
+                String editedRedString = "";
+                isReadStringArray[receiverIndex] = "1";
+                for (int i = 0; i < isReadStringArray.length; i++) {
+                    if (i < isReadStringArray.length - 1) {
+                        editedRedString = editedRedString + isReadStringArray[i] + ",";
+                    } else {
+                        editedRedString = editedRedString + isReadStringArray[i];
+                    }
+                }
+                message.setIsRedString(editedRedString);
+                messagesRepository.save(message);
+                return "Сообщение прочитано";
+            } else {
+                return "Получатель не найден";
+            }
+        }
+        return "Сообщение не найдено";
     }
 }

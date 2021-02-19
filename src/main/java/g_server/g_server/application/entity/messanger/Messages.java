@@ -25,6 +25,9 @@ public class Messages {
     @Column(name = "receivers")
     private String receivers;
 
+    @Column(name = "is_receiver_red")
+    private String isRedString;
+
     @ManyToOne
     @JoinColumn(name = "sender", insertable = false, updatable = false, referencedColumnName = "id")
     private Users users;
@@ -85,5 +88,13 @@ public class Messages {
 
     public void setUsers(Users users) {
         this.users = users;
+    }
+
+    public String getIsRedString() {
+        return isRedString;
+    }
+
+    public void setIsRedString(String isRedString) {
+        this.isRedString = isRedString;
     }
 }

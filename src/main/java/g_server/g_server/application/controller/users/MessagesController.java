@@ -103,6 +103,20 @@ public class MessagesController {
         );
     }
 
+    @PostMapping("/messages/read/")
+    public String readMessage(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer messageID,
+            @RequestParam Integer receiverID
+    ) {
+        Integer userID = usersService.getUserId(getTokenFromRequest(httpServletRequest));
+        if (userID.equals(receiverID)) {
+            return messagesService.readMessage(messageID, receiverID);
+        } else {
+            return "Попытка прочитать чужое сообщение";
+        }
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(AUTHORIZATION);
         if (hasText(bearer) && bearer.startsWith("Bearer ")) {
