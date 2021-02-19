@@ -401,11 +401,26 @@ public class MessagesService {
             if (!isMessageDeleteForUser(userID, dbMessage)) {
                 String[] isDeleteArray = dbMessage.getIsDelete().split(",");
                 String[] receiversArray = dbMessage.getReceivers().split(",");
-                if (dbMessage.getSender().equals(userID.toString())) {
+                // Если сообщение послано самому себе
+                if (dbMessage.getSender().equals(userID.toString()) && isReceiver(userID, receiversArray)) {
+                    isDeleteArray[0] = "1";
+                    for (int i = 0; i < receiversArray.length; i++) {
+                        if (receiversArray[i].equals(userID.toString())) {
+                            isDeleteArray[i + 1] = "1";
+                            break;
+                        }
+                    }
+                    dbMessage.setIsDelete(buildDeleteString(isDeleteArray));
+                    messagesRepository.save(dbMessage);
+                    return "Отправленное самому себе сообщение удалено";
+                }
+                // Если отправитель
+                else if (dbMessage.getSender().equals(userID.toString())) {
                     isDeleteArray[0] = "1";
                     dbMessage.setIsDelete(buildDeleteString(isDeleteArray));
                     messagesRepository.save(dbMessage);
                     return "Отправленное сообщение успешно удалено";
+                // Если получатель
                 } else if (isReceiver(userID, receiversArray)) {
                     for (int i = 0; i < receiversArray.length; i++) {
                         if (receiversArray[i].equals(userID.toString())) {
