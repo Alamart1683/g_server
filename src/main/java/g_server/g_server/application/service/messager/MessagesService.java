@@ -106,6 +106,17 @@ public class MessagesService {
         return null;
     }
 
+    // Вспомогательный метод определения получателя в списке получателей
+    private boolean isReceiver(Integer userId, String[] receivers) {
+        for (String receiver: receivers) {
+            if (receiver.equals(userId.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     // Метод получения всех отправленных пользователем сообщений
     public List<Message> getUsersSentMessages(Integer userId) {
         List<Message> messages = new ArrayList<>();
@@ -119,15 +130,6 @@ public class MessagesService {
         return null;
     }
 
-    // Вспомогательный метод определения получателя в списке получателей
-    private boolean isReceiver(Integer userId, String[] receivers) {
-        for (String receiver: receivers) {
-            if (receiver.equals(userId.toString())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     // Метод получения всех отправленных пользователю сообщений
     public List<Message> getUsersReceivedMessages(Integer userId) {

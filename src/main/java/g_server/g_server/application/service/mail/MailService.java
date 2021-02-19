@@ -270,7 +270,7 @@ public class MailService {
                         "</div>\n" +
                         "</body>\n" +
                         "</html>";
-                if (sender.getEmail().contains("@gmail.com")) {
+                if (receiver.getEmail().contains("@gmail.com")) {
                     messageHelper.setText(gmailHtmlMessage, true);
                 } else {
                     messageHelper.setText(htmlMessage, true);
