@@ -66,6 +66,7 @@ public class AuthorizationController {
                             refreshExpire,
                             userRole,
                             fio,
+                            user.getEmail(),
                             "Все в порядке"
                     );
                 }
@@ -116,6 +117,7 @@ public class AuthorizationController {
                         refreshExpire,
                         userRole,
                         fio,
+                        user.getEmail(),
                         "Пролонгация пройдена успешно"
                 );
                 return authorizationResponseForm;

@@ -9,12 +9,13 @@ public class AuthorizationResponseForm {
     private long refreshExpireDate;
     private String userRole;
     private String fio;
+    private String email;
     private String message;
 
     public AuthorizationResponseForm(
             String accessToken, long accessIssueDate, long accessExpireDate,
             String refreshToken, long refreshIssueDate, long refreshExpireDate,
-            String userRole, String fio, String message) {
+            String userRole, String fio, String email, String message) {
         this.accessToken = accessToken;
         this.accessIssueDate = accessIssueDate;
         this.accessExpireDate = accessExpireDate;
@@ -23,6 +24,7 @@ public class AuthorizationResponseForm {
         this.refreshExpireDate = refreshExpireDate;
         this.userRole = userRole;
         this.fio = fio;
+        this.email = email;
         this.message = message;
     }
 
@@ -112,5 +114,13 @@ public class AuthorizationResponseForm {
 
     public void setRefreshExpireDate(long refreshExpireDate) {
         this.refreshExpireDate = refreshExpireDate;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
