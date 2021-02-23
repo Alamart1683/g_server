@@ -411,14 +411,22 @@ public class MessagesService {
                         }
                     }
                     dbMessage.setIsDelete(buildDeleteString(isDeleteArray));
-                    messagesRepository.save(dbMessage);
+                    if (dbMessage.getIsDelete().contains("0")) {
+                        messagesRepository.save(dbMessage);
+                    } else {
+                        messagesRepository.deleteById(dbMessage.getId());
+                    }
                     return "Отправленное самому себе сообщение удалено";
                 }
                 // Если отправитель
                 else if (dbMessage.getSender().equals(userID.toString())) {
                     isDeleteArray[0] = "1";
                     dbMessage.setIsDelete(buildDeleteString(isDeleteArray));
-                    messagesRepository.save(dbMessage);
+                    if (dbMessage.getIsDelete().contains("0")) {
+                        messagesRepository.save(dbMessage);
+                    } else {
+                        messagesRepository.deleteById(dbMessage.getId());
+                    }
                     return "Отправленное сообщение успешно удалено";
                 // Если получатель
                 } else if (isReceiver(userID, receiversArray)) {
@@ -426,7 +434,11 @@ public class MessagesService {
                         if (receiversArray[i].equals(userID.toString())) {
                             isDeleteArray[i + 1] = "1";
                             dbMessage.setIsDelete(buildDeleteString(isDeleteArray));
-                            messagesRepository.save(dbMessage);
+                            if (dbMessage.getIsDelete().contains("0")) {
+                                messagesRepository.save(dbMessage);
+                            } else {
+                                messagesRepository.deleteById(dbMessage.getId());
+                            }
                             return "Полученное сообщение успешно удалено";
                         }
                     }
