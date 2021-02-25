@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 //@Configuration
 //@EnableWebMvc
-public class  CorsConfig implements WebMvcConfigurer {
+public class CorsConfig implements WebMvcConfigurer {
 
     final String webFrontURL = "http://localhost:3000";
 

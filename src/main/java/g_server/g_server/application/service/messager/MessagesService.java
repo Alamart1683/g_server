@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class MessagesService {
@@ -252,10 +253,11 @@ public class MessagesService {
 
     // Метод поиска получателей
     public List<Receiver> findReceiver(String userInput) {
+        userInput = userInput.toLowerCase();
         List<Receiver> allReceiversList = getAllExistReceivers();
         List<Receiver> foundedReceivers = new ArrayList<>();
         for (Receiver receiver: allReceiversList) {
-            String receiverString = receiver.getFio() + " " + receiver.getEmail();
+            String receiverString = receiver.getFio().toLowerCase() + " " + receiver.getEmail().toLowerCase();
             if ((receiverString).contains(userInput)) {
                 foundedReceivers.add(receiver);
             }
