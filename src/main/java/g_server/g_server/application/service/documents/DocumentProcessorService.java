@@ -94,7 +94,7 @@ public class DocumentProcessorService {
     @Autowired
     private VkrTaskRepository vkrTaskRepository;
 
-    // Сгенерировать шаблон задания или создать его версию для студента
+    // Сгенерировать задание или создать его версию для студента
     public String studentTaskGeneration(String token, ShortTaskDataView shortTaskDataView) throws Exception {
         Integer userID;
         try {
@@ -769,7 +769,7 @@ public class DocumentProcessorService {
                 );
                 pdTaskRepository.save(pdTask);
             }
-            return "Задание по " + taskDataView.getTaskType() + " успешно сгенерировано!";
+            return String.valueOf(documentVersion.getId());
         } else if (document != null && !flag) {
             Integer type = determineType(taskDataView.getTaskType());
             if (document.getCreator() == student.getId()) {
@@ -800,7 +800,7 @@ public class DocumentProcessorService {
                     );
                     pdTaskRepository.save(pdTask);
                 }
-                return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
+                return String.valueOf(documentVersion.getId());
             } else {
                 return "Попытка создать версию чужого документа";
             }
@@ -834,7 +834,7 @@ public class DocumentProcessorService {
                 );
                 pdTaskRepository.save(pdTask);
             }
-            return "Версия задания по " + taskDataView.getTaskType() + " успешно добавлена!";
+            return String.valueOf(documentVersion.getId());
         }
         return "Извините, что-то пошло не так";
     }
@@ -875,7 +875,7 @@ public class DocumentProcessorService {
                 );
                 vkrTaskRepository.save(vkrTask);
             }
-            return "Задание по " + vkrTaskDataView.getTaskType() + " успешно сгенерировано!";
+            return String.valueOf(documentVersion.getId());
         } else if (document != null && !flag) {
             Integer type = determineType(vkrTaskDataView.getTaskType());
             if (document.getCreator() == student.getId()) {
@@ -894,7 +894,7 @@ public class DocumentProcessorService {
                     );
                     vkrTaskRepository.save(vkrTask);
                 }
-                return "Версия задания по " + vkrTaskDataView.getTaskType() + " успешно добавлена!";
+                return String.valueOf(documentVersion.getId());
             } else {
                 return "Попытка создать версию чужого документа";
             }
@@ -915,7 +915,7 @@ public class DocumentProcessorService {
                         vkrTaskDataView.getTaskTasks(), vkrTaskDataView.getTaskDocs() , 1
                 );
                 vkrTaskRepository.save(vkrTask);
-                return "Версия задания по " + vkrTaskDataView.getTaskType() + " успешно добавлена!";
+                return String.valueOf(documentVersion.getId());
             }
         }
         return "Извините, что-то пошло не так";

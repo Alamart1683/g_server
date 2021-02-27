@@ -1,10 +1,7 @@
 package g_server.g_server.application.controller.documents;
 
 import g_server.g_server.application.entity.forms.NewRightViewForm;
-import g_server.g_server.application.entity.view.AdvisorShortTaskDataView;
-import g_server.g_server.application.entity.view.AdvisorShortVkrTaskDataView;
-import g_server.g_server.application.entity.view.ShortTaskDataView;
-import g_server.g_server.application.entity.view.ShortVkrTaskDataView;
+import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.service.documents.DocumentManagementService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
