@@ -300,7 +300,7 @@ public class DocumentUploadService {
                                     document.getKind() == 9) {
                                 uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
-                            messagesList.add(String.valueOf(documentVersion.getId()));
+                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                         }
                         else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
@@ -384,7 +384,7 @@ public class DocumentUploadService {
                                     document.getKind() == 9) {
                                 uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
-                            messagesList.add(String.valueOf(documentVersion.getId()));
+                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                         }
                         else {
                             messagesList.add("Произошла непредвиденная ошибка загрузки версии файла");
@@ -496,7 +496,7 @@ public class DocumentUploadService {
                             DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
                                     sqlDateTime, "Загрузка документа на сайт", versionPath);
                             documentVersionService.save(documentVersion);
-                            messagesList.add(String.valueOf(documentVersion.getId()));
+                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                         } else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
                             if (documentDirectory.listFiles().length == 0) {
@@ -655,7 +655,7 @@ public class DocumentUploadService {
                                 destination.save(finalReportVersion.getPath());
                                 // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
                                 uploadedTempReportVersion.delete();
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки файла");
                                 if (documentDirectory != null) {
@@ -698,7 +698,7 @@ public class DocumentUploadService {
                                 destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 uploadedTempReportVersion.delete();
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
@@ -770,7 +770,7 @@ public class DocumentUploadService {
                                 destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 uploadedTempReportVersion.delete();
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки файла");
                                 if (documentDirectory != null) {
@@ -813,7 +813,7 @@ public class DocumentUploadService {
                                 destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 uploadedTempReportVersion.delete();
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
@@ -885,7 +885,7 @@ public class DocumentUploadService {
                                 destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 uploadedTempReportVersion.delete();
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки файла");
                                 if (documentDirectory != null) {
@@ -905,7 +905,7 @@ public class DocumentUploadService {
                                         documentForm.getDocumentFormType() + " на сайт",
                                         versionPath);
                                 documentVersionService.save(documentVersion);
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 PdReport pdReport;
                                 if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
                                     pdReport = new PdReport(
@@ -996,7 +996,7 @@ public class DocumentUploadService {
                                 destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 uploadedTempReportVersion.delete();
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки файла");
                                 if (documentDirectory != null) {
@@ -1035,7 +1035,7 @@ public class DocumentUploadService {
                                 destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                 destination.save(finalReportVersion.getPath());
                                 uploadedTempReportVersion.delete();
-                                messagesList.add(String.valueOf(documentVersion.getId()));
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
@@ -1210,7 +1210,7 @@ public class DocumentUploadService {
                                     destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                     destination.save(finalReportVersion.getPath());
                                     uploadedTempReportVersion.delete();
-                                    messagesList.add(String.valueOf(documentVersion.getId()));
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1286,7 +1286,7 @@ public class DocumentUploadService {
                                     destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                     destination.save(finalReportVersion.getPath());
                                     uploadedTempReportVersion.delete();
-                                    messagesList.add(String.valueOf(documentVersion.getId()));
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1362,7 +1362,7 @@ public class DocumentUploadService {
                                     destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                     destination.save(finalReportVersion.getPath());
                                     uploadedTempReportVersion.delete();
-                                    messagesList.add(String.valueOf(documentVersion.getId()));
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1434,7 +1434,7 @@ public class DocumentUploadService {
                                     destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                                     destination.save(finalReportVersion.getPath());
                                     uploadedTempReportVersion.delete();
-                                    messagesList.add(String.valueOf(documentVersion.getId()));
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1647,6 +1647,16 @@ public class DocumentUploadService {
             default:
                 return "00";
         }
+    }
+
+    // Красиво отобразить дату загрузки новой версии документа
+    public String getRussianDateTime(String date) {
+        String year = date.substring(0, 4);
+        String month = date.substring(5, 7);
+        String day = date.substring(8, 10);
+        String russianDate = day + "." + month + "." + year;
+        String russianDateTime = russianDate + date.substring(10);
+        return russianDateTime;
     }
 
     // Необходимо декодировать права просмотра

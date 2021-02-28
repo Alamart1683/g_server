@@ -769,7 +769,7 @@ public class DocumentProcessorService {
                 );
                 pdTaskRepository.save(pdTask);
             }
-            return String.valueOf(documentVersion.getId());
+            return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
         } else if (document != null && !flag) {
             Integer type = determineType(taskDataView.getTaskType());
             if (document.getCreator() == student.getId()) {
@@ -800,7 +800,7 @@ public class DocumentProcessorService {
                     );
                     pdTaskRepository.save(pdTask);
                 }
-                return String.valueOf(documentVersion.getId());
+                return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
             } else {
                 return "Попытка создать версию чужого документа";
             }
@@ -834,7 +834,7 @@ public class DocumentProcessorService {
                 );
                 pdTaskRepository.save(pdTask);
             }
-            return String.valueOf(documentVersion.getId());
+            return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
         }
         return "Извините, что-то пошло не так";
     }
@@ -875,7 +875,7 @@ public class DocumentProcessorService {
                 );
                 vkrTaskRepository.save(vkrTask);
             }
-            return String.valueOf(documentVersion.getId());
+            return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
         } else if (document != null && !flag) {
             Integer type = determineType(vkrTaskDataView.getTaskType());
             if (document.getCreator() == student.getId()) {
@@ -894,7 +894,7 @@ public class DocumentProcessorService {
                     );
                     vkrTaskRepository.save(vkrTask);
                 }
-                return String.valueOf(documentVersion.getId());
+                return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
             } else {
                 return "Попытка создать версию чужого документа";
             }
@@ -915,7 +915,7 @@ public class DocumentProcessorService {
                         vkrTaskDataView.getTaskTasks(), vkrTaskDataView.getTaskDocs() , 1
                 );
                 vkrTaskRepository.save(vkrTask);
-                return String.valueOf(documentVersion.getId());
+                return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
             }
         }
         return "Извините, что-то пошло не так";
@@ -1840,6 +1840,16 @@ public class DocumentProcessorService {
                 type = 0;
         }
         return type;
+    }
+
+    // Красиво отобразить дату загрузки новой версии документа
+    public String getRussianDateTime(String date) {
+        String year = date.substring(0, 4);
+        String month = date.substring(5, 7);
+        String day = date.substring(8, 10);
+        String russianDate = day + "." + month + "." + year;
+        String russianDateTime = russianDate + date.substring(10);
+        return russianDateTime;
     }
 
     public Integer getUserId(String token) {
