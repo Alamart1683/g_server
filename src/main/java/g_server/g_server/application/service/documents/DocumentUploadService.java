@@ -616,10 +616,8 @@ public class DocumentUploadService {
                             }
                             DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
                             lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
                         } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                            messagesList.add("Не найдено одобренное задание");
                         }
                         // Если найдено задание последней версии, то присоединим к нему файл с содержанием отчёта и запишем как отчёт
                         if (documentRepository.findByCreatorAndName(creator_id, fileName) == null && messagesList.size() == 0) {
@@ -734,10 +732,8 @@ public class DocumentUploadService {
                             }
                             DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
                             lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
                         } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                            messagesList.add("Не найдено одобренное задание");
                         }
                         // Если найдено задание последней версии, то присоединим к нему файл с содержанием отчёта и запишем как отчёт
                         if (documentRepository.findByCreatorAndName(creator_id, fileName) == null && messagesList.size() == 0) {
@@ -851,10 +847,8 @@ public class DocumentUploadService {
                             }
                             DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
                             lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
                         } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                            messagesList.add("Не найдено одобренное задание");
                         }
                         // Если найдено задание последней версии, то присоединим к нему файл с содержанием отчёта и запишем как отчёт
                         if (documentRepository.findByCreatorAndName(creator_id, fileName) == null && messagesList.size() == 0) {
@@ -968,10 +962,8 @@ public class DocumentUploadService {
                             }
                             DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
                             lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
                         } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                            messagesList.add("Не найдено одобренное задание");
                         }
                         // Если найдено задание последней версии, то присоединим к нему файл с содержанием отчёта и запишем как отчёт
                         if (documentRepository.findByCreatorAndName(creator_id, fileName) == null && messagesList.size() == 0) {
