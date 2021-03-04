@@ -301,7 +301,7 @@ public class DocumentUploadService {
                                 uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
                             messagesList.clear();
-                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()) + "," + documentVersion.getDocument());
                         }
                         else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
@@ -386,7 +386,7 @@ public class DocumentUploadService {
                                 uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
                             messagesList.clear();
-                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()) + "," + documentVersion.getDocument());
                         }
                         else {
                             messagesList.add("Произошла непредвиденная ошибка загрузки версии файла");
