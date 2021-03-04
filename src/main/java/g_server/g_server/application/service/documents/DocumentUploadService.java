@@ -499,7 +499,7 @@ public class DocumentUploadService {
                                     sqlDateTime, "Загрузка документа на сайт", versionPath);
                             documentVersionService.save(documentVersion);
                             messagesList.clear();
-                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                            messagesList.add(document.getName() + "," + document.getCreator());
                         } else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
                             if (documentDirectory.listFiles().length == 0) {
