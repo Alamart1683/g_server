@@ -1206,7 +1206,7 @@ public class DocumentManagementService {
     // Научный руководитель одобряет или замечает отчет
     public String advisorCheckReport(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Неудовлетворительно") || newStatus.equals("Удовлетворительно") ||
-                newStatus.equals("Хорошо") || newStatus.equals("Отлично")) {
+                newStatus.equals("Хорошо") || newStatus.equals("Отлично") || newStatus.equals("Замечания")) {
             Integer advisorID = documentUploadService.getCreatorId(token);
             if (advisorID != null && versionID != null) {
                 DocumentVersion documentVersion;
