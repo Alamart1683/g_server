@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class MessagesService {
@@ -122,7 +121,6 @@ public class MessagesService {
         return false;
     }
 
-
     // Метод получения всех отправленных пользователем сообщений
     public List<Message> getUsersSentMessages(Integer userId) {
         List<Message> messages = new ArrayList<>();
@@ -137,7 +135,6 @@ public class MessagesService {
         }
         return null;
     }
-
 
     // Метод получения всех отправленных пользователю сообщений
     public List<Message> getUsersReceivedMessages(Integer userId) {
