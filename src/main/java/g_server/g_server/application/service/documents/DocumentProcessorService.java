@@ -9,12 +9,18 @@ import g_server.g_server.application.entity.documents.tasks.NirTask;
 import g_server.g_server.application.entity.documents.tasks.PdTask;
 import g_server.g_server.application.entity.documents.tasks.PpppuiopdTask;
 import g_server.g_server.application.entity.documents.tasks.VkrTask;
+import g_server.g_server.application.entity.system_data.EconomyConsultants;
+import g_server.g_server.application.entity.system_data.GroupsConsultants;
 import g_server.g_server.application.entity.system_data.Speciality;
+import g_server.g_server.application.entity.system_data.StudentGroup;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.view.*;
 import g_server.g_server.application.repository.documents.*;
+import g_server.g_server.application.repository.system_data.EconomyConsultantsRepository;
+import g_server.g_server.application.repository.system_data.GroupsConsultantsRepository;
 import g_server.g_server.application.repository.system_data.SpecialityRepository;
+import g_server.g_server.application.repository.system_data.StudentGroupRepository;
 import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
@@ -93,6 +99,15 @@ public class DocumentProcessorService {
 
     @Autowired
     private VkrTaskRepository vkrTaskRepository;
+
+    @Autowired
+    private StudentGroupRepository studentGroupRepository;
+
+    @Autowired
+    private EconomyConsultantsRepository economyConsultantsRepository;
+
+    @Autowired
+    private GroupsConsultantsRepository groupsConsultantsRepository;
 
     // Сгенерировать задание или создать его версию для студента
     public String studentTaskGeneration(String token, ShortTaskDataView shortTaskDataView) throws Exception {
@@ -570,6 +585,8 @@ public class DocumentProcessorService {
     // Обработать шаблон
     public void taskProcessing(XWPFDocument template, TaskDataView taskDataView, String speciality, Users student)
             throws Exception {
+        AssociatedStudents associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+        Users advisor = associatedStudents.getAdvisorUser();
         WordReplaceService wordReplaceService = new WordReplaceService(template);
         String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
         // Заменим слова в тексте документа
@@ -611,6 +628,7 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
         wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInText("ПНР", advisor.getScientificAdvisorData().getPost());
         wordReplaceService.replaceWordsInText("ИЗУЧИТЬ", toLowerCaseFirstSymbol(taskDataView.getToExplore()));
         wordReplaceService.replaceWordsInText("СОЗДАТЬ", toLowerCaseFirstSymbol(taskDataView.getToCreate()));
         wordReplaceService.replaceWordsInText("ОЗНАКОМИТЬСЯ", toLowerCaseFirstSymbol(taskDataView.getToFamiliarize()));
@@ -656,6 +674,7 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
         wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInTables("ПНР", advisor.getScientificAdvisorData().getPost());
         if (taskDataView.getToExplore().equals("Изучить")) {
             wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", taskDataView.getToExplore());
         } else {
@@ -673,7 +692,14 @@ public class DocumentProcessorService {
     // Обработать шаблон задания на ВКР
     public void vkrTaskProcessing(XWPFDocument template, VkrTaskDataView vkrTaskDataView, String speciality, Users student) {
         WordReplaceService wordReplaceService = new WordReplaceService(template);
+        AssociatedStudents associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+        Users advisor = associatedStudents.getAdvisorUser();
         String studentTheme = vkrTaskDataView.getStudentTheme();
+        String studentGroup = vkrTaskDataView.getStudentGroup();
+        StudentGroup entityStudentGroup = studentGroupRepository.getByStudentGroup(studentGroup);
+        GroupsConsultants groupsConsultants = groupsConsultantsRepository.findByGroupID(entityStudentGroup.getId());
+        EconomyConsultants economyConsultant = economyConsultantsRepository.findById(groupsConsultants.getConsultantID()).get();
+
         // Заменим слова в тексте документа
         wordReplaceService.replaceWordsInText("Дата выдачи задания", getFirstDateType(vkrTaskDataView.getOrderStartDate()));
         wordReplaceService.replaceWordsInText("Согласованное название темы", studentTheme);
@@ -687,6 +713,10 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("ФИО НРП", vkrTaskDataView.getAdvisorFio());
         wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(vkrTaskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(vkrTaskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInText("ФИО ЭКП", economyConsultant.getFio());
+        wordReplaceService.replaceWordsInText("ФИО ЭК", getShortFio(economyConsultant.getFio()));
+        wordReplaceService.replaceWordsInText("ЭКДОЛЖНОСТЬ", economyConsultant.getPost());
+        wordReplaceService.replaceWordsInText("ПНР", advisor.getScientificAdvisorData().getPost());
         wordReplaceService.replaceWordsInText("ГОД", vkrTaskDataView.getOrderStartDate().substring(6, 10));
         wordReplaceService.replaceWordsInText("ЦЕЛЬВКР", vkrTaskDataView.getTaskAim());
         wordReplaceService.replaceWordsInText("ЗАДАЧИ", vkrTaskDataView.getTaskTasks());
@@ -706,6 +736,10 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ФИО НРП", vkrTaskDataView.getAdvisorFio());
         wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(vkrTaskDataView.getAdvisorFio()));
         wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(vkrTaskDataView.getHeadFio()));
+        // wordReplaceService.replaceWordsInTables("ФИО ЭКП", economyConsultant.getFio());
+        wordReplaceService.replaceWordsInTables("ФИО ЭК", economyConsultant.getFio());
+        wordReplaceService.replaceWordsInTables("ЭКДОЛЖНОСТЬ", economyConsultant.getPost());
+        wordReplaceService.replaceWordsInTables("ПНР", advisor.getScientificAdvisorData().getPost());
         wordReplaceService.replaceWordsInTables("ЦЕЛЬВКР", vkrTaskDataView.getTaskAim());
         wordReplaceService.replaceWordsInTables("ЗАДАЧИ", vkrTaskDataView.getTaskTasks());
         wordReplaceService.replaceWordsInTables("Документы", vkrTaskDataView.getTaskDocs());

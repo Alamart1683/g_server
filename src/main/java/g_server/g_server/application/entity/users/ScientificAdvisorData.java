@@ -17,6 +17,9 @@ public class ScientificAdvisorData {
     @Column(name = "places")
     private int places;
 
+    @Column(name = "post")
+    private String post;
+
     @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Roles roles;
@@ -71,5 +74,13 @@ public class ScientificAdvisorData {
 
     public void setPlaces(int places) {
         this.places = places;
+    }
+
+    public String getPost() {
+        return post;
+    }
+
+    public void setPost(String post) {
+        this.post = post;
     }
 }

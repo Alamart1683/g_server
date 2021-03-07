@@ -332,6 +332,20 @@ create table vkr_advisor_conlusion(
     foreign key (vkr_advisor_conclusion_status) references  document_status (id)
 );
 
+create table economy_consultants(
+  consultantID int primary key auto_increment,
+  post varchar(100) not null,
+  fio varchar(200) not null
+);
+
+create table economy_consultants_student_group(
+    id int primary key auto_increment,
+    consultantID int not null,
+    groupID int not null,
+    foreign key (consultantID) references economy_consultants(consultantID) on delete cascade on update cascade,
+    foreign key (groupID) references student_group(id) on delete cascade on update cascade
+);
+
 insert into document_status (status) values
     ('Не отправлено'),
     ('Одобрено'),
@@ -435,6 +449,28 @@ insert into document_kind (kind) values
 insert into speciality values
     ('1', '09.03.04', 'ИКБО', 'Программная инженерия'),
     ('2', '09.03.01', 'ИВБО', 'Информатика и вычислительная техника');
+
+insert into economy_consultants values
+    (1, 'к.э.н., доцент', 'Гавриленко Татьяна Юрьевна'),
+    (2, 'к.э.н., доцент', 'Григоренко Ольга Викторовна');
+
+insert into economy_consultants_student_group values
+    (1, 2, 1),
+    (2, 2, 2),
+    (3, 1, 3),
+    (4, 1, 4),
+    (5, 1, 5);
+
+alter table scientific_advisor_data
+    add post varchar(100) default 'к.т.н, доцент';
+
+UPDATE scientific_advisor_data, users
+SET post = 'д.т.н, профессор'
+WHERE scientific_advisor_data.id = users.id and users.surname = 'Головин';
+
+UPDATE scientific_advisor_data, users
+SET post = 'к.т.н, старший преподаватель'
+WHERE scientific_advisor_data.id = users.id and users.surname = 'Миронов';
 
 /*
 Событие для планировщика, которое будет удалять неподтвердившихся

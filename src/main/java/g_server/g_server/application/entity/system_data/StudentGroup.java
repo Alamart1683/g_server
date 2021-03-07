@@ -1,6 +1,7 @@
 package g_server.g_server.application.entity.system_data;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @NamedNativeQuery(
         name = "getStudentGroupByStudentGroup",
@@ -18,6 +19,15 @@ public class StudentGroup {
 
     @Column(name = "student_group")
     private String studentGroup;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "economy_consultants_student_group",
+            joinColumns = @JoinColumn(
+                    name = "groupID", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "consultantID", referencedColumnName = "consultantID"))
+    private Set<EconomyConsultants> consultants;
 
     public StudentGroup() { }
 
@@ -39,5 +49,13 @@ public class StudentGroup {
 
     public void setStudentGroup(String student_group) {
         this.studentGroup = student_group;
+    }
+
+    public Set<EconomyConsultants> getConsultants() {
+        return consultants;
+    }
+
+    public void setConsultants(Set<EconomyConsultants> consultants) {
+        this.consultants = consultants;
     }
 }
