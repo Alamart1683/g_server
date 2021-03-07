@@ -32,11 +32,16 @@ import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.text_processor.Splitter;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -1405,6 +1410,33 @@ public class DocumentViewService {
                     }
                     File viewTask = getThreeViewPages(versionID);
                     String outerAccessString = externalApiUrl + viewTask.getName();
+                    return outerAccessString;
+                }
+                else if (document.getKind() == 2 && document.getType() == 4) {
+                    File viewTaskDirectory = new File(".\\view_tasks");
+                    if (!viewTaskDirectory.exists()) {
+                        viewTaskDirectory.mkdir();
+                    }
+                    List<File> viewTaskList = Arrays.asList(viewTaskDirectory.listFiles());
+                    for (File file: viewTaskList) {
+                        long fileModified = file.lastModified();
+                        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+                        long currentTime = zonedDateTime.toInstant().toEpochMilli();
+                        if (currentTime - fileModified > 120000) {
+                            file.delete();
+                        }
+                    }
+                    String timeName = ZonedDateTime.now().toString();
+                    timeName = timeName.replaceAll("\\D", "");
+                    String tempCutTaskPath = ".\\view_tasks" + File.separator + timeName + documentVersion.getEditor() + ".docx";
+                    String outerAccessString = externalApiUrl + timeName + documentVersion.getEditor() + ".docx";
+                    try (OutputStream os = Files.newOutputStream(Path.of(tempCutTaskPath))) {
+                        File file = new File(documentVersion.getThis_version_document_path());
+                        os.write(FileUtils.readFileToByteArray(file));
+                    }
+                    catch (IOException ioException) {
+                        return "Ошибка";
+                    }
                     return outerAccessString;
                 }
             } else {
