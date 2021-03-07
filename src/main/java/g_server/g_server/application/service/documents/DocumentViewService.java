@@ -1404,7 +1404,7 @@ public class DocumentViewService {
                         long fileModified = file.lastModified();
                         ZonedDateTime zonedDateTime = ZonedDateTime.now();
                         long currentTime = zonedDateTime.toInstant().toEpochMilli();
-                        if (currentTime - fileModified > 120000) {
+                        if (currentTime - fileModified > 3600000) {
                             file.delete();
                         }
                     }
