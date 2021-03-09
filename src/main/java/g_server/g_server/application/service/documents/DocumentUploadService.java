@@ -26,6 +26,7 @@ import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.repository.users.UsersRolesRepository;
 import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.documents.crud.DocumentVersionService;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -647,14 +648,20 @@ public class DocumentUploadService {
                                 nirReportRepository.save(nirReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                documentProcessorService.reportProcessing(finalReportVersion,
-                                        nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
-                                // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                                 uploadedTempReportVersion.delete();
                                 messagesList.clear();
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
@@ -692,13 +699,20 @@ public class DocumentUploadService {
                                 nirReportRepository.save(nirReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                documentProcessorService.reportProcessing(finalReportVersion,
-                                        nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                                 uploadedTempReportVersion.delete();
                                 messagesList.clear();
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
@@ -763,13 +777,20 @@ public class DocumentUploadService {
                                 ppppuiopdReportRepository.save(ppppuiopdReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                documentProcessorService.reportProcessing(finalReportVersion,
-                                        ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                                 uploadedTempReportVersion.delete();
                                 messagesList.clear();
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
@@ -807,13 +828,20 @@ public class DocumentUploadService {
                                 ppppuiopdReportRepository.save(ppppuiopdReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                documentProcessorService.reportProcessing(finalReportVersion,
-                                        ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                                 uploadedTempReportVersion.delete();
                                 messagesList.clear();
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
@@ -878,13 +906,20 @@ public class DocumentUploadService {
                                 pdReportRepository.save(pdReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                documentProcessorService.reportProcessing(finalReportVersion,
-                                        pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                                 uploadedTempReportVersion.delete();
                                 messagesList.clear();
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
@@ -922,13 +957,20 @@ public class DocumentUploadService {
                                 pdReportRepository.save(pdReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                documentProcessorService.reportProcessing(finalReportVersion,
-                                        pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                                 uploadedTempReportVersion.delete();
                                 messagesList.clear();
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
@@ -991,11 +1033,18 @@ public class DocumentUploadService {
                                 vkrReportRepository.save(vkrReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                                 uploadedTempReportVersion.delete();
                                 messagesList.clear();
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
@@ -1031,14 +1080,18 @@ public class DocumentUploadService {
                                 vkrReportRepository.save(vkrReport);
                                 File uploadedTempReportVersion = new File(tempVersionPath);
                                 File finalReportVersion = new File(versionPath);
-                                Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                destination.save(finalReportVersion.getPath());
-                                uploadedTempReportVersion.delete();
-                                messagesList.clear();
-                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
@@ -1205,16 +1258,20 @@ public class DocumentUploadService {
                                     nirReportRepository.save(nirReport);
                                     File uploadedTempReportVersion = new File(tempVersionPath);
                                     File finalReportVersion = new File(versionPath);
-                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                    documentProcessorService.reportProcessing(finalReportVersion,
-                                            nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
-                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                    destination.save(finalReportVersion.getPath());
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                                    if (documentForm.isNowMerge()) {
+                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                        documentProcessorService.reportProcessing(finalReportVersion,
+                                                nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
+                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                        destination.save(finalReportVersion.getPath());
+                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                    } else {
+                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                        }
+                                    }
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1282,16 +1339,20 @@ public class DocumentUploadService {
                                     ppppuiopdReportRepository.save(ppppuiopdReport);
                                     File uploadedTempReportVersion = new File(tempVersionPath);
                                     File finalReportVersion = new File(versionPath);
-                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                    documentProcessorService.reportProcessing(finalReportVersion,
-                                            ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
-                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                    destination.save(finalReportVersion.getPath());
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                                    if (documentForm.isNowMerge()) {
+                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                        documentProcessorService.reportProcessing(finalReportVersion,
+                                                ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
+                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                        destination.save(finalReportVersion.getPath());
+                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                    } else {
+                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                        }
+                                    }
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1359,16 +1420,20 @@ public class DocumentUploadService {
                                     pdReportRepository.save(pdReport);
                                     File uploadedTempReportVersion = new File(tempVersionPath);
                                     File finalReportVersion = new File(versionPath);
-                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                    documentProcessorService.reportProcessing(finalReportVersion,
-                                            pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
-                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                    destination.save(finalReportVersion.getPath());
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                                    if (documentForm.isNowMerge()) {
+                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                        documentProcessorService.reportProcessing(finalReportVersion,
+                                                pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
+                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                        destination.save(finalReportVersion.getPath());
+                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                    } else {
+                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                        }
+                                    }
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1434,14 +1499,18 @@ public class DocumentUploadService {
                                     vkrReportRepository.save(vkrReport);
                                     File uploadedTempReportVersion = new File(tempVersionPath);
                                     File finalReportVersion = new File(versionPath);
-                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                    destination.save(finalReportVersion.getPath());
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                                    if (documentForm.isNowMerge()) {
+                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                        destination.save(finalReportVersion.getPath());
+                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                    } else {
+                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                        }
+                                    }
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }

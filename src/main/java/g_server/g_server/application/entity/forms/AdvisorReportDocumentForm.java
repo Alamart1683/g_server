@@ -6,12 +6,17 @@ public class AdvisorReportDocumentForm extends DocumentForm {
     private int studentID;
     private String detailedContent;
     private String advisorConclusion;
+    private boolean nowMerge;
 
-    public AdvisorReportDocumentForm(String type, String kind, String description, String viewRights, String projectArea, String projectName, String token, MultipartFile file, int studentID, String detailedContent, String advisorConclusion) {
+    public AdvisorReportDocumentForm(String type, String kind, String description, String viewRights,
+                                     String projectArea, String projectName, String token, MultipartFile file,
+                                     int studentID, String detailedContent, String advisorConclusion,
+                                     boolean nowMerge) {
         super(type, kind, description, viewRights, projectArea, projectName, token, file);
         this.studentID = studentID;
         this.detailedContent = detailedContent;
         this.advisorConclusion = advisorConclusion;
+        this.nowMerge = nowMerge;
     }
 
     public int getStudentID() {
@@ -36,5 +41,13 @@ public class AdvisorReportDocumentForm extends DocumentForm {
 
     public void setAdvisorConclusion(String advisorConclusion) {
         this.advisorConclusion = advisorConclusion;
+    }
+
+    public boolean isNowMerge() {
+        return nowMerge;
+    }
+
+    public void setNowMerge(boolean nowMerge) {
+        this.nowMerge = nowMerge;
     }
 }
