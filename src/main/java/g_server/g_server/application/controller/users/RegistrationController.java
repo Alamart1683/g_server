@@ -226,7 +226,8 @@ public class RegistrationController {
         }
         if (messageList.size() == 0) {
             if (!usersService.saveScientificAdvisor(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
-                    scientificAdvisorForm.getCathedra(), scientificAdvisorForm.getPlaces())) {
+                    scientificAdvisorForm.getCathedra(), scientificAdvisorForm.getPlaces(),
+                    scientificAdvisorForm.getPosition())) {
                 model.addAttribute("usernameError", "Пользовател с данным email уже зарегистрирован");
                 messageList.add("Пользователь с таким email уже есть");
             } else {
@@ -253,7 +254,7 @@ public class RegistrationController {
         }
         if (messageList.size() == 0) {
             if (!usersService.saveHeadOfCathedra(scientificAdvisorForm.ScientificAdvisorFormToUsers(),
-                    scientificAdvisorForm.getCathedra(), scientificAdvisorForm.getPlaces()))  {
+                    scientificAdvisorForm.getCathedra(), scientificAdvisorForm.getPlaces(), scientificAdvisorForm.getPosition()))  {
                 model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
                 messageList.add("Пользователь с таким email уже есть");
             } else {

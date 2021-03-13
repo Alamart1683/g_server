@@ -30,10 +30,11 @@ public class ScientificAdvisorData {
 
     public ScientificAdvisorData() { }
 
-    public ScientificAdvisorData(int id, int cathedra, int places) {
+    public ScientificAdvisorData(int id, int cathedra, int places, String position) {
         this.id = id;
         this.cathedra = cathedra;
         this.places = places;
+        this.post = post;
     }
 
     public int getId() {

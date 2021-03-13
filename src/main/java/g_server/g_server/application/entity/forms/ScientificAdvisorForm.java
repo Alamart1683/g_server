@@ -6,11 +6,12 @@ public class ScientificAdvisorForm extends Users {
     private String cathedra;
     private String mailSendingAccepted;
     private int places;
+    private String position;
 
     public ScientificAdvisorForm() { }
 
     public ScientificAdvisorForm(String cathedra, String email, String name, String surname,
-            String second_name, String phone, String mailSendingAccepted, int places) {
+            String second_name, String phone, String mailSendingAccepted, int places, String position) {
         this.cathedra = cathedra;
         this.setEmail(email);
         this.setName(name);
@@ -19,6 +20,7 @@ public class ScientificAdvisorForm extends Users {
         this.setPhone(phone);
         this.mailSendingAccepted = mailSendingAccepted;
         this.places = places;
+        this.position = position;
     }
 
     public Users ScientificAdvisorFormToUsers() {
@@ -51,5 +53,13 @@ public class ScientificAdvisorForm extends Users {
 
     public void setPlaces(int places) {
         this.places = places;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }

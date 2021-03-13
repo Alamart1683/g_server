@@ -144,7 +144,7 @@ public class UsersService implements UserDetailsService {
     }
 
     // Сохранить НР
-    public boolean saveScientificAdvisor(Users user, String cathedra_name, int places) {
+    public boolean saveScientificAdvisor(Users user, String cathedra_name, int places, String position) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
             return false;
@@ -155,7 +155,7 @@ public class UsersService implements UserDetailsService {
             user.setRoles(Collections.singleton(new Roles(2, "ROLE_SCIENTIFIC_ADVISOR")));
             usersRepository.save(user);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
-                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places);
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places, position);
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             // Отправка письма науч. руководителю
             mailService.sendLoginEmailAndPassword(user.getEmail(), password, "научного руководителя");
@@ -165,7 +165,7 @@ public class UsersService implements UserDetailsService {
     }
 
     // Сохранить зав. кафедрой
-    public boolean saveHeadOfCathedra(Users user, String cathedra_name, int places) {
+    public boolean saveHeadOfCathedra(Users user, String cathedra_name, int places, String position) {
         Users userFromDB = usersRepository.findByEmail(user.getEmail());
         if (isUserExists(userFromDB)) {
             return false;
@@ -177,7 +177,7 @@ public class UsersService implements UserDetailsService {
             user.setPassword(bCryptPasswordEncoder.encode(password));
             usersRepository.save(user);
             ScientificAdvisorData scientificAdvisorData = new ScientificAdvisorData(user.getId(),
-                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places);
+                    cathedrasRepository.getCathedrasByCathedraName(cathedra_name).getId(), places, position);
             scientificAdvisorDataRepository.save(scientificAdvisorData);
             // Отправка письма зав. кафедры
             mailService.sendLoginEmailAndPassword(user.getEmail(), password, "заведующего кафедрой");
