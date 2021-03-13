@@ -1092,6 +1092,9 @@ public class DocumentUploadService {
                                         os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
                                     }
                                 }
+                                uploadedTempReportVersion.delete();
+                                messagesList.clear();
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки версии файла");
                                 if (documentDirectory != null) {
@@ -1272,6 +1275,9 @@ public class DocumentUploadService {
                                             os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
                                         }
                                     }
+                                    uploadedTempReportVersion.delete();
+                                    messagesList.clear();
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1353,6 +1359,9 @@ public class DocumentUploadService {
                                             os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
                                         }
                                     }
+                                    uploadedTempReportVersion.delete();
+                                    messagesList.clear();
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1434,6 +1443,9 @@ public class DocumentUploadService {
                                             os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
                                         }
                                     }
+                                    uploadedTempReportVersion.delete();
+                                    messagesList.clear();
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
@@ -1511,6 +1523,9 @@ public class DocumentUploadService {
                                             os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
                                         }
                                     }
+                                    uploadedTempReportVersion.delete();
+                                    messagesList.clear();
+                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                                 } else {
                                     messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                                 }
