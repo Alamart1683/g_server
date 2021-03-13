@@ -940,11 +940,11 @@ public class AssociatedStudentsService {
             File deleteFile = new File(tempPath + File.separator + "studentAssocData.xlsx");
             XSSFSheet studentSheet;
             try {
-                studentSheet = excelStudentData.getSheetAt(1);
+                studentSheet = excelStudentData.getSheet("СПИСОК СТУДЕНТОВ С ТЕМАМИ");
+                //studentSheet = excelStudentData.getSheetAt(1);
             } catch (IllegalArgumentException illegalArgumentException) {
                 return "Некорректный формат для файла с сопоставлением научных руководителей с студентами";
             }
-
             excelStudentData.close();
             List<Users> usersList = usersRepository.findAll();
             try {

@@ -9,6 +9,8 @@ import g_server.g_server.application.entity.documents.tasks.NirTask;
 import g_server.g_server.application.entity.documents.tasks.PdTask;
 import g_server.g_server.application.entity.documents.tasks.PpppuiopdTask;
 import g_server.g_server.application.entity.documents.tasks.VkrTask;
+import g_server.g_server.application.entity.forms.DocumentForm;
+import g_server.g_server.application.entity.forms.DocumentFormReport;
 import g_server.g_server.application.entity.system_data.EconomyConsultants;
 import g_server.g_server.application.entity.system_data.GroupsConsultants;
 import g_server.g_server.application.entity.system_data.Speciality;
@@ -955,6 +957,7 @@ public class DocumentProcessorService {
         return "Извините, что-то пошло не так";
     }
 
+    @Deprecated
     // Объединить вордовские документы спомощью docx4j
     public void makeUsWhole(File finalReport, File tempReport) throws Docx4JException, JAXBException, FileNotFoundException, IOException {
         InputStream inputStream = new FileInputStream(finalReport);
@@ -1003,6 +1006,7 @@ public class DocumentProcessorService {
         f.save(finalReport);
     }
 
+    @Deprecated
     // Объединить задание с отчётом
     public void makeUsWhole(InputStream taskVersion, InputStream reportVersion, OutputStream destination) throws Exception {
         OPCPackage taskPackage = OPCPackage.open(taskVersion);
