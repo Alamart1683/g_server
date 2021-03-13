@@ -34,7 +34,7 @@ public class ScientificAdvisorData {
         this.id = id;
         this.cathedra = cathedra;
         this.places = places;
-        this.post = post;
+        this.post = position;
     }
 
     public int getId() {
