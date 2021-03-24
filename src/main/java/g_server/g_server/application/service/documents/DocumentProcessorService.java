@@ -751,7 +751,7 @@ public class DocumentProcessorService {
         InputStream inputStream = new FileInputStream(templateFile);
         XWPFDocument template = new XWPFDocument(inputStream);
         WordReplaceService wordReplaceService = new WordReplaceService(template);
-        wordReplaceService.replaceWordsInText("СОДЕРЖАНИЕ", detailedContent);
+        wordReplaceService.replaceWordsInText("ДСОДЕРЖАНИЕ", detailedContent);
         wordReplaceService.replaceWordsInText("ЗАКЛЮЧЕНИЕ", advisorsConclusion);
         inputStream.close();
         wordReplaceService.saveAndGetModdedFile(templateFile);
