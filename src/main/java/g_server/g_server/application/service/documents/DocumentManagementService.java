@@ -833,44 +833,40 @@ public class DocumentManagementService {
                     int type = document.getType();
                     switch (type) {
                         case 1:
-                            if (documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "nirTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 2:
-                            if (documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "ppppuiopdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 3:
-                            if (documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "pdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 4:
-                            if (documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "vkrTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         default:
                             return "Непредвиденная ошибка при удалении версии задания";
@@ -901,79 +897,75 @@ public class DocumentManagementService {
                     switch (type) {
                         case 1:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "nirTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "nirTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 2:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "ppppuiopdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "ppppuiopdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 3:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "pdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "pdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 4:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         default:
                             return "Непредвиденная ошибка при удалении версии задания научным руководителем";
@@ -1001,44 +993,40 @@ public class DocumentManagementService {
                     int kind = document.getKind();
                     switch (kind) {
                         case 6:
-                            if (documentVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "vkrAllowance")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 7:
-                            if (documentVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "advisorConclusion")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 8:
-                            if (documentVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "vkrAnitplagiat")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 9:
-                            if (documentVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "vkrPresentation")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
-                                return "Запрещено удалять версии документа после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         default:
                             return "Непредвиденная ошибка при удалении версии задания";
@@ -1069,79 +1057,75 @@ public class DocumentManagementService {
                     switch (kind) {
                         case 6:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrAllowance")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrAllowance")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию документа своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 7:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "advisorConclusion")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "advisorConclusion")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию документа своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 8:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrAnitplagiat")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrAnitplagiat")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 9:
                             if (documentVersion.getEditor() == advisorID &&
-                                    documentVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrPresentation")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrPresentation")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию задания своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         default:
                             return "Непредвиденная ошибка при удалении версии задания научным руководителем";
@@ -1302,48 +1286,44 @@ public class DocumentManagementService {
                     int type = document.getType();
                     switch (type) {
                         case 1:
-                            if (documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "nirReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Запрещено удалять версии отчета после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 2:
-                            if (documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "ppppuiopdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Запрещено удалять версии отчета после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 3:
-                            if (documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "pdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Запрещено удалять версии отчета после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 4:
-                            if (documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                    || documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                            if (!isLastChecked(documentVersion, "vkrReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Запрещено удалять версии отчета после его отправки";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         default:
                             return "Непредвиденная ошибка при удалении версии отчета";
@@ -1374,84 +1354,79 @@ public class DocumentManagementService {
                     switch (type) {
                         case 1:
                             if (documentVersion.getEditor() == advisorID &&
-                                    (documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                            || documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Замечания"))) {
+                                    !isLastChecked(documentVersion, "nirReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "nirReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 2:
                             if (documentVersion.getEditor() == advisorID &&
-                                    (documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                            || documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Замечания"))) {
+                                    !isLastChecked(documentVersion, "ppppuiopdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "ppppuiopdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 3:
                             if (documentVersion.getEditor() == advisorID &&
-                                    (documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                            || documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Замечания"))) {
+                                    !isLastChecked(documentVersion, "pdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "pdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         case 4:
                             if (documentVersion.getEditor() == advisorID &&
-                                    (documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Не отправлено")
-                                            || documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Замечания"))) {
+                                    !isLastChecked(documentVersion, "vkrReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
-                                    documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Замечания")) {
+                                    !isLastChecked(documentVersion, "vkrReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
                                 documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
-                                return "Вы можете удалить только свою неотправленную версию отчёта своего студента";
+                                return "Запрещено удалять последнюю прорецензированную версию документа";
                             }
                         default:
                             return "Непредвиденная ошибка при удалении версии отчета научным руководителем";
                     }
-
                 } else {
                     return "Попытка удалить чужую версию отчета";
                 }
@@ -1481,7 +1456,6 @@ public class DocumentManagementService {
         Document vkrAllowance;
         Document vkrAntiplagiat;
         Document vkrAdvisorConclusion;
-        // TODO Сделать обработку остальных документов когда они появятся
         try {
             // НИР
             if (documentRepository.findByTypeAndKindAndCreator(1, 2, studentID).size() == 1) {
@@ -1726,5 +1700,102 @@ public class DocumentManagementService {
             default:
                 return 0;
         }
+    }
+
+    private boolean isLastChecked(DocumentVersion documentVersion, String versionType) {
+        List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(documentVersion.getDocument());
+        DocumentVersion lastCheckedVersion = null;
+        switch (versionType) {
+            case "nirTask":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getNirTask().getStatus() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "nirReport":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getNirReport().getNirReportStatus() == 5 ||
+                            version.getNirReport().getNirReportStatus() == 6 ||
+                            version.getNirReport().getNirReportStatus() == 7 ||
+                            version.getNirReport().getNirReportStatus() == 8) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "ppppuiopdTask":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getPpppuiopdTask().getStatus() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "ppppuiopdReport":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getPpppuiopdReport().getPpppuiopdReportStatus() == 5 ||
+                            version.getPpppuiopdReport().getPpppuiopdReportStatus() == 6 ||
+                            version.getPpppuiopdReport().getPpppuiopdReportStatus() == 7 ||
+                            version.getPpppuiopdReport().getPpppuiopdReportStatus() == 8) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "pdTask":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getPdTask().getStatus() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "pdReport":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getPdReport().getPdReportStatus() == 5 ||
+                            version.getPdReport().getPdReportStatus() == 6 ||
+                            version.getPdReport().getPdReportStatus() == 7 ||
+                            version.getPdReport().getPdReportStatus() == 8) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "vkrTask":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getVkrTask().getVkr_status() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "vkrReport":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getVkrReport().getVkrReportStatus() == 5 ||
+                            version.getVkrReport().getVkrReportStatus() == 6 ||
+                            version.getVkrReport().getVkrReportStatus() == 7 ||
+                            version.getVkrReport().getVkrReportStatus() == 8) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "advisorConclusion":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getAdvisorConclusion().getConclusionStatus() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "vkrAllowance":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getVkrAllowance().getAllowanceStatus() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "vkrAnitplagiat":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getVkrAntiplagiat().getAntiplagiatStatus() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+            case "vkrPresentation":
+                for (DocumentVersion version: documentVersions) {
+                    if (version.getVkrPresentation().getPresentationStatus() == 2) {
+                        lastCheckedVersion = version;
+                    }
+                }
+        }
+        if (lastCheckedVersion != null) {
+            if (documentVersion.getId() == lastCheckedVersion.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
