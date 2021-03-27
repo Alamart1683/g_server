@@ -1712,6 +1712,7 @@ public class DocumentManagementService {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "nirReport":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getNirReport().getNirReportStatus() == 5 ||
@@ -1721,12 +1722,14 @@ public class DocumentManagementService {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "ppppuiopdTask":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getPpppuiopdTask().getStatus() == 2) {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "ppppuiopdReport":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getPpppuiopdReport().getPpppuiopdReportStatus() == 5 ||
@@ -1736,12 +1739,14 @@ public class DocumentManagementService {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "pdTask":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getPdTask().getStatus() == 2) {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "pdReport":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getPdReport().getPdReportStatus() == 5 ||
@@ -1751,12 +1756,14 @@ public class DocumentManagementService {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "vkrTask":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getVkrTask().getVkr_status() == 2) {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "vkrReport":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getVkrReport().getVkrReportStatus() == 5 ||
@@ -1766,30 +1773,35 @@ public class DocumentManagementService {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "advisorConclusion":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getAdvisorConclusion().getConclusionStatus() == 2) {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "vkrAllowance":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getVkrAllowance().getAllowanceStatus() == 2) {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "vkrAnitplagiat":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getVkrAntiplagiat().getAntiplagiatStatus() == 2) {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
             case "vkrPresentation":
                 for (DocumentVersion version: documentVersions) {
                     if (version.getVkrPresentation().getPresentationStatus() == 2) {
                         lastCheckedVersion = version;
                     }
                 }
+                break;
         }
         if (lastCheckedVersion != null) {
             if (documentVersion.getId() == lastCheckedVersion.getId()) {
