@@ -1,6 +1,6 @@
 package g_server.g_server.application.controller.documents;
 
-import g_server.g_server.application.entity.view.*;
+import g_server.g_server.application.query.response.*;
 import g_server.g_server.application.service.documents.DocumentViewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

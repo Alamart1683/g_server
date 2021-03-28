@@ -1,7 +1,7 @@
 package g_server.g_server.application.controller.documents;
 
-import g_server.g_server.application.entity.forms.NewRightViewForm;
-import g_server.g_server.application.entity.view.*;
+import g_server.g_server.application.query.request.NewRightViewForm;
+import g_server.g_server.application.query.response.*;
 import g_server.g_server.application.service.documents.DocumentManagementService;
 import g_server.g_server.application.service.documents.DocumentProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;

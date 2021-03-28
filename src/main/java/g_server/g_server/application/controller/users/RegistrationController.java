@@ -1,10 +1,10 @@
 package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.forms.AdminForm;
-import g_server.g_server.application.entity.forms.AutomaticRegistrationForm;
-import g_server.g_server.application.entity.forms.ScientificAdvisorForm;
-import g_server.g_server.application.entity.forms.StudentForm;
+import g_server.g_server.application.query.request.AdminForm;
+import g_server.g_server.application.query.request.AutomaticRegistrationForm;
+import g_server.g_server.application.query.request.ScientificAdvisorForm;
+import g_server.g_server.application.query.request.StudentForm;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.mail.MailService;
@@ -16,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

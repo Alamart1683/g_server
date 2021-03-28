@@ -1,7 +1,7 @@
 package g_server.g_server.application.service.project;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.forms.ProjectForm;
+import g_server.g_server.application.query.request.ProjectForm;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.project.ProjectRepository;

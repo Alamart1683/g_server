@@ -11,7 +11,7 @@ import g_server.g_server.application.entity.documents.vkr_other.VkrAdvisorConclu
 import g_server.g_server.application.entity.documents.vkr_other.VkrAllowance;
 import g_server.g_server.application.entity.documents.vkr_other.VkrAntiplagiat;
 import g_server.g_server.application.entity.documents.vkr_other.VkrPresentation;
-import g_server.g_server.application.entity.forms.*;
+import g_server.g_server.application.query.request.*;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.system_data.Speciality;

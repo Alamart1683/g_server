@@ -1,6 +1,6 @@
 package g_server.g_server.application.controller.project;
 
-import g_server.g_server.application.entity.forms.ProjectForm;
+import g_server.g_server.application.query.request.ProjectForm;
 import g_server.g_server.application.service.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;

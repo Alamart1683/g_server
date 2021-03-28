@@ -1,7 +1,7 @@
 package g_server.g_server.application.controller.users;
 
-import g_server.g_server.application.entity.forms.AutomaticRegistrationForm;
-import g_server.g_server.application.entity.view.*;
+import g_server.g_server.application.query.request.AutomaticRegistrationForm;
+import g_server.g_server.application.query.response.*;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import g_server.g_server.application.service.users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;

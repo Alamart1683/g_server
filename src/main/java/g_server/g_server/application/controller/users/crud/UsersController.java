@@ -1,8 +1,8 @@
 package g_server.g_server.application.controller.users.crud;
 
 import g_server.g_server.application.entity.users.Users;
-import g_server.g_server.application.entity.view.PersonalAdvisorView;
-import g_server.g_server.application.entity.view.PersonalStudentView;
+import g_server.g_server.application.query.response.PersonalAdvisorView;
+import g_server.g_server.application.query.response.PersonalStudentView;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.users.ScientificAdvisorDataService;
 import g_server.g_server.application.service.users.UsersService;

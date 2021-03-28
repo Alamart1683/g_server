@@ -1,11 +1,9 @@
 package g_server.g_server.application.controller.documents;
 
-import g_server.g_server.application.entity.forms.*;
+import g_server.g_server.application.query.request.*;
 import g_server.g_server.application.service.documents.DocumentUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -20,7 +20,7 @@ import g_server.g_server.application.entity.system_data.Speciality;
 import g_server.g_server.application.entity.users.AssociatedStudents;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.entity.users.UsersRoles;
-import g_server.g_server.application.entity.view.*;
+import g_server.g_server.application.query.response.*;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.OccupiedStudentsRepository;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;

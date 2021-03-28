@@ -1,8 +1,8 @@
 package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
-import g_server.g_server.application.entity.forms.AuthorizationForm;
-import g_server.g_server.application.entity.forms.AuthorizationResponseForm;
+import g_server.g_server.application.query.request.AuthorizationForm;
+import g_server.g_server.application.query.request.AuthorizationResponseForm;
 import g_server.g_server.application.entity.users.RefreshToken;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.users.RefreshTokenRepository;
