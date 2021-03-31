@@ -1052,7 +1052,7 @@ public class DocumentProcessorService {
                     cutTask.appendDocument(splitter.getDocumentOfPage(page), com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
                     page += 1;
                 }
-                String tempCutTaskPath = document.getDocument_path() + File.separator + "temp_task_download.docx";
+                String tempCutTaskPath = document.getDocumentPath() + File.separator + "temp_task_download.docx";
                 cutTask.save(tempCutTaskPath);
                 downloadTask = new File(tempCutTaskPath);
             }

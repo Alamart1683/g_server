@@ -20,17 +20,30 @@ import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class DocumentDownloadController {
-    @Autowired
     private DocumentDownloadService documentDownloadService;
-
-    @Autowired
     private DocumentProcessorService documentProcessorService;
-
-    @Autowired
     private DocumentVersionRepository documentVersionRepository;
+    private DocumentRepository documentRepository;
 
     @Autowired
-    private DocumentRepository documentRepository;
+    public void setDocumentDownloadService(DocumentDownloadService documentDownloadService) {
+        this.documentDownloadService = documentDownloadService;
+    }
+
+    @Autowired
+    public void setDocumentProcessorService(DocumentProcessorService documentProcessorService) {
+        this.documentProcessorService = documentProcessorService;
+    }
+
+    @Autowired
+    public void setDocumentVersionRepository(DocumentVersionRepository documentVersionRepository) {
+        this.documentVersionRepository = documentVersionRepository;
+    }
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
 
     public static final String AUTHORIZATION = "Authorization";
 
@@ -55,7 +68,7 @@ public class DocumentDownloadController {
             }
         }
     }
-
+    
     @GetMapping("/document/download/version")
     public void documentVersionDownload(
             @RequestParam Integer versionID,

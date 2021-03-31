@@ -115,9 +115,6 @@ public class DocumentUploadService {
     private PdReportRepository pdReportRepository;
 
     @Autowired
-    private VkrTaskRepository vkrTaskRepository;
-
-    @Autowired
     private VkrReportRepository vkrReportRepository;
 
     @Autowired
@@ -246,7 +243,7 @@ public class DocumentUploadService {
                                 }
                                 if (projectArea == null) {
                                     Document changingDocument = documentRepository.findByCreatorAndName(creator_id, document.getName());
-                                    changingDocument.setView_rights(1);
+                                    changingDocument.setViewRightsInteger(1);
                                     documentService.save(changingDocument);
                                 }
                                 else {
@@ -274,12 +271,12 @@ public class DocumentUploadService {
                                         viewRightsProjectRepository.save(viewRightsProject);
                                     } else {
                                         Document changingDocument = documentRepository.findByCreatorAndName(creator_id, document.getName());
-                                        changingDocument.setView_rights(1);
+                                        changingDocument.setViewRightsInteger(1);
                                         documentService.save(changingDocument);
                                     }
                                 } else {
                                     Document changingDocument = documentRepository.findByCreatorAndName(creator_id, document.getName());
-                                    changingDocument.setView_rights(1);
+                                    changingDocument.setViewRightsInteger(1);
                                     documentService.save(changingDocument);
                                 }
 
@@ -374,7 +371,7 @@ public class DocumentUploadService {
                         currentDate = getCurrentDate(true);
                         sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
                     }
-                    String versionUploadPath = document.getDocument_path() + File.separator +
+                    String versionUploadPath = document.getDocumentPath() + File.separator +
                             "version_" + currentDate + "." + fileExtension;
                     try {
                         if (multipartFileToFileWrite(documentVersionForm.getVersionFile(),Paths.get(versionUploadPath))) {

@@ -143,7 +143,7 @@ public class DocumentViewService {
         // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
         // TODO иначе его придется переделывать
         // Определим уровень видимости документа
-        Integer documentView = document.getView_rights();
+        Integer documentView = document.getViewRightsInteger();
         // Проверим соответствие ролей
         Integer documentCreatorRoleID = usersRolesRepository.findUsersRolesByUserId(documentCreator.getId()).getRoleId();
         Integer studentRoleID = usersRolesRepository.findUsersRolesByUserId(student.getId()).getRoleId();
@@ -219,7 +219,7 @@ public class DocumentViewService {
     // Проверить, может ли научный руководитель/заведующий кафедрой видеть данный документ
     private boolean checkAdvisorDocumentView(Users lookingAdvisor, Users documentCreator, Document document) {
         // Определим уровень видимости документа
-        Integer documentView = document.getView_rights();
+        Integer documentView = document.getViewRightsInteger();
         // Проверим соответствие ролей
         Integer lookingAdvisorRoleID = usersRolesRepository.
                 findUsersRolesByUserId(lookingAdvisor.getId()).getRoleId();
@@ -1295,7 +1295,7 @@ public class DocumentViewService {
                 if (documentView.getDocumentKind().equals("Образец")) {
                     Document document = documentRepository.findByCreatorAndName(documentView.getSystemCreatorID(),
                             documentView.getDocumentName());
-                    if (document.getView_rights() == 6) {
+                    if (document.getViewRightsInteger() == 6) {
                         try {
                             ViewRightsArea viewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
                             ProjectArea projectArea = projectAreaRepository.findById(viewRightsArea.getArea()).get();
@@ -1306,7 +1306,7 @@ public class DocumentViewService {
                                     0, "Программа проектов не назначена"));
                         }
                     }
-                    else if (document.getView_rights() == 8) {
+                    else if (document.getViewRightsInteger() == 8) {
                         try {
                             ViewRightsProject viewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
                             Project project = projectRepository.findById(viewRightsProject.getProject()).get();

@@ -1,10 +1,7 @@
 package g_server.g_server.application.entity.documents;
 
-import g_server.g_server.application.entity.users.Roles;
 import g_server.g_server.application.entity.users.Users;
 import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "document")
@@ -13,17 +10,17 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "creator_id") // Костыль ибо генератор методов JPA не воспринимает подчеркивания в названиях полей
+    @Column(name = "creator_id")
     private int creator;
 
     @Column
     private String name;
 
-    @Column
-    private String document_path;
+    @Column(name = "document_path")
+    private String documentPath;
 
-    @Column
-    private String creation_date;
+    @Column(name = "creation_date")
+    private String creationDate;
 
     @Column
     private int type;
@@ -34,8 +31,8 @@ public class Document {
     @Column
     private String description;
 
-    @Column
-    private int view_rights;
+    @Column(name = "view_rights")
+    private int viewRightsInteger;
 
     @ManyToOne
     @JoinColumn(name = "view_rights", referencedColumnName = "id", insertable = false, updatable = false)
@@ -63,16 +60,16 @@ public class Document {
 
     public Document() { }
 
-    public Document(int creator_id, String name, String document_path,
-                    String creation_date, int type, int kind, String description, int view_rights) {
+    public Document(int creator_id, String name, String documentPath,
+                    String creationDate, int type, int kind, String description, int viewRightsInteger) {
         this.creator = creator_id;
         this.name = name;
-        this.document_path = document_path;
-        this.creation_date = creation_date;
+        this.documentPath = documentPath;
+        this.creationDate = creationDate;
         this.type = type;
         this.kind = kind;
         this.description = description;
-        this.view_rights = view_rights;
+        this.viewRightsInteger = viewRightsInteger;
     }
 
     public int getId() {
@@ -99,20 +96,20 @@ public class Document {
         this.name = name;
     }
 
-    public String getDocument_path() {
-        return document_path;
+    public String getDocumentPath() {
+        return documentPath;
     }
 
-    public void setDocument_path(String document_path) {
-        this.document_path = document_path;
+    public void setDocumentPath(String document_path) {
+        this.documentPath = document_path;
     }
 
-    public String getCreation_date() {
-        return creation_date;
+    public String getCreationDate() {
+        return creationDate;
     }
 
-    public void setCreation_date(String creation_date) {
-        this.creation_date = creation_date;
+    public void setCreationDate(String creation_date) {
+        this.creationDate = creation_date;
     }
 
     public int getType() {
@@ -131,12 +128,12 @@ public class Document {
         this.description = description;
     }
 
-    public int getView_rights() {
-        return view_rights;
+    public int getViewRightsInteger() {
+        return viewRightsInteger;
     }
 
-    public void setView_rights(int view_rights) {
-        this.view_rights = view_rights;
+    public void setViewRightsInteger(int view_rights) {
+        this.viewRightsInteger = view_rights;
     }
 
     public ViewRights getViewRights() {

@@ -20,7 +20,7 @@ public class DocumentView {
         this.documentName = document.getName();
         this.documentDownloader = document.getUser().getSurname() + " " + document.getUser().getName() + " " +
                 document.getUser().getSecond_name();
-        this.documentDownloadDate = getRussianDate(document.getCreation_date());
+        this.documentDownloadDate = getRussianDate(document.getCreationDate());
         this.documentType = document.getDocumentType().getType();
         this.documentKind = document.getDocumentKind().getKind();
         this.documentDescription = document.getDescription();

@@ -23,18 +23,30 @@ import static org.springframework.util.StringUtils.hasText;
 public class DocumentDownloadService {
     @Value("${storage.location}")
     private String storageLocation;
-
-    @Autowired
     private DocumentRepository documentRepository;
-
-    @Autowired
     private DocumentVersionRepository documentVersionRepository;
-
-    @Autowired
     private DocumentProcessorService documentProcessorService;
+    private AssociatedStudentsService associatedStudentsService;
 
     @Autowired
-    private AssociatedStudentsService associatedStudentsService;
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
+
+    @Autowired
+    public void setDocumentVersionRepository(DocumentVersionRepository documentVersionRepository) {
+        this.documentVersionRepository = documentVersionRepository;
+    }
+
+    @Autowired
+    public void setDocumentProcessorService(DocumentProcessorService documentProcessorService) {
+        this.documentProcessorService = documentProcessorService;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsService(AssociatedStudentsService associatedStudentsService) {
+        this.associatedStudentsService = associatedStudentsService;
+    }
 
     // Метод скачивания документа последней версии
     public File findDownloadDocument(Integer creator_id, String documentName) {
@@ -45,8 +57,7 @@ public class DocumentDownloadService {
             List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(document.getId());
             DocumentVersion lastVersion = documentVersions.get(documentVersions.size() - 1);
             String path = lastVersion.getThis_version_document_path();
-            File downloadFile = new File(path);
-            return downloadFile;
+            return new File(path);
         }
         else {
             return null;

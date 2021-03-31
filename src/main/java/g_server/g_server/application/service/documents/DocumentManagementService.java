@@ -116,7 +116,7 @@ public class DocumentManagementService {
             Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
             // Если директория удаляемого документа существует, удалим его версии и саму директорию
             if (document != null) {
-                File fileDirectory = new File(document.getDocument_path());
+                File fileDirectory = new File(document.getDocumentPath());
                 if (fileDirectory.exists()) {
                     for (File file: fileDirectory.listFiles()) {
                         file.delete();
@@ -154,7 +154,7 @@ public class DocumentManagementService {
             Document document = documentRepository.findByTypeAndKindAndCreator(4, kind, creator_id).get(0);
             // Если директория удаляемого документа существует, удалим его версии и саму директорию
             if (document != null) {
-                File fileDirectory = new File(document.getDocument_path());
+                File fileDirectory = new File(document.getDocumentPath());
                 if (fileDirectory.exists()) {
                     for (File file: fileDirectory.listFiles()) {
                         file.delete();
@@ -192,7 +192,7 @@ public class DocumentManagementService {
             Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
             // Если директория удаляемого документа существует, удалим его версию и саму директорию
             if (document != null) {
-                File fileDirectory = new File(document.getDocument_path());
+                File fileDirectory = new File(document.getDocumentPath());
                 if (fileDirectory.exists()) {
                     List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(document.getId());
                     if (documentVersions.size() != 0) {
@@ -260,13 +260,13 @@ public class DocumentManagementService {
             Document document = documentRepository.findByCreatorAndName(creator_id, oldDocumentName);
             // Если переименовываемый документ существует в базе данных, то переименуем его
             if (document != null) {
-                File documentDirectory = new File(document.getDocument_path());
-                String newDocumentPath = document.getDocument_path().substring(0,
-                        document.getDocument_path().lastIndexOf(File.separator) + 1) + newDocumentName;
+                File documentDirectory = new File(document.getDocumentPath());
+                String newDocumentPath = document.getDocumentPath().substring(0,
+                        document.getDocumentPath().lastIndexOf(File.separator) + 1) + newDocumentName;
                 File newDocumentDirectoryName = new File(newDocumentPath);
                 if (!newDocumentDirectoryName.exists()) {
                     documentDirectory.renameTo(newDocumentDirectoryName);
-                    document.setDocument_path(newDocumentPath);
+                    document.setDocumentPath(newDocumentPath);
                     document.setName(newDocumentName);
                     documentService.save(document);
                     // Подкорректируем пути к версиям документа
@@ -425,11 +425,11 @@ public class DocumentManagementService {
                             newViewRightsArea.setDocument(document.getId());
                             newViewRightsArea.setArea(projectArea.getId());
                             viewRightsAreaRepository.save(newViewRightsArea);
-                            document.setView_rights(6);
+                            document.setViewRightsInteger(6);
                             documentService.save(document);
                             messagesList.add("Права доступа успешно изменены");
                         } else {
-                            document.setView_rights(3);
+                            document.setViewRightsInteger(3);
                             documentService.save(document);
                             messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
@@ -454,11 +454,11 @@ public class DocumentManagementService {
                             newViewRightsProject.setDocument(document.getId());
                             newViewRightsProject.setProject(project.getId());
                             viewRightsProjectRepository.save(newViewRightsProject);
-                            document.setView_rights(8);
+                            document.setViewRightsInteger(8);
                             documentService.save(document);
                             messagesList.add("Права доступа успешно изменены");
                         } else {
-                            document.setView_rights(3);
+                            document.setViewRightsInteger(3);
                             documentService.save(document);
                             messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
@@ -476,7 +476,7 @@ public class DocumentManagementService {
                             viewRightsProjectRepository.delete(oldViewRightsProject);
                             messagesList.add("Удалены предыдущие права доступа для проекта");
                         }
-                        document.setView_rights(newViewRights);
+                        document.setViewRightsInteger(newViewRights);
                         documentService.save(document);
                         messagesList.add("Зона видимости документа успешно изменена");
                     }

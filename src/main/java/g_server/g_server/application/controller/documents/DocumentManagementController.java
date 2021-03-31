@@ -179,7 +179,7 @@ public class DocumentManagementController {
     }
 
     @PostMapping("/student/document/management/task/nir/create")
-    public String taskCreateOrCangeByStudent(
+    public String taskCreateOrChangeByStudent(
             @ModelAttribute("shortTaskDataView") @Validated ShortTaskDataView shortTaskDataView,
             HttpServletRequest httpServletRequest
     ) throws Exception {
@@ -199,7 +199,7 @@ public class DocumentManagementController {
     }
 
     @PostMapping("/student/document/management/task/vkr/create")
-    public String vkrTaskCreateOrCangeByStudent(
+    public String vkrTaskCreateOrChangeByStudent(
             @ModelAttribute("shortVkrTaskDataView") @Validated ShortVkrTaskDataView shortVkrTaskDataView,
             HttpServletRequest httpServletRequest
     ) throws Exception {

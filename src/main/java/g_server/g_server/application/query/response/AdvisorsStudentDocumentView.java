@@ -14,8 +14,8 @@ public class AdvisorsStudentDocumentView {
     private String documentDescription;
     private List<TaskDocumentVersionView> taskVersions;
     private List<ReportVersionDocumentView> reportVersions;
-    private List<DocumentVersionView> documentVersionViews;
-    private List<VkrStuffVersionView> vkrStuffVersionViews;
+    private List<DocumentVersionView> documentVersions;
+    private List<VkrStuffVersionView> vkrStuffVersions;
 
     public AdvisorsStudentDocumentView(Document document, List<TaskDocumentVersionView> taskVersions,
              List<ReportVersionDocumentView> reportVersions, List<DocumentVersionView> documentVersionViews,
@@ -24,14 +24,14 @@ public class AdvisorsStudentDocumentView {
         this.documentName = document.getName();
         this.documentDownloader = document.getUser().getSurname() + " " + document.getUser().getName() + " " +
                 document.getUser().getSecond_name();
-        this.documentDownloadDate = getRussianDate(document.getCreation_date());
+        this.documentDownloadDate = getRussianDate(document.getCreationDate());
         this.documentType = document.getDocumentType().getType();
         this.documentKind = document.getDocumentKind().getKind();
         this.documentDescription = document.getDescription();
         this.taskVersions = taskVersions;
         this.reportVersions = reportVersions;
-        this.documentVersionViews = documentVersionViews;
-        this.vkrStuffVersionViews = vkrStuffVersionViews;
+        this.documentVersions = documentVersionViews;
+        this.vkrStuffVersions = vkrStuffVersionViews;
     }
 
     public String getRussianDate(String date) {
@@ -41,12 +41,12 @@ public class AdvisorsStudentDocumentView {
         return day + "." + month + "." + year;
     }
 
-    public List<VkrStuffVersionView> getVkrStuffVersionViews() {
-        return vkrStuffVersionViews;
+    public List<VkrStuffVersionView> getVkrStuffVersions() {
+        return vkrStuffVersions;
     }
 
-    public void setVkrStuffVersionViews(List<VkrStuffVersionView> vkrStuffVersionViews) {
-        this.vkrStuffVersionViews = vkrStuffVersionViews;
+    public void setVkrStuffVersions(List<VkrStuffVersionView> vkrStuffVersions) {
+        this.vkrStuffVersions = vkrStuffVersions;
     }
 
     public int getSystemCreatorID() {
@@ -121,11 +121,11 @@ public class AdvisorsStudentDocumentView {
         this.reportVersions = reportVersions;
     }
 
-    public List<DocumentVersionView> getDocumentVersionViews() {
-        return documentVersionViews;
+    public List<DocumentVersionView> getDocumentVersions() {
+        return documentVersions;
     }
 
-    public void setDocumentVersionViews(List<DocumentVersionView> documentVersionViews) {
-        this.documentVersionViews = documentVersionViews;
+    public void setDocumentVersions(List<DocumentVersionView> documentVersions) {
+        this.documentVersions = documentVersions;
     }
 }
