@@ -8,14 +8,13 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Properties;
 
 // Класс настроек почты
-
 @Configuration
 public class MailConfig {
 
     // Почта с которой отправляются сообщения
     public static final String email = "graduatesserver@gmail.com";
     // Пароль к почте
-    public static final String emailPassword = "Trewq123";
+    public static final String emailPassword = "************";
 
     @Bean
     public JavaMailSender getJavaMailSender() {

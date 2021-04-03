@@ -68,7 +68,7 @@ public class DocumentDownloadController {
             }
         }
     }
-    
+
     @GetMapping("/document/download/version")
     public void documentVersionDownload(
             @RequestParam Integer versionID,

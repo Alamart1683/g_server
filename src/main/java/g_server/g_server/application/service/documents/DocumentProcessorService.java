@@ -49,6 +49,7 @@ import org.springframework.stereotype.Service;
 import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -111,6 +112,7 @@ public class DocumentProcessorService {
     // Сгенерировать задание или создать его версию для студента
     public String studentTaskGeneration(String token, ShortTaskDataView shortTaskDataView) throws Exception {
         Integer userID;
+        Boolean isTwoOrder = false;
         try {
             userID = getUserId(token);
         } catch (Exception e) {
@@ -134,13 +136,19 @@ public class DocumentProcessorService {
                         .getStudentGroup().getStudentGroup().substring(0, 4));
                 OrderProperties orderProperty;
                 Document documentOrder = null;
+                List<Document> compareOrderList = new ArrayList<>();
                 try {
                     List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortTaskDataView.getTaskType()), 1);
                     for (Document order: orderList) {
                         if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
-                            documentOrder = order;
-                            break;
+                            compareOrderList.add(order);
                         }
+                    }
+                    if (compareOrderList.size() == 2) {
+                        isTwoOrder = true;
+                    } else if (compareOrderList.size() > 0) {
+                        documentOrder = compareOrderList.get(0);
+                        isTwoOrder = false;
                     }
                     if (documentOrder != null) {
                         orderProperty = documentOrder.getOrderProperties();
@@ -150,7 +158,7 @@ public class DocumentProcessorService {
                 } catch (NullPointerException nullPointerException) {
                     orderProperty = null;
                 }
-                if (orderProperty != null) {
+                if (orderProperty != null || isTwoOrder == true) {
                     Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
                     Users headOfCathedra = usersRepository.findById(
                             usersRolesRepository.findByRoleId(3).getUserId()).get();
@@ -158,36 +166,68 @@ public class DocumentProcessorService {
                     Integer kind = 5;
                     List<Document> taskList = documentRepository.findByTypeAndKind(
                             type, kind);
-                    if (taskList.size() > 0 && taskList.get(0).getTemplateProperties().isApproved()
-                            && orderProperty.isApproved()) {
-                        TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
-                                advisor, headOfCathedra, documentOrder, orderProperty, speciality);
-                        String studentDocumentsPath = storageLocation + File.separator + student.getId();
-                        File studentDir = new File(studentDocumentsPath);
-                        if (!studentDir.exists()) {
-                            studentDir.mkdir();
+                    if (taskList.size() > 0 && taskList.get(0).getTemplateProperties().isApproved()) {
+                        if (isTwoOrder == false && orderProperty.isApproved()) {
+                            TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
+                                    advisor, headOfCathedra, documentOrder, orderProperty, speciality);
+                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                            File studentDir = new File(studentDocumentsPath);
+                            if (!studentDir.exists()) {
+                                studentDir.mkdir();
+                            }
+                            String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                    taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
+                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                            File taskDir = new File(taskDirPath);
+                            if (!taskDir.exists()) {
+                                taskDir.mkdir();
+                            }
+                            Document currentTask = taskList.get(taskList.size() - 1);
+                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                            taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                            String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                    documentUploadService.getCurrentDate() + ".docx";
+                            String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                    taskDataView, documentVersionPath, false);
+                            if (!response.equals("Попытка создать версию чужого документа")) {
+                                WordReplaceService wordReplaceService = new WordReplaceService(template);
+                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                            }
+                            return response;
                         }
-                        String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
-                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
-                        String taskDirPath = studentDocumentsPath + File.separator + fileName;
-                        File taskDir = new File(taskDirPath);
-                        if (!taskDir.exists()) {
-                            taskDir.mkdir();
+                        else if (isTwoOrder) {
+                            TwoOrdersTaskDataView taskDataView = fillingTwoOrdersTaskDataView(shortTaskDataView, student,
+                                    advisor, headOfCathedra, compareOrderList, speciality);
+                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                            File studentDir = new File(studentDocumentsPath);
+                            if (!studentDir.exists()) {
+                                studentDir.mkdir();
+                            }
+                            String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                    taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
+                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                            File taskDir = new File(taskDirPath);
+                            if (!taskDir.exists()) {
+                                taskDir.mkdir();
+                            }
+                            Document currentTask = taskList.get(taskList.size() - 1);
+                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                            twoOrdersTaskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                            String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                    documentUploadService.getCurrentDate() + ".docx";
+                            String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                    taskDataView, documentVersionPath, false);
+                            if (!response.equals("Попытка создать версию чужого документа")) {
+                                WordReplaceService wordReplaceService = new WordReplaceService(template);
+                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                            }
+                            return response;
                         }
-                        Document currentTask = taskList.get(taskList.size() - 1);
-                        List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
-                        DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
-                        XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                        taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
-                        String documentVersionPath = taskDirPath + File.separator + "version_" +
-                                documentUploadService.getCurrentDate() + ".docx";
-                        String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
-                                taskDataView, documentVersionPath, false);
-                        if (!response.equals("Попытка создать версию чужого документа")) {
-                            WordReplaceService wordReplaceService = new WordReplaceService(template);
-                            wordReplaceService.saveAndGetModdedFile(documentVersionPath);
-                        }
-                        return response;
+                        return "Ошибка связанная с внедрением шаблона с двумя приказами";
                     } else {
                         return "Шаблон задания еще не был загружен";
                     }
@@ -402,6 +442,7 @@ public class DocumentProcessorService {
     // Создать версию задания студента от его НР
     public String advisorTaskVersionAdd(String token, AdvisorShortTaskDataView shortTaskDataView) throws Exception {
         Integer userID;
+        Boolean isTwoOrder = false;
         try {
             userID = getUserId(token);
         } catch (Exception e) {
@@ -427,13 +468,19 @@ public class DocumentProcessorService {
                         .getStudentGroup().getStudentGroup().substring(0, 4));
                 OrderProperties orderProperty;
                 Document documentOrder = null;
+                List<Document> compareOrderList = new ArrayList<>();
                 try {
                     List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortTaskDataView.getTaskType()), 1);
                     for (Document order: orderList) {
                         if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
-                            documentOrder = order;
-                            break;
+                            compareOrderList.add(order);
                         }
+                    }
+                    if (compareOrderList.size() == 2) {
+                        isTwoOrder = true;
+                    } else if (compareOrderList.size() > 0) {
+                        documentOrder = compareOrderList.get(0);
+                        isTwoOrder = false;
                     }
                     if (documentOrder != null) {
                         orderProperty = documentOrder.getOrderProperties();
@@ -443,43 +490,74 @@ public class DocumentProcessorService {
                 } catch (NullPointerException nullPointerException) {
                     orderProperty = null;
                 }
-                if (orderProperty != null) {
+                if (orderProperty != null || isTwoOrder == true) {
                     Document order = documentRepository.findById(orderProperty.getId()).get();
                     Users headOfCathedra = usersRepository.findById(
                             usersRolesRepository.findByRoleId(3).getUserId()).get();
                     Integer type = determineType(shortTaskDataView.getTaskType());
                     Integer kind = 5;
-                    List<Document> taskList = documentRepository.findByTypeAndKind(
-                            type, kind);
+                    List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
                     if (taskList.size() > 0) {
-                        TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
-                                advisor,headOfCathedra, order, orderProperty, speciality);
-                        String studentDocumentsPath = storageLocation + File.separator + student.getId();
-                        File studentDir = new File(studentDocumentsPath);
-                        if (!studentDir.exists()) {
-                            return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
+                        if (isTwoOrder == false) {
+                            TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
+                                    advisor,headOfCathedra, order, orderProperty, speciality);
+                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                            File studentDir = new File(studentDocumentsPath);
+                            if (!studentDir.exists()) {
+                                return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
+                            }
+                            String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                    taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
+                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                            File taskDir = new File(taskDirPath);
+                            if (!taskDir.exists()) {
+                                return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
+                            }
+                            Document currentTask = taskList.get(taskList.size() - 1);
+                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                            taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                            String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                    documentUploadService.getCurrentDate() + ".docx";
+                            String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                    taskDataView, documentVersionPath, true);
+                            if (!response.equals("Попытка создать версию чужого документа")) {
+                                WordReplaceService wordReplaceService = new WordReplaceService(template);
+                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                            }
+                            return response;
+                        } else if (isTwoOrder) {
+                            TwoOrdersTaskDataView taskDataView = fillingTwoOrdersTaskDataView(shortTaskDataView, student,
+                                    advisor, headOfCathedra, compareOrderList, speciality);
+                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                            File studentDir = new File(studentDocumentsPath);
+                            if (!studentDir.exists()) {
+                                return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
+                            }
+                            String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                    taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
+                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                            File taskDir = new File(taskDirPath);
+                            if (!taskDir.exists()) {
+                                return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
+                            }
+                            Document currentTask = taskList.get(taskList.size() - 1);
+                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                            twoOrdersTaskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                            String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                    documentUploadService.getCurrentDate() + ".docx";
+                            String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                    taskDataView, documentVersionPath, true);
+                            if (!response.equals("Попытка создать версию чужого документа")) {
+                                WordReplaceService wordReplaceService = new WordReplaceService(template);
+                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                            }
+                            return response;
                         }
-                        String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
-                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
-                        String taskDirPath = studentDocumentsPath + File.separator + fileName;
-                        File taskDir = new File(taskDirPath);
-                        if (!taskDir.exists()) {
-                            return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
-                        }
-                        Document currentTask = taskList.get(taskList.size() - 1);
-                        List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
-                        DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
-                        XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                        taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
-                        String documentVersionPath = taskDirPath + File.separator + "version_" +
-                                documentUploadService.getCurrentDate() + ".docx";
-                        String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
-                                taskDataView, documentVersionPath, true);
-                        if (!response.equals("Попытка создать версию чужого документа")) {
-                            WordReplaceService wordReplaceService = new WordReplaceService(template);
-                            wordReplaceService.saveAndGetModdedFile(documentVersionPath);
-                        }
-                        return response;
+                        return "Ошибка связанная с внедрением шаблона с двумя приказами";
                     } else {
                         return "Шаблон задания еще не был загружен";
                     }
@@ -531,6 +609,79 @@ public class DocumentProcessorService {
         taskDataView.setOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
         taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getStartDate()));
         taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+        taskDataView.setOrderSpeciality(speciality.getCode());
+        taskDataView.setToExplore(shortTaskDataView.getToExplore());
+        taskDataView.setToCreate(shortTaskDataView.getToCreate());
+        taskDataView.setToFamiliarize(shortTaskDataView.getToFamiliarize());
+        taskDataView.setAdditionalTask(shortTaskDataView.getAdditionalTask());
+        return taskDataView;
+    }
+
+    public TwoOrdersTaskDataView fillingTwoOrdersTaskDataView(
+            ShortTaskDataView shortTaskDataView, Users student, Users advisor,
+            Users headOfCathedra, List<Document> orderList, Speciality speciality) {
+        Document firstOrder;
+        OrderProperties firstOrderProperties;
+        Document secondOrder;
+        OrderProperties secondOrderProperties;
+        String[] firstOrderDate = orderList.get(0).getOrderProperties().getOrderDate().split("-");
+        String[] secondOrderDate = orderList.get(1).getOrderProperties().getOrderDate().split("-");
+        String fMonth = firstOrderDate[1];
+        if (fMonth.charAt(0) == '0') {
+            fMonth = fMonth.replaceAll("0", "");
+        }
+        String sMonth = secondOrderDate[1];
+        if (sMonth.charAt(0) == '0') {
+            sMonth = sMonth.replaceAll("0", "");
+        }
+        Integer firstMonth = Integer.parseInt(fMonth);
+        Integer secondMonth = Integer.parseInt(sMonth);
+        if (firstMonth > secondMonth) {
+            firstOrder = orderList.get(0);
+            secondOrder = orderList.get(1);
+        } else {
+            firstOrder = orderList.get(1);
+            secondOrder = orderList.get(0);
+        }
+        firstOrderProperties = firstOrder.getOrderProperties();
+        secondOrderProperties = secondOrder.getOrderProperties();
+
+        if (shortTaskDataView.getStudentTheme().length() < 1) {
+            shortTaskDataView.setStudentTheme("Введите тему практики");
+        }
+        if (shortTaskDataView.getToCreate().length() < 1) {
+            shortTaskDataView.setToCreate("Создать");
+        }
+        if (shortTaskDataView.getToExplore().length() < 1) {
+            shortTaskDataView.setToExplore("Изучить");
+        }
+        if (shortTaskDataView.getToFamiliarize().length() < 1) {
+            shortTaskDataView.setToFamiliarize("Ознакомиться");
+        }
+        if (shortTaskDataView.getAdditionalTask().length() < 1) {
+            shortTaskDataView.setAdditionalTask("Дополнительное задание");
+        }
+        TwoOrdersTaskDataView taskDataView = new TwoOrdersTaskDataView();
+        // Данные пользователей
+        taskDataView.setTaskType(firstOrder.getDocumentType().getType());
+        taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
+                " " + student.getSecond_name());
+        taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
+        taskDataView.setStudentTheme(shortTaskDataView.getStudentTheme());
+        taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
+                " " + advisor.getSecond_name());
+        taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
+                " " + headOfCathedra.getSecond_name());
+        taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
+        // Первый приказ
+        taskDataView.setFirstOrderNumber(firstOrderProperties.getNumber());
+        taskDataView.setFirstOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(firstOrderProperties.getOrderDate()));
+        // Второй приказ
+        taskDataView.setSecondOrderNumber(secondOrderProperties.getNumber());
+        taskDataView.setSecondOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getOrderDate()));
+        // Остальное
+        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getStartDate()));
+        taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getEndDate()));
         taskDataView.setOrderSpeciality(speciality.getCode());
         taskDataView.setToExplore(shortTaskDataView.getToExplore());
         taskDataView.setToCreate(shortTaskDataView.getToCreate());
@@ -688,6 +839,119 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
     }
 
+    // Обработать шаблон в случае, когда на практику вышло 2 приказа
+    public void twoOrdersTaskProcessing(XWPFDocument template, TwoOrdersTaskDataView taskDataView, String speciality, Users student)
+        throws Exception {
+        AssociatedStudents associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+        Users advisor = associatedStudents.getAdvisorUser();
+        WordReplaceService wordReplaceService = new WordReplaceService(template);
+        String studentTheme = "«" + taskDataView.getStudentTheme() + "»";
+        // Заменим слова в тексте документа
+        wordReplaceService.replaceWordsInText("Номер первого приказа", taskDataView.getFirstOrderNumber());
+        wordReplaceService.replaceWordsInText("Номер второго приказа", taskDataView.getSecondOrderNumber());
+        wordReplaceService.replaceWordsInText("Дата выхода первого приказа", getFirstDateType(taskDataView.getFirstOrderDate()));
+        wordReplaceService.replaceWordsInText("Дата выхода второго приказа", getFirstDateType(taskDataView.getSecondOrderDate()));
+
+        wordReplaceService.replaceWordsInText("Короткая дата начала НИР", taskDataView.getOrderStartDate());
+        wordReplaceService.replaceWordsInText("Короткая дата начала ППППУИОПД", taskDataView.getOrderStartDate());
+        wordReplaceService.replaceWordsInText("Короткая дата начала ПП", taskDataView.getOrderStartDate());
+
+        wordReplaceService.replaceWordsInText("Короткая дата конца НИР", taskDataView.getOrderEndDate());
+        wordReplaceService.replaceWordsInText("Короткая дата конца ППППУИОПД", taskDataView.getOrderEndDate());
+        wordReplaceService.replaceWordsInText("Короткая дата конца ПП", taskDataView.getOrderEndDate());
+
+        wordReplaceService.replaceWordsInText("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInText("Дата начала ППППУИОПД без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInText("Дата начала ПП без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+
+        wordReplaceService.replaceWordsInText("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInText("Дата конца ППППУИОПД без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInText("Дата конца ПП без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+
+        wordReplaceService.replaceWordsInText("Согласованное название темы", studentTheme);
+
+        wordReplaceService.replaceWordsInText("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInText("Дата начала ППППУИОПД", getFirstDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInText("Дата начала ПП", getFirstDateType(taskDataView.getOrderStartDate()));
+
+        wordReplaceService.replaceWordsInText("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInText("Дата конца ППППУИОПД", getFirstDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInText("Дата конца ПП", getFirstDateType(taskDataView.getOrderEndDate()));
+
+        wordReplaceService.replaceWordsInText("КАФЕДРА", taskDataView.getCathedra());
+        wordReplaceService.replaceWordsInText("ГРУППА", taskDataView.getStudentGroup());
+        wordReplaceService.replaceWordsInText("Код специальности", taskDataView.getOrderSpeciality());
+        wordReplaceService.replaceWordsInText("Название специальности", speciality);
+        wordReplaceService.replaceWordsInText("ФИОРС", getShortFio(getRpFio(student.getSurname(), student.getName(), student.getSecond_name())));
+        wordReplaceService.replaceWordsInText("ФИОПД", getDpFio(student.getSurname(), student.getName(), student.getSecond_name()));
+        wordReplaceService.replaceWordsInText("ФИОПР", getRpFio(student.getSurname(), student.getName(), student.getSecond_name()));
+        wordReplaceService.replaceWordsInText("ФИО С", getShortFio(taskDataView.getStudentFio()));
+        wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
+        wordReplaceService.replaceWordsInText("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInText("ПНР", advisor.getScientificAdvisorData().getPost());
+        wordReplaceService.replaceWordsInText("ИЗУЧИТЬ", toLowerCaseFirstSymbol(taskDataView.getToExplore()));
+        wordReplaceService.replaceWordsInText("СОЗДАТЬ", toLowerCaseFirstSymbol(taskDataView.getToCreate()));
+        wordReplaceService.replaceWordsInText("ОЗНАКОМИТЬСЯ", toLowerCaseFirstSymbol(taskDataView.getToFamiliarize()));
+        wordReplaceService.replaceWordsInText("ДОПЗАДАНИЕ", toLowerCaseFirstSymbol(taskDataView.getAdditionalTask()));
+        wordReplaceService.replaceWordsInText("ГОД", taskDataView.getOrderStartDate().substring(6, 10));
+
+        // Заменим слова в таблицах документа
+        wordReplaceService.replaceWordsInTables("Номер первого приказа", taskDataView.getFirstOrderNumber());
+        wordReplaceService.replaceWordsInTables("Номер второго приказа", taskDataView.getSecondOrderNumber());
+        wordReplaceService.replaceWordsInTables("Дата выхода первого приказа", getFirstDateType(taskDataView.getFirstOrderDate()));
+        wordReplaceService.replaceWordsInTables("Дата выхода второго приказа", getFirstDateType(taskDataView.getSecondOrderDate()));
+
+        wordReplaceService.replaceWordsInTables("Короткая дата начала НИР", taskDataView.getOrderStartDate());
+        wordReplaceService.replaceWordsInTables("Короткая дата начала ППППУИОПД", taskDataView.getOrderStartDate());
+        wordReplaceService.replaceWordsInTables("Короткая дата начала ПП", taskDataView.getOrderStartDate());
+
+        wordReplaceService.replaceWordsInTables("Короткая дата конца НИР", taskDataView.getOrderEndDate());
+        wordReplaceService.replaceWordsInTables("Короткая дата конца ППППУИОПД", taskDataView.getOrderEndDate());
+        wordReplaceService.replaceWordsInTables("Короткая дата конца ПП", taskDataView.getOrderEndDate());
+
+        wordReplaceService.replaceWordsInTables("Дата начала НИР без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInTables("Дата начала ППППУИОПД без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInTables("Дата начала ПП без кавычек", getSecondDateType(taskDataView.getOrderStartDate()));
+
+        wordReplaceService.replaceWordsInTables("Дата конца НИР без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInTables("Дата конца ППППУИОПД без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInTables("Дата конца ПП без кавычек", getSecondDateType(taskDataView.getOrderEndDate()));
+
+        wordReplaceService.replaceWordsInTables("Согласованное название темы", studentTheme);
+
+        wordReplaceService.replaceWordsInTables("Дата начала НИР", getFirstDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInTables("Дата начала ППППУИОПД", getFirstDateType(taskDataView.getOrderStartDate()));
+        wordReplaceService.replaceWordsInTables("Дата начала ПП", getFirstDateType(taskDataView.getOrderStartDate()));
+
+        wordReplaceService.replaceWordsInTables("Дата конца НИР", getFirstDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInTables("Дата конца ППППУИОПД", getFirstDateType(taskDataView.getOrderEndDate()));
+        wordReplaceService.replaceWordsInTables("Дата конца ПП", getFirstDateType(taskDataView.getOrderEndDate()));
+
+        wordReplaceService.replaceWordsInTables("КАФЕДРА", taskDataView.getCathedra());
+        wordReplaceService.replaceWordsInTables("ГРУППА", taskDataView.getStudentGroup());
+        wordReplaceService.replaceWordsInTables("Код специальности", taskDataView.getOrderSpeciality());
+        wordReplaceService.replaceWordsInTables("Название специальности", speciality);
+        wordReplaceService.replaceWordsInTables("ФИОРС", getShortFio(getRpFio(student.getSurname(), student.getName(), student.getSecond_name())));
+        wordReplaceService.replaceWordsInText("ФИОПД", getDpFio(student.getSurname(), student.getName(), student.getSecond_name()));
+        wordReplaceService.replaceWordsInText("ФИОПР", getRpFio(student.getSurname(), student.getName(), student.getSecond_name()));
+        wordReplaceService.replaceWordsInTables("ФИО С", getShortFio(taskDataView.getStudentFio()));
+        wordReplaceService.replaceWordsInTables("ФИО НР", getShortFio(taskDataView.getAdvisorFio()));
+        wordReplaceService.replaceWordsInTables("ФИО ЗВК", getShortFio(taskDataView.getHeadFio()));
+        wordReplaceService.replaceWordsInTables("ПНР", advisor.getScientificAdvisorData().getPost());
+        if (taskDataView.getToExplore().equals("Изучить")) {
+            wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", taskDataView.getToExplore());
+        } else {
+            wordReplaceService.replaceWordsInTables("ИЗУЧИТЬ", "Изучить " + taskDataView.getToExplore());
+        }
+        wordReplaceService.replaceWordsInTables("СОЗДАТЬ", toUpperCaseFirstSymbol(taskDataView.getToCreate()));
+        if (taskDataView.getToFamiliarize().equals("Ознакомиться")) {
+            wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", taskDataView.getToFamiliarize());
+        } else {
+            wordReplaceService.replaceWordsInTables("ОЗНАКОМИТЬСЯ", "Ознакомиться " + taskDataView.getToFamiliarize());
+        }
+        wordReplaceService.replaceWordsInTables("ДОПЗАДАНИЕ", toUpperCaseFirstSymbol(taskDataView.getAdditionalTask()));
+    }
+
     // Обработать шаблон задания на ВКР
     public void vkrTaskProcessing(XWPFDocument template, VkrTaskDataView vkrTaskDataView, String speciality, Users student) {
         WordReplaceService wordReplaceService = new WordReplaceService(template);
@@ -757,6 +1021,123 @@ public class DocumentProcessorService {
     // Сохранить задание как документ
     public String saveTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
                                      TaskDataView taskDataView, String documentVersionPath, boolean flag) {
+        Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
+        if (document == null && !flag) {
+            Integer kind = 2;
+            Integer type = determineType(taskDataView.getTaskType());
+            Document newDocument = new Document(
+                    student.getId(),
+                    filename,
+                    studentDocumentsPath,
+                    documentUploadService.convertRussianDateToSqlDate(documentUploadService.getCurrentDate()),
+                    type,
+                    kind,
+                    "Задание по " + taskDataView.getTaskType() + " " + getShortFio(
+                            student.getSurname() + " " + student.getName() + " " + student.getSecond_name()) + " " +
+                            student.getStudentData().getStudentGroup().getStudentGroup()
+                    ,
+                    7
+            );
+            documentRepository.save(newDocument);
+            DocumentVersion documentVersion = new DocumentVersion(
+                    student.getId(),
+                    newDocument.getId(),
+                    documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                    "Генерация задания по " + taskDataView.getTaskType() + " на сайте",
+                    documentVersionPath
+            );
+            documentVersionRepository.save(documentVersion);
+            if (type == 1) {
+                NirTask nirTask = new NirTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                nirTaskRepository.save(nirTask);
+            } else if (type == 2) {
+                PpppuiopdTask ppppuiopdTask = new PpppuiopdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                ppppuiopdTaskRepository.save(ppppuiopdTask);
+            } else if (type == 3) {
+                PdTask pdTask = new PdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                pdTaskRepository.save(pdTask);
+            }
+            return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
+        } else if (document != null && !flag) {
+            Integer type = determineType(taskDataView.getTaskType());
+            if (document.getCreator() == student.getId()) {
+                DocumentVersion documentVersion = new DocumentVersion(
+                        student.getId(),
+                        document.getId(),
+                        documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                        "Добавление новой версии задания по " + taskDataView.getTaskType(),
+                        documentVersionPath
+                );
+                documentVersionRepository.save(documentVersion);
+                if (type == 1) {
+                    NirTask nirTask = new NirTask(
+                            documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                            taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                    );
+                    nirTaskRepository.save(nirTask);
+                } else if (type == 2) {
+                    PpppuiopdTask ppppuiopdTask = new PpppuiopdTask(
+                            documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                            taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                    );
+                    ppppuiopdTaskRepository.save(ppppuiopdTask);
+                } else if (type == 3) {
+                    PdTask pdTask = new PdTask(
+                            documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                            taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                    );
+                    pdTaskRepository.save(pdTask);
+                }
+                return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
+            } else {
+                return "Попытка создать версию чужого документа";
+            }
+        } else if (document != null && flag) {
+            Integer type = determineType(taskDataView.getTaskType());
+            DocumentVersion documentVersion = new DocumentVersion(
+                    advisor.getId(),
+                    document.getId(),
+                    documentUploadService.convertRussianDateToSqlDateTime(documentUploadService.getCurrentDate()),
+                    "Добавление новой версии задания по " + taskDataView.getTaskType() + " научным руководителем "
+                            + getShortFio(advisor.getSurname() + " " + advisor.getName() + " " + advisor.getSecond_name()),
+                    documentVersionPath
+            );
+            documentVersionRepository.save(documentVersion);
+            if (type == 1) {
+                NirTask nirTask = new NirTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                nirTaskRepository.save(nirTask);
+            } else if (type == 2) {
+                PpppuiopdTask ppppuiopdTask = new PpppuiopdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                ppppuiopdTaskRepository.save(ppppuiopdTask);
+            } else if (type == 3) {
+                PdTask pdTask = new PdTask(
+                        documentVersion.getId(), taskDataView.getStudentTheme(), taskDataView.getToExplore(),
+                        taskDataView.getToCreate(), taskDataView.getToFamiliarize(), taskDataView.getAdditionalTask(), 1
+                );
+                pdTaskRepository.save(pdTask);
+            }
+            return documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate());
+        }
+        return "Извините, что-то пошло не так";
+    }
+
+    public String saveTaskAsDocument(String filename, Users student, Users advisor, String studentDocumentsPath,
+                                     TwoOrdersTaskDataView taskDataView, String documentVersionPath, boolean flag) {
         Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
         if (document == null && !flag) {
             Integer kind = 2;
