@@ -680,7 +680,7 @@ public class DocumentProcessorService {
         taskDataView.setSecondOrderNumber(secondOrderProperties.getNumber());
         taskDataView.setSecondOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getOrderDate()));
         // Остальное
-        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getStartDate()));
+        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(firstOrderProperties.getStartDate()));
         taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getEndDate()));
         taskDataView.setOrderSpeciality(speciality.getCode());
         taskDataView.setToExplore(shortTaskDataView.getToExplore());
