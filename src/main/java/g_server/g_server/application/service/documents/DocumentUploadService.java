@@ -299,7 +299,7 @@ public class DocumentUploadService {
                                 uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
                             messagesList.clear();
-                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()) + "," + documentVersion.getDocument());
+                            messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()) + "," + documentVersion.getDocument() + "," + documentVersion.getEditor());
                         }
                         else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
