@@ -606,9 +606,9 @@ public class DocumentProcessorService {
                 " " + headOfCathedra.getSecond_name());
         taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
         taskDataView.setOrderNumber(orderProperty.getNumber());
-        taskDataView.setOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
-        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getStartDate()));
-        taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+        taskDataView.setOrderDate(convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+        taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+        taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
         taskDataView.setOrderSpeciality(speciality.getCode());
         taskDataView.setToExplore(shortTaskDataView.getToExplore());
         taskDataView.setToCreate(shortTaskDataView.getToCreate());
@@ -675,13 +675,13 @@ public class DocumentProcessorService {
         taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
         // Первый приказ
         taskDataView.setFirstOrderNumber(firstOrderProperties.getNumber());
-        taskDataView.setFirstOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(firstOrderProperties.getOrderDate()));
+        taskDataView.setFirstOrderDate(convertSQLDateToRussianFormat(firstOrderProperties.getOrderDate()));
         // Второй приказ
         taskDataView.setSecondOrderNumber(secondOrderProperties.getNumber());
-        taskDataView.setSecondOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getOrderDate()));
+        taskDataView.setSecondOrderDate(convertSQLDateToRussianFormat(secondOrderProperties.getOrderDate()));
         // Остальное
-        taskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(firstOrderProperties.getStartDate()));
-        taskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(secondOrderProperties.getEndDate()));
+        taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(firstOrderProperties.getStartDate()));
+        taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(secondOrderProperties.getEndDate()));
         taskDataView.setOrderSpeciality(speciality.getCode());
         taskDataView.setToExplore(shortTaskDataView.getToExplore());
         taskDataView.setToCreate(shortTaskDataView.getToCreate());
@@ -722,9 +722,9 @@ public class DocumentProcessorService {
         vkrTaskDataView.setStudentCode(student.getStudentData().getStudentCode());
         vkrTaskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
         vkrTaskDataView.setOrderNumber(orderProperty.getNumber());
-        vkrTaskDataView.setOrderDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
-        vkrTaskDataView.setOrderStartDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getStartDate()));
-        vkrTaskDataView.setOrderEndDate(associatedStudentsService.convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+        vkrTaskDataView.setOrderDate(convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+        vkrTaskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+        vkrTaskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
         vkrTaskDataView.setOrderSpeciality(speciality.getCode());
         vkrTaskDataView.setTaskAim(shortVkrTaskDataView.getVkrAim());
         vkrTaskDataView.setTaskTasks(shortVkrTaskDataView.getVkrTasks());
@@ -2266,6 +2266,13 @@ public class DocumentProcessorService {
         String russianDate = day + "." + month + "." + year;
         String russianDateTime = russianDate + date.substring(10);
         return russianDateTime;
+    }
+
+    public String convertSQLDateToRussianFormat(String sqlDate) {
+        String year = sqlDate.substring(0, 4);
+        String month = sqlDate.substring(5, 7);
+        String day = sqlDate.substring(8);
+        return day + '.' + month + '.' + year;
     }
 
     public Integer getUserId(String token) {
