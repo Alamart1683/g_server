@@ -206,7 +206,7 @@ public class DocumentUploadService {
             // Создание директории версий файла
             String documentPath = scientificAdvisorDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
-            if (kind_id == 5) {
+            if (kind_id == 5 || kind_id == 4) {
                 uploadDocumentTrigger(documentDirectory);
             }
             // Проверим что одноименный файл не был загружен пользователем
