@@ -459,6 +459,7 @@ public class DocumentUploadService {
             // Создание директории версий файла
             String documentPath = scientificAdvisorDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
+            uploadDocumentTrigger(documentDirectory);
             // Проверим что одноименный файл не был загружен пользователем
             if (!documentDirectory.exists())
                 documentDirectory.mkdir();
