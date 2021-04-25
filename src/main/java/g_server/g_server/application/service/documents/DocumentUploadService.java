@@ -206,6 +206,9 @@ public class DocumentUploadService {
             // Создание директории версий файла
             String documentPath = scientificAdvisorDocumentsPath + File.separator + fileName;
             File documentDirectory = new File(documentPath);
+            if (kind_id == 5) {
+                uploadDocumentTrigger(documentDirectory);
+            }
             // Проверим что одноименный файл не был загружен пользователем
             if (!documentDirectory.exists())
                 documentDirectory.mkdir();
@@ -1559,6 +1562,7 @@ public class DocumentUploadService {
         return messagesList;
     }
 
+    // Метод сохранения данных по материалам ВКР в бд
     public void uploadVkrStuff(Integer stuff, Integer versionID) {
         switch (stuff) {
             case 6:
@@ -1579,6 +1583,15 @@ public class DocumentUploadService {
                 break;
             default:
                 return;
+        }
+    }
+
+    // Триггер на оставшиеся пустые папки при удалении документов
+    public void uploadDocumentTrigger(File dir) {
+        if (dir.exists() && dir.isDirectory()) {
+            if (dir.listFiles().length == 0) {
+                dir.delete();
+            }
         }
     }
 
