@@ -17,11 +17,18 @@ import java.util.Optional;
 // которые им вдруг разонравились
 @RestController
 public class DocumentVersionController {
-    @Autowired
     private DocumentVersionService documentVersionService;
+    private DocumentVersionRepository documentVersionRepository;
 
     @Autowired
-    private DocumentVersionRepository documentVersionRepository;
+    public void setDocumentVersionService(DocumentVersionService documentVersionService) {
+        this.documentVersionService = documentVersionService;
+    }
+
+    @Autowired
+    public void setDocumentVersionRepository(DocumentVersionRepository documentVersionRepository) {
+        this.documentVersionRepository = documentVersionRepository;
+    }
 
     @GetMapping("/admin/document/version/all")
     public List<DocumentVersion> findAll() {

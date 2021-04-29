@@ -18,17 +18,30 @@ import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class AuthorizationController {
-    @Autowired
     private UsersService usersService;
-
-    @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+    private UsersRepository usersRepository;
 
     @Autowired
-    private UsersRepository usersRepository;
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
+
+    @Autowired
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setRefreshTokenRepository(RefreshTokenRepository refreshTokenRepository) {
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
 
     public static final String AUTHORIZATION = "Authorization";
 

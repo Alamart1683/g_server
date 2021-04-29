@@ -18,9 +18,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
-// TODO Глобально подумать о создании генерируемых на основе токенов ссылок подтверждения каких либо действий
-// TODO это позволит сильно увеличить удобство пользования сайтом, например прямо из письма подтвердить заявку
-// TODO студента, просто перейдя по ссылке
 public class MailService {
     private JavaMailSender mailSender;
     private DocumentProcessorService documentProcessorService;

@@ -21,15 +21,24 @@ import static org.springframework.util.StringUtils.hasText;
 @RestController
 public class UsersController {
     public static final String AUTHORIZATION = "Authorization";
-
-    @Autowired
     private UsersService usersService;
-
-    @Autowired
     private UsersRepository usersRepository;
+    private ScientificAdvisorDataService scientificAdvisorDataService;
 
     @Autowired
-    private ScientificAdvisorDataService scientificAdvisorDataService;
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setScientificAdvisorDataService(ScientificAdvisorDataService scientificAdvisorDataService) {
+        this.scientificAdvisorDataService = scientificAdvisorDataService;
+    }
 
     @GetMapping("/admin/users/all")
     public List<Users> findAll() {

@@ -13,9 +13,12 @@ import static org.springframework.util.StringUtils.hasText;
 @RestController
 public class DocumentViewController {
     public static final String AUTHORIZATION = "Authorization";
+    private DocumentViewService documentViewService;
 
     @Autowired
-    private DocumentViewService documentViewService;
+    public void setDocumentViewService(DocumentViewService documentViewService) {
+        this.documentViewService = documentViewService;
+    }
 
     @GetMapping("/document/view")
     public List<DocumentView> getDocumentView(HttpServletRequest httpServletRequest) {

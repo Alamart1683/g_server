@@ -58,56 +58,117 @@ public class DocumentProcessorService {
     @Value("${storage.location}")
     private String storageLocation;
 
-    @Autowired
     private JwtProvider jwtProvider;
 
-    @Autowired
     private UsersRepository usersRepository;
 
-    @Autowired
     private AssociatedStudentsRepository associatedStudentsRepository;
 
-    @Autowired
     private DocumentRepository documentRepository;
 
-    @Autowired
     private DocumentVersionRepository documentVersionRepository;
 
-    @Autowired
     private SpecialityRepository specialityRepository;
 
-    @Autowired
-    private OrderPropertiesRepository orderPropertiesRepository;
-
-    @Autowired
     private UsersRolesRepository usersRolesRepository;
 
-    @Autowired
     private AssociatedStudentsService associatedStudentsService;
 
-    @Autowired
     private NirTaskRepository nirTaskRepository;
 
-    @Autowired
     private DocumentUploadService documentUploadService;
 
-    @Autowired
     private PpppuiopdTaskRepository ppppuiopdTaskRepository;
 
-    @Autowired
     private PdTaskRepository pdTaskRepository;
 
-    @Autowired
     private VkrTaskRepository vkrTaskRepository;
 
-    @Autowired
     private StudentGroupRepository studentGroupRepository;
 
-    @Autowired
     private EconomyConsultantsRepository economyConsultantsRepository;
 
-    @Autowired
     private GroupsConsultantsRepository groupsConsultantsRepository;
+
+    @Autowired
+    private void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsRepository(AssociatedStudentsRepository associatedStudentsRepository) {
+        this.associatedStudentsRepository = associatedStudentsRepository;
+    }
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
+
+    @Autowired
+    public void setDocumentVersionRepository(DocumentVersionRepository documentVersionRepository) {
+        this.documentVersionRepository = documentVersionRepository;
+    }
+
+    @Autowired
+    public void setSpecialityRepository(SpecialityRepository specialityRepository) {
+        this.specialityRepository = specialityRepository;
+    }
+
+    @Autowired
+    public void setUsersRolesRepository(UsersRolesRepository usersRolesRepository) {
+        this.usersRolesRepository = usersRolesRepository;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsService(AssociatedStudentsService associatedStudentsService) {
+        this.associatedStudentsService = associatedStudentsService;
+    }
+
+    @Autowired
+    public void setNirTaskRepository(NirTaskRepository nirTaskRepository) {
+        this.nirTaskRepository = nirTaskRepository;
+    }
+
+    @Autowired
+    public void setDocumentUploadService(DocumentUploadService documentUploadService) {
+        this.documentUploadService = documentUploadService;
+    }
+
+    @Autowired
+    public void setPpppuiopdTaskRepository(PpppuiopdTaskRepository ppppuiopdTaskRepository) {
+        this.ppppuiopdTaskRepository = ppppuiopdTaskRepository;
+    }
+
+    @Autowired
+    public void setPdTaskRepository(PdTaskRepository pdTaskRepository) {
+        this.pdTaskRepository = pdTaskRepository;
+    }
+
+    @Autowired
+    public void setVkrTaskRepository(VkrTaskRepository vkrTaskRepository) {
+        this.vkrTaskRepository = vkrTaskRepository;
+    }
+
+    @Autowired
+    public void setStudentGroupRepository(StudentGroupRepository studentGroupRepository) {
+        this.studentGroupRepository = studentGroupRepository;
+    }
+
+    @Autowired
+    public void setEconomyConsultantsRepository(EconomyConsultantsRepository economyConsultantsRepository) {
+        this.economyConsultantsRepository = economyConsultantsRepository;
+    }
+
+    @Autowired
+    public void setGroupsConsultantsRepository(GroupsConsultantsRepository groupsConsultantsRepository) {
+        this.groupsConsultantsRepository = groupsConsultantsRepository;
+    }
 
     // Сгенерировать задание или создать его версию для студента
     public String studentTaskGeneration(String token, ShortTaskDataView shortTaskDataView) throws Exception {
@@ -971,7 +1032,7 @@ public class DocumentProcessorService {
         wordReplaceService.replaceWordsInText("ШИФР", vkrTaskDataView.getStudentCode());
         wordReplaceService.replaceWordsInText("Код специальности", vkrTaskDataView.getOrderSpeciality());
         wordReplaceService.replaceWordsInText("Название специальности", speciality);
-        wordReplaceService.replaceWordsInTables("ФИО СИП", vkrTaskDataView.getStudentFio());
+        wordReplaceService.replaceWordsInText("ФИО СИП", vkrTaskDataView.getStudentFio());
         wordReplaceService.replaceWordsInText("ФИО С", getShortFio(vkrTaskDataView.getStudentFio()));
         wordReplaceService.replaceWordsInText("ФИО НРП", vkrTaskDataView.getAdvisorFio());
         wordReplaceService.replaceWordsInText("ФИО НР", getShortFio(vkrTaskDataView.getAdvisorFio()));

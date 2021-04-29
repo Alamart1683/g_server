@@ -27,18 +27,30 @@ public class RegistrationController {
     private String confirmUrl;
     @Value("${api.url}")
     private String apiUrl;
-
-    @Autowired
     private UsersService usersService;
-
-    @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
     private MailService mailService;
+    private UsersRepository usersRepository;
 
     @Autowired
-    private UsersRepository usersRepository;
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
+
+    @Autowired
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setMailService(MailService mailService) {
+        this.mailService = mailService;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
 
     // Отправить форму регистрации на клиент, сгенерировать код подтверждения
     @GetMapping("/registration/student")

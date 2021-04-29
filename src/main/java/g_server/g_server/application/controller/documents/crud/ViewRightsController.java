@@ -12,8 +12,12 @@ import java.util.Optional;
 // или изменении документа
 @RestController
 public class ViewRightsController {
-    @Autowired
     private ViewRightsService viewRightsService;
+
+    @Autowired
+    public void setViewRightsService(ViewRightsService viewRightsService) {
+        this.viewRightsService = viewRightsService;
+    }
 
     @GetMapping("/document/view_rights/all")
     public List<ViewRights> findAll() {

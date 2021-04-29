@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @RestController
 public class DocumentKindController {
-    @Autowired
     private DocumentKindService documentKindService;
+
+    @Autowired
+    public void setDocumentKindService(DocumentKindService documentKindService) {
+        this.documentKindService = documentKindService;
+    }
 
     @GetMapping("/document/kind/all")
     public List<DocumentKind> findAll() {

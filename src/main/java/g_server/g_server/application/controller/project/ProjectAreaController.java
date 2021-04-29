@@ -9,8 +9,12 @@ import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class ProjectAreaController {
-    @Autowired
     private ProjectAreaService projectThemeService;
+
+    @Autowired
+    public void setProjectThemeService(ProjectAreaService projectThemeService) {
+        this.projectThemeService = projectThemeService;
+    }
 
     @GetMapping("/scientific_advisor/project/area/all")
     public List<String> getAll(HttpServletRequest httpServletRequest) {

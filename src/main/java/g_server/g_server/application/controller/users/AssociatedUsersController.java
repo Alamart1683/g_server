@@ -18,12 +18,18 @@ import static org.springframework.util.StringUtils.hasText;
 @RestController
 public class AssociatedUsersController {
     public static final String AUTHORIZATION = "Authorization";
-
-    @Autowired
     private AssociatedStudentsService associatedStudentsService;
+    private UsersService usersService;
 
     @Autowired
-    private UsersService usersService;
+    public void setAssociatedStudentsService(AssociatedStudentsService associatedStudentsService) {
+        this.associatedStudentsService = associatedStudentsService;
+    }
+
+    @Autowired
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
 
     @PostMapping("/student/request/for_scientific_advisor/")
     public List<String> sendRequestForScientificAdvisor(

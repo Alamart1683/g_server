@@ -4,20 +4,14 @@ import g_server.g_server.application.entity.documents.Document;
 import g_server.g_server.application.entity.documents.DocumentVersion;
 import g_server.g_server.application.repository.documents.DocumentRepository;
 import g_server.g_server.application.repository.documents.DocumentVersionRepository;
-import g_server.g_server.application.service.documents.crud.DocumentService;
 import g_server.g_server.application.service.users.AssociatedStudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.print.Doc;
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static org.springframework.util.StringUtils.hasText;
 
 @Service
 public class DocumentDownloadService {
@@ -83,6 +77,7 @@ public class DocumentDownloadService {
         }
     }
 
+    @Deprecated // Метод соединения отчёта с одобренным заданием в момент скачивания отчёта
     public File studentDownloadReportVersionWithApprovedTask(String token, String stringType, Integer reportVersion) {
         Integer studentID = associatedStudentsService.getUserId(token);
         if (studentID != null) {
@@ -119,6 +114,7 @@ public class DocumentDownloadService {
         }
     }
 
+    @Deprecated // Метод соединения отчёта с одобренным заданием в момент скачивания отчёта
     public File advisorDownloadReportVersionWithApprovedTask(String token, String stringType, Integer reportVersion, Integer studentID) {
         Integer advisorID = associatedStudentsService.getUserId(token);
         if (advisorID != null && studentID != null) {

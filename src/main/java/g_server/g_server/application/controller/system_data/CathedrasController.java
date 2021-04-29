@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @RestController
 public class CathedrasController {
-    @Autowired
     private CathedrasService cathedrasService;
+
+    @Autowired
+    public void setCathedrasService(CathedrasService cathedrasService) {
+        this.cathedrasService = cathedrasService;
+    }
 
     @GetMapping("/cathedras/all")
     public List<Cathedras> getAll() {

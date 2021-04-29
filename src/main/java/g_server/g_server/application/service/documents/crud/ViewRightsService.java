@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @Service
 public class ViewRightsService {
-    @Autowired
     private ViewRightsRepository viewRightsRepository;
+
+    @Autowired
+    public void setViewRightsRepository(ViewRightsRepository viewRightsRepository) {
+        this.viewRightsRepository = viewRightsRepository;
+    }
 
     public List<ViewRights> findAll() {
         return viewRightsRepository.findAll();

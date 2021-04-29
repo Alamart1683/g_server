@@ -15,11 +15,18 @@ import java.util.Optional;
 // сортировать и удалять их по своему усмотрению
 @RestController
 public class DocumentController {
-    @Autowired
     private DocumentService documentService;
+    private DocumentRepository documentRepository;
 
     @Autowired
-    private DocumentRepository documentRepository;
+    public void setDocumentService(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
 
     @GetMapping("/admin/document/all")
     public List<Document> findAll() {

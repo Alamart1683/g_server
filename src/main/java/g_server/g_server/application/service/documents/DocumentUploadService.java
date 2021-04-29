@@ -44,90 +44,174 @@ import java.util.NoSuchElementException;
 public class DocumentUploadService {
     @Value("${storage.location}")
     private String storageLocation;
-
-    @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
     private DocumentTypeRepository documentTypeRepository;
-
-    @Autowired
     private DocumentKindRepository documentKindRepository;
-
-    @Autowired
     private DocumentVersionService documentVersionService;
-
-    @Autowired
     private DocumentRepository documentRepository;
-
-    @Autowired
     private DocumentService documentService;
-
-    @Autowired
     private DocumentVersionRepository documentVersionRepository;
-
-    @Autowired
     private DocumentDownloadService documentDownloadService;
-
-    @Autowired
     private ViewRightsRepository viewRightsRepository;
-
-    @Autowired
     private ProjectAreaRepository projectAreaRepository;
-
-    @Autowired
     private ViewRightsAreaRepository viewRightsAreaRepository;
-
-    @Autowired
     private OrderPropertiesRepository orderPropertiesRepository;
-
-    @Autowired
     private UsersRolesRepository usersRolesRepository;
-
-    @Autowired
     private SpecialityRepository specialityRepository;
-
-    @Autowired
     private DocumentProcessorService documentProcessorService;
-
-    @Autowired
     private NirReportRepository nirReportRepository;
-
-    @Autowired
     private AssociatedStudentsRepository associatedStudentsRepository;
-
-    @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
     private ViewRightsProjectRepository viewRightsProjectRepository;
-
-    @Autowired
     private TemplatePropertiesRepository templatePropertiesRepository;
-
-    @Autowired
     private PpppuiopdReportRepository ppppuiopdReportRepository;
-
-    @Autowired
     private PdReportRepository pdReportRepository;
-
-    @Autowired
     private VkrReportRepository vkrReportRepository;
-
-    @Autowired
     private VkrAllowanceRepository vkrAllowanceRepository;
-
-    @Autowired
     private VkrPresentationRepository vkrPresentationRepository;
-
-    @Autowired
     private VkrAntiplagiatRepository vkrAntiplagiatRepository;
+    private VkrConclusionRepository vkrConclusionRepository;
 
     @Autowired
-    private VkrConclusionRepository vkrConclusionRepository;
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setDocumentTypeRepository(DocumentTypeRepository documentTypeRepository) {
+        this.documentTypeRepository = documentTypeRepository;
+    }
+
+    @Autowired
+    public void setDocumentKindRepository(DocumentKindRepository documentKindRepository) {
+        this.documentKindRepository = documentKindRepository;
+    }
+
+    @Autowired
+    public void setDocumentVersionService(DocumentVersionService documentVersionService) {
+        this.documentVersionService = documentVersionService;
+    }
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
+
+    @Autowired
+    public void setDocumentService(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
+    @Autowired
+    public void setDocumentVersionRepository(DocumentVersionRepository documentVersionRepository) {
+        this.documentVersionRepository = documentVersionRepository;
+    }
+
+    @Autowired
+    public void setDocumentDownloadService(DocumentDownloadService documentDownloadService) {
+        this.documentDownloadService = documentDownloadService;
+    }
+
+    @Autowired
+    public void setViewRightsRepository(ViewRightsRepository viewRightsRepository) {
+        this.viewRightsRepository = viewRightsRepository;
+    }
+
+    @Autowired
+    public void setProjectAreaRepository(ProjectAreaRepository projectAreaRepository) {
+        this.projectAreaRepository = projectAreaRepository;
+    }
+
+    @Autowired
+    public void setViewRightsAreaRepository(ViewRightsAreaRepository viewRightsAreaRepository) {
+        this.viewRightsAreaRepository = viewRightsAreaRepository;
+    }
+
+    @Autowired
+    public void setOrderPropertiesRepository(OrderPropertiesRepository orderPropertiesRepository) {
+        this.orderPropertiesRepository = orderPropertiesRepository;
+    }
+
+    @Autowired
+    public void setUsersRolesRepository(UsersRolesRepository usersRolesRepository) {
+        this.usersRolesRepository = usersRolesRepository;
+    }
+
+    @Autowired
+    public void setSpecialityRepository(SpecialityRepository specialityRepository) {
+        this.specialityRepository = specialityRepository;
+    }
+
+    @Autowired
+    public void setDocumentProcessorService(DocumentProcessorService documentProcessorService) {
+        this.documentProcessorService = documentProcessorService;
+    }
+
+    @Autowired
+    public void setNirReportRepository(NirReportRepository nirReportRepository) {
+        this.nirReportRepository = nirReportRepository;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsRepository(AssociatedStudentsRepository associatedStudentsRepository) {
+        this.associatedStudentsRepository = associatedStudentsRepository;
+    }
+
+    @Autowired
+    public void setProjectRepository(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+
+    @Autowired
+    public void setViewRightsProjectRepository(ViewRightsProjectRepository viewRightsProjectRepository) {
+        this.viewRightsProjectRepository = viewRightsProjectRepository;
+    }
+
+    @Autowired
+    public void setTemplatePropertiesRepository(TemplatePropertiesRepository templatePropertiesRepository) {
+        this.templatePropertiesRepository = templatePropertiesRepository;
+    }
+
+    @Autowired
+    public void setPpppuiopdReportRepository(PpppuiopdReportRepository ppppuiopdReportRepository) {
+        this.ppppuiopdReportRepository = ppppuiopdReportRepository;
+    }
+
+    @Autowired
+    public void setPdReportRepository(PdReportRepository pdReportRepository) {
+        this.pdReportRepository = pdReportRepository;
+    }
+
+    @Autowired
+    public void setVkrReportRepository(VkrReportRepository vkrReportRepository) {
+        this.vkrReportRepository = vkrReportRepository;
+    }
+
+    @Autowired
+    public void setVkrAllowanceRepository(VkrAllowanceRepository vkrAllowanceRepository) {
+        this.vkrAllowanceRepository = vkrAllowanceRepository;
+    }
+
+    @Autowired
+    public void setVkrPresentationRepository(VkrPresentationRepository vkrPresentationRepository) {
+        this.vkrPresentationRepository = vkrPresentationRepository;
+    }
+
+    @Autowired
+    public void setVkrAntiplagiatRepository(VkrAntiplagiatRepository vkrAntiplagiatRepository) {
+        this.vkrAntiplagiatRepository = vkrAntiplagiatRepository;
+    }
+
+    @Autowired
+    public void setVkrConclusionRepository(VkrConclusionRepository vkrConclusionRepository) {
+        this.vkrConclusionRepository = vkrConclusionRepository;
+    }
 
     public void createDocumentRootDirIfIsNotExist() {
         String rootDocDirPath = storageLocation;

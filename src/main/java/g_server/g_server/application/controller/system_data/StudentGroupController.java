@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @RestController
 public class StudentGroupController {
-    @Autowired
     private StudentGroupService studentGroupService;
+
+    @Autowired
+    public void setStudentGroupService(StudentGroupService studentGroupService) {
+        this.studentGroupService = studentGroupService;
+    }
 
     @GetMapping("/student_group/all")
     public List<StudentGroup> getAll() {

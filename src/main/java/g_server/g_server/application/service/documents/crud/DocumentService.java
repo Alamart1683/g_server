@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @Service
 public class DocumentService {
-    @Autowired
     private DocumentRepository documentRepository;
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
 
     public List<Document> findAll() {
         return documentRepository.findAll();

@@ -11,8 +11,12 @@ import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class ProjectController {
-    @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    public void setProjectService(ProjectService projectService) {
+        this.projectService = projectService;
+    }
 
     public static final String AUTHORIZATION = "Authorization";
 

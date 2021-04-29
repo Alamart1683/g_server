@@ -11,8 +11,12 @@ import java.util.Optional;
 // Админ может проводить полную модификацию таблицы типов документов
 @RestController
 public class DocumentTypeController {
-    @Autowired
     private DocumentTypeService documentTypeService;
+
+    @Autowired
+    public void setDocumentTypeService(DocumentTypeService documentTypeService) {
+        this.documentTypeService = documentTypeService;
+    }
 
     @GetMapping("/document/type/all")
     public List<DocumentType> findAll() {

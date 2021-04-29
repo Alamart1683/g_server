@@ -47,101 +47,175 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Service
-// Сервис ответственный за представление
-// и разграничение документов пользователям
-// TODO Обработать новую, седьмую область видимости
-// TODO Доработать видимость проекта если это необходимо
+@Service // Сервис ответственный за представление и разграничение документов пользователям
 public class DocumentViewService {
     @Value("${external.api.url}")
     private String externalApiUrl;
-
-    @Autowired
     private UsersService usersService;
-
-    @Autowired
     private AssociatedStudentsService associatedStudentsService;
-
-    @Autowired
     private AssociatedStudentsRepository associatedStudentsRepository;
-
-    @Autowired
     private DocumentService documentService;
-
-    @Autowired
     private UsersRolesRepository usersRolesRepository;
-
-    @Autowired
     private DocumentVersionRepository documentVersionRepository;
-
-    @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
-
-    @Autowired
     private DocumentRepository documentRepository;
-
-    @Autowired
     private DocumentProcessorService documentProcessorService;
-
-    @Autowired
     private NirTaskRepository nirTaskRepository;
-
-    @Autowired
     private NirReportRepository nirReportRepository;
-
-    @Autowired
     private ViewRightsAreaRepository viewRightsAreaRepository;
-
-    @Autowired
     private ProjectAreaRepository projectAreaRepository;
-
-    @Autowired
     private OrderPropertiesRepository orderPropertiesRepository;
-
-    @Autowired
     private SpecialityRepository specialityRepository;
-
-    @Autowired
     private ViewRightsProjectRepository viewRightsProjectRepository;
-
-    @Autowired
     private PpppuiopdTaskRepository ppppuiopdTaskRepository;
-
-    @Autowired
     private PpppuiopdReportRepository ppppuiopdReportRepository;
-
-    @Autowired
     private PdTaskRepository pdTaskRepository;
-
-    @Autowired
     private PdReportRepository pdReportRepository;
-
-    @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
     private VkrTaskRepository vkrTaskRepository;
-
-    @Autowired
     private VkrReportRepository vkrReportRepository;
-
-    @Autowired
     private VkrAntiplagiatRepository vkrAntiplagiatRepository;
-
-    @Autowired
     private VkrPresentationRepository vkrPresentationRepository;
-
-    @Autowired
     private VkrConclusionRepository vkrConclusionRepository;
-
-    @Autowired
     private VkrAllowanceRepository vkrAllowanceRepository;
 
+    @Autowired
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsService(AssociatedStudentsService associatedStudentsService) {
+        this.associatedStudentsService = associatedStudentsService;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsRepository(AssociatedStudentsRepository associatedStudentsRepository) {
+        this.associatedStudentsRepository = associatedStudentsRepository;
+    }
+
+    @Autowired
+    public void setDocumentService(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
+    @Autowired
+    public void setUsersRolesRepository(UsersRolesRepository usersRolesRepository) {
+        this.usersRolesRepository = usersRolesRepository;
+    }
+
+    @Autowired
+    public void setDocumentVersionRepository(DocumentVersionRepository documentVersionRepository) {
+        this.documentVersionRepository = documentVersionRepository;
+    }
+
+    @Autowired
+    public void setOccupiedStudentsRepository(OccupiedStudentsRepository occupiedStudentsRepository) {
+        this.occupiedStudentsRepository = occupiedStudentsRepository;
+    }
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
+
+    @Autowired
+    public void setDocumentProcessorService(DocumentProcessorService documentProcessorService) {
+        this.documentProcessorService = documentProcessorService;
+    }
+
+    @Autowired
+    public void setNirTaskRepository(NirTaskRepository nirTaskRepository) {
+        this.nirTaskRepository = nirTaskRepository;
+    }
+
+    @Autowired
+    public void setNirReportRepository(NirReportRepository nirReportRepository) {
+        this.nirReportRepository = nirReportRepository;
+    }
+
+    @Autowired
+    public void setViewRightsAreaRepository(ViewRightsAreaRepository viewRightsAreaRepository) {
+        this.viewRightsAreaRepository = viewRightsAreaRepository;
+    }
+
+    @Autowired
+    public void setProjectAreaRepository(ProjectAreaRepository projectAreaRepository) {
+        this.projectAreaRepository = projectAreaRepository;
+    }
+
+    @Autowired
+    public void setOrderPropertiesRepository(OrderPropertiesRepository orderPropertiesRepository) {
+        this.orderPropertiesRepository = orderPropertiesRepository;
+    }
+
+    @Autowired
+    public void setSpecialityRepository(SpecialityRepository specialityRepository) {
+        this.specialityRepository = specialityRepository;
+    }
+
+    @Autowired
+    public void setViewRightsProjectRepository(ViewRightsProjectRepository viewRightsProjectRepository) {
+        this.viewRightsProjectRepository = viewRightsProjectRepository;
+    }
+
+    @Autowired
+    public void setPpppuiopdTaskRepository(PpppuiopdTaskRepository ppppuiopdTaskRepository) {
+        this.ppppuiopdTaskRepository = ppppuiopdTaskRepository;
+    }
+
+    @Autowired
+    public void setPpppuiopdReportRepository(PpppuiopdReportRepository ppppuiopdReportRepository) {
+        this.ppppuiopdReportRepository = ppppuiopdReportRepository;
+    }
+
+    @Autowired
+    public void setPdTaskRepository(PdTaskRepository pdTaskRepository) {
+        this.pdTaskRepository = pdTaskRepository;
+    }
+
+    @Autowired
+    public void setPdReportRepository(PdReportRepository pdReportRepository) {
+        this.pdReportRepository = pdReportRepository;
+    }
+
+    @Autowired
+    public void setProjectRepository(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+
+    @Autowired
+    public void setVkrTaskRepository(VkrTaskRepository vkrTaskRepository) {
+        this.vkrTaskRepository = vkrTaskRepository;
+    }
+
+    @Autowired
+    public void setVkrReportRepository(VkrReportRepository vkrReportRepository) {
+        this.vkrReportRepository = vkrReportRepository;
+    }
+
+    @Autowired
+    public void setVkrAntiplagiatRepository(VkrAntiplagiatRepository vkrAntiplagiatRepository) {
+        this.vkrAntiplagiatRepository = vkrAntiplagiatRepository;
+    }
+
+    @Autowired
+    public void setVkrPresentationRepository(VkrPresentationRepository vkrPresentationRepository) {
+        this.vkrPresentationRepository = vkrPresentationRepository;
+    }
+
+    @Autowired
+    public void setVkrConclusionRepository(VkrConclusionRepository vkrConclusionRepository) {
+        this.vkrConclusionRepository = vkrConclusionRepository;
+    }
+
+    @Autowired
+    public void setVkrAllowanceRepository(VkrAllowanceRepository vkrAllowanceRepository) {
+        this.vkrAllowanceRepository = vkrAllowanceRepository;
+    }
 
     // Проверить, может ли студент видеть данный документ
     private boolean checkStudentDocumentView(Users student, Users documentCreator, Document document) {
-        // TODO Внимание, метод проверки работает только под текущий вариант зон видимости и ролей,
-        // TODO иначе его придется переделывать
         // Определим уровень видимости документа
         Integer documentView = document.getViewRightsInteger();
         // Проверим соответствие ролей

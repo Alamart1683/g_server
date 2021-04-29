@@ -13,8 +13,12 @@ import static org.springframework.util.StringUtils.hasText;
 
 @RestController
 public class DocumentUploadController {
-    @Autowired
     private DocumentUploadService documentUploadService;
+
+    @Autowired
+    public void setDocumentUploadService(DocumentUploadService documentUploadService) {
+        this.documentUploadService = documentUploadService;
+    }
 
     public static final String AUTHORIZATION = "Authorization";
 

@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @Service
 public class DocumentVersionService {
-    @Autowired
     private DocumentVersionRepository documentVersionRepository;
+
+    @Autowired
+    public void setDocumentVersionRepository(DocumentVersionRepository documentVersionRepository) {
+        this.documentVersionRepository = documentVersionRepository;
+    }
 
     public List<DocumentVersion> findAll() {
         return documentVersionRepository.findAll();
