@@ -285,7 +285,7 @@ public class MailService {
     // Определить время письма
     String mailTimeDetector() {
         ZonedDateTime dateTime = ZonedDateTime.now();
-        Integer currentHour = dateTime.getHour();
+        int currentHour = dateTime.getHour();
         if (currentHour >= 0 && currentHour <= 6) {
             return "Доброй ночи";
         }

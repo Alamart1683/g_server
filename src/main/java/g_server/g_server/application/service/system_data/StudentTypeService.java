@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @Service
 public class StudentTypeService {
-    @Autowired
     StudentTypeRepository studentTypeRepository;
+
+    @Autowired
+    public void setStudentTypeRepository(StudentTypeRepository studentTypeRepository) {
+        this.studentTypeRepository = studentTypeRepository;
+    }
 
     public void save(StudentType studentType) {
         studentTypeRepository.save(studentType);

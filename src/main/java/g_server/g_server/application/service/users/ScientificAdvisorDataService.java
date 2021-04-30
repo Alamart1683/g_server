@@ -7,21 +7,30 @@ import g_server.g_server.application.repository.users.ScientificAdvisorDataRepos
 import g_server.g_server.application.repository.users.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ScientificAdvisorDataService {
-    @Autowired
     private ScientificAdvisorDataRepository scientificAdvisorDataRepository;
-
-    @Autowired
     private UsersRepository usersRepository;
+    private JwtProvider jwtProvider;
 
     @Autowired
-    private JwtProvider jwtProvider;
+    public void setScientificAdvisorDataRepository(ScientificAdvisorDataRepository scientificAdvisorDataRepository) {
+        this.scientificAdvisorDataRepository = scientificAdvisorDataRepository;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
 
     public List<ScientificAdvisorData> findAll() {
         return scientificAdvisorDataRepository.findAll();

@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @Service
 public class CathedrasService {
-    @Autowired
     private CathedrasRepository cathedrasRepository;
+
+    @Autowired
+    public void setCathedrasRepository(CathedrasRepository cathedrasRepository) {
+        this.cathedrasRepository = cathedrasRepository;
+    }
 
     public List<Cathedras> findAll() {
         return cathedrasRepository.findAll();

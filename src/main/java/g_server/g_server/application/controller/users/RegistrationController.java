@@ -15,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,54 +75,6 @@ public class RegistrationController {
             return "Email занят";
     }
 
-    /* DEPRECATED
-    @PostMapping("/registration/student")
-    public List<String> RegisterStudent(
-            @ModelAttribute("studentForm") @Validated StudentForm studentForm,
-            BindingResult bindingResult, Model model) {
-        List<String> messageList = new ArrayList<>();
-        if (bindingResult.hasErrors()) {
-            messageList.add("Непредвиденная ошибка");
-        }
-        if (!studentForm.getPassword().equals(studentForm.getPasswordConfirm())) {
-            model.addAttribute("passwordError", "Пароли не совпадают");
-            messageList.add("Пароли не совпадают");
-        }
-        if (!usersService.isCathedraExist(studentForm)) {
-            messageList.add("Указана несуществующая кафедра");
-        }
-        if (!usersService.isGroupExist(studentForm)) {
-            messageList.add("Указана несуществующая группа");
-        }
-        if (!usersService.isStudentTypeExist(studentForm)) {
-            messageList.add("Указан несуществуюший тип");
-        }
-        if (studentForm.determineMailSendingAccepted(studentForm.getMailSendingAccepted()) == null) {
-            messageList.add("Ошибка определения согласия на почтовую рассылку");
-        }
-        if (registrationCode == null) {
-            messageList.add("Код подтверждения регистрации не был сгенерирован (не получена форма регистрации)");
-        }
-        if (messageList.size() == 0) {
-            if (!usersService.saveStudent(studentForm.StudentFormToUsers(), studentForm.getStudent_type(),
-                    studentForm.getStudent_group(), studentForm.getCathedra())) {
-                model.addAttribute("usernameError", "Пользователь с данным email уже зарегистрирован");
-                messageList.add("Пользователь с таким email уже есть");
-            } else {
-                messageList.add("Студент успешно зарегистрирован!");
-                // Сохраним email, с которого была совершена регистрация, в буфер
-                studentRegistrationEmail = studentForm.getEmail();
-                // Сгенерируем токен для подтверждения регистрации по ссылке
-                String tokenConfirm = jwtProvider.generateConfirmToken(registrationCode);
-                confirmUrl = apiUrl + "registration/student/confirm/" + tokenConfirm;
-                mailService.sendStudentEmail(studentForm.getEmail(), Integer.toString(registrationCode), confirmUrl);
-                messageList.add("Письмо с кодом подтверждения успешно отправлено");
-            }
-        }
-        return messageList;
-    }
-     */
-
     // Запрос на повторную отправку кода
     @PostMapping("/registration/student/confirm/{email}")
     public String repeatConformCodeSending(@PathVariable String email) {
@@ -167,6 +118,7 @@ public class RegistrationController {
         return messageList;
     }
 
+    @Deprecated
     // Активация аккаунта по сгенерированной ссылке
     @GetMapping("/registration/student/confirm/{token}")
     public String StudentConfirmCodeFromUrl(@PathVariable String token) {

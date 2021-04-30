@@ -45,65 +45,109 @@ import java.util.*;
 public class UsersService implements UserDetailsService {
     @Value("${storage.location}")
     private String storageLocation;
-
     @Value("${test.auth}")
     private String userTestStorage;
-
-    @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
     private StudentDataRepository studentDataRepository;
-
-    @Autowired
     private ScientificAdvisorDataRepository scientificAdvisorDataRepository;
-
-    @Autowired
     private CathedrasRepository cathedrasRepository;
-
-    @Autowired
     private StudentGroupRepository studentGroupRepository;
-
-    @Autowired
     private StudentTypeRepository studentTypeRepository;
-
-    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
     private UsersRolesRepository usersRolesRepository;
-
-    @Autowired
     private AssociatedStudentsRepository associatedStudentsRepository;
-
-    @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
-
-    @Autowired
     private RolesService rolesService;
-
-    @Autowired
     private DocumentRepository documentRepository;
-
-    @Autowired
     private DocumentUploadService documentUploadService;
+    private MailService mailService;
 
     @Autowired
-    private MailService mailService;
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setStudentDataRepository(StudentDataRepository studentDataRepository) {
+        this.studentDataRepository = studentDataRepository;
+    }
+
+    @Autowired
+    public void setScientificAdvisorDataRepository(ScientificAdvisorDataRepository scientificAdvisorDataRepository) {
+        this.scientificAdvisorDataRepository = scientificAdvisorDataRepository;
+    }
+
+    @Autowired
+    public void setCathedrasRepository(CathedrasRepository cathedrasRepository) {
+        this.cathedrasRepository = cathedrasRepository;
+    }
+
+    @Autowired
+    public void setStudentGroupRepository(StudentGroupRepository studentGroupRepository) {
+        this.studentGroupRepository = studentGroupRepository;
+    }
+
+    @Autowired
+    public void setStudentTypeRepository(StudentTypeRepository studentTypeRepository) {
+        this.studentTypeRepository = studentTypeRepository;
+    }
+
+    @Autowired
+    public void setbCryptPasswordEncoder(BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+
+    @Autowired
+    public void setUsersRolesRepository(UsersRolesRepository usersRolesRepository) {
+        this.usersRolesRepository = usersRolesRepository;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsRepository(AssociatedStudentsRepository associatedStudentsRepository) {
+        this.associatedStudentsRepository = associatedStudentsRepository;
+    }
+
+    @Autowired
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setProjectRepository(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+
+    @Autowired
+    public void setOccupiedStudentsRepository(OccupiedStudentsRepository occupiedStudentsRepository) {
+        this.occupiedStudentsRepository = occupiedStudentsRepository;
+    }
+
+    @Autowired
+    public void setRolesService(RolesService rolesService) {
+        this.rolesService = rolesService;
+    }
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
+
+    @Autowired
+    public void setDocumentUploadService(DocumentUploadService documentUploadService) {
+        this.documentUploadService = documentUploadService;
+    }
+
+    @Autowired
+    public void setMailService(MailService mailService) {
+        this.mailService = mailService;
+    }
 
     @Override
     // Загрузить пользователя по email
     public UserDetails loadUserByUsername(String email) {
-        Users user = usersRepository.findByEmail(email);
-        if (user == null)
-            return null;
-        return user;
+        return usersRepository.findByEmail(email);
     }
 
     // Загрузить пользователя по email и паролю
@@ -205,20 +249,13 @@ public class UsersService implements UserDetailsService {
 
     // Существует ли пользователь
     public boolean isUserExists(Users user) {
-        if (user == null)
-            return false;
-        else
-            return true;
+        return user != null;
     }
 
     // Существует ли пользователь в базе данных
     public boolean isUserExistsInDB(Users user) {
         Users testUser = usersRepository.findByEmail(user.getEmail());
-        if (testUser == null) {
-            return false;
-        } else {
-            return true;
-        }
+        return testUser != null;
     }
 
     // Существует ли кафедра для формы студента
@@ -268,11 +305,7 @@ public class UsersService implements UserDetailsService {
     // Существует ли email
     public boolean isEmailExist(String email) {
         Users userFromDB = usersRepository.findByEmail(email);
-
-        if (userFromDB == null)
-            return false;
-        else
-            return true;
+        return userFromDB != null;
     }
 
     // Найти пользователя по id
@@ -300,18 +333,13 @@ public class UsersService implements UserDetailsService {
         if (adminId != null && userToDeleteId != null) {
             Users admin = usersRepository.findById(adminId).get();
             Users userToDelete = null;
-            try { userToDelete = usersRepository.findById(userToDeleteId).get(); } catch (Exception e) { }
-            if (admin != null && userToDelete != null) {
-                Integer userToDeleteRoleId = usersRolesRepository.findUsersRolesByUserId(userToDeleteId).getRoleId();
-                Integer adminRoleId = usersRolesRepository.findUsersRolesByUserId(adminId).getRoleId();
-                if (userToDeleteRoleId != null && adminRoleId != null) {
-                    if (userToDeleteRoleId == adminRoleId)
-                        return false;
-                    else if (userToDeleteRoleId > adminRoleId)
-                        return false;
-                    else if (userToDeleteRoleId < adminRoleId)
-                        return true;
-                }
+            try { userToDelete = usersRepository.findById(userToDeleteId).get(); } catch (Exception ignored) { }
+            if (userToDelete != null) {
+                int userToDeleteRoleId = usersRolesRepository.findUsersRolesByUserId(userToDeleteId).getRoleId();
+                int adminRoleId = usersRolesRepository.findUsersRolesByUserId(adminId).getRoleId();
+                if (userToDeleteRoleId == adminRoleId)
+                    return false;
+                else return userToDeleteRoleId <= adminRoleId;
             }
             else {
                 return false;
@@ -382,8 +410,7 @@ public class UsersService implements UserDetailsService {
             if (project != null) {
                 projectName = project.getName();
             }
-            PersonalStudentView personalStudentView = new PersonalStudentView(student, advisorName, projectName);
-            return personalStudentView;
+            return new PersonalStudentView(student, advisorName, projectName);
         }
     }
 
@@ -419,19 +446,15 @@ public class UsersService implements UserDetailsService {
         }
         else {
             Users advisor;
-            if (advisorID != null) {
-                try {
-                    advisor = usersRepository.findById(advisorID).get();
-                    UsersRoles usersRoles = usersRolesRepository.findUsersRolesByUserId(advisor.getId());
-                    if (usersRoles.getRoleId() == 2) {
-                        return new PersonalAdvisorView(advisor, "Научный руководитель");
-                    } else if (usersRoles.getRoleId() == 3) {
-                        return new PersonalAdvisorView(advisor, "Заведующий кафедрой");
-                    }
-                } catch (NoSuchElementException noSuchElementException) {
-                    advisor = null;
+            try {
+                advisor = usersRepository.findById(advisorID).get();
+                UsersRoles usersRoles = usersRolesRepository.findUsersRolesByUserId(advisor.getId());
+                if (usersRoles.getRoleId() == 2) {
+                    return new PersonalAdvisorView(advisor, "Научный руководитель");
+                } else if (usersRoles.getRoleId() == 3) {
+                    return new PersonalAdvisorView(advisor, "Заведующий кафедрой");
                 }
-            }
+            } catch (NoSuchElementException ignored) { }
             return null;
         }
     }
@@ -509,7 +532,7 @@ public class UsersService implements UserDetailsService {
                             deleteFile.delete();
                             return "Ошибка чтения группы";
                         }
-                        Integer groupId = studentGroupRepository.getByStudentGroup(group).getId();
+                        int groupId = studentGroupRepository.getByStudentGroup(group).getId();
                         studentData.setStudent_group(groupId);
                         studentData.setCathedra(cathedrasRepository.getCathedrasByCathedraName(cathedra).getId());
                         studentData.setType(studentTypeRepository.getByStudentType(type).getId());
@@ -521,20 +544,18 @@ public class UsersService implements UserDetailsService {
                         String phone = hssfRow.getCell(7).getRichStringCellValue().getString();
                         if (!phone.equals("")) {
                             student.setPhone(getNormalPhone(phone));
-                        } else if (phone.equals("")) {
+                        } else {
                             phone = hssfRow.getCell(9).getRichStringCellValue().getString();
                             if (!phone.equals("")) {
                                 student.setPhone(getNormalPhone(phone));
                             }
-                        } else {
-                            student.setPhone("Не указан");
                         }
 
                         // Определим почту студента
                         String email = hssfRow.getCell(10).getRichStringCellValue().getString();
                         if (!email.equals("")) {
                             student.setEmail(email);
-                        } else if (email.equals("")) {
+                        } else {
                             email = hssfRow.getCell(11).getRichStringCellValue().getString();
                             if (!email.equals("")) {
                                 student.setEmail(email);
@@ -590,7 +611,7 @@ public class UsersService implements UserDetailsService {
         documentUploadService.createDocumentRootDirIfIsNotExist();
         MultipartFile multipartFile = automaticRegistrationForm.getStudentData();
         String cathedra = automaticRegistrationForm.getCathedra();
-        Integer places = 10; // TODO Заглушка для мест, потом можно добавить, если понадобится
+        int places = 10; // TODO Заглушка для мест, потом можно добавить, если понадобится
         String tempPath = storageLocation + File.separator + "temp";
         File temp = new File(tempPath);
         if (!temp.exists()) {
@@ -701,17 +722,15 @@ public class UsersService implements UserDetailsService {
     public String generatePassword() {
         PasswordGenerator passwordGenerator = new PasswordGenerator.PasswordGeneratorBuilder()
                 .useDigits(true).useLower(true).useUpper(true).build();
-        String password = passwordGenerator.generate(12);
-        return password;
+        return passwordGenerator.generate(12);
     }
 
     // Приведем все телефоны к унифицированному виду
     public String getNormalPhone(String phone) {
         String temp = phone.replaceAll("\\D+","");
-        String normalPhone = "+" + temp.charAt(0) + " " + temp.charAt(1) + temp.charAt(2) + temp.charAt(3) + " " +
+        return "+" + temp.charAt(0) + " " + temp.charAt(1) + temp.charAt(2) + temp.charAt(3) + " " +
                 temp.charAt(4) + temp.charAt(5) + temp.charAt(6) + "-" + temp.charAt(7) + temp.charAt(8) + "-" +
                 temp.charAt(9) + temp.charAt(10);
-        return normalPhone;
     }
 
     // Тестовый метод для сохранения логинов и паролей студентов перед включением почтовой рассылки
@@ -745,13 +764,12 @@ public class UsersService implements UserDetailsService {
                 writer.write(System.getProperty("line.separator"));
             }
             writer.flush();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         } finally {
             if (writer != null) {
                 try {
                     writer.close();
-                } catch (IOException ex) {
-                }
+                } catch (IOException ignored) { }
             }
         }
     }
@@ -767,30 +785,20 @@ public class UsersService implements UserDetailsService {
         if (file.exists()) {
             file.delete();
         }
-        Writer writer = null;
-        try {
-                writer = new FileWriter(userTestStorage + File.separator + "auth for " +
-                        user.getSurname() + " " + user.getName() + " " + user.getSecond_name() + " " + user.getEmail()
-                        + ".txt");
-                UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
-                Roles role = rolesService.findById(usersRole.getRoleId()).get();
-                writer.write(
-                        " " + role.getRole()
-                        + " " + user.getName()
-                        + " " + user.getSecond_name()
-                        + " email: " + user.getEmail()
-                        + " password: " + password);
-                writer.write(System.getProperty("line.separator"));
+        try (Writer writer = new FileWriter(userTestStorage + File.separator + "auth for " +
+                user.getSurname() + " " + user.getName() + " " + user.getSecond_name() + " " + user.getEmail()
+                + ".txt")) {
+            UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(user.getId());
+            Roles role = rolesService.findById(usersRole.getRoleId()).get();
+            writer.write(
+                    " " + role.getRole()
+                            + " " + user.getName()
+                            + " " + user.getSecond_name()
+                            + " email: " + user.getEmail()
+                            + " password: " + password);
+            writer.write(System.getProperty("line.separator"));
             writer.flush();
-        } catch (Exception e) {
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException ex) {
-                }
-            }
-        }
+        } catch (Exception ignored) { }
     }
 
     public StudentAdvisorView getAdvisorDataByStudentToken(String token) {
@@ -845,11 +853,7 @@ public class UsersService implements UserDetailsService {
     // Проверить верный ли код подтверждения
     public boolean isCodeEquals(Integer code) {
         List<Users> users = usersRepository.findByPasswordChangeCode(code);
-        if (users.size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return users.size() > 0;
     }
 
     // Сменить пароль
@@ -896,14 +900,11 @@ public class UsersService implements UserDetailsService {
         List<Document> vkrOrders = new ArrayList<>();
         List<Document> orderList = documentRepository.findByKind(1);
         for (Document currentOrder: orderList) {
-            if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
-                nirOrders.add(currentOrder);
-            } else if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
-                ppppuipdOrders.add(currentOrder);
-            } else if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
-                ppOrders.add(currentOrder);
-            } else if (currentOrder.getDocumentType().getType().equals("Научно-исследовательская работа")) {
-                vkrOrders.add(currentOrder);
+            switch (currentOrder.getDocumentType().getType()) {
+                case "Научно-исследовательская работа" -> nirOrders.add(currentOrder);
+                case "Практика по получению знаний и умений" -> ppppuipdOrders.add(currentOrder);
+                case "Преддипломная практика" -> ppOrders.add(currentOrder);
+                case "ВКР" -> vkrOrders.add(currentOrder);
             }
         }
         // НИР

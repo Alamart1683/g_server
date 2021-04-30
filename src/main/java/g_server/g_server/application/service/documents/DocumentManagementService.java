@@ -294,11 +294,11 @@ public class DocumentManagementService {
                             }
                         }
                         else if (documentVersions.size() > 1) {
-                            for (int i = 0; i < documentVersions.size(); i++) {
-                                if (collateDateTimes(documentVersions.get(i).getEditionDate(), editionDateTime)) {
-                                    File fileVersion = new File(documentVersions.get(i).getThis_version_document_path());
+                            for (DocumentVersion documentVersion : documentVersions) {
+                                if (collateDateTimes(documentVersion.getEditionDate(), editionDateTime)) {
+                                    File fileVersion = new File(documentVersion.getThis_version_document_path());
                                     fileVersion.delete();
-                                    getDocumentVersionRepository().delete(documentVersions.get(i));
+                                    getDocumentVersionRepository().delete(documentVersion);
                                     messagesList.add("Версия документа удалена успешно");
                                     break;
                                 }
@@ -374,10 +374,7 @@ public class DocumentManagementService {
     // Необходимо корректно сопоставить дату и время из бд с полученными от пользователя
     public boolean collateDateTimes(String fromDB, String fromRequest) {
         fromRequest = getDocumentUploadService().convertRussianDateToSqlDateTime(fromRequest);
-        if (fromDB.equals(fromRequest))
-            return true;
-        else
-            return false;
+        return fromDB.equals(fromRequest);
     }
 
     // Метод изменения описания документа
@@ -1591,14 +1588,11 @@ public class DocumentManagementService {
                 List<DocumentVersion> ppppuiopdReportVersions = getDocumentVersionRepository().findByDocument(ppppuiopdReport.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion ppppuiopdReportVersion: ppppuiopdReportVersions) {
-                    if (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Неудовлетворительно")) {
-                        statusView.setPpppuipdReportStatus(2);
-                    } else if (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Удовлетворительно")) {
-                        statusView.setPpppuipdReportStatus(3);
-                    } else if (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Хорошо")) {
-                        statusView.setPpppuipdReportStatus(4);
-                    } else if (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Отлично")) {
-                        statusView.setPpppuipdReportStatus(5);
+                    switch (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus()) {
+                        case "Неудовлетворительно" -> statusView.setPpppuipdReportStatus(2);
+                        case "Удовлетворительно" -> statusView.setPpppuipdReportStatus(3);
+                        case "Хорошо" -> statusView.setPpppuipdReportStatus(4);
+                        case "Отлично" -> statusView.setPpppuipdReportStatus(5);
                     }
                     if (ppppuiopdReportVersion.getPpppuiopdReport().isHocRate()) {
                         statusView.setPpppuipdReportHocRate(true);
@@ -1624,14 +1618,11 @@ public class DocumentManagementService {
                 List<DocumentVersion> pdReportVersions = getDocumentVersionRepository().findByDocument(pdReport.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion pdReportVersion: pdReportVersions) {
-                    if (pdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Неудовлетворительно")) {
-                        statusView.setPpReportStatus(2);
-                    } else if (pdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Удовлетворительно")) {
-                        statusView.setPpReportStatus(3);
-                    } else if (pdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Хорошо")) {
-                        statusView.setPpReportStatus(4);
-                    } else if (pdReportVersion.getPdReport().getDocumentStatus().getStatus().equals("Отлично")) {
-                        statusView.setPpReportStatus(5);
+                    switch (pdReportVersion.getPdReport().getDocumentStatus().getStatus()) {
+                        case "Неудовлетворительно" -> statusView.setPpReportStatus(2);
+                        case "Удовлетворительно" -> statusView.setPpReportStatus(3);
+                        case "Хорошо" -> statusView.setPpReportStatus(4);
+                        case "Отлично" -> statusView.setPpReportStatus(5);
                     }
                     if (pdReportVersion.getPdReport().isHocRate()) {
                         statusView.setPpReportHocRate(true);
@@ -1657,14 +1648,11 @@ public class DocumentManagementService {
                 List<DocumentVersion> vkrReportVersions = getDocumentVersionRepository().findByDocument(vkrReport.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion vkrReportVersion: vkrReportVersions) {
-                    if (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Неудовлетворительно")) {
-                        statusView.setVkrRPZ(2);
-                    } else if (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Удовлетворительно")) {
-                        statusView.setVkrRPZ(3);
-                    } else if (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Хорошо")) {
-                        statusView.setVkrRPZ(4);
-                    } else if (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus().equals("Отлично")) {
-                        statusView.setVkrRPZ(5);
+                    switch (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus()) {
+                        case "Неудовлетворительно" -> statusView.setVkrRPZ(2);
+                        case "Удовлетворительно" -> statusView.setVkrRPZ(3);
+                        case "Хорошо" -> statusView.setVkrRPZ(4);
+                        case "Отлично" -> statusView.setVkrRPZ(5);
                     }
                     if (vkrReportVersion.getVkrReport().isHocRate()) {
                         statusView.setVkrRPZHocRate(true);
@@ -1768,20 +1756,14 @@ public class DocumentManagementService {
     }
 
     public Integer determineMark(String newStatus) {
-        switch (newStatus) {
-            case "Замечания":
-                return 3;
-            case "Неудовлетворительно":
-                return 5;
-            case "Удовлетворительно":
-                return 6;
-            case "Хорошо":
-                return 7;
-            case "Отлично":
-                return 8;
-            default:
-                return 0;
-        }
+        return switch (newStatus) {
+            case "Замечания" -> 3;
+            case "Неудовлетворительно" -> 5;
+            case "Удовлетворительно" -> 6;
+            case "Хорошо" -> 7;
+            case "Отлично" -> 8;
+            default -> 0;
+        };
     }
 
     private boolean isLastChecked(DocumentVersion documentVersion, String versionType) {
@@ -1886,9 +1868,7 @@ public class DocumentManagementService {
                 break;
         }
         if (lastCheckedVersion != null) {
-            if (documentVersion.getId() == lastCheckedVersion.getId()) {
-                return true;
-            }
+            return documentVersion.getId() == lastCheckedVersion.getId();
         }
         return false;
     }

@@ -228,7 +228,7 @@ public class DocumentProcessorService {
                     List<Document> taskList = documentRepository.findByTypeAndKind(
                             type, kind);
                     if (taskList.size() > 0 && taskList.get(0).getTemplateProperties().isApproved()) {
-                        if (isTwoOrder == false && orderProperty.isApproved()) {
+                        if (!isTwoOrder && orderProperty.isApproved()) {
                             TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
                                     advisor, headOfCathedra, documentOrder, orderProperty, speciality);
                             String studentDocumentsPath = storageLocation + File.separator + student.getId();
@@ -503,7 +503,7 @@ public class DocumentProcessorService {
     // Создать версию задания студента от его НР
     public String advisorTaskVersionAdd(String token, AdvisorShortTaskDataView shortTaskDataView) throws Exception {
         Integer userID;
-        Boolean isTwoOrder = false;
+        boolean isTwoOrder = false;
         try {
             userID = getUserId(token);
         } catch (Exception e) {
@@ -517,119 +517,114 @@ public class DocumentProcessorService {
         } catch (NoSuchElementException noSuchElementException) {
             return "Пользователь не найден";
         }
-        if (student != null && advisor != null) {
-            AssociatedStudents associatedStudents;
+        AssociatedStudents associatedStudents;
+        try {
+            associatedStudents = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisor.getId(), student.getId());
+        } catch (NullPointerException nullPointerException) {
+            associatedStudents = null;
+        }
+        if (associatedStudents != null) {
+            Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
+                    .getStudentGroup().getStudentGroup().substring(0, 4));
+            OrderProperties orderProperty;
+            Document documentOrder = null;
+            List<Document> compareOrderList = new ArrayList<>();
             try {
-                associatedStudents = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisor.getId(), student.getId());
-            } catch (NullPointerException nullPointerException) {
-                associatedStudents = null;
-            }
-            if (associatedStudents != null) {
-                Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
-                        .getStudentGroup().getStudentGroup().substring(0, 4));
-                OrderProperties orderProperty;
-                Document documentOrder = null;
-                List<Document> compareOrderList = new ArrayList<>();
-                try {
-                    List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortTaskDataView.getTaskType()), 1);
-                    for (Document order: orderList) {
-                        if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
-                            compareOrderList.add(order);
-                        }
+                List<Document> orderList = documentRepository.findByTypeAndKind(determineType(shortTaskDataView.getTaskType()), 1);
+                for (Document order: orderList) {
+                    if (order.getOrderProperties().getSpeciality() == speciality.getId()) {
+                        compareOrderList.add(order);
                     }
-                    if (compareOrderList.size() == 2) {
-                        isTwoOrder = true;
-                    } else if (compareOrderList.size() > 0) {
-                        documentOrder = compareOrderList.get(0);
-                        isTwoOrder = false;
-                    }
-                    if (documentOrder != null) {
-                        orderProperty = documentOrder.getOrderProperties();
-                    } else {
-                        orderProperty = null;
-                    }
-                } catch (NullPointerException nullPointerException) {
+                }
+                if (compareOrderList.size() == 2) {
+                    isTwoOrder = true;
+                } else if (compareOrderList.size() > 0) {
+                    documentOrder = compareOrderList.get(0);
+                    isTwoOrder = false;
+                }
+                if (documentOrder != null) {
+                    orderProperty = documentOrder.getOrderProperties();
+                } else {
                     orderProperty = null;
                 }
-                if (orderProperty != null || isTwoOrder == true) {
-                    Document order = documentRepository.findById(orderProperty.getId()).get();
-                    Users headOfCathedra = usersRepository.findById(
-                            usersRolesRepository.findByRoleId(3).getUserId()).get();
-                    Integer type = determineType(shortTaskDataView.getTaskType());
-                    Integer kind = 5;
-                    List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
-                    if (taskList.size() > 0) {
-                        if (isTwoOrder == false) {
-                            TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
-                                    advisor,headOfCathedra, order, orderProperty, speciality);
-                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
-                            File studentDir = new File(studentDocumentsPath);
-                            if (!studentDir.exists()) {
-                                return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
-                            }
-                            String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
-                                    taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
-                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
-                            File taskDir = new File(taskDirPath);
-                            if (!taskDir.exists()) {
-                                return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
-                            }
-                            Document currentTask = taskList.get(taskList.size() - 1);
-                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
-                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
-                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                            taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
-                            String documentVersionPath = taskDirPath + File.separator + "version_" +
-                                    documentUploadService.getCurrentDate() + ".docx";
-                            String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
-                                    taskDataView, documentVersionPath, true);
-                            if (!response.equals("Попытка создать версию чужого документа")) {
-                                WordReplaceService wordReplaceService = new WordReplaceService(template);
-                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
-                            }
-                            return response;
-                        } else if (isTwoOrder) {
-                            TwoOrdersTaskDataView taskDataView = fillingTwoOrdersTaskDataView(shortTaskDataView, student,
-                                    advisor, headOfCathedra, compareOrderList, speciality);
-                            String studentDocumentsPath = storageLocation + File.separator + student.getId();
-                            File studentDir = new File(studentDocumentsPath);
-                            if (!studentDir.exists()) {
-                                return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
-                            }
-                            String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
-                                    taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
-                            String taskDirPath = studentDocumentsPath + File.separator + fileName;
-                            File taskDir = new File(taskDirPath);
-                            if (!taskDir.exists()) {
-                                return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
-                            }
-                            Document currentTask = taskList.get(taskList.size() - 1);
-                            List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
-                            DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
-                            XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
-                            twoOrdersTaskProcessing(template, taskDataView, speciality.getSpeciality(), student);
-                            String documentVersionPath = taskDirPath + File.separator + "version_" +
-                                    documentUploadService.getCurrentDate() + ".docx";
-                            String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
-                                    taskDataView, documentVersionPath, true);
-                            if (!response.equals("Попытка создать версию чужого документа")) {
-                                WordReplaceService wordReplaceService = new WordReplaceService(template);
-                                wordReplaceService.saveAndGetModdedFile(documentVersionPath);
-                            }
-                            return response;
+            } catch (NullPointerException nullPointerException) {
+                orderProperty = null;
+            }
+            if (orderProperty != null || isTwoOrder == true) {
+                Document order = documentRepository.findById(orderProperty.getId()).get();
+                Users headOfCathedra = usersRepository.findById(
+                        usersRolesRepository.findByRoleId(3).getUserId()).get();
+                Integer type = determineType(shortTaskDataView.getTaskType());
+                Integer kind = 5;
+                List<Document> taskList = documentRepository.findByTypeAndKind(type, kind);
+                if (taskList.size() > 0) {
+                    if (!isTwoOrder) {
+                        TaskDataView taskDataView = fillingTaskDataView(shortTaskDataView, student,
+                                advisor,headOfCathedra, order, orderProperty, speciality);
+                        String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                        File studentDir = new File(studentDocumentsPath);
+                        if (!studentDir.exists()) {
+                            return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
                         }
-                        return "Ошибка связанная с внедрением шаблона с двумя приказами";
+                        String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
+                        String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                        File taskDir = new File(taskDirPath);
+                        if (!taskDir.exists()) {
+                            return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
+                        }
+                        Document currentTask = taskList.get(taskList.size() - 1);
+                        List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                        DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                        XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                        taskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                        String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                documentUploadService.getCurrentDate() + ".docx";
+                        String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                taskDataView, documentVersionPath, true);
+                        if (!response.equals("Попытка создать версию чужого документа")) {
+                            WordReplaceService wordReplaceService = new WordReplaceService(template);
+                            wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                        }
+                        return response;
                     } else {
-                        return "Шаблон задания еще не был загружен";
+                        TwoOrdersTaskDataView taskDataView = fillingTwoOrdersTaskDataView(shortTaskDataView, student,
+                                advisor, headOfCathedra, compareOrderList, speciality);
+                        String studentDocumentsPath = storageLocation + File.separator + student.getId();
+                        File studentDir = new File(studentDocumentsPath);
+                        if (!studentDir.exists()) {
+                            return "Вы не можете добавлять версии заданию студенту, пока он его не сгенерирует";
+                        }
+                        String fileName = getShortFio(taskDataView.getStudentFio()) + " " +
+                                taskDataView.getStudentGroup() + " задание по " + taskDataView.getTaskType() + ".docx";
+                        String taskDirPath = studentDocumentsPath + File.separator + fileName;
+                        File taskDir = new File(taskDirPath);
+                        if (!taskDir.exists()) {
+                            return "Вы не можете добавлять версии заданию студента, пока он его не сгенерирует";
+                        }
+                        Document currentTask = taskList.get(taskList.size() - 1);
+                        List<DocumentVersion> taskVersions = documentVersionRepository.findByDocument(currentTask.getId());
+                        DocumentVersion taskVersion = taskVersions.get(taskVersions.size() - 1);
+                        XWPFDocument template = openDocument(taskVersion.getThis_version_document_path());
+                        twoOrdersTaskProcessing(template, taskDataView, speciality.getSpeciality(), student);
+                        String documentVersionPath = taskDirPath + File.separator + "version_" +
+                                documentUploadService.getCurrentDate() + ".docx";
+                        String response = saveTaskAsDocument(fileName, student, advisor, taskDirPath,
+                                taskDataView, documentVersionPath, true);
+                        if (!response.equals("Попытка создать версию чужого документа")) {
+                            WordReplaceService wordReplaceService = new WordReplaceService(template);
+                            wordReplaceService.saveAndGetModdedFile(documentVersionPath);
+                        }
+                        return response;
                     }
                 } else {
-                    return "Приказ еще не был загружен";
+                    return "Шаблон задания еще не был загружен";
                 }
             } else {
-                return "Запрещено вносить изменения в задания не ваших студентов";
+                return "Приказ еще не был загружен";
             }
         } else {
-            return "Студент не найден";
+            return "Запрещено вносить изменения в задания не ваших студентов";
         }
     }
 
@@ -695,8 +690,8 @@ public class DocumentProcessorService {
         if (sMonth.charAt(0) == '0') {
             sMonth = sMonth.replaceAll("0", "");
         }
-        Integer firstMonth = Integer.parseInt(fMonth);
-        Integer secondMonth = Integer.parseInt(sMonth);
+        int firstMonth = Integer.parseInt(fMonth);
+        int secondMonth = Integer.parseInt(sMonth);
         if (firstMonth > secondMonth) {
             firstOrder = orderList.get(0);
             secondOrder = orderList.get(1);
@@ -1084,7 +1079,7 @@ public class DocumentProcessorService {
                                      TaskDataView taskDataView, String documentVersionPath, boolean flag) {
         Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
         if (document == null && !flag) {
-            Integer kind = 2;
+            int kind = 2;
             Integer type = determineType(taskDataView.getTaskType());
             Document newDocument = new Document(
                     student.getId(),
@@ -1201,7 +1196,7 @@ public class DocumentProcessorService {
                                      TwoOrdersTaskDataView taskDataView, String documentVersionPath, boolean flag) {
         Document document = documentRepository.findByCreatorAndName(student.getId(), filename);
         if (document == null && !flag) {
-            Integer kind = 2;
+            int kind = 2;
             Integer type = determineType(taskDataView.getTaskType());
             Document newDocument = new Document(
                     student.getId(),
@@ -1279,7 +1274,7 @@ public class DocumentProcessorService {
             } else {
                 return "Попытка создать версию чужого документа";
             }
-        } else if (document != null && flag) {
+        } else if (document != null) {
             Integer type = determineType(taskDataView.getTaskType());
             DocumentVersion documentVersion = new DocumentVersion(
                     advisor.getId(),
@@ -1373,7 +1368,7 @@ public class DocumentProcessorService {
             } else {
                 return "Попытка создать версию чужого документа";
             }
-        } else if (document != null && flag) {
+        } else if (document != null) {
             Integer type = determineType(vkrTaskDataView.getTaskType());
             DocumentVersion documentVersion = new DocumentVersion(
                     advisor.getId(),
@@ -1799,7 +1794,6 @@ public class DocumentProcessorService {
                 XSSFCell NirReportGroupCell = reportRow.createCell(4);
                 NirReportGroupCell.setCellType(CellType.STRING);
                 NirReportGroupCell.setCellValue("Отчёт по НИР");
-                rowIndex = 1;
                 // Заполнение данных в цикле
                 for (AssociatedStudentView activeStudent: allActiveStudents) {
                     // Создание текущей строки таблицы
@@ -2171,8 +2165,7 @@ public class DocumentProcessorService {
         String month = russianDate.substring(3, 5);
         String year = russianDate.substring(6, 10);
         String monthWord = getMonthWord(month);
-        String date = "«" + day + "»" + " " + monthWord + " " + year;
-        return date;
+        return "«" + day + "»" + " " + monthWord + " " + year;
     }
 
     // Преобразование даты вида ДД.ММ.ГГГГ к виду XX месяца YYYY
@@ -2181,15 +2174,13 @@ public class DocumentProcessorService {
         String month = russianDate.substring(3, 5);
         String year = russianDate.substring(6, 10);
         String monthWord = getMonthWord(month);
-        String date = day + " " + monthWord + " " + year;
-        return date;
+        return day + " " + monthWord + " " + year;
     }
 
     // Преобразование ФИО к укороченному варианту
     public String getShortFio(String Fio) {
         String[] words = Fio.split(" ");
-        String shortFio = words[0] + " " + words[1].substring(0, 1) + "." + words[2].substring(0, 1) + ".";
-        return shortFio;
+        return words[0] + " " + words[1].substring(0, 1) + "." + words[2].substring(0, 1) + ".";
     }
 
     // Преобразование ФИО к дательному падежу
@@ -2227,45 +2218,58 @@ public class DocumentProcessorService {
         // Определим месяц
         String monthWord = "";
         switch (month) {
-            case "01":
+            case "01" -> {
                 monthWord = "января";
                 return monthWord;
-            case "02":
+            }
+            case "02" -> {
                 monthWord = "февраля";
                 return monthWord;
-            case "03":
+            }
+            case "03" -> {
                 monthWord = "марта";
                 return monthWord;
-            case "04":
+            }
+            case "04" -> {
                 monthWord = "апреля";
                 return monthWord;
-            case "05":
+            }
+            case "05" -> {
                 monthWord = "мая";
                 return monthWord;
-            case "06":
+            }
+            case "06" -> {
                 monthWord = "июня";
                 return monthWord;
-            case "07":
+            }
+            case "07" -> {
                 monthWord = "июля";
                 return monthWord;
-            case "08":
+            }
+            case "08" -> {
                 monthWord = "августа";
                 return monthWord;
-            case "09":
+            }
+            case "09" -> {
                 monthWord = "сентября";
                 return monthWord;
-            case "10":
+            }
+            case "10" -> {
                 monthWord = "октября";
                 return monthWord;
-            case "11":
+            }
+            case "11" -> {
                 monthWord = "ноября";
                 return monthWord;
-            case "12":
+            }
+            case "12" -> {
                 monthWord = "декабря";
                 return monthWord;
-            default:
+            }
+            default -> {
                 monthWord = "ошибка";
                 return monthWord;
+            }
         }
     }
 
@@ -2278,45 +2282,23 @@ public class DocumentProcessorService {
     }
 
     public Integer determineType(String stringType) {
-        Integer type;
-        switch (stringType) {
-            case "Научно-исследовательская работа":
-                type = 1;
-                break;
-            case "Практика по получению знаний и умений":
-                type = 2;
-                break;
-            case "Преддипломная практика":
-                type = 3;
-                break;
-            case "ВКР":
-                type = 4;
-                break;
-            default:
-                type = 0;
-        }
-        return type;
+        return switch (stringType) {
+            case "Научно-исследовательская работа" -> 1;
+            case "Практика по получению знаний и умений" -> 2;
+            case "Преддипломная практика" -> 3;
+            case "ВКР" -> 4;
+            default -> 0;
+        };
     }
 
     public Integer determineKind(String stringKind) {
-        Integer type;
-        switch (stringKind) {
-            case "Допуск":
-                type = 6;
-                break;
-            case "Отзыв":
-                type = 7;
-                break;
-            case "Антиплагиат":
-                type = 8;
-                break;
-            case "Презентация":
-                type = 9;
-                break;
-            default:
-                type = 0;
-        }
-        return type;
+        return switch (stringKind) {
+            case "Допуск" -> 6;
+            case "Отзыв" -> 7;
+            case "Антиплагиат" -> 8;
+            case "Презентация" -> 9;
+            default -> 0;
+        };
     }
 
     // Красиво отобразить дату загрузки новой версии документа
@@ -2325,8 +2307,7 @@ public class DocumentProcessorService {
         String month = date.substring(5, 7);
         String day = date.substring(8, 10);
         String russianDate = day + "." + month + "." + year;
-        String russianDateTime = russianDate + date.substring(10);
-        return russianDateTime;
+        return russianDate + date.substring(10);
     }
 
     public String convertSQLDateToRussianFormat(String sqlDate) {

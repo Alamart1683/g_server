@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @Service
 public class RolesService {
-    @Autowired
     private RolesRepository rolesRepository;
+
+    @Autowired
+    public void setRolesRepository(RolesRepository rolesRepository) {
+        this.rolesRepository = rolesRepository;
+    }
 
     public List<Roles> findAll() {
         return rolesRepository.findAll();

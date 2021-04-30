@@ -102,11 +102,7 @@ public class DocumentDownloadService {
                 OutputStream outputStream = new FileOutputStream(destinationFile);
                 documentProcessorService.makeUsWhole(taskStream, reportStream, outputStream);
                 return destinationFile;
-            } catch (NoSuchElementException noSuchElementException) {
-                return null;
-            } catch (FileNotFoundException fileNotFoundException) {
-                return null;
-            } catch (Exception e) {
+            } catch (Exception noSuchElementException) {
                 return null;
             }
         } else {
@@ -143,11 +139,7 @@ public class DocumentDownloadService {
                 OutputStream outputStream = new FileOutputStream(destinationFile);
                 documentProcessorService.makeUsWhole(taskStream, reportStream, outputStream);
                 return destinationFile;
-            } catch (NoSuchElementException noSuchElementException) {
-                return null;
-            } catch (FileNotFoundException fileNotFoundException) {
-                return null;
-            } catch (Exception e) {
+            } catch (Exception noSuchElementException) {
                 return null;
             }
         } else {
@@ -158,47 +150,27 @@ public class DocumentDownloadService {
     // Метод определения типа контента
     public String getContentType(String path) {
         String extension = getFileExtension(path);
-        switch(extension) {
-            case "docx":
-                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "doc":
-                return "application/msword";
-            case "pdf":
-                return "application/pdf";
-            case "rtf":
-                return "application/rtf";
-            case "txt":
-                return "text/plain";
-            case "ppt":
-                return "application/mspowerpoint";
-            case "pptx":
-                return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-            case "csv":
-                return "text/csv";
-            case "xls":
-                return "application/vnd.ms-excel";
-            case "xlsx":
-                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            case "xlsm":
-                return "application/vnd.ms-excel.sheet.macroenabled.12";
-            case "jpg":
-                return "image/x-citrix-jpeg";
-            case "jpeg":
-                return "image/jpeg";
-            case "png":
-                return "image/png";
-            case "webp":
-                return "image/webp";
-            case "rar":
-                return "application/x-rar-compressed";
-            case "zip":
-                return "application/zip";
-            case "7z":
-                return "application/x-7z-compressed";
-            default:
-                return "";
-
-        }
+        return switch (extension) {
+            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "doc" -> "application/msword";
+            case "pdf" -> "application/pdf";
+            case "rtf" -> "application/rtf";
+            case "txt" -> "text/plain";
+            case "ppt" -> "application/mspowerpoint";
+            case "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            case "csv" -> "text/csv";
+            case "xls" -> "application/vnd.ms-excel";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "xlsm" -> "application/vnd.ms-excel.sheet.macroenabled.12";
+            case "jpg" -> "image/x-citrix-jpeg";
+            case "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "webp" -> "image/webp";
+            case "rar" -> "application/x-rar-compressed";
+            case "zip" -> "application/zip";
+            case "7z" -> "application/x-7z-compressed";
+            default -> "";
+        };
     }
 
     // Необходимо опеределить корректность расширения файла

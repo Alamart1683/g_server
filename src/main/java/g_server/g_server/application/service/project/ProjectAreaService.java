@@ -7,7 +7,6 @@ import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.documents.ViewRightsAreaRepository;
 import g_server.g_server.application.repository.project.ProjectRepository;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;
-import g_server.g_server.application.repository.users.AssociatedStudentsRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,20 +15,36 @@ import java.util.List;
 
 @Service
 public class ProjectAreaService {
-    @Autowired
     private ProjectAreaRepository projectAreaRepository;
-
-    @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
     private ViewRightsAreaRepository viewRightsAreaRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    public void setProjectAreaRepository(ProjectAreaRepository projectAreaRepository) {
+        this.projectAreaRepository = projectAreaRepository;
+    }
+
+    @Autowired
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setViewRightsAreaRepository(ViewRightsAreaRepository viewRightsAreaRepository) {
+        this.viewRightsAreaRepository = viewRightsAreaRepository;
+    }
+
+    @Autowired
+    public void setProjectRepository(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
 
     // Добавить новую тему
     public List<String> addProjectArea(String token, String area) {

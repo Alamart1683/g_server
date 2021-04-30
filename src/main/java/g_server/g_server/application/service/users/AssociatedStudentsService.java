@@ -48,61 +48,112 @@ import java.util.NoSuchElementException;
 public class AssociatedStudentsService {
     @Value("${api.url}")
     private String apiUrl;
-
     @Value("${storage.location}")
     private String storageLocation;
-
-    @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
     private UsersRolesRepository usersRolesRepository;
-
-    @Autowired
     private AssociatedStudentsRepository associatedStudentsRepository;
-
-    @Autowired
     private MailService mailService;
-
-    @Autowired
     private ProjectAreaRepository projectAreaRepository;
-
-    @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
     private ScientificAdvisorDataService scientificAdvisorDataService;
-
-    @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
     private StudentDataRepository studentDataRepository;
-
-    @Autowired
     private OccupiedStudentsRepository occupiedStudentsRepository;
-
-    @Autowired
     private OrderPropertiesRepository orderPropertiesRepository;
-
-    @Autowired
     private SpecialityRepository specialityRepository;
-
-    @Autowired
     private DocumentRepository documentRepository;
-
-    @Autowired
     private DocumentManagementService documentManagementService;
-
-    @Autowired
     private DocumentProcessorService documentProcessorService;
-
-    @Autowired
     private DocumentUploadService documentUploadService;
-
-    @Autowired
     private StudentGroupRepository studentGroupRepository;
 
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setUsersRolesRepository(UsersRolesRepository usersRolesRepository) {
+        this.usersRolesRepository = usersRolesRepository;
+    }
+
+    @Autowired
+    public void setAssociatedStudentsRepository(AssociatedStudentsRepository associatedStudentsRepository) {
+        this.associatedStudentsRepository = associatedStudentsRepository;
+    }
+
+    @Autowired
+    public void setMailService(MailService mailService) {
+        this.mailService = mailService;
+    }
+
+    @Autowired
+    public void setProjectAreaRepository(ProjectAreaRepository projectAreaRepository) {
+        this.projectAreaRepository = projectAreaRepository;
+    }
+
+    @Autowired
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setScientificAdvisorDataService(ScientificAdvisorDataService scientificAdvisorDataService) {
+        this.scientificAdvisorDataService = scientificAdvisorDataService;
+    }
+
+    @Autowired
+    public void setProjectRepository(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+
+    @Autowired
+    public void setStudentDataRepository(StudentDataRepository studentDataRepository) {
+        this.studentDataRepository = studentDataRepository;
+    }
+
+    @Autowired
+    public void setOccupiedStudentsRepository(OccupiedStudentsRepository occupiedStudentsRepository) {
+        this.occupiedStudentsRepository = occupiedStudentsRepository;
+    }
+
+    @Autowired
+    public void setOrderPropertiesRepository(OrderPropertiesRepository orderPropertiesRepository) {
+        this.orderPropertiesRepository = orderPropertiesRepository;
+    }
+
+    @Autowired
+    public void setSpecialityRepository(SpecialityRepository specialityRepository) {
+        this.specialityRepository = specialityRepository;
+    }
+
+    @Autowired
+    public void setDocumentRepository(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
+
+    @Autowired
+    public void setDocumentManagementService(DocumentManagementService documentManagementService) {
+        this.documentManagementService = documentManagementService;
+    }
+
+    @Autowired
+    public void setDocumentProcessorService(DocumentProcessorService documentProcessorService) {
+        this.documentProcessorService = documentProcessorService;
+    }
+
+    @Autowired
+    public void setDocumentUploadService(DocumentUploadService documentUploadService) {
+        this.documentUploadService = documentUploadService;
+    }
+
+    @Autowired
+    public void setStudentGroupRepository(StudentGroupRepository studentGroupRepository) {
+        this.studentGroupRepository = studentGroupRepository;
+    }
+
+    @Deprecated
     // Отправить заявку научному руководителю от имени студента на научное руководство
     public List<String> sendRequestForScientificAdvisor(String token,
         Integer scientificAdvisorId, String theme) {
@@ -179,31 +230,30 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
+    @Deprecated
     // Показать список активных заявок данного научного руководителя
     public List<AssociatedRequestView> getActiveRequests(String token) {
         Integer scientificAdvisorId = getUserId(token);
         List<AssociatedRequestView> activeRequests = new ArrayList<>();
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
-        if (scientificAdvisor != null) {
-            List<AssociatedStudents> associatedStudentsRaw =
-                    associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
-            List<AssociatedStudents> associatedStudents = new ArrayList<>();
-            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
-                if (!associatedStudentRaw.isAccepted()) {
-                    associatedStudents.add(associatedStudentRaw);
-                }
+        List<AssociatedStudents> associatedStudentsRaw =
+                associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
+        List<AssociatedStudents> associatedStudents = new ArrayList<>();
+        for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+            if (!associatedStudentRaw.isAccepted()) {
+                associatedStudents.add(associatedStudentRaw);
             }
-            for (AssociatedStudents associatedStudent: associatedStudents) {
-                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
-                AssociatedRequestView associatedStudentForm = new AssociatedRequestView(currentStudent,
-                        associatedStudent.getId());
-                activeRequests.add(associatedStudentForm);
-            }
-            return activeRequests;
         }
-        return null;
+        for (AssociatedStudents associatedStudent: associatedStudents) {
+            Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+            AssociatedRequestView associatedStudentForm = new AssociatedRequestView(currentStudent,
+                    associatedStudent.getId());
+            activeRequests.add(associatedStudentForm);
+        }
+        return activeRequests;
     }
 
+    @Deprecated
     // Принять заявку или отклонить заявку
     public List<String> handleRequest(Integer scientificAdvisorId, Integer requestId, boolean accept) {
         List<String> messageList = new ArrayList<>();
@@ -256,40 +306,37 @@ public class AssociatedStudentsService {
         List<AssociatedStudentView> activeStudents = new ArrayList<>();
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
         List<AssociatedStudents> associatedStudents = new ArrayList<>();
-        if (scientificAdvisor != null) {
-            List<AssociatedStudents> associatedStudentsRaw =
-                    associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
-            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
-                if (associatedStudentRaw.isAccepted()) {
-                    associatedStudents.add(associatedStudentRaw);
-                }
+        List<AssociatedStudents> associatedStudentsRaw =
+                associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
+        for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+            if (associatedStudentRaw.isAccepted()) {
+                associatedStudents.add(associatedStudentRaw);
             }
-            for (AssociatedStudents associatedStudent: associatedStudents) {
-                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
-                Integer studentID = associatedStudent.getStudent();
-                String projectName = "Проект не назначен";
-                String projectArea = "Нет комплексного проекта";
-                OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
-                Project project = null;
-                if (occupiedStudent != null) {
-                    try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
-                    catch (NoSuchElementException noSuchElementException) { }
-                }
-                if (project != null) {
-                    projectName = project.getName();
-                    projectArea = project.getProjectArea().getArea();
-                }
-                AssociatedStudentView activeStudentForm = new AssociatedStudentView(currentStudent,
-                        associatedStudent.getId(), projectName, projectArea,
-                        associatedStudent.getStudentUser().getPhone(),
-                        associatedStudent.getStudentUser().getEmail(),
-                        documentManagementService.getStudentsDocumentStatus(studentID)
-                        );
-                activeStudents.add(activeStudentForm);
-            }
-            return activeStudents;
         }
-        return null;
+        for (AssociatedStudents associatedStudent: associatedStudents) {
+            Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+            Integer studentID = associatedStudent.getStudent();
+            String projectName = "Проект не назначен";
+            String projectArea = "Нет комплексного проекта";
+            OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
+            Project project = null;
+            if (occupiedStudent != null) {
+                try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
+                catch (NoSuchElementException ignored) { }
+            }
+            if (project != null) {
+                projectName = project.getName();
+                projectArea = project.getProjectArea().getArea();
+            }
+            AssociatedStudentView activeStudentForm = new AssociatedStudentView(currentStudent,
+                    associatedStudent.getId(), projectName, projectArea,
+                    associatedStudent.getStudentUser().getPhone(),
+                    associatedStudent.getStudentUser().getEmail(),
+                    documentManagementService.getStudentsDocumentStatus(studentID)
+                    );
+            activeStudents.add(activeStudentForm);
+        }
+        return activeStudents;
     }
 
     // Показать весь список студентов с их отчётностью для кафедры
@@ -314,8 +361,7 @@ public class AssociatedStudentsService {
                 if (occupiedStudent != null) {
                     try {
                         project = projectRepository.findById(occupiedStudent.getProjectID()).get();
-                    } catch (NoSuchElementException noSuchElementException) {
-                    }
+                    } catch (NoSuchElementException ignored) { }
                 }
                 if (project != null) {
                     projectName = project.getName();
@@ -355,7 +401,7 @@ public class AssociatedStudentsService {
                 Project project = null;
                 if (occupiedStudent != null) {
                     try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
-                    catch (NoSuchElementException noSuchElementException) { }
+                    catch (NoSuchElementException ignored) { }
                 }
                 if (project != null) {
                     projectName = project.getName();
@@ -391,7 +437,7 @@ public class AssociatedStudentsService {
         Project project = null;
         if (occupiedStudent != null) {
             try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
-            catch (NoSuchElementException noSuchElementException) { }
+            catch (NoSuchElementException ignored) { }
         }
         if (project != null) {
             projectName = project.getName();
@@ -410,39 +456,37 @@ public class AssociatedStudentsService {
         Users scientificAdvisor = usersRepository.findById(scientificAdvisorId).get();
         List<AssociatedStudents> associatedStudents = new ArrayList<>();
         List<AssociatedStudentViewWithoutProject> associatedStudentViewWithoutProjects = new ArrayList<>();
-        if (scientificAdvisor != null) {
-            List<AssociatedStudents> associatedStudentsRaw =
-                    associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
-            for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
-                if (associatedStudentRaw.isAccepted()) {
-                    associatedStudents.add(associatedStudentRaw);
-                }
+        List<AssociatedStudents> associatedStudentsRaw =
+                associatedStudentsRepository.findByScientificAdvisor(scientificAdvisorId);
+        for (AssociatedStudents associatedStudentRaw: associatedStudentsRaw) {
+            if (associatedStudentRaw.isAccepted()) {
+                associatedStudents.add(associatedStudentRaw);
             }
-            for (AssociatedStudents associatedStudent: associatedStudents) {
-                Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
-                Integer studentID = associatedStudent.getStudent();
-                OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
-                Project project = null;
-                if (occupiedStudent != null) {
-                    try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
-                    catch (NoSuchElementException noSuchElementException) { }
-                }
-                if (project == null) {
-                    AssociatedStudentViewWithoutProject associatedStudentViewWithoutProject = new AssociatedStudentViewWithoutProject(
-                            currentStudent,
-                            associatedStudent.getId(),
-                            associatedStudent.getStudentUser().getPhone(),
-                            associatedStudent.getStudentUser().getEmail(),
-                            documentManagementService.getStudentsDocumentStatus(studentID)
-                            );
-                    associatedStudentViewWithoutProjects.add(associatedStudentViewWithoutProject);
-                }
-            }
-            return associatedStudentViewWithoutProjects;
         }
-        return null;
+        for (AssociatedStudents associatedStudent: associatedStudents) {
+            Users currentStudent = usersRepository.findById(associatedStudent.getStudent()).get();
+            Integer studentID = associatedStudent.getStudent();
+            OccupiedStudents occupiedStudent = occupiedStudentsRepository.findByStudentID(studentID);
+            Project project = null;
+            if (occupiedStudent != null) {
+                try { project = projectRepository.findById(occupiedStudent.getProjectID()).get(); }
+                catch (NoSuchElementException ignored) { }
+            }
+            if (project == null) {
+                AssociatedStudentViewWithoutProject associatedStudentViewWithoutProject = new AssociatedStudentViewWithoutProject(
+                        currentStudent,
+                        associatedStudent.getId(),
+                        associatedStudent.getStudentUser().getPhone(),
+                        associatedStudent.getStudentUser().getEmail(),
+                        documentManagementService.getStudentsDocumentStatus(studentID)
+                        );
+                associatedStudentViewWithoutProjects.add(associatedStudentViewWithoutProject);
+            }
+        }
+        return associatedStudentViewWithoutProjects;
     }
 
+    @Deprecated
     // Отозвать заявку от лица студента
     public List<String> revokeRequestByStudent(String token) {
         List<String> messageList = new ArrayList<>();
@@ -465,6 +509,7 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
+    @Deprecated
     // Откзаться от научного руководителя от лица студента
     public List<String> dismissAdvisorByStudent(String token) {
         List<String> messageList = new ArrayList<>();
@@ -506,6 +551,7 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
+    @Deprecated
     // Отказаться от научного руководства студента для научного руководителя
     public List<String> dismissStudentByAdvisor(String token, Integer systemID) {
         List<String> messageList = new ArrayList<>();
@@ -619,12 +665,10 @@ public class AssociatedStudentsService {
         return messageList;
     }
 
-    // TODO Возможно стоит сделать триггер при принятии последней заявки НР чтобы те, что не были
-    // TODO им приняты, автоматически отклонились и для этого заюзать письмо
-
+    @Deprecated
     // Сформировать представление научных руководителей для подачи студентом заявки
-    // TODO Не знаю, стоит ли отображать преподов с уже закончившимися местами
-    // TODO Можно отображать их типа приглушенными, ввел для этого специальный флаг
+    // Не знаю, стоит ли отображать преподов с уже закончившимися местами
+    // Можно отображать их типа приглушенными, ввел для этого специальный флаг
     public List<ScientificAdvisorView> getScientificAdvisorViewList() {
         List<ScientificAdvisorData> advisorList = scientificAdvisorDataService.findAll();
         List<ScientificAdvisorView> advisorViewList = new ArrayList<>();
@@ -771,64 +815,59 @@ public class AssociatedStudentsService {
         } catch (NoSuchElementException noSuchElementException) {
             return null;
         }
-        if (student != null) {
-            AssociatedStudents associatedStudents;
+        AssociatedStudents associatedStudents;
+        try {
+            associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+        } catch (NullPointerException nullPointerException) {
+            associatedStudents = null;
+        }
+        if (associatedStudents != null) {
+            Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
+                    .getStudentGroup().getStudentGroup().substring(0, 4));
+            OrderProperties orderProperty;
             try {
-                associatedStudents = associatedStudentsRepository.findByStudent(student.getId());
+                orderProperty = orderPropertiesRepository.findBySpeciality(speciality.getId());
             } catch (NullPointerException nullPointerException) {
-                associatedStudents = null;
+                orderProperty = null;
             }
-            if (associatedStudents != null) {
-                Speciality speciality = specialityRepository.findByPrefix(student.getStudentData()
-                        .getStudentGroup().getStudentGroup().substring(0, 4));
-                OrderProperties orderProperty;
-                try {
-                    orderProperty = orderPropertiesRepository.findBySpeciality(speciality.getId());
-                } catch (NullPointerException nullPointerException) {
-                    orderProperty = null;
-                }
-                if (orderProperty != null) {
-                    Document document = documentRepository.findById(orderProperty.getId()).get();
-                    Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
-                    Users headOfCathedra = usersRepository.findById(
-                            usersRolesRepository.findByRoleId(3).getUserId()).get();
-                    List<Document> taskList = documentRepository.findByTypeAndKind(1, 2);
-                    if (taskList.size() > 0) {
-                        TaskDataView taskDataView = new TaskDataView();
-                        taskDataView.setTaskType(document.getDocumentType().getType());
-                        taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
-                                " " + student.getSecond_name());
-                        taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
-                        taskDataView.setStudentTheme("Введите согласованную тему НИР");
-                        taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
-                                " " + advisor.getSecond_name());
-                        taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
-                                " " + headOfCathedra.getSecond_name());
-                        taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
-                        taskDataView.setOrderNumber(orderProperty.getNumber());
-                        taskDataView.setOrderDate(convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
-                        taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
-                        taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
-                        taskDataView.setOrderSpeciality(speciality.getCode());
-                        taskDataView.setToCreate("Создать");
-                        taskDataView.setToExplore("Изучить");
-                        taskDataView.setToFamiliarize("Ознакомиться");
-                        taskDataView.setAdditionalTask("Дополнительное задание");
-                        taskDataViewWithMessage.setTaskDataView(taskDataView);
-                        taskDataViewWithMessage.setMessage("Данные получены успешно");
-                    } else {
-                        taskDataViewWithMessage.setMessage("Образец задания еще не был загружен в систему");
-                    }
+            if (orderProperty != null) {
+                Document document = documentRepository.findById(orderProperty.getId()).get();
+                Users advisor = usersRepository.findById(associatedStudents.getScientificAdvisor()).get();
+                Users headOfCathedra = usersRepository.findById(
+                        usersRolesRepository.findByRoleId(3).getUserId()).get();
+                List<Document> taskList = documentRepository.findByTypeAndKind(1, 2);
+                if (taskList.size() > 0) {
+                    TaskDataView taskDataView = new TaskDataView();
+                    taskDataView.setTaskType(document.getDocumentType().getType());
+                    taskDataView.setStudentFio(student.getSurname() + " " + student.getName() +
+                            " " + student.getSecond_name());
+                    taskDataView.setStudentGroup(student.getStudentData().getStudentGroup().getStudentGroup());
+                    taskDataView.setStudentTheme("Введите согласованную тему НИР");
+                    taskDataView.setAdvisorFio(advisor.getSurname() + " " + advisor.getName() +
+                            " " + advisor.getSecond_name());
+                    taskDataView.setHeadFio(headOfCathedra.getSurname() + " " + headOfCathedra.getName() +
+                            " " + headOfCathedra.getSecond_name());
+                    taskDataView.setCathedra(student.getStudentData().getCathedras().getCathedraName());
+                    taskDataView.setOrderNumber(orderProperty.getNumber());
+                    taskDataView.setOrderDate(convertSQLDateToRussianFormat(orderProperty.getOrderDate()));
+                    taskDataView.setOrderStartDate(convertSQLDateToRussianFormat(orderProperty.getStartDate()));
+                    taskDataView.setOrderEndDate(convertSQLDateToRussianFormat(orderProperty.getEndDate()));
+                    taskDataView.setOrderSpeciality(speciality.getCode());
+                    taskDataView.setToCreate("Создать");
+                    taskDataView.setToExplore("Изучить");
+                    taskDataView.setToFamiliarize("Ознакомиться");
+                    taskDataView.setAdditionalTask("Дополнительное задание");
+                    taskDataViewWithMessage.setTaskDataView(taskDataView);
+                    taskDataViewWithMessage.setMessage("Данные получены успешно");
                 } else {
-                    taskDataViewWithMessage.setMessage("Приказ еще не вышел");
+                    taskDataViewWithMessage.setMessage("Образец задания еще не был загружен в систему");
                 }
-                return taskDataViewWithMessage;
             } else {
-                taskDataViewWithMessage.setMessage("Студенту не назначен научный руководитель");
-                return taskDataViewWithMessage;
+                taskDataViewWithMessage.setMessage("Приказ еще не вышел");
             }
+            return taskDataViewWithMessage;
         } else {
-            taskDataViewWithMessage.setMessage("Студент не найден");
+            taskDataViewWithMessage.setMessage("Студенту не назначен научный руководитель");
             return taskDataViewWithMessage;
         }
     }
@@ -871,9 +910,7 @@ public class AssociatedStudentsService {
                             user.isConfirmed()
                     );
                 }
-                if (currentView != null) {
-                    associatedStudentViewWithAdvisorList.add(currentView);
-                }
+                associatedStudentViewWithAdvisorList.add(currentView);
             }
         }
         return associatedStudentViewWithAdvisorList;
@@ -1008,11 +1045,10 @@ public class AssociatedStudentsService {
         UsersRoles usersRole = usersRolesRepository.findUsersRolesByUserId(studentID);
         if (usersRole.getRoleId() == 1) {
             Users student = usersRepository.findById(studentID).get();
-            VkrThemeView vkrThemeView = new VkrThemeView(
+            return new VkrThemeView(
                     student.getStudentData().getVkrTheme(),
                     student.getStudentData().isVkrThemeEditable()
             );
-            return vkrThemeView;
         }
         return null;
     }
@@ -1179,11 +1215,8 @@ public class AssociatedStudentsService {
 
     // Метод получения айди запроса по айди НР и студента
     public Integer getRequestId(String scientificAdvisor, String student) {
-        Integer advisor_id = Integer.parseInt(scientificAdvisor);
-        Integer student_id = Integer.parseInt(student);
-        if (advisor_id == null || student_id == null) {
-            return null;
-        }
+        int advisor_id = Integer.parseInt(scientificAdvisor);
+        int student_id = Integer.parseInt(student);
         AssociatedStudents associatedStudent =
                 associatedStudentsRepository.findByScientificAdvisorAndStudent(advisor_id, student_id);
         if (associatedStudent == null) {

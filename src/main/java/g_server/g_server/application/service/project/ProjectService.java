@@ -15,17 +15,30 @@ import java.util.NoSuchElementException;
 
 @Service
 public class ProjectService {
-    @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
     private ProjectAreaRepository projectAreaRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Autowired
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setProjectAreaRepository(ProjectAreaRepository projectAreaRepository) {
+        this.projectAreaRepository = projectAreaRepository;
+    }
+
+    @Autowired
+    public void setProjectRepository(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
 
     // Добавить новый проект
     public List<String> addProject(String token, ProjectForm projectForm) {

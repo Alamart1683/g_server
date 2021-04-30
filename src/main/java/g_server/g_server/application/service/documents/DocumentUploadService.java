@@ -39,6 +39,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 public class DocumentUploadService {
@@ -268,7 +269,7 @@ public class DocumentUploadService {
             } else if (viewRights == 8 && (projectName == null || projectAreaName == null)) {
                 messagesList.add("Не указано имя проекта или его проектной области для добавления ему документа");
             }
-            Integer roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
+            int roleID = usersRolesRepository.findUsersRolesByUserId(creator_id).getRoleId();
             if ((roleID == 1 || roleID == 2) && viewRights == 5) {
                 messagesList.add("Попытка загрузить документ с" +
                         " областью видимости доступной только заведующему кафедрой");
@@ -385,21 +386,18 @@ public class DocumentUploadService {
                                     document.getKind() == 9) {
                                 uploadVkrStuff(document.getKind(), documentVersion.getId());
                             }
-                            messagesList.clear();
                             messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()) + "," + documentVersion.getDocument() + "," + documentVersion.getEditor());
                         }
                         else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
-                            if (documentDirectory != null) {
-                                if (documentDirectory.listFiles().length == 0) {
-                                    documentDirectory.delete();
-                                }
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
                             }
                         }
                     }
                     else {
                         messagesList.add("Ошибка синхронизации файловой системы с базой данных");
-                        if (documentDirectory.listFiles().length == 0) {
+                        if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
                             documentDirectory.delete();
                         }
                     }
@@ -454,7 +452,7 @@ public class DocumentUploadService {
                     DocumentVersion integrityController = documentVersionRepository.findByEditorAndDocumentAndEditionDate(editor_id,
                             document.getId(), sqlDateTime);
                     if (integrityController != null) {
-                        try { Thread.sleep(3000); } catch (InterruptedException interruptedException) { }
+                        try { Thread.sleep(3000); } catch (InterruptedException ignored) { }
                         currentDate = getCurrentDate(true);
                         sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
                     }
@@ -584,17 +582,16 @@ public class DocumentUploadService {
                             DocumentVersion documentVersion = new DocumentVersion(creator_id, uploadingDocumentId,
                                     sqlDateTime, "Загрузка документа на сайт", versionPath);
                             documentVersionService.save(documentVersion);
-                            messagesList.clear();
                             messagesList.add(document.getName() + "," + document.getCreator());
                         } else {
                             messagesList.add("Непредвиденная ошибка загрузки файла");
-                            if (documentDirectory.listFiles().length == 0) {
+                            if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
                                 documentDirectory.delete();
                             }
                         }
                     } else {
                         messagesList.add("Ошибка синхронизации файловой системы с базой данных");
-                        if (documentDirectory.listFiles().length == 0) {
+                        if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
                             documentDirectory.delete();
                         }
                     }
@@ -642,6 +639,7 @@ public class DocumentUploadService {
         if (documentForm.getFile() == null) {
             messagesList.add("Ошибка загрузки файла. Такого файла не существует");
         }
+        assert documentForm.getFile() != null;
         String fileExtension = getFileExtension(documentForm.getFile());
         if (fileExtension.length() == 0 || !fileExtension.equals("docx")) {
             messagesList.add("Попытка загрузить документ с некорректным разрешением");
@@ -752,10 +750,8 @@ public class DocumentUploadService {
                                 messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
                             } else {
                                 messagesList.add("Непредвиденная ошибка загрузки файла");
-                                if (documentDirectory != null) {
-                                    if (documentDirectory.listFiles().length == 0) {
-                                        documentDirectory.delete();
-                                    }
+                                if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
+                                    documentDirectory.delete();
                                 }
                             }
                         // Если отчет уже был загружен в прошлый раз, добавим его новую версию
@@ -1285,360 +1281,347 @@ public class DocumentUploadService {
                 return messagesList;
             }
             // Сохраним файл на сервере, создав необходимую директорию
-            if (messagesList.size() == 0) {
-                String currentDate = getCurrentDate();
-                String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
-                String versionPath = documentDirectory.getPath() + File.separator +
-                        "version_" + currentDate + "." + fileExtension;
-                String tempVersionPath = documentDirectory.getPath() + File.separator +
-                        "temp_version_" + currentDate + "." + fileExtension;
-                Path uploadingFilePath = Paths.get(tempVersionPath);
-                File lastTaskVersionFile = null;
-                try {
-                    Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
-                    // Если тип отчтёта - НИР
-                    if (reportType == 1) {
-                        // Найдем последнюю версию задания, необходимую для загрузки отчёта
-                        Document task;
-                        List<DocumentVersion> taskVersions;
-                        try {
-                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
-                            taskVersions = documentVersionRepository.findByDocument(task.getId());
-                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
-                            for (DocumentVersion taskVersion: taskVersions) {
-                                if (taskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
-                                    approvedTaskVersions.add(taskVersion);
-                                }
-                            }
-                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
-                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
-                        } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
-                        }
-                        if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
-                            messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
-                            return messagesList;
-                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
-                        } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
-                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
-                                AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
-                                if (associatedStudent != null) {
-                                    // Далее создадим запись о новой версии отчёта в таблице версий
-                                    int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
-                                    DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
-                                            sqlDateTime, "Загрузка версии отчёта по " +
-                                            documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
-                                    documentVersionService.save(documentVersion);
-                                    messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
-                                    NirReport nirReport;
-                                    if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
-                                        nirReport = new NirReport(
-                                                documentVersion.getId(),
-                                                documentForm.getDetailedContent(),
-                                                documentForm.getAdvisorConclusion(),
-                                                1
-                                        );
-                                    } else {
-                                        nirReport = new NirReport(documentVersion.getId(), 1);
-                                    }
-                                    nirReportRepository.save(nirReport);
-                                    File uploadedTempReportVersion = new File(tempVersionPath);
-                                    File finalReportVersion = new File(versionPath);
-                                    if (documentForm.isNowMerge()) {
-                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                        documentProcessorService.reportProcessing(finalReportVersion,
-                                                nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
-                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                        destination.save(finalReportVersion.getPath());
-                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
-                                    } else {
-                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
-                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
-                                        }
-                                    }
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
-                                } else {
-                                    messagesList.add("Разрешено загружать версии отчетов только своим студентам");
-                                }
-                            } else {
-                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
-                                if (documentDirectory != null) {
-                                    if (documentDirectory.listFiles().length == 0) {
-                                        documentDirectory.delete();
-                                    }
-                                }
-                            }
-                        } else {
-                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
-                            if (documentDirectory.listFiles().length == 0) {
-                                documentDirectory.delete();
+            String currentDate = getCurrentDate();
+            String sqlDateTime = convertRussianDateToSqlDateTime(currentDate);
+            String versionPath = documentDirectory.getPath() + File.separator +
+                    "version_" + currentDate + "." + fileExtension;
+            String tempVersionPath = documentDirectory.getPath() + File.separator +
+                    "temp_version_" + currentDate + "." + fileExtension;
+            Path uploadingFilePath = Paths.get(tempVersionPath);
+            File lastTaskVersionFile = null;
+            try {
+                Integer reportType = documentProcessorService.determineType(documentForm.getDocumentFormType());
+                // Если тип отчтёта - НИР
+                if (reportType == 1) {
+                    // Найдем последнюю версию задания, необходимую для загрузки отчёта
+                    Document task;
+                    List<DocumentVersion> taskVersions;
+                    try {
+                        task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
+                        taskVersions = documentVersionRepository.findByDocument(task.getId());
+                        List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                        for (DocumentVersion taskVersion: taskVersions) {
+                            if (taskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                approvedTaskVersions.add(taskVersion);
                             }
                         }
+                        DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                        lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                    } catch (NoSuchElementException noSuchElementException) {
+                        messagesList.add("Не найдено одобренное задание");
+                    } catch (Exception e) {
+                        messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
                     }
-                    // Если тип отчёта - Знания и умения
-                    else if (reportType == 2) {
-                        Document task;
-                        List<DocumentVersion> taskVersions;
-                        try {
-                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
-                            taskVersions = documentVersionRepository.findByDocument(task.getId());
-                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
-                            for (DocumentVersion taskVersion: taskVersions) {
-                                if (taskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
-                                    approvedTaskVersions.add(taskVersion);
-                                }
-                            }
-                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
-                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
-                        } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
-                        }
-                        if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
-                            messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
-                            return messagesList;
-                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
-                        } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
-                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
-                                AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
-                                if (associatedStudent != null) {
-                                    // Далее создадим запись о новой версии отчёта в таблице версий
-                                    int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
-                                    DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
-                                            sqlDateTime, "Загрузка версии отчёта по " +
-                                            documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
-                                    documentVersionService.save(documentVersion);
-                                    messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
-                                    PpppuiopdReport ppppuiopdReport;
-                                    if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
-                                        ppppuiopdReport = new PpppuiopdReport(
-                                                documentVersion.getId(),
-                                                documentForm.getDetailedContent(),
-                                                documentForm.getAdvisorConclusion(),
-                                                1
-                                        );
-                                    } else {
-                                        ppppuiopdReport = new PpppuiopdReport(documentVersion.getId(), 1);
-                                    }
-                                    ppppuiopdReportRepository.save(ppppuiopdReport);
-                                    File uploadedTempReportVersion = new File(tempVersionPath);
-                                    File finalReportVersion = new File(versionPath);
-                                    if (documentForm.isNowMerge()) {
-                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                        documentProcessorService.reportProcessing(finalReportVersion,
-                                                ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
-                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                        destination.save(finalReportVersion.getPath());
-                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
-                                    } else {
-                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
-                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
-                                        }
-                                    }
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
-                                } else {
-                                    messagesList.add("Разрешено загружать версии отчетов только своим студентам");
-                                }
-                            } else {
-                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
-                                if (documentDirectory != null) {
-                                    if (documentDirectory.listFiles().length == 0) {
-                                        documentDirectory.delete();
-                                    }
-                                }
-                            }
-                        } else {
-                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
-                            if (documentDirectory.listFiles().length == 0) {
-                                documentDirectory.delete();
-                            }
-                        }
-                    }
-                    // Если тип отчёта - Преддиплом
-                    else if (reportType == 3) {
-                        Document task;
-                        List<DocumentVersion> taskVersions;
-                        try {
-                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
-                            taskVersions = documentVersionRepository.findByDocument(task.getId());
-                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
-                            for (DocumentVersion taskVersion: taskVersions) {
-                                if (taskVersion.getPdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
-                                    approvedTaskVersions.add(taskVersion);
-                                }
-                            }
-                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
-                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
-                        } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
-                        }
-                        if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
-                            messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
-                            return messagesList;
+                    if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
+                        messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
+                        return messagesList;
                         // Если отчет уже был загружен в прошлый раз, добавим его новую версию
-                        } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
-                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
-                                AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
-                                if (associatedStudent != null) {
-                                    // Далее создадим запись о новой версии отчёта в таблице версий
-                                    int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
-                                    DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
-                                            sqlDateTime, "Загрузка версии отчёта по " +
-                                            documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
-                                    documentVersionService.save(documentVersion);
-                                    messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
-                                    PdReport pdReport;
-                                    if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
-                                        pdReport = new PdReport(
-                                                documentVersion.getId(),
-                                                documentForm.getDetailedContent(),
-                                                documentForm.getAdvisorConclusion(),
-                                                1
-                                        );
-                                    } else {
-                                        pdReport = new PdReport(documentVersion.getId(), 1);
-                                    }
-                                    pdReportRepository.save(pdReport);
-                                    File uploadedTempReportVersion = new File(tempVersionPath);
-                                    File finalReportVersion = new File(versionPath);
-                                    if (documentForm.isNowMerge()) {
-                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                        documentProcessorService.reportProcessing(finalReportVersion,
-                                                pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
-                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                        destination.save(finalReportVersion.getPath());
-                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
-                                    } else {
-                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
-                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
-                                        }
-                                    }
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                    } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
+                        if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                            AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
+                            if (associatedStudent != null) {
+                                // Далее создадим запись о новой версии отчёта в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка версии отчёта по " +
+                                        documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
+                                documentVersionService.save(documentVersion);
+                                messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                NirReport nirReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    nirReport = new NirReport(
+                                            documentVersion.getId(),
+                                            documentForm.getDetailedContent(),
+                                            documentForm.getAdvisorConclusion(),
+                                            1
+                                    );
                                 } else {
-                                    messagesList.add("Разрешено загружать версии отчетов только своим студентам");
+                                    nirReport = new NirReport(documentVersion.getId(), 1);
                                 }
-                            } else {
-                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
-                                if (documentDirectory != null) {
-                                    if (documentDirectory.listFiles().length == 0) {
-                                        documentDirectory.delete();
+                                nirReportRepository.save(nirReport);
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            nirReport.getDetailedContent(), nirReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
                                     }
                                 }
+                                uploadedTempReportVersion.delete();
+                                messagesList.clear();
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                            } else {
+                                messagesList.add("Разрешено загружать версии отчетов только своим студентам");
                             }
                         } else {
-                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
-                            if (documentDirectory.listFiles().length == 0) {
-                                documentDirectory.delete();
-                            }
-                        }
-                    }
-                    // Если тип отчёта - ВКР
-                    else if (reportType == 4) {
-                        Document task;
-                        List<DocumentVersion> taskVersions;
-                        try {
-                            task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
-                            taskVersions = documentVersionRepository.findByDocument(task.getId());
-                            List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
-                            for (DocumentVersion taskVersion: taskVersions) {
-                                if (taskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Одобрено")) {
-                                    approvedTaskVersions.add(taskVersion);
-                                }
-                            }
-                            DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
-                            lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
-                        } catch (NoSuchElementException noSuchElementException) {
-                            messagesList.add("Не найдено одобренное задание");
-                        } catch (Exception e) {
-                            messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
-                        }
-                        if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
-                            messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
-                            return messagesList;
-                            // Если отчет уже был загружен в прошлый раз, добавим его новую версию
-                        } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
-                            if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
-                                AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
-                                if (associatedStudent != null) {
-                                    // Далее создадим запись о новой версии отчёта в таблице версий
-                                    int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
-                                    DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
-                                            sqlDateTime, "Загрузка версии отчёта по " +
-                                            documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
-                                    documentVersionService.save(documentVersion);
-                                    messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
-                                    VkrReport vkrReport;
-                                    if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
-                                        vkrReport = new VkrReport(
-                                                documentVersion.getId(),
-                                                1
-                                        );
-                                    } else {
-                                        vkrReport = new VkrReport(documentVersion.getId(), 1);
-                                    }
-                                    vkrReportRepository.save(vkrReport);
-                                    File uploadedTempReportVersion = new File(tempVersionPath);
-                                    File finalReportVersion = new File(versionPath);
-                                    if (documentForm.isNowMerge()) {
-                                        Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
-                                        com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
-                                        com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
-                                        destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
-                                        destination.save(finalReportVersion.getPath());
-                                        // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
-                                    } else {
-                                        try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
-                                            os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
-                                        }
-                                    }
-                                    uploadedTempReportVersion.delete();
-                                    messagesList.clear();
-                                    messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
-                                } else {
-                                    messagesList.add("Разрешено загружать версии отчетов только своим студентам");
-                                }
-                            } else {
-                                messagesList.add("Непредвиденная ошибка загрузки версии файла");
-                                if (documentDirectory != null) {
-                                    if (documentDirectory.listFiles().length == 0) {
-                                        documentDirectory.delete();
-                                    }
-                                }
-                            }
-                        } else {
-                            messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                            messagesList.add("Непредвиденная ошибка загрузки версии файла");
                             if (documentDirectory.listFiles().length == 0) {
                                 documentDirectory.delete();
                             }
                         }
                     } else {
-                        messagesList.add("Некорректный тип отчёта!");
+                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                        if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
+                            documentDirectory.delete();
+                        }
                     }
+                }
+                // Если тип отчёта - Знания и умения
+                else if (reportType == 2) {
+                    Document task;
+                    List<DocumentVersion> taskVersions;
+                    try {
+                        task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
+                        taskVersions = documentVersionRepository.findByDocument(task.getId());
+                        List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                        for (DocumentVersion taskVersion: taskVersions) {
+                            if (taskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                approvedTaskVersions.add(taskVersion);
+                            }
+                        }
+                        DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                        lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                    } catch (NoSuchElementException noSuchElementException) {
+                        messagesList.add("Не найдено одобренное задание");
+                    } catch (Exception e) {
+                        messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                    }
+                    if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
+                        messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
+                        return messagesList;
+                        // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                    } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
+                        if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                            AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
+                            if (associatedStudent != null) {
+                                // Далее создадим запись о новой версии отчёта в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка версии отчёта по " +
+                                        documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
+                                documentVersionService.save(documentVersion);
+                                messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                PpppuiopdReport ppppuiopdReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    ppppuiopdReport = new PpppuiopdReport(
+                                            documentVersion.getId(),
+                                            documentForm.getDetailedContent(),
+                                            documentForm.getAdvisorConclusion(),
+                                            1
+                                    );
+                                } else {
+                                    ppppuiopdReport = new PpppuiopdReport(documentVersion.getId(), 1);
+                                }
+                                ppppuiopdReportRepository.save(ppppuiopdReport);
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            ppppuiopdReport.getDetailedContent(), ppppuiopdReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
+                                uploadedTempReportVersion.delete();
+                                messagesList.clear();
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                            } else {
+                                messagesList.add("Разрешено загружать версии отчетов только своим студентам");
+                            }
+                        } else {
+                            messagesList.add("Непредвиденная ошибка загрузки версии файла");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
+                    } else {
+                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                        if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
+                            documentDirectory.delete();
+                        }
+                    }
+                }
+                // Если тип отчёта - Преддиплом
+                else if (reportType == 3) {
+                    Document task;
+                    List<DocumentVersion> taskVersions;
+                    try {
+                        task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
+                        taskVersions = documentVersionRepository.findByDocument(task.getId());
+                        List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                        for (DocumentVersion taskVersion: taskVersions) {
+                            if (taskVersion.getPdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                approvedTaskVersions.add(taskVersion);
+                            }
+                        }
+                        DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                        lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                    } catch (NoSuchElementException noSuchElementException) {
+                        messagesList.add("Не найдено одобренное задание");
+                    } catch (Exception e) {
+                        messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                    }
+                    if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
+                        messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
+                        return messagesList;
+                    // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                    } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
+                        if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                            AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
+                            if (associatedStudent != null) {
+                                // Далее создадим запись о новой версии отчёта в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка версии отчёта по " +
+                                        documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
+                                documentVersionService.save(documentVersion);
+                                messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                PdReport pdReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    pdReport = new PdReport(
+                                            documentVersion.getId(),
+                                            documentForm.getDetailedContent(),
+                                            documentForm.getAdvisorConclusion(),
+                                            1
+                                    );
+                                } else {
+                                    pdReport = new PdReport(documentVersion.getId(), 1);
+                                }
+                                pdReportRepository.save(pdReport);
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    documentProcessorService.reportProcessing(finalReportVersion,
+                                            pdReport.getDetailedContent(), pdReport.getAdvisorConclusion());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
+                                uploadedTempReportVersion.delete();
+                                messagesList.clear();
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                            } else {
+                                messagesList.add("Разрешено загружать версии отчетов только своим студентам");
+                            }
+                        } else {
+                            messagesList.add("Непредвиденная ошибка загрузки версии файла");
+                            if (documentDirectory.listFiles().length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
+                    } else {
+                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                        if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
+                            documentDirectory.delete();
+                        }
+                    }
+                }
+                // Если тип отчёта - ВКР
+                else if (reportType == 4) {
+                    Document task;
+                    List<DocumentVersion> taskVersions;
+                    try {
+                        task = documentRepository.findByTypeAndKindAndCreator(documentProcessorService.determineType(documentForm.getDocumentFormType()), 2, student.getId()).get(0);
+                        taskVersions = documentVersionRepository.findByDocument(task.getId());
+                        List<DocumentVersion> approvedTaskVersions = new ArrayList<>();
+                        for (DocumentVersion taskVersion: taskVersions) {
+                            if (taskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Одобрено")) {
+                                approvedTaskVersions.add(taskVersion);
+                            }
+                        }
+                        DocumentVersion lastTaskVersion = approvedTaskVersions.get(approvedTaskVersions.size() - 1);
+                        lastTaskVersionFile = new File(lastTaskVersion.getThis_version_document_path());
+                    } catch (NoSuchElementException noSuchElementException) {
+                        messagesList.add("Не найдено одобренное задание");
+                    } catch (Exception e) {
+                        messagesList.add("При поиске последней версии задания произошло что-то необъяснимое");
+                    }
+                    if (documentRepository.findByCreatorAndName(student.getId(), fileName) == null) {
+                        messagesList.add("Вы не можете загрузить версию отчёта студента пока он его не загрузит");
+                        return messagesList;
+                        // Если отчет уже был загружен в прошлый раз, добавим его новую версию
+                    } else if (documentRepository.findByCreatorAndName(student.getId(), fileName) != null) {
+                        if (multipartFileToFileWrite(documentForm.getFile(), uploadingFilePath)) {
+                            AssociatedStudents associatedStudent = associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, student.getId());
+                            if (associatedStudent != null) {
+                                // Далее создадим запись о новой версии отчёта в таблице версий
+                                int uploadingDocumentId = documentRepository.findByCreatorAndName(student.getId(), fileName).getId();
+                                DocumentVersion documentVersion = new DocumentVersion(advisorID, uploadingDocumentId,
+                                        sqlDateTime, "Загрузка версии отчёта по " +
+                                        documentForm.getDocumentFormType() + " на сайт научным руководителем", versionPath);
+                                documentVersionService.save(documentVersion);
+                                messagesList.add("Версия отчёта по " + documentForm.getDocumentFormType() + " была успешно загружена");
+                                VkrReport vkrReport;
+                                if (documentForm.getAdvisorConclusion() != null && documentForm.getDetailedContent() != null) {
+                                    vkrReport = new VkrReport(
+                                            documentVersion.getId(),
+                                            1
+                                    );
+                                } else {
+                                    vkrReport = new VkrReport(documentVersion.getId(), 1);
+                                }
+                                vkrReportRepository.save(vkrReport);
+                                File uploadedTempReportVersion = new File(tempVersionPath);
+                                File finalReportVersion = new File(versionPath);
+                                if (documentForm.isNowMerge()) {
+                                    Files.copy(lastTaskVersionFile.toPath(), finalReportVersion.toPath());
+                                    com.aspose.words.Document destination = new com.aspose.words.Document(finalReportVersion.getPath());
+                                    com.aspose.words.Document source = new com.aspose.words.Document(uploadedTempReportVersion.getPath());
+                                    destination.appendDocument(source, com.aspose.words.ImportFormatMode.KEEP_SOURCE_FORMATTING);
+                                    destination.save(finalReportVersion.getPath());
+                                    // documentProcessorService.makeUsWhole(finalReportVersion, uploadedTempReportVersion);
+                                } else {
+                                    try (OutputStream os = Files.newOutputStream(finalReportVersion.toPath())) {
+                                        os.write(FileUtils.readFileToByteArray(uploadedTempReportVersion));
+                                    }
+                                }
+                                uploadedTempReportVersion.delete();
+                                messagesList.clear();
+                                messagesList.add(documentVersion.getId() + "," + getRussianDateTime(documentVersion.getEditionDate()));
+                            } else {
+                                messagesList.add("Разрешено загружать версии отчетов только своим студентам");
+                            }
+                        } else {
+                            messagesList.add("Непредвиденная ошибка загрузки версии файла");
+                            if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
+                                documentDirectory.delete();
+                            }
+                        }
+                    } else {
+                        messagesList.add("Ошибка синхронизации файловой системы с базой данных");
+                        if (Objects.requireNonNull(documentDirectory.listFiles()).length == 0) {
+                            documentDirectory.delete();
+                        }
+                    }
+                } else {
+                    messagesList.add("Некорректный тип отчёта!");
+                }
 
-                }
-                catch (IOException ioException) {
-                    messagesList.add("IOException");
-                }
             }
-            else {
-                return messagesList;
+            catch (IOException ioException) {
+                messagesList.add("IOException");
             }
         }
         else {
@@ -1674,7 +1657,7 @@ public class DocumentUploadService {
     // Триггер на оставшиеся пустые папки при удалении документов
     public void uploadDocumentTrigger(File dir) {
         if (dir.exists() && dir.isDirectory()) {
-            if (dir.listFiles().length == 0) {
+            if (Objects.requireNonNull(dir.listFiles()).length == 0) {
                 dir.delete();
             }
         }
@@ -1805,34 +1788,21 @@ public class DocumentUploadService {
 
     // Необходимо конвертировать месяца в номера
     public String monthWordToMonthNumber(String monthWord) {
-        switch (monthWord) {
-            case "JANUARY":
-                return "01";
-            case "FEBRUARY":
-                return "02";
-            case "MARCH":
-                return "03";
-            case "APRIL":
-                return "04";
-            case "MAY":
-                return "05";
-            case "JUNE":
-                return "06";
-            case "JULY":
-                return "07";
-            case "AUGUST":
-                return "08";
-            case "SEPTEMBER":
-                return "09";
-            case "OCTOBER":
-                return "10";
-            case "NOVEMBER":
-                return "11";
-            case "DECEMBER":
-                return "12";
-            default:
-                return "00";
-        }
+        return switch (monthWord) {
+            case "JANUARY" -> "01";
+            case "FEBRUARY" -> "02";
+            case "MARCH" -> "03";
+            case "APRIL" -> "04";
+            case "MAY" -> "05";
+            case "JUNE" -> "06";
+            case "JULY" -> "07";
+            case "AUGUST" -> "08";
+            case "SEPTEMBER" -> "09";
+            case "OCTOBER" -> "10";
+            case "NOVEMBER" -> "11";
+            case "DECEMBER" -> "12";
+            default -> "00";
+        };
     }
 
     // Красиво отобразить дату загрузки новой версии документа
@@ -1841,8 +1811,7 @@ public class DocumentUploadService {
         String month = date.substring(5, 7);
         String day = date.substring(8, 10);
         String russianDate = day + "." + month + "." + year;
-        String russianDateTime = russianDate + date.substring(10);
-        return russianDateTime;
+        return russianDate + date.substring(10);
     }
 
     // Необходимо декодировать права просмотра

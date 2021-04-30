@@ -366,9 +366,7 @@ public class MessagesService {
         String[] deleteArray = dbMessage.getIsDelete().split(",");
         String[] receiversArray = dbMessage.getReceivers().split(",");
         if (userID.toString().equals(dbMessage.getSender())) { // Отправитель
-            if (deleteArray[0].equals("1")) {
-                return true;
-            }
+            return deleteArray[0].equals("1");
         } else if (isReceiver(userID, receiversArray)) { // Получатель
             for (int i = 0; i < receiversArray.length; i++) {
                 if (receiversArray[i].equals(userID.toString()) && deleteArray[i + 1].equals("1")) {
@@ -384,7 +382,7 @@ public class MessagesService {
         StringBuilder isDeleteString = new StringBuilder();
         for (int i = 0; i < isDeleteArray.length; i++) {
             if (i < isDeleteArray.length - 1) {
-                isDeleteString.append(isDeleteArray[i] + ",");
+                isDeleteString.append(isDeleteArray[i]).append(",");
             } else {
                 isDeleteString.append(isDeleteArray[i]);
             }
