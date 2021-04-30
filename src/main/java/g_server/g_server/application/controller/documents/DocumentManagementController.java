@@ -356,4 +356,12 @@ public class DocumentManagementController {
     ) {
         return documentManagementService.approveOrder(getTokenFromRequest(httpServletRequest), documentID);
     }
+
+    @PutMapping("/scientific_advisor/document/version/set/note")
+    public String advisorSetNote(
+            HttpServletRequest httpServletRequest,
+            @RequestParam Integer versionID,
+            @RequestParam String note) {
+        return documentManagementService.setAdvisorNote(getTokenFromRequest(httpServletRequest), versionID, note);
+    }
 }

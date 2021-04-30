@@ -4,6 +4,7 @@ import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.users.AssociatedStudents;
+import g_server.g_server.application.entity.users.UsersRoles;
 import g_server.g_server.application.query.response.StudentDocumentsStatusView;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;
@@ -191,11 +192,11 @@ public class DocumentManagementService {
             messagesList.add("");
         Integer creator_id = null;
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - удаление документа невозможно");
         if (messagesList.size() == 0) {
-            Document document = getDocumentRepository().findByCreatorAndName(creator_id, documentName);
+            Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
             // Если директория удаляемого документа существует, удалим его версии и саму директорию
             if (document != null) {
                 File fileDirectory = new File(document.getDocumentPath());
@@ -204,7 +205,7 @@ public class DocumentManagementService {
                         file.delete();
                     }
                     fileDirectory.delete();
-                    getDocumentRepository().deleteById(document.getId());
+                    documentRepository.deleteById(document.getId());
                     messagesList.add("Документ удален успешно вместе со всеми версиями");
                 }
                 else {
@@ -227,13 +228,13 @@ public class DocumentManagementService {
         if (token.equals("Ошибка аутентификации: токен пуст"))
             messagesList.add("");
         Integer creator_id = null;
-        Integer kind = getDocumentProcessorService().determineKind(documentKind);
+        Integer kind = documentProcessorService.determineKind(documentKind);
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - удаление документа невозможно");
         if (messagesList.size() == 0) {
-            Document document = getDocumentRepository().findByTypeAndKindAndCreator(4, kind, creator_id).get(0);
+            Document document = documentRepository.findByTypeAndKindAndCreator(4, kind, creator_id).get(0);
             // Если директория удаляемого документа существует, удалим его версии и саму директорию
             if (document != null) {
                 File fileDirectory = new File(document.getDocumentPath());
@@ -242,7 +243,7 @@ public class DocumentManagementService {
                         file.delete();
                     }
                     fileDirectory.delete();
-                    getDocumentRepository().deleteById(document.getId());
+                    documentRepository.deleteById(document.getId());
                     messagesList.add("Документ удален успешно вместе со всеми версиями");
                 }
                 else {
@@ -267,16 +268,16 @@ public class DocumentManagementService {
             messagesList.add("");
         Integer creator_id = null;
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - удаление версии документа невозможно");
         if (messagesList.size() == 0) {
-            Document document = getDocumentRepository().findByCreatorAndName(creator_id, documentName);
+            Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
             // Если директория удаляемого документа существует, удалим его версию и саму директорию
             if (document != null) {
                 File fileDirectory = new File(document.getDocumentPath());
                 if (fileDirectory.exists()) {
-                    List<DocumentVersion> documentVersions = getDocumentVersionRepository().findByDocument(document.getId());
+                    List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(document.getId());
                     if (documentVersions.size() != 0) {
                         if (documentVersions.size() == 1) {
                             if (collateDateTimes(documentVersions.get(0).getEditionDate(), editionDateTime)) {
@@ -286,7 +287,7 @@ public class DocumentManagementService {
                                 if (fileDirectory.listFiles().length == 0) {
                                     fileDirectory.delete();
                                 }
-                                getDocumentRepository().deleteById(document.getId());
+                                documentRepository.deleteById(document.getId());
                                 messagesList.add("Документ был успешно удален вместе с последней его версией");
                             }
                             else {
@@ -298,7 +299,7 @@ public class DocumentManagementService {
                                 if (collateDateTimes(documentVersion.getEditionDate(), editionDateTime)) {
                                     File fileVersion = new File(documentVersion.getThis_version_document_path());
                                     fileVersion.delete();
-                                    getDocumentVersionRepository().delete(documentVersion);
+                                    documentVersionRepository.delete(documentVersion);
                                     messagesList.add("Версия документа удалена успешно");
                                     break;
                                 }
@@ -333,13 +334,13 @@ public class DocumentManagementService {
             messagesList.add("");
         Integer creator_id = null;
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - переименование документа невозможно");
-        if (!getDocumentDownloadService().getFileExtension(newDocumentName).equals(getDocumentDownloadService().getFileExtension(oldDocumentName)))
+        if (!documentDownloadService.getFileExtension(newDocumentName).equals(documentDownloadService.getFileExtension(oldDocumentName)))
             messagesList.add("Запрещено изменять расширение переименовываемого документа");
         if (messagesList.size() == 0) {
-            Document document = getDocumentRepository().findByCreatorAndName(creator_id, oldDocumentName);
+            Document document = documentRepository.findByCreatorAndName(creator_id, oldDocumentName);
             // Если переименовываемый документ существует в базе данных, то переименуем его
             if (document != null) {
                 File documentDirectory = new File(document.getDocumentPath());
@@ -350,14 +351,14 @@ public class DocumentManagementService {
                     documentDirectory.renameTo(newDocumentDirectoryName);
                     document.setDocumentPath(newDocumentPath);
                     document.setName(newDocumentName);
-                    getDocumentService().save(document);
+                    documentService.save(document);
                     // Подкорректируем пути к версиям документа
-                    List<DocumentVersion> versions = getDocumentVersionRepository().findByDocument(document.getId());
+                    List<DocumentVersion> versions = documentVersionRepository.findByDocument(document.getId());
                     for (DocumentVersion version : versions) {
                         version.setThis_version_document_path(version.getThis_version_document_path().replace(
                                 oldDocumentName, newDocumentName));
                     }
-                    getDocumentVersionRepository().saveAll(versions);
+                    documentVersionRepository.saveAll(versions);
                     messagesList.add("Документ переименован успешно");
                 }
                 else {
@@ -373,7 +374,7 @@ public class DocumentManagementService {
 
     // Необходимо корректно сопоставить дату и время из бд с полученными от пользователя
     public boolean collateDateTimes(String fromDB, String fromRequest) {
-        fromRequest = getDocumentUploadService().convertRussianDateToSqlDateTime(fromRequest);
+        fromRequest = documentUploadService.convertRussianDateToSqlDateTime(fromRequest);
         return fromDB.equals(fromRequest);
     }
 
@@ -386,14 +387,14 @@ public class DocumentManagementService {
             messagesList.add("");
         Integer creator_id = null;
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение описания документа невозможно");
         if (messagesList.size() == 0) {
-            Document document = getDocumentRepository().findByCreatorAndName(creator_id, documentName);
+            Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
             if (document != null) {
                 document.setDescription(newDescription);
-                getDocumentService().save(document);
+                documentService.save(document);
                 messagesList.add("Описание документа успешно изменено");
             }
             else {
@@ -412,15 +413,15 @@ public class DocumentManagementService {
             messagesList.add("");
         Integer creator_id = null;
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение типа документа невозможно");
         if (messagesList.size() == 0) {
-            if (getDocumentTypeRepository().getDocumentTypeByType(newType) != null) {
-                Document document = getDocumentRepository().findByCreatorAndName(creator_id, documentName);
+            if (documentTypeRepository.getDocumentTypeByType(newType) != null) {
+                Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
                 if (document != null) {
-                    document.setType(getDocumentTypeRepository().getDocumentTypeByType(newType).getId());
-                    getDocumentService().save(document);
+                    document.setType(documentTypeRepository.getDocumentTypeByType(newType).getId());
+                    documentService.save(document);
                     messagesList.add("Тип документа успешно изменен");
                 }
                 else {
@@ -443,16 +444,16 @@ public class DocumentManagementService {
             messagesList.add("");
         Integer creator_id = null;
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение вида документа невозможно");
         if (messagesList.size() == 0) {
-            if (getDocumentKindRepository().getDocumentKindByKind(newKind) != null) {
-                Document document = getDocumentRepository().findByCreatorAndName(creator_id, documentName);
+            if (documentKindRepository.getDocumentKindByKind(newKind) != null) {
+                Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
 
                 if (document != null) {
-                    document.setKind(getDocumentKindRepository().getDocumentKindByKind(newKind).getId());
-                    getDocumentService().save(document);
+                    document.setKind(documentKindRepository.getDocumentKindByKind(newKind).getId());
+                    documentService.save(document);
                     messagesList.add("Вид документа успешно изменен");
                 }
                 else {
@@ -476,87 +477,87 @@ public class DocumentManagementService {
             messagesList.add("");
         Integer creator_id = null;
         if (messagesList.size() == 0)
-            creator_id = getDocumentUploadService().getCreatorId(token);
+            creator_id = documentUploadService.getCreatorId(token);
         if (creator_id == null)
             messagesList.add("Пользователь, загрузивший документ, не найден - изменение зоны видимости документа невозможно");
         if (messagesList.size() == 0) {
-            Integer newViewRights = getDocumentUploadService().getViewRights(newViewRightsString);
+            Integer newViewRights = documentUploadService.getViewRights(newViewRightsString);
             if (newViewRights!= null) {
-                Document document = getDocumentRepository().findByCreatorAndName(creator_id, documentName);
+                Document document = documentRepository.findByCreatorAndName(creator_id, documentName);
                 if (document != null) {
                     // Если новая видимость - программа проектов
                     if (newViewRights == 6 && projectAreaName != null && projectName == null) {
-                        ViewRightsProject oldViewRightsProject = getViewRightsProjectRepository().findByDocument(document.getId());
-                        ViewRightsArea oldViewRightsArea = getViewRightsAreaRepository().findByDocument(document.getId());
+                        ViewRightsProject oldViewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                        ViewRightsArea oldViewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
                         // Удалим старую ассоциацию с проектом или программой проектов, если она есть
                         if (oldViewRightsArea != null) {
-                            getViewRightsAreaRepository().delete(oldViewRightsArea);
+                            viewRightsAreaRepository.delete(oldViewRightsArea);
                             messagesList.add("Удалены предыдущие права доступа для программы проектов");
                         }
                         if (oldViewRightsProject != null) {
-                            getViewRightsProjectRepository().delete(oldViewRightsProject);
+                            viewRightsProjectRepository.delete(oldViewRightsProject);
                             messagesList.add("Удалены предыдущие права доступа для проекта");
                         }
                         // Найдем новую программу проектов
-                        ProjectArea projectArea = getProjectAreaRepository().findByAreaAndAdvisor(projectAreaName, creator_id);
+                        ProjectArea projectArea = projectAreaRepository.findByAreaAndAdvisor(projectAreaName, creator_id);
                         if (projectArea != null) {
                             ViewRightsArea newViewRightsArea = new ViewRightsArea();
                             newViewRightsArea.setDocument(document.getId());
                             newViewRightsArea.setArea(projectArea.getId());
-                            getViewRightsAreaRepository().save(newViewRightsArea);
+                            viewRightsAreaRepository.save(newViewRightsArea);
                             document.setViewRightsInteger(6);
-                            getDocumentService().save(document);
+                            documentService.save(document);
                             messagesList.add("Права доступа успешно изменены");
                         } else {
                             document.setViewRightsInteger(3);
-                            getDocumentService().save(document);
+                            documentService.save(document);
                             messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
                     }
                     // Если новая видимость - проект
                     else if (newViewRights == 8 && projectAreaName == null && projectName != null) {
-                        ViewRightsProject oldViewRightsProject = getViewRightsProjectRepository().findByDocument(document.getId());
-                        ViewRightsArea oldViewRightsArea = getViewRightsAreaRepository().findByDocument(document.getId());
+                        ViewRightsProject oldViewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                        ViewRightsArea oldViewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
                         // Удалим старую ассоциацию с проектом или программой проектов, если она есть
                         if (oldViewRightsArea != null) {
-                            getViewRightsAreaRepository().delete(oldViewRightsArea);
+                            viewRightsAreaRepository.delete(oldViewRightsArea);
                             messagesList.add("Удалены предыдущие права доступа для программы проектов");
                         }
                         if (oldViewRightsProject != null) {
-                            getViewRightsProjectRepository().delete(oldViewRightsProject);
+                            viewRightsProjectRepository.delete(oldViewRightsProject);
                             messagesList.add("Удалены предыдущие права доступа для проекта");
                         }
                         // Найдем новый проект
-                        Project project = getProjectRepository().findByScientificAdvisorIDAndName(creator_id, projectName);
+                        Project project = projectRepository.findByScientificAdvisorIDAndName(creator_id, projectName);
                         if (project != null) {
                             ViewRightsProject newViewRightsProject = new ViewRightsProject();
                             newViewRightsProject.setDocument(document.getId());
                             newViewRightsProject.setProject(project.getId());
-                            getViewRightsProjectRepository().save(newViewRightsProject);
+                            viewRightsProjectRepository.save(newViewRightsProject);
                             document.setViewRightsInteger(8);
-                            getDocumentService().save(document);
+                            documentService.save(document);
                             messagesList.add("Права доступа успешно изменены");
                         } else {
                             document.setViewRightsInteger(3);
-                            getDocumentService().save(document);
+                            documentService.save(document);
                             messagesList.add("Произошла ошибка смены прав доступа: установлена видимость только создателю");
                         }
                     }
                     // Изменение зоны видимости без затрагивания проекта или программы проектов
                     else {
-                        ViewRightsProject oldViewRightsProject = getViewRightsProjectRepository().findByDocument(document.getId());
-                        ViewRightsArea oldViewRightsArea = getViewRightsAreaRepository().findByDocument(document.getId());
+                        ViewRightsProject oldViewRightsProject = viewRightsProjectRepository.findByDocument(document.getId());
+                        ViewRightsArea oldViewRightsArea = viewRightsAreaRepository.findByDocument(document.getId());
                         // Удалим старую ассоциацию с проектом или программой проектов, если она есть
                         if (oldViewRightsArea != null) {
-                            getViewRightsAreaRepository().delete(oldViewRightsArea);
+                            viewRightsAreaRepository.delete(oldViewRightsArea);
                             messagesList.add("Удалены предыдущие права доступа для программы проектов");
                         }
                         if (oldViewRightsProject != null) {
-                            getViewRightsProjectRepository().delete(oldViewRightsProject);
+                            viewRightsProjectRepository.delete(oldViewRightsProject);
                             messagesList.add("Удалены предыдущие права доступа для проекта");
                         }
                         document.setViewRightsInteger(newViewRights);
-                        getDocumentService().save(document);
+                        documentService.save(document);
                         messagesList.add("Зона видимости документа успешно изменена");
                     }
                 }
@@ -574,33 +575,33 @@ public class DocumentManagementService {
     // Студент отправляет версию задания научному руководителю
     public String studentSendingTask(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Рассматривается")) {
-            Integer studentID = getDocumentUploadService().getCreatorId(token);
+            Integer studentID = documentUploadService.getCreatorId(token);
             if (studentID != null && versionID != null) {
                 DocumentVersion documentVersion;
                 try {
-                    documentVersion = getDocumentVersionRepository().findById(versionID).get();
+                    documentVersion = documentVersionRepository.findById(versionID).get();
                 } catch (NoSuchElementException noSuchElementException) {
                     documentVersion = null;
                 }
                 if (documentVersion != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
                             documentVersion.getNirTask().setStatus(4);
-                            getNirTaskRepository().save(documentVersion.getNirTask());
+                            nirTaskRepository.save(documentVersion.getNirTask());
                             break;
                         case 2:
                             documentVersion.getPpppuiopdTask().setStatus(4);
-                            getPpppuiopdTaskRepository().save(documentVersion.getPpppuiopdTask());
+                            ppppuiopdTaskRepository.save(documentVersion.getPpppuiopdTask());
                             break;
                         case 3:
                             documentVersion.getPdTask().setStatus(4);
-                            getPdTaskRepository().save(documentVersion.getPdTask());
+                            pdTaskRepository.save(documentVersion.getPdTask());
                             break;
                         case 4:
                             documentVersion.getVkrTask().setVkr_status(4);
-                            getVkrTaskRepository().save(documentVersion.getVkrTask());
+                            vkrTaskRepository.save(documentVersion.getVkrTask());
                             break;
                         default:
                             return "Некорректно указан этап";
@@ -621,33 +622,33 @@ public class DocumentManagementService {
     // Студент отправляет версию остальных документов по вкр научному руководителю
     public String studentSendingVkrStuff(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Рассматривается")) {
-            Integer studentID = getDocumentUploadService().getCreatorId(token);
+            Integer studentID = documentUploadService.getCreatorId(token);
             if (studentID != null && versionID != null) {
                 DocumentVersion documentVersion;
                 try {
-                    documentVersion = getDocumentVersionRepository().findById(versionID).get();
+                    documentVersion = documentVersionRepository.findById(versionID).get();
                 } catch (NoSuchElementException noSuchElementException) {
                     documentVersion = null;
                 }
                 if (documentVersion != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int kind = document.getKind();
                     switch (kind) {
                         case 6:
                             documentVersion.getVkrAllowance().setAllowanceStatus(4);
-                            getVkrAllowanceRepository().save(documentVersion.getVkrAllowance());
+                            vkrAllowanceRepository.save(documentVersion.getVkrAllowance());
                             break;
                         case 7:
                             documentVersion.getAdvisorConclusion().setConclusionStatus(4);
-                            getVkrConclusionRepository().save(documentVersion.getAdvisorConclusion());
+                            vkrConclusionRepository.save(documentVersion.getAdvisorConclusion());
                             break;
                         case 8:
                             documentVersion.getVkrAntiplagiat().setAntiplagiatStatus(4);
-                            getVkrAntiplagiatRepository().save(documentVersion.getVkrAntiplagiat());
+                            vkrAntiplagiatRepository.save(documentVersion.getVkrAntiplagiat());
                             break;
                         case 9:
                             documentVersion.getVkrPresentation().setPresentationStatus(4);
-                            getVkrPresentationRepository().save(documentVersion.getVkrPresentation());
+                            vkrPresentationRepository.save(documentVersion.getVkrPresentation());
                             break;
                         default:
                             return "Некорректно указан этап";
@@ -667,37 +668,37 @@ public class DocumentManagementService {
     // Научный руководитель одобряет или замечает задание
     public String advisorCheckTask(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Одобрено") || newStatus.equals("Замечания")) {
-            Integer advisorID = getDocumentUploadService().getCreatorId(token);
+            Integer advisorID = documentUploadService.getCreatorId(token);
             if (advisorID != null && versionID != null) {
                 DocumentVersion documentVersion;
                 try {
-                    documentVersion = getDocumentVersionRepository().findById(versionID).get();
+                    documentVersion = documentVersionRepository.findById(versionID).get();
                 } catch (NoSuchElementException noSuchElementException) {
                     documentVersion = null;
                 }
                 if (documentVersion != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getNirTask().setStatus(2);
-                                getNirTaskRepository().save(documentVersion.getNirTask());
+                                nirTaskRepository.save(documentVersion.getNirTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getNirTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getNirTask().setStatus(3);
-                                getNirTaskRepository().save(documentVersion.getNirTask());
+                                nirTaskRepository.save(documentVersion.getNirTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getNirTask().setStatus(2);
-                                    getNirTaskRepository().save(documentVersion.getNirTask());
+                                    nirTaskRepository.save(documentVersion.getNirTask());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getNirTask().setStatus(3);
-                                    getNirTaskRepository().save(documentVersion.getNirTask());
+                                    nirTaskRepository.save(documentVersion.getNirTask());
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
@@ -705,21 +706,21 @@ public class DocumentManagementService {
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getPpppuiopdTask().setStatus(2);
-                                getPpppuiopdTaskRepository().save(documentVersion.getPpppuiopdTask());
+                                ppppuiopdTaskRepository.save(documentVersion.getPpppuiopdTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getPpppuiopdTask().setStatus(3);
-                                getPpppuiopdTaskRepository().save(documentVersion.getPpppuiopdTask());
+                                ppppuiopdTaskRepository.save(documentVersion.getPpppuiopdTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getPpppuiopdTask().setStatus(2);
-                                    getPpppuiopdTaskRepository().save(documentVersion.getPpppuiopdTask());
+                                    ppppuiopdTaskRepository.save(documentVersion.getPpppuiopdTask());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getPpppuiopdTask().setStatus(3);
-                                    getPpppuiopdTaskRepository().save(documentVersion.getPpppuiopdTask());
+                                    ppppuiopdTaskRepository.save(documentVersion.getPpppuiopdTask());
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
@@ -727,21 +728,21 @@ public class DocumentManagementService {
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getPdTask().setStatus(2);
-                                getPdTaskRepository().save(documentVersion.getPdTask());
+                                pdTaskRepository.save(documentVersion.getPdTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getPdTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getPdTask().setStatus(3);
-                                getPdTaskRepository().save(documentVersion.getPdTask());
+                                pdTaskRepository.save(documentVersion.getPdTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getPdTask().setStatus(2);
-                                    getPdTaskRepository().save(documentVersion.getPdTask());
+                                    pdTaskRepository.save(documentVersion.getPdTask());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getPdTask().setStatus(3);
-                                    getPdTaskRepository().save(documentVersion.getPdTask());
+                                    pdTaskRepository.save(documentVersion.getPdTask());
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
@@ -749,21 +750,21 @@ public class DocumentManagementService {
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrTask().setVkr_status(2);
-                                getVkrTaskRepository().save(documentVersion.getVkrTask());
+                                vkrTaskRepository.save(documentVersion.getVkrTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getVkrTask().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrTask().setVkr_status(3);
-                                getVkrTaskRepository().save(documentVersion.getVkrTask());
+                                vkrTaskRepository.save(documentVersion.getVkrTask());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getVkrTask().setVkr_status(2);
-                                    getVkrTaskRepository().save(documentVersion.getVkrTask());
+                                    vkrTaskRepository.save(documentVersion.getVkrTask());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getVkrTask().setVkr_status(3);
-                                    getVkrTaskRepository().save(documentVersion.getVkrTask());
+                                    vkrTaskRepository.save(documentVersion.getVkrTask());
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
@@ -785,37 +786,37 @@ public class DocumentManagementService {
     // Научный руководитель одобряет или замечает один из документов по ВКР
     public String advisorCheckVkrStuff(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Одобрено") || newStatus.equals("Замечания")) {
-            Integer advisorID = getDocumentUploadService().getCreatorId(token);
+            Integer advisorID = documentUploadService.getCreatorId(token);
             if (advisorID != null && versionID != null) {
                 DocumentVersion documentVersion;
                 try {
-                    documentVersion = getDocumentVersionRepository().findById(versionID).get();
+                    documentVersion = documentVersionRepository.findById(versionID).get();
                 } catch (NoSuchElementException noSuchElementException) {
                     documentVersion = null;
                 }
                 if (documentVersion != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int kind = document.getKind();
                     switch (kind) {
                         case 6:
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrAllowance().setAllowanceStatus(2);
-                                getVkrAllowanceRepository().save(documentVersion.getVkrAllowance());
+                                vkrAllowanceRepository.save(documentVersion.getVkrAllowance());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrAllowance().setAllowanceStatus(3);
-                                getVkrAllowanceRepository().save(documentVersion.getVkrAllowance());
+                                vkrAllowanceRepository.save(documentVersion.getVkrAllowance());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getVkrAllowance().setAllowanceStatus(2);
-                                    getVkrAllowanceRepository().save(documentVersion.getVkrAllowance());
+                                    vkrAllowanceRepository.save(documentVersion.getVkrAllowance());
                                     return "Вы отправили студенту свою версию допуска с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getVkrAllowance().setAllowanceStatus(3);
-                                    getVkrAllowanceRepository().save(documentVersion.getVkrAllowance());
+                                    vkrAllowanceRepository.save(documentVersion.getVkrAllowance());
                                     return "Вы отправили студенту свою версию допуска с статусом замечания";
                                 }
                             }
@@ -823,21 +824,21 @@ public class DocumentManagementService {
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getAdvisorConclusion().setConclusionStatus(2);
-                                getVkrConclusionRepository().save(documentVersion.getAdvisorConclusion());
+                                vkrConclusionRepository.save(documentVersion.getAdvisorConclusion());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getAdvisorConclusion().setConclusionStatus(3);
-                                getVkrConclusionRepository().save(documentVersion.getAdvisorConclusion());
+                                vkrConclusionRepository.save(documentVersion.getAdvisorConclusion());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getAdvisorConclusion().setConclusionStatus(2);
-                                    getVkrConclusionRepository().save(documentVersion.getAdvisorConclusion());
+                                    vkrConclusionRepository.save(documentVersion.getAdvisorConclusion());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getAdvisorConclusion().setConclusionStatus(3);
-                                    getVkrConclusionRepository().save(documentVersion.getAdvisorConclusion());
+                                    vkrConclusionRepository.save(documentVersion.getAdvisorConclusion());
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
@@ -845,21 +846,21 @@ public class DocumentManagementService {
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrAntiplagiat().setAntiplagiatStatus(2);
-                                getVkrAntiplagiatRepository().save(documentVersion.getVkrAntiplagiat());
+                                vkrAntiplagiatRepository.save(documentVersion.getVkrAntiplagiat());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrAntiplagiat().setAntiplagiatStatus(3);
-                                getVkrAntiplagiatRepository().save(documentVersion.getVkrAntiplagiat());
+                                vkrAntiplagiatRepository.save(documentVersion.getVkrAntiplagiat());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getVkrAntiplagiat().setAntiplagiatStatus(2);
-                                    getVkrAntiplagiatRepository().save(documentVersion.getVkrAntiplagiat());
+                                    vkrAntiplagiatRepository.save(documentVersion.getVkrAntiplagiat());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getVkrAntiplagiat().setAntiplagiatStatus(3);
-                                    getVkrAntiplagiatRepository().save(documentVersion.getVkrAntiplagiat());
+                                    vkrAntiplagiatRepository.save(documentVersion.getVkrAntiplagiat());
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
@@ -867,21 +868,21 @@ public class DocumentManagementService {
                             if (newStatus.equals("Одобрено") &&
                                     documentVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrPresentation().setPresentationStatus(2);
-                                getVkrPresentationRepository().save(documentVersion.getVkrPresentation());
+                                vkrPresentationRepository.save(documentVersion.getVkrPresentation());
                                 return "Версия документа успешно прорецензирована";
                             } else if (newStatus.equals("Замечания") &&
                                     documentVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrPresentation().setPresentationStatus(3);
-                                getVkrPresentationRepository().save(documentVersion.getVkrPresentation());
+                                vkrPresentationRepository.save(documentVersion.getVkrPresentation());
                                 return "Версия документа успешно прорецензирована";
                             } else if (documentVersion.getEditor() == advisorID) {
                                 if (newStatus.equals("Одобрено")) {
                                     documentVersion.getVkrPresentation().setPresentationStatus(2);
-                                    getVkrPresentationRepository().save(documentVersion.getVkrPresentation());
+                                    vkrPresentationRepository.save(documentVersion.getVkrPresentation());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
-                                } else if (newStatus.equals("Замечания")) {
+                                } else {
                                     documentVersion.getVkrPresentation().setPresentationStatus(3);
-                                    getVkrPresentationRepository().save(documentVersion.getVkrPresentation());
+                                    vkrPresentationRepository.save(documentVersion.getVkrPresentation());
                                     return "Вы отправили студенту свою версию задания с статусом замечания";
                                 }
                             }
@@ -902,20 +903,20 @@ public class DocumentManagementService {
 
     // Студент удаляет версию задания
     public String studentDeleteTaskVersion(String token, Integer versionID) {
-        Integer studentID = getDocumentUploadService().getCreatorId(token);
+        Integer studentID = documentUploadService.getCreatorId(token);
         DocumentVersion documentVersion;
         try {
-            documentVersion = getDocumentVersionRepository().findById(versionID).get();
+            documentVersion = documentVersionRepository.findById(versionID).get();
             if (studentID != null) {
                 if (documentVersion.getEditor() == studentID) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
                             if (!isLastChecked(documentVersion, "nirTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -924,7 +925,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "ppppuiopdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -933,7 +934,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "pdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -942,7 +943,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "vkrTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -963,15 +964,15 @@ public class DocumentManagementService {
 
     // Научный руководитель удаляет версию задания
     public String advisorDeleteTaskVersion(String token, Integer versionID, Integer studentID) {
-        Integer advisorID = getDocumentUploadService().getCreatorId(token);
+        Integer advisorID = documentUploadService.getCreatorId(token);
         DocumentVersion documentVersion;
         try {
-            documentVersion = getDocumentVersionRepository().findById(versionID).get();
+            documentVersion = documentVersionRepository.findById(versionID).get();
             if (advisorID != null && studentID != null) {
                 AssociatedStudents associatedStudent =
-                        getAssociatedStudentsRepository().findByScientificAdvisorAndStudent(advisorID, studentID);
+                        associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
                 if (associatedStudent != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
@@ -979,14 +980,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "nirTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "nirTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -997,14 +998,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "ppppuiopdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "ppppuiopdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -1015,14 +1016,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "pdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "pdTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -1033,14 +1034,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "vkrTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "vkrTask")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -1062,20 +1063,20 @@ public class DocumentManagementService {
 
     // Студент удаляет версию вкрного стаффа
     public String studentDeleteVkrStuffVersion(String token, Integer versionID) {
-        Integer studentID = getDocumentUploadService().getCreatorId(token);
+        Integer studentID = documentUploadService.getCreatorId(token);
         DocumentVersion documentVersion;
         try {
-            documentVersion = getDocumentVersionRepository().findById(versionID).get();
+            documentVersion = documentVersionRepository.findById(versionID).get();
             if (studentID != null) {
                 if (documentVersion.getEditor() == studentID) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int kind = document.getKind();
                     switch (kind) {
                         case 6:
                             if (!isLastChecked(documentVersion, "vkrAllowance")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -1084,7 +1085,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "advisorConclusion")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -1093,7 +1094,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "vkrAnitplagiat")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -1102,7 +1103,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "vkrPresentation")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             } else {
                                 return "Запрещено удалять последнюю прорецензированную версию документа";
@@ -1123,15 +1124,15 @@ public class DocumentManagementService {
 
     // Научный руководитель удаляет версию вкрного стаффа
     public String advisorDeleteVkrStuffVersion(String token, Integer versionID, Integer studentID) {
-        Integer advisorID = getDocumentUploadService().getCreatorId(token);
+        Integer advisorID = documentUploadService.getCreatorId(token);
         DocumentVersion documentVersion;
         try {
-            documentVersion = getDocumentVersionRepository().findById(versionID).get();
+            documentVersion = documentVersionRepository.findById(versionID).get();
             if (advisorID != null && studentID != null) {
                 AssociatedStudents associatedStudent =
-                        getAssociatedStudentsRepository().findByScientificAdvisorAndStudent(advisorID, studentID);
+                        associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
                 if (associatedStudent != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int kind = document.getKind();
                     switch (kind) {
                         case 6:
@@ -1139,14 +1140,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "vkrAllowance")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "vkrAllowance")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -1157,14 +1158,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "advisorConclusion")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "advisorConclusion")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -1175,14 +1176,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "vkrAnitplagiat")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "vkrAnitplagiat")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -1193,14 +1194,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "vkrPresentation")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "vkrPresentation")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия документа успешно удалена";
                             }
                             else {
@@ -1223,33 +1224,33 @@ public class DocumentManagementService {
     // Студент отправляет версию отчета научному руководителю
     public String studentSendingReport(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Рассматривается")) {
-            Integer studentID = getDocumentUploadService().getCreatorId(token);
+            Integer studentID = documentUploadService.getCreatorId(token);
             if (studentID != null && versionID != null) {
                 DocumentVersion documentVersion;
                 try {
-                    documentVersion = getDocumentVersionRepository().findById(versionID).get();
+                    documentVersion = documentVersionRepository.findById(versionID).get();
                 } catch (NoSuchElementException noSuchElementException) {
                     documentVersion = null;
                 }
                 if (documentVersion != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
                             documentVersion.getNirReport().setNirReportStatus(4);
-                            getNirReportRepository().save(documentVersion.getNirReport());
+                            nirReportRepository.save(documentVersion.getNirReport());
                             break;
                         case 2:
                             documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(4);
-                            getPpppuiopdReportRepository().save(documentVersion.getPpppuiopdReport());
+                            ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
                             break;
                         case 3:
                             documentVersion.getPdReport().setPdReportStatus(4);
-                            getPdReportRepository().save(documentVersion.getPdReport());
+                            pdReportRepository.save(documentVersion.getPdReport());
                             break;
                         case 4:
                             documentVersion.getVkrReport().setVkrReportStatus(4);
-                            getVkrReportRepository().save(documentVersion.getVkrReport());
+                            vkrReportRepository.save(documentVersion.getVkrReport());
                             break;
                         default:
                             return "Некорректно указан этап";
@@ -1266,33 +1267,33 @@ public class DocumentManagementService {
         }
     }
 
-    // Научный руководитель одобряет или замечает отчет
+    // Научный руководитель оценивает отчет
     public String advisorCheckReport(String token, String newStatus, Integer versionID) {
         if (newStatus.equals("Неудовлетворительно") || newStatus.equals("Удовлетворительно") ||
                 newStatus.equals("Хорошо") || newStatus.equals("Отлично") || newStatus.equals("Замечания")) {
-            Integer advisorID = getDocumentUploadService().getCreatorId(token);
+            Integer advisorID = documentUploadService.getCreatorId(token);
             if (advisorID != null && versionID != null) {
                 DocumentVersion documentVersion;
                 try {
-                    documentVersion = getDocumentVersionRepository().findById(versionID).get();
+                    documentVersion = documentVersionRepository.findById(versionID).get();
                 } catch (NoSuchElementException noSuchElementException) {
                     documentVersion = null;
                 }
                 if (documentVersion != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
                             if (determineMark(newStatus) != 0 &&
                                     documentVersion.getNirReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getNirReport().setNirReportStatus(determineMark(newStatus));
-                                getNirReportRepository().save(documentVersion.getNirReport());
+                                nirReportRepository.save(documentVersion.getNirReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
                                 if (determineMark(newStatus) != 0) {
                                     documentVersion.getNirReport().setNirReportStatus(determineMark(newStatus));
-                                    getNirReportRepository().save(documentVersion.getNirReport());
+                                    nirReportRepository.save(documentVersion.getNirReport());
                                     return "Вы отправили студенту свою версию отчёта";
                                 }
                             }
@@ -1300,13 +1301,13 @@ public class DocumentManagementService {
                             if (determineMark(newStatus) != 0 &&
                                     documentVersion.getPpppuiopdReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(determineMark(newStatus));
-                                getPpppuiopdReportRepository().save(documentVersion.getPpppuiopdReport());
+                                ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
                                 if (determineMark(newStatus) != 0) {
                                     documentVersion.getPpppuiopdReport().setPpppuiopdReportStatus(determineMark(newStatus));
-                                    getPpppuiopdReportRepository().save(documentVersion.getPpppuiopdReport());
+                                    ppppuiopdReportRepository.save(documentVersion.getPpppuiopdReport());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
                                 }
                             }
@@ -1314,13 +1315,13 @@ public class DocumentManagementService {
                             if (determineMark(newStatus) != 0 &&
                                     documentVersion.getPdReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getPdReport().setPdReportStatus(determineMark(newStatus));
-                                getPdReportRepository().save(documentVersion.getPdReport());
+                                pdReportRepository.save(documentVersion.getPdReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
                                 if (determineMark(newStatus) != 0) {
                                     documentVersion.getPdReport().setPdReportStatus(determineMark(newStatus));
-                                    getPdReportRepository().save(documentVersion.getPdReport());
+                                    pdReportRepository.save(documentVersion.getPdReport());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
                                 }
                             }
@@ -1328,13 +1329,13 @@ public class DocumentManagementService {
                             if (determineMark(newStatus) != 0 &&
                                     documentVersion.getVkrReport().getDocumentStatus().getStatus().equals("Рассматривается")) {
                                 documentVersion.getVkrReport().setVkrReportStatus(determineMark(newStatus));
-                                getVkrReportRepository().save(documentVersion.getVkrReport());
+                                vkrReportRepository.save(documentVersion.getVkrReport());
                                 return "Версия документа успешно прорецензирована";
                             }
                             else if (documentVersion.getEditor() == advisorID) {
                                 if (determineMark(newStatus) != 0) {
                                     documentVersion.getVkrReport().setVkrReportStatus(determineMark(newStatus));
-                                    getVkrReportRepository().save(documentVersion.getVkrReport());
+                                    vkrReportRepository.save(documentVersion.getVkrReport());
                                     return "Вы отправили студенту свою версию задания с статусом одобрено";
                                 }
                             }
@@ -1355,20 +1356,20 @@ public class DocumentManagementService {
 
     // Студент удаляет версию отчета
     public String studentDeleteReportVersion(String token, Integer versionID) {
-        Integer studentID = getDocumentUploadService().getCreatorId(token);
+        Integer studentID = documentUploadService.getCreatorId(token);
         DocumentVersion documentVersion;
         try {
-            documentVersion = getDocumentVersionRepository().findById(versionID).get();
+            documentVersion = documentVersionRepository.findById(versionID).get();
             if (studentID != null) {
                 if (documentVersion.getEditor() == studentID) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
                             if (!isLastChecked(documentVersion, "nirReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1378,7 +1379,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "ppppuiopdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1388,7 +1389,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "pdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1398,7 +1399,7 @@ public class DocumentManagementService {
                             if (!isLastChecked(documentVersion, "vkrReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1420,15 +1421,15 @@ public class DocumentManagementService {
 
     // Научный руководитель удаляет версию отчета
     public String advisorDeleteReportVersion(String token, Integer versionID, Integer studentID) {
-        Integer advisorID = getDocumentUploadService().getCreatorId(token);
+        Integer advisorID = documentUploadService.getCreatorId(token);
         DocumentVersion documentVersion;
         try {
-            documentVersion = getDocumentVersionRepository().findById(versionID).get();
+            documentVersion = documentVersionRepository.findById(versionID).get();
             if (advisorID != null && studentID != null) {
                 AssociatedStudents associatedStudent =
-                        getAssociatedStudentsRepository().findByScientificAdvisorAndStudent(advisorID, studentID);
+                        associatedStudentsRepository.findByScientificAdvisorAndStudent(advisorID, studentID);
                 if (associatedStudent != null) {
-                    Document document = getDocumentRepository().findById(documentVersion.getDocument()).get();
+                    Document document = documentRepository.findById(documentVersion.getDocument()).get();
                     int type = document.getType();
                     switch (type) {
                         case 1:
@@ -1436,14 +1437,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "nirReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "nirReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1454,14 +1455,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "ppppuiopdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "ppppuiopdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1472,14 +1473,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "pdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "pdReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1490,14 +1491,14 @@ public class DocumentManagementService {
                                     !isLastChecked(documentVersion, "vkrReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else if (documentVersion.getEditor() == studentID &&
                                     !isLastChecked(documentVersion, "vkrReport")) {
                                 File deleteFile = new File(documentVersion.getThis_version_document_path());
                                 deleteFile.delete();
-                                getDocumentVersionRepository().delete(documentVersion);
+                                documentVersionRepository.delete(documentVersion);
                                 return "Версия отчета успешно удалена";
                             }
                             else {
@@ -1537,9 +1538,9 @@ public class DocumentManagementService {
         Document vkrAdvisorConclusion;
         try {
             // НИР
-            if (getDocumentRepository().findByTypeAndKindAndCreator(1, 2, studentID).size() == 1) {
-                nirTask = getDocumentRepository().findByTypeAndKindAndCreator(1, 2, studentID).get(0);
-                List<DocumentVersion> nirTaskVersions = getDocumentVersionRepository().findByDocument(nirTask.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(1, 2, studentID).size() == 1) {
+                nirTask = documentRepository.findByTypeAndKindAndCreator(1, 2, studentID).get(0);
+                List<DocumentVersion> nirTaskVersions = documentVersionRepository.findByDocument(nirTask.getId());
                 // Пройдем по версиям задания студента
                 for (DocumentVersion nirTaskVersion : nirTaskVersions) {
                     if (nirTaskVersion.getNirTask().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1550,9 +1551,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(1, 3, studentID).size() == 1) {
-                nirReport = getDocumentRepository().findByTypeAndKindAndCreator(1, 3, studentID).get(0);
-                List<DocumentVersion> nirReportVersions = getDocumentVersionRepository().findByDocument(nirReport.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(1, 3, studentID).size() == 1) {
+                nirReport = documentRepository.findByTypeAndKindAndCreator(1, 3, studentID).get(0);
+                List<DocumentVersion> nirReportVersions = documentVersionRepository.findByDocument(nirReport.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion nirReportVersion: nirReportVersions) {
                     if (nirReportVersion.getNirReport().getDocumentStatus().getStatus().equals("Неудовлетворительно")) {
@@ -1570,9 +1571,9 @@ public class DocumentManagementService {
                 }
             }
             // ППППУиОПД
-            if (getDocumentRepository().findByTypeAndKindAndCreator(2, 2, studentID).size() == 1) {
-                ppppuiopdTask = getDocumentRepository().findByTypeAndKindAndCreator(2, 2, studentID).get(0);
-                List<DocumentVersion> ppppuiopdTaskVersions = getDocumentVersionRepository().findByDocument(ppppuiopdTask.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(2, 2, studentID).size() == 1) {
+                ppppuiopdTask = documentRepository.findByTypeAndKindAndCreator(2, 2, studentID).get(0);
+                List<DocumentVersion> ppppuiopdTaskVersions = documentVersionRepository.findByDocument(ppppuiopdTask.getId());
                 // Пройдем по версиям задания студента
                 for (DocumentVersion ppppuiopdTaskVersion : ppppuiopdTaskVersions) {
                     if (ppppuiopdTaskVersion.getPpppuiopdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1583,9 +1584,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(2, 3, studentID).size() == 1) {
-                ppppuiopdReport = getDocumentRepository().findByTypeAndKindAndCreator(2, 3, studentID).get(0);
-                List<DocumentVersion> ppppuiopdReportVersions = getDocumentVersionRepository().findByDocument(ppppuiopdReport.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(2, 3, studentID).size() == 1) {
+                ppppuiopdReport = documentRepository.findByTypeAndKindAndCreator(2, 3, studentID).get(0);
+                List<DocumentVersion> ppppuiopdReportVersions = documentVersionRepository.findByDocument(ppppuiopdReport.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion ppppuiopdReportVersion: ppppuiopdReportVersions) {
                     switch (ppppuiopdReportVersion.getPpppuiopdReport().getDocumentStatus().getStatus()) {
@@ -1600,9 +1601,9 @@ public class DocumentManagementService {
                 }
             }
             // ПП
-            if (getDocumentRepository().findByTypeAndKindAndCreator(3, 2, studentID).size() == 1) {
-                pdTask = getDocumentRepository().findByTypeAndKindAndCreator(3, 2, studentID).get(0);
-                List<DocumentVersion> pdTaskVersions = getDocumentVersionRepository().findByDocument(pdTask.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(3, 2, studentID).size() == 1) {
+                pdTask = documentRepository.findByTypeAndKindAndCreator(3, 2, studentID).get(0);
+                List<DocumentVersion> pdTaskVersions = documentVersionRepository.findByDocument(pdTask.getId());
                 // Пройдем по версиям задания студента
                 for (DocumentVersion pdTaskVersion : pdTaskVersions) {
                     if (pdTaskVersion.getPdTask().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1613,9 +1614,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(3, 3, studentID).size() == 1) {
-                pdReport = getDocumentRepository().findByTypeAndKindAndCreator(3, 3, studentID).get(0);
-                List<DocumentVersion> pdReportVersions = getDocumentVersionRepository().findByDocument(pdReport.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(3, 3, studentID).size() == 1) {
+                pdReport = documentRepository.findByTypeAndKindAndCreator(3, 3, studentID).get(0);
+                List<DocumentVersion> pdReportVersions = documentVersionRepository.findByDocument(pdReport.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion pdReportVersion: pdReportVersions) {
                     switch (pdReportVersion.getPdReport().getDocumentStatus().getStatus()) {
@@ -1630,9 +1631,9 @@ public class DocumentManagementService {
                 }
             }
             // ВКР
-            if (getDocumentRepository().findByTypeAndKindAndCreator(4, 2, studentID).size() == 1) {
-                vkrTask = getDocumentRepository().findByTypeAndKindAndCreator(4, 2, studentID).get(0);
-                List<DocumentVersion> vkrTaskVersions = getDocumentVersionRepository().findByDocument(vkrTask.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(4, 2, studentID).size() == 1) {
+                vkrTask = documentRepository.findByTypeAndKindAndCreator(4, 2, studentID).get(0);
+                List<DocumentVersion> vkrTaskVersions = documentVersionRepository.findByDocument(vkrTask.getId());
                 // Пройдем по версиям задания студента
                 for (DocumentVersion vkrTaskVersion : vkrTaskVersions) {
                     if (vkrTaskVersion.getVkrTask().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1643,9 +1644,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(4, 3, studentID).size() == 1) {
-                vkrReport = getDocumentRepository().findByTypeAndKindAndCreator(4, 3, studentID).get(0);
-                List<DocumentVersion> vkrReportVersions = getDocumentVersionRepository().findByDocument(vkrReport.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(4, 3, studentID).size() == 1) {
+                vkrReport = documentRepository.findByTypeAndKindAndCreator(4, 3, studentID).get(0);
+                List<DocumentVersion> vkrReportVersions = documentVersionRepository.findByDocument(vkrReport.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion vkrReportVersion: vkrReportVersions) {
                     switch (vkrReportVersion.getVkrReport().getDocumentStatus().getStatus()) {
@@ -1659,9 +1660,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(4, 6, studentID).size() == 1) {
-                vkrAllowance = getDocumentRepository().findByTypeAndKindAndCreator(4, 6, studentID).get(0);
-                List<DocumentVersion> vkrAllowanceVersions = getDocumentVersionRepository().findByDocument(vkrAllowance.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(4, 6, studentID).size() == 1) {
+                vkrAllowance = documentRepository.findByTypeAndKindAndCreator(4, 6, studentID).get(0);
+                List<DocumentVersion> vkrAllowanceVersions = documentVersionRepository.findByDocument(vkrAllowance.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion vkrAllowanceVersion: vkrAllowanceVersions) {
                     if (vkrAllowanceVersion.getVkrAllowance().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1669,9 +1670,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(4, 7, studentID).size() == 1) {
-                vkrAdvisorConclusion = getDocumentRepository().findByTypeAndKindAndCreator(4, 7, studentID).get(0);
-                List<DocumentVersion> vkrConclusionVersions = getDocumentVersionRepository().findByDocument(vkrAdvisorConclusion.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(4, 7, studentID).size() == 1) {
+                vkrAdvisorConclusion = documentRepository.findByTypeAndKindAndCreator(4, 7, studentID).get(0);
+                List<DocumentVersion> vkrConclusionVersions = documentVersionRepository.findByDocument(vkrAdvisorConclusion.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion vkrConclusionVersion: vkrConclusionVersions) {
                     if (vkrConclusionVersion.getAdvisorConclusion().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1679,9 +1680,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(4, 8, studentID).size() == 1) {
-                vkrAntiplagiat = getDocumentRepository().findByTypeAndKindAndCreator(4, 8, studentID).get(0);
-                List<DocumentVersion> vkrAntiplagiatVersions = getDocumentVersionRepository().findByDocument(vkrAntiplagiat.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(4, 8, studentID).size() == 1) {
+                vkrAntiplagiat = documentRepository.findByTypeAndKindAndCreator(4, 8, studentID).get(0);
+                List<DocumentVersion> vkrAntiplagiatVersions = documentVersionRepository.findByDocument(vkrAntiplagiat.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion vkrAntiplagiatVersion: vkrAntiplagiatVersions) {
                     if (vkrAntiplagiatVersion.getVkrAntiplagiat().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1689,9 +1690,9 @@ public class DocumentManagementService {
                     }
                 }
             }
-            if (getDocumentRepository().findByTypeAndKindAndCreator(4, 9, studentID).size() == 1) {
-                vkrPresentation = getDocumentRepository().findByTypeAndKindAndCreator(4, 9, studentID).get(0);
-                List<DocumentVersion> vkrPresentationVersions = getDocumentVersionRepository().findByDocument(vkrPresentation.getId());
+            if (documentRepository.findByTypeAndKindAndCreator(4, 9, studentID).size() == 1) {
+                vkrPresentation = documentRepository.findByTypeAndKindAndCreator(4, 9, studentID).get(0);
+                List<DocumentVersion> vkrPresentationVersions = documentVersionRepository.findByDocument(vkrPresentation.getId());
                 // Пройдем по версиям отчёта студента
                 for (DocumentVersion vkrPresentationVersion: vkrPresentationVersions) {
                     if (vkrPresentationVersion.getVkrPresentation().getDocumentStatus().getStatus().equals("Одобрено")) {
@@ -1711,16 +1712,16 @@ public class DocumentManagementService {
 
     // Одобрить шаблон
     public String approveTemplate(String token, Integer documentID) {
-        Integer creatorID = getDocumentUploadService().getCreatorId(token);
+        Integer creatorID = documentUploadService.getCreatorId(token);
         Document template;
         try {
-            template = getDocumentRepository().findById(documentID).get();
+            template = documentRepository.findById(documentID).get();
             if (template.getKind() == 5) {
                 TemplateProperties templateProperties;
                 try {
-                    templateProperties = getTemplatePropertiesRepository().findById(template.getId()).get();
+                    templateProperties = templatePropertiesRepository.findById(template.getId()).get();
                     templateProperties.setApproved(true);
-                    getTemplatePropertiesRepository().save(templateProperties);
+                    templatePropertiesRepository.save(templateProperties);
                     return "Шаблон успешно одобрен";
                 } catch (NoSuchElementException noSuchElementException) {
                     return "У шаблона отсутствует статус, ошибка целостности";
@@ -1734,16 +1735,16 @@ public class DocumentManagementService {
 
     // Одобрить приказ
     public String approveOrder(String token, Integer documentID) {
-        Integer creatorID = getDocumentUploadService().getCreatorId(token);
+        Integer creatorID = documentUploadService.getCreatorId(token);
         Document order;
         try {
-            order = getDocumentRepository().findById(documentID).get();
+            order = documentRepository.findById(documentID).get();
             if (order.getKind() == 1) {
                 OrderProperties orderProperties;
                 try {
-                    orderProperties = getOrderPropertiesRepository().findById(order.getId()).get();
+                    orderProperties = orderPropertiesRepository.findById(order.getId()).get();
                     orderProperties.setApproved(true);
-                    getOrderPropertiesRepository().save(orderProperties);
+                    orderPropertiesRepository.save(orderProperties);
                     return "Приказ успешно одобрен";
                 } catch (NoSuchElementException noSuchElementException) {
                     return "У приказа отсутствует статус, ошибка целостности";
@@ -1753,6 +1754,33 @@ public class DocumentManagementService {
             return "Приказ не найден";
         }
         return "Что-то пошло не так";
+    }
+
+
+    // Добавить замечание версии задания или отчёта
+    public String setAdvisorNote(String token, Integer versionID, String note) {
+        Integer advisorID = documentUploadService.getCreatorId(token);
+        DocumentVersion documentVersion;
+        if (advisorID != null) {
+            if (documentVersionRepository.findById(versionID).isPresent()) {
+                documentVersion = documentVersionRepository.findById(versionID).get();
+                List<AssociatedStudents> associatedStudents = associatedStudentsRepository.findByScientificAdvisor(advisorID);
+                List<Integer> associatedStudentsID = new ArrayList<>();
+                for (AssociatedStudents associatedStudent: associatedStudents) {
+                    associatedStudentsID.add(associatedStudent.getStudent());
+                }
+                if (documentVersion.getEditor() == advisorID || associatedStudentsID.contains(documentVersion.getEditor())) {
+                    documentVersion.setEdition_description("Замечание: " + note);
+                    return "Замечение успешно установлено";
+                } else {
+                    return "Вы не можете выставить замечание данной версии";
+                }
+            } else {
+                return "Версия документа не найдена";
+            }
+        } else {
+            return "Пользователь не найден";
+        }
     }
 
     public Integer determineMark(String newStatus) {
@@ -1767,7 +1795,7 @@ public class DocumentManagementService {
     }
 
     private boolean isLastChecked(DocumentVersion documentVersion, String versionType) {
-        List<DocumentVersion> documentVersions = getDocumentVersionRepository().findByDocument(documentVersion.getDocument());
+        List<DocumentVersion> documentVersions = documentVersionRepository.findByDocument(documentVersion.getDocument());
         DocumentVersion lastCheckedVersion = null;
         switch (versionType) {
             case "nirTask":
@@ -1871,113 +1899,5 @@ public class DocumentManagementService {
             return documentVersion.getId() == lastCheckedVersion.getId();
         }
         return false;
-    }
-
-    public DocumentRepository getDocumentRepository() {
-        return documentRepository;
-    }
-
-    public DocumentUploadService getDocumentUploadService() {
-        return documentUploadService;
-    }
-
-    public DocumentVersionRepository getDocumentVersionRepository() {
-        return documentVersionRepository;
-    }
-
-    public DocumentService getDocumentService() {
-        return documentService;
-    }
-
-    public DocumentTypeRepository getDocumentTypeRepository() {
-        return documentTypeRepository;
-    }
-
-    public DocumentKindRepository getDocumentKindRepository() {
-        return documentKindRepository;
-    }
-
-    public DocumentDownloadService getDocumentDownloadService() {
-        return documentDownloadService;
-    }
-
-    public ViewRightsAreaRepository getViewRightsAreaRepository() {
-        return viewRightsAreaRepository;
-    }
-
-    public NirTaskRepository getNirTaskRepository() {
-        return nirTaskRepository;
-    }
-
-    public AssociatedStudentsRepository getAssociatedStudentsRepository() {
-        return associatedStudentsRepository;
-    }
-
-    public NirReportRepository getNirReportRepository() {
-        return nirReportRepository;
-    }
-
-    public ProjectRepository getProjectRepository() {
-        return projectRepository;
-    }
-
-    public ProjectAreaRepository getProjectAreaRepository() {
-        return projectAreaRepository;
-    }
-
-    public TemplatePropertiesRepository getTemplatePropertiesRepository() {
-        return templatePropertiesRepository;
-    }
-
-    public OrderPropertiesRepository getOrderPropertiesRepository() {
-        return orderPropertiesRepository;
-    }
-
-    public PpppuiopdReportRepository getPpppuiopdReportRepository() {
-        return ppppuiopdReportRepository;
-    }
-
-    public PdReportRepository getPdReportRepository() {
-        return pdReportRepository;
-    }
-
-    public PpppuiopdTaskRepository getPpppuiopdTaskRepository() {
-        return ppppuiopdTaskRepository;
-    }
-
-    public PdTaskRepository getPdTaskRepository() {
-        return pdTaskRepository;
-    }
-
-    public ViewRightsProjectRepository getViewRightsProjectRepository() {
-        return viewRightsProjectRepository;
-    }
-
-    public VkrTaskRepository getVkrTaskRepository() {
-        return vkrTaskRepository;
-    }
-
-    public VkrReportRepository getVkrReportRepository() {
-        return vkrReportRepository;
-    }
-
-    public VkrAntiplagiatRepository getVkrAntiplagiatRepository() {
-        return vkrAntiplagiatRepository;
-    }
-
-    public VkrPresentationRepository getVkrPresentationRepository() {
-        return vkrPresentationRepository;
-    }
-
-    public VkrConclusionRepository getVkrConclusionRepository() {
-        return vkrConclusionRepository;
-    }
-
-    public VkrAllowanceRepository getVkrAllowanceRepository() {
-        return vkrAllowanceRepository;
-    }
-
-    public DocumentProcessorService getDocumentProcessorService() {
-        return documentProcessorService;
     }
 }
