@@ -51,6 +51,7 @@ public class RegistrationController {
         this.usersRepository = usersRepository;
     }
 
+    @Deprecated
     // Отправить форму регистрации на клиент, сгенерировать код подтверждения
     @GetMapping("/registration/student")
     public String StudentRegistrationPreparing() {
@@ -75,6 +76,7 @@ public class RegistrationController {
             return "Email занят";
     }
 
+    @Deprecated
     // Запрос на повторную отправку кода
     @PostMapping("/registration/student/confirm/{email}")
     public String repeatConformCodeSending(@PathVariable String email) {
@@ -85,6 +87,7 @@ public class RegistrationController {
         return "Код подтверждения был успешно выслан повторно";
     }
 
+    @Deprecated
     // Запрос подтверждения кода и аккаунта студента без ссылки
     @PostMapping("/registration/student/confirm/")
     public List<String> StudentConfirmCode(
