@@ -1771,6 +1771,7 @@ public class DocumentManagementService {
                 }
                 if (documentVersion.getEditor() == advisorID || associatedStudentsID.contains(documentVersion.getEditor())) {
                     documentVersion.setEdition_description("Замечание: " + note);
+                    documentVersionRepository.save(documentVersion);
                     return "Замечение успешно установлено";
                 } else {
                     return "Вы не можете выставить замечание данной версии";
