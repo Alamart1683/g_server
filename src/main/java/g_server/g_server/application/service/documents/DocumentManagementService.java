@@ -1770,7 +1770,7 @@ public class DocumentManagementService {
                     associatedStudentsID.add(associatedStudent.getStudent());
                 }
                 if (documentVersion.getEditor() == advisorID || associatedStudentsID.contains(documentVersion.getEditor())) {
-                    documentVersion.setEdition_description("Замечание: " + note);
+                    documentVersion.setEdition_description(note);
                     documentVersionRepository.save(documentVersion);
                     return "Замечение успешно установлено";
                 } else {
