@@ -4,7 +4,6 @@ import g_server.g_server.application.entity.documents.*;
 import g_server.g_server.application.entity.project.Project;
 import g_server.g_server.application.entity.project.ProjectArea;
 import g_server.g_server.application.entity.users.AssociatedStudents;
-import g_server.g_server.application.entity.users.UsersRoles;
 import g_server.g_server.application.query.response.StudentDocumentsStatusView;
 import g_server.g_server.application.repository.documents.*;
 import g_server.g_server.application.repository.project.ProjectAreaRepository;
