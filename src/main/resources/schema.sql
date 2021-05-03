@@ -122,7 +122,7 @@ create table view_rights (
 create table document (
     id int primary key auto_increment,
     creator_id int not null,
-    name varchar (100) not null,
+    name varchar (512) not null,
     document_path varchar (256) not null,
     creation_date date not null,
     type int not null,
