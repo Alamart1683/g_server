@@ -21,14 +21,24 @@ import java.util.Date;
 @Log
 @Component
 public class JwtProvider {
-    @Autowired
-    UsersRepository usersRepository;
-
-    @Autowired
+    private UsersRepository usersRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
+    public void setUsersRepository(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Autowired
+    public void setbCryptPasswordEncoder(BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+
+    @Autowired
+    public void setRefreshTokenRepository(RefreshTokenRepository refreshTokenRepository) {
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -43,27 +53,31 @@ public class JwtProvider {
     public String generateRefreshToken(String email, String password, long issue, long expire) {
         Users user = usersRepository.findByEmail(email);
         String rawToken = email + " " + password + " " + issue + " " + expire;
-        RefreshToken refreshToken = refreshTokenRepository.findByUserID(user.getId());
-        if (refreshToken == null) {
-            try {
-                refreshToken = new RefreshToken(
-                        user.getId(),
-                        bCryptPasswordEncoder.encode(rawToken),
-                        issue,
-                        expire
-                );
+        try {
+            RefreshToken refreshToken = refreshTokenRepository.findByUserID(user.getId());
+            if (refreshToken == null) {
+                try {
+                    refreshToken = new RefreshToken(
+                            user.getId(),
+                            bCryptPasswordEncoder.encode(rawToken),
+                            issue,
+                            expire
+                    );
+                    refreshTokenRepository.save(refreshToken);
+                } catch (Exception e) {
+                    System.out.println("Обработано исключение вызванное " +
+                            "несовершенством токенной библиотеки и не несущее угрозы целостности базе данных");
+                }
+            } else {
+                refreshToken.setRefreshToken(bCryptPasswordEncoder.encode(rawToken));
+                refreshToken.setIssue(issue);
+                refreshToken.setExpire(expire);
                 refreshTokenRepository.save(refreshToken);
-            } catch (Exception e) {
-                System.out.println("Обработано исключение вызванное " +
-                        "несовершенством токенной библиотеки и не несущее угрозы целостности базе данных");
             }
-        } else {
-            refreshToken.setRefreshToken(bCryptPasswordEncoder.encode(rawToken));
-            refreshToken.setIssue(issue);
-            refreshToken.setExpire(expire);
-            refreshTokenRepository.save(refreshToken);
+            return refreshToken.getRefreshToken();
+        } catch (NullPointerException nullPointerException) {
+            return null;
         }
-        return refreshToken.getRefreshToken();
     }
 
     public boolean validateRefreshToken(String token) {
@@ -95,7 +109,8 @@ public class JwtProvider {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
             Users users = usersRepository.findByEmail(getEmailFromToken(token));
             if (users != null) {
-                if (users.getPassword().equals(getPasswordFromToken(token))) {
+                String password = getPasswordFromToken(token);
+                if (bCryptPasswordEncoder.matches(password, users.getPassword())) {
                     return true;
                 }
             }

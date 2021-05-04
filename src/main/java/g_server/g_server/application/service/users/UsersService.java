@@ -335,7 +335,7 @@ public class UsersService implements UserDetailsService {
             try { userToDelete = usersRepository.findById(userToDeleteId).get(); } catch (Exception ignored) { }
             if (userToDelete != null) {
                 int userToDeleteRoleId = usersRolesRepository.findUsersRolesByUserId(userToDeleteId).getRoleId();
-                int adminRoleId = usersRolesRepository.findUsersRolesByUserId(adminId).getRoleId();
+                int adminRoleId = usersRolesRepository.findUsersRolesByUserId(admin.getId()).getRoleId();
                 if (userToDeleteRoleId == adminRoleId)
                     return false;
                 else return userToDeleteRoleId <= adminRoleId;
