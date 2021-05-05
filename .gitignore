@@ -40,3 +40,7 @@ g_server.log
 *.docx
 *.docx
 *.txt
+*.txt
+users_test/testAdvisorFioLoginAndPassword_30.04.2021.19.29.58.txt
+users_test/testAdvisorFioLoginAndPassword_30.04.2021.19.29.58.txt
+users_test/testStudentFioLoginAndPassword_30.04.2021.19.30.32.txt
