@@ -1,4 +1,4 @@
-package g_server.g_server.application.query.request;
+package g_server.g_server.application.query.response;
 
 public class AuthorizationResponseForm {
     private String accessToken;
@@ -43,6 +43,8 @@ public class AuthorizationResponseForm {
     public AuthorizationResponseForm(String message) {
         this.message = message;
     }
+
+    public AuthorizationResponseForm() { }
 
     public String getAccessToken() {
         return accessToken;

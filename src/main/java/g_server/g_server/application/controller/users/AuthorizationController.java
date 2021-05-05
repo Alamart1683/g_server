@@ -2,12 +2,13 @@ package g_server.g_server.application.controller.users;
 
 import g_server.g_server.application.config.jwt.JwtProvider;
 import g_server.g_server.application.query.request.AuthorizationForm;
-import g_server.g_server.application.query.request.AuthorizationResponseForm;
+import g_server.g_server.application.query.response.AuthorizationResponseForm;
 import g_server.g_server.application.entity.users.RefreshToken;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.users.RefreshTokenRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.users.UsersService;
+import org.apache.catalina.filters.ExpiresFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

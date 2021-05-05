@@ -4,9 +4,9 @@ public class AuthorizationForm {
     private String email;
     private String password;
 
-    AuthorizationForm() { }
+    public AuthorizationForm() { }
 
-    AuthorizationForm(String email, String password) {
+    public AuthorizationForm(String email, String password) {
         this.email = email;
         this.password = password;
     }

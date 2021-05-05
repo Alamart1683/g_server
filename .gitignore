@@ -34,6 +34,9 @@ build/
 
 .users_documents/**
 users_documents/**
+.users_test/**
+users_test/**
 g_server.log
 *.docx
 *.docx
+*.txt
