@@ -53,18 +53,17 @@ public class AuthorizationController {
         Users user = usersService.loadUserByEmailAndPassword(authorizationForm.getEmail(), authorizationForm.getPassword());
         if (user != null) {
             if (user.isConfirmed()) {
-                //System.out.println("мда");
                 // Сгенерируем refresh-токен
                 long refreshIssue = java.time.Instant.now().getEpochSecond();
                 long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000; // 60 суток
                 String refreshToken = jwtProvider.generateRefreshToken(
-                        user.getEmail(), user.getPassword(), refreshIssue, refreshExpire
+                        authorizationForm.getEmail(), authorizationForm.getPassword(), refreshIssue, refreshExpire
                 );
                 // Сгенерируем access-токен
                 long accessIssue = java.time.Instant.now().getEpochSecond();
                 long accessExpire = java.time.Instant.now().getEpochSecond() + 172800; // 48 часов
                 String accessToken = jwtProvider.generateAccessToken(
-                        user.getEmail(), user.getPassword(), accessIssue, accessExpire
+                        authorizationForm.getEmail(), authorizationForm.getPassword(), accessIssue, accessExpire
                 );
                 String userRole = usersService.getUserRoleByRoleID(user.getId()).substring(5).toLowerCase();
                 String fio = user.getSurname() + " " + user.getName() + " " + user.getSecond_name();

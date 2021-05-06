@@ -110,9 +110,7 @@ public class JwtProvider {
             Users users = usersRepository.findByEmail(getEmailFromToken(token));
             if (users != null) {
                 String password = getPasswordFromToken(token);
-                if (bCryptPasswordEncoder.matches(password, users.getPassword())) {
-                    return true;
-                }
+                return bCryptPasswordEncoder.matches(password, users.getPassword());
             }
             return false;
         } catch (Exception e) {
