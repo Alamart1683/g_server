@@ -168,6 +168,7 @@ public class UsersService implements UserDetailsService {
             String password = user.getPassword();
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setRoles(Collections.singleton(new Roles(1, "ROLE_STUDENT")));
+            user.setConfirmed(true);
             usersRepository.save(user);
             StudentData studentData = new StudentData(
                     user.getId(),
