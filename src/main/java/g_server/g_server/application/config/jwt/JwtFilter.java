@@ -29,9 +29,15 @@ public class JwtFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        // logger.info("Аутентифицирую запрос согласно токену...");
+        HttpServletRequest httpServletRequest = (((HttpServletRequest)servletRequest));
         String token = getTokenFromRequest((HttpServletRequest) servletRequest);
-        if (token != null && jwtProvider.validateAccessToken(token)) {
+        if (httpServletRequest.getRequestURI().contains("prolongation")) {
+            log.info("Обработан запрос пролонгации");
+        }
+        else if (httpServletRequest.getRequestURI().contains("authorization")) {
+            log.info("Обработан запрос авторизации");
+        }
+        else if (token != null && jwtProvider.validateAccessToken(token)) {
             String email = jwtProvider.getEmailFromToken(token);
             UsernamePasswordAuthenticationToken auth = null;
             if (usersService.loadUserByUsername(email) != null) {

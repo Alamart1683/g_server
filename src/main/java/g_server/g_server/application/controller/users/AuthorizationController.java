@@ -8,11 +8,9 @@ import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.users.RefreshTokenRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
 import g_server.g_server.application.service.users.UsersService;
-import org.apache.catalina.filters.ExpiresFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.NoSuchElementException;
 import static org.springframework.util.StringUtils.hasText;
@@ -55,15 +53,15 @@ public class AuthorizationController {
             if (user.isConfirmed()) {
                 // Сгенерируем refresh-токен
                 long refreshIssue = java.time.Instant.now().getEpochSecond();
-                long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000; // 60 суток
+                long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000; // 60 суток - 51840000 секунд
                 String refreshToken = jwtProvider.generateRefreshToken(
-                        authorizationForm.getEmail(), authorizationForm.getPassword(), refreshIssue, refreshExpire
+                        authorizationForm.getEmail(), refreshIssue, refreshExpire
                 );
                 // Сгенерируем access-токен
                 long accessIssue = java.time.Instant.now().getEpochSecond();
-                long accessExpire = java.time.Instant.now().getEpochSecond() + 172800; // 48 часов
+                long accessExpire = java.time.Instant.now().getEpochSecond() + 172800; // 48 часов - 172800 секунды
                 String accessToken = jwtProvider.generateAccessToken(
-                        authorizationForm.getEmail(), authorizationForm.getPassword(), accessIssue, accessExpire
+                        authorizationForm.getEmail(), accessIssue, accessExpire
                 );
                 String userRole = usersService.getUserRoleByRoleID(user.getId()).substring(5).toLowerCase();
                 String fio = user.getSurname() + " " + user.getName() + " " + user.getSecond_name();
@@ -111,13 +109,13 @@ public class AuthorizationController {
                 long refreshIssue = java.time.Instant.now().getEpochSecond();
                 long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000; // 60 суток
                 String newRefreshToken = jwtProvider.generateRefreshToken(
-                        user.getEmail(), user.getPassword(), refreshIssue, refreshExpire
+                        user.getEmail(), refreshIssue, refreshExpire
                 );
                 // Сгенерируем новый access-токен
                 long accessIssue = java.time.Instant.now().getEpochSecond();
                 long accessExpire = java.time.Instant.now().getEpochSecond() + 172800; // 48 часов
                 String accessToken = jwtProvider.generateAccessToken(
-                        user.getEmail(), user.getPassword(), accessIssue, accessExpire
+                        user.getEmail(), accessIssue, accessExpire
                 );
                 String userRole = usersService.getUserRoleByRoleID(user.getId()).substring(5).toLowerCase();
                 String fio = user.getSurname() + " " + user.getName() + " " + user.getSecond_name();

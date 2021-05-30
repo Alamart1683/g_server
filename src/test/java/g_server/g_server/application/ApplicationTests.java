@@ -70,99 +70,89 @@ class ApplicationTests {
     @Test
     void firstAccessTokenTest() {
         String email = "Delamart1683@yandex.ru";
-        String password = "3Bq0050eQxSx";
         long accessIssue = java.time.Instant.now().getEpochSecond();
         long accessExpire = java.time.Instant.now().getEpochSecond() + 172800;
-        String accessToken = jwtProvider.generateAccessToken(email, password, accessIssue, accessExpire);
+        String accessToken = jwtProvider.generateAccessToken(email, accessIssue, accessExpire);
         Assertions.assertTrue(jwtProvider.validateAccessToken(accessToken));
     }
 
     @Test
     void secondAccessTokenTest() {
         String email = "korra-m@yandex.ru";
-        String password = "LGghRb0UL6RL";
         long accessIssue = java.time.Instant.now().getEpochSecond();
         long accessExpire = java.time.Instant.now().getEpochSecond() + 172800;
-        String accessToken = jwtProvider.generateAccessToken(email, password, accessIssue, accessExpire);
+        String accessToken = jwtProvider.generateAccessToken(email, accessIssue, accessExpire);
         Assertions.assertTrue(jwtProvider.validateAccessToken(accessToken));
     }
 
     @Test
     void thirdAccessTokenTest() {
         String email = "vkgrig49@mail.ru";
-        String password = "s4VQ5LtVVZ6g";
         long accessIssue = java.time.Instant.now().getEpochSecond();
         long accessExpire = java.time.Instant.now().getEpochSecond() + 172800;
-        String accessToken = jwtProvider.generateAccessToken(email, password, accessIssue, accessExpire);
+        String accessToken = jwtProvider.generateAccessToken(email, accessIssue, accessExpire);
         Assertions.assertTrue(jwtProvider.validateAccessToken(accessToken));
     }
 
     @Test
     void fourthAccessTokenTest() {
         String email = "abyrvalg";
-        String password = "12345";
         long accessIssue = java.time.Instant.now().getEpochSecond();
-        String accessToken = jwtProvider.generateAccessToken(email, password, accessIssue, accessIssue);
+        String accessToken = jwtProvider.generateAccessToken(email, accessIssue, accessIssue);
         Assertions.assertFalse(jwtProvider.validateAccessToken(accessToken));
     }
 
     @Test
     void fifthAccessTokenTest() {
         String email = "ascalon";
-        String password = "54321";
         long accessIssue = java.time.Instant.now().getEpochSecond();
         long accessExpire = java.time.Instant.now().getEpochSecond() + 172800;
-        String accessToken = jwtProvider.generateAccessToken(email, password, accessIssue, accessExpire);
+        String accessToken = jwtProvider.generateAccessToken(email, accessIssue, accessExpire);
         Assertions.assertFalse(jwtProvider.validateAccessToken(accessToken));
     }
 
     @Test
     void firstRefreshTokenTest() {
         String email = "Delamart1683@yandex.ru";
-        String password = "3Bq0050eQxSx";
         long refreshIssue = java.time.Instant.now().getEpochSecond();
         long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000;
-        String refreshToken = jwtProvider.generateRefreshToken(email, password, refreshIssue, refreshExpire);
+        String refreshToken = jwtProvider.generateRefreshToken(email, refreshIssue, refreshExpire);
         Assertions.assertTrue(jwtProvider.validateRefreshToken(refreshToken));
     }
 
     @Test
     void secondRefreshTokenTest() {
         String email = "korra-m@yandex.ru";
-        String password = "LGghRb0UL6RL";
         long refreshIssue = java.time.Instant.now().getEpochSecond();
         long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000;
-        String refreshToken = jwtProvider.generateRefreshToken(email, password, refreshIssue, refreshExpire);
+        String refreshToken = jwtProvider.generateRefreshToken(email, refreshIssue, refreshExpire);
         Assertions.assertTrue(jwtProvider.validateRefreshToken(refreshToken));
     }
 
     @Test
     void thirdRefreshTokenTest() {
         String email = "vkgrig49@mail.ru";
-        String password = "s4VQ5LtVVZ6g";
         long refreshIssue = java.time.Instant.now().getEpochSecond();
         long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000;
-        String refreshToken = jwtProvider.generateRefreshToken(email, password, refreshIssue, refreshExpire);
+        String refreshToken = jwtProvider.generateRefreshToken(email, refreshIssue, refreshExpire);
         Assertions.assertTrue(jwtProvider.validateRefreshToken(refreshToken));
     }
 
     @Test
     void fourthRefreshTokenTest() {
         String email = "abyrvalg";
-        String password = "12345";
         long refreshIssue = java.time.Instant.now().getEpochSecond();
         long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000;
-        String refreshToken = jwtProvider.generateRefreshToken(email, password, refreshIssue, refreshExpire);
+        String refreshToken = jwtProvider.generateRefreshToken(email, refreshIssue, refreshExpire);
         Assertions.assertFalse(jwtProvider.validateRefreshToken(refreshToken));
     }
 
     @Test
     void fifthRefreshTokenTest() {
         String email = "ascalon";
-        String password = "54321";
         long refreshIssue = java.time.Instant.now().getEpochSecond();
         long refreshExpire = java.time.Instant.now().getEpochSecond() + 5184000;
-        String refreshToken = jwtProvider.generateRefreshToken(email, password, refreshIssue, refreshExpire);
+        String refreshToken = jwtProvider.generateRefreshToken(email, refreshIssue, refreshExpire);
         Assertions.assertFalse(jwtProvider.validateRefreshToken(refreshToken));
     }
 

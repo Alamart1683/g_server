@@ -4,9 +4,7 @@ import g_server.g_server.application.entity.users.RefreshToken;
 import g_server.g_server.application.entity.users.Users;
 import g_server.g_server.application.repository.users.RefreshTokenRepository;
 import g_server.g_server.application.repository.users.UsersRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,9 +48,9 @@ public class JwtProvider {
     private String requestHandleSecret;
 
     // Сгенерировать refresh-токен
-    public String generateRefreshToken(String email, String password, long issue, long expire) {
+    public String generateRefreshToken(String email, long issue, long expire) {
         Users user = usersRepository.findByEmail(email);
-        String rawToken = email + " " + password + " " + issue + " " + expire;
+        String rawToken = email + " " + issue + " " + expire;
         try {
             RefreshToken refreshToken = refreshTokenRepository.findByUserID(user.getId());
             if (refreshToken == null) {
@@ -94,8 +92,8 @@ public class JwtProvider {
     }
 
     // Сгенерировать access-токен по email
-    public String generateAccessToken(String email, String password, long issue, long expire) {
-        email = email + " " + password + " " + issue + " " + expire;
+    public String generateAccessToken(String email, long issue, long expire) {
+        email = email + " " + issue + " " + expire;
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(Date.from(Instant.ofEpochSecond(issue)))
@@ -107,14 +105,18 @@ public class JwtProvider {
     public boolean validateAccessToken(String token) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
-            Users users = usersRepository.findByEmail(getEmailFromToken(token));
-            if (users != null) {
-                String password = getPasswordFromToken(token);
-                return bCryptPasswordEncoder.matches(password, users.getPassword()) || users.getPassword().equals(password);
-            }
-            return false;
-        } catch (Exception e) {
-            log.severe("invalid token");
+            log.info("Токен успешно прошел валидацию");
+            return true;
+        } catch (SignatureException e) {
+            log.info("Получена некорректная сигнатура токена");
+        } catch (MalformedJwtException e) {
+            log.info("Получен скомпроментированный токен");
+        } catch (ExpiredJwtException e) {
+            log.info("Получен просроченный токен");
+        } catch (UnsupportedJwtException e) {
+            log.info("Полученный не корректный токен");
+        } catch (IllegalArgumentException e) {
+            log.info("Заголовок или аргументы полученного токена некорректны");
         }
         return false;
     }
@@ -125,16 +127,6 @@ public class JwtProvider {
         if (claims.getSubject().lastIndexOf(' ') == -1)
             return null;
         return claims.getSubject().substring(0, claims.getSubject().indexOf(' '));
-    }
-
-    public String getPasswordFromToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-        if (claims.getSubject().lastIndexOf(' ') == -1)
-            return null;
-        String password = claims.getSubject().substring(claims.getSubject().indexOf(' '));
-        password = password.substring(1);
-        password = password.substring(0, password.indexOf(' '));
-        return password;
     }
 
     // Токен подтверждения регистрации
